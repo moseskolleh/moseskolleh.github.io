@@ -1,13 +1,13 @@
 # Moses Kolleh Sesay - Portfolio Website
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://moseskolleh.github.io/sustaintheworld/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)](https://moseskolleh.github.io)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## About
 
 Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Climate Analyst specializing in ESG analysis, climate resilience, and data-driven environmental solutions.
 
-**Live Website:** [https://moseskolleh.github.io/sustaintheworld/](https://moseskolleh.github.io/sustaintheworld/)
+**Live Website:** [https://moseskolleh.github.io/sustaintheworld/](https://moseskolleh.github.io)
 
 ## Features
 
