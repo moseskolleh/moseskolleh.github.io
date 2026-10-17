@@ -37,7 +37,7 @@
     "THE HOMEPAGE CARD. index.html shows each case study as a teaser card,",
     "generated from this file (npm run build:content), so the two pages cannot",
     "disagree. The card takes the title, period, location, lenses,",
-    "`tags` (tools and topics; the Assay reads them as evidence) and `photo`,",
+    "`tags` (tools and topics; The Brief reads them as evidence) and `photo`,",
     "and the FIRST result as the headline. That result carries a `brief`: its",
     "basis in one line, for a card with no room for the whole of it. A brief",
     "may say less than the basis, never more.",

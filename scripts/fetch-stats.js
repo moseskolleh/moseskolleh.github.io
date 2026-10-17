@@ -243,9 +243,9 @@ function parseSource(text) {
  * data-analytics (a module writes some of its own controls, such as the
  * player's offer of the introduction), if it is an on-demand module (as
  * "module-" and its file name, the name the counter gives a module once it
- * has been fetched), if it is one of the Assay's grades (as "assay-" and the
+ * has been fetched), if it is one of The Brief's grades (as "brief-" and the
  * grade's class, the name it sends), or if a script tracks it by a literal
- * name.
+ * name ("brief-run", the fifth of the five numbers, among them).
  */
 function knownNames(root = ROOT) {
     const rootFiles = fs.readdirSync(root);
@@ -270,13 +270,14 @@ function knownNames(root = ROOT) {
     scripts.forEach((file) => {
         const js = fs.readFileSync(file, 'utf8');
         for (const m of js.matchAll(/\bdata-analytics="([a-z0-9-]{1,40})"/g)) features.add(m[1]);
-        // A whole literal only: track('assay-' + grade) names no feature.
+        // A whole literal only: track('brief-' + a.cls) names no feature.
         for (const m of js.matchAll(/\btrack\(\s*['"]([a-z0-9-]{1,40})['"]\s*\)/g)) features.add(m[1]);
     });
-    // The Assay composes its name from the grade's class, so read the classes.
-    const assay = path.join(modulesDir, 'interactives.js');
-    if (fs.existsSync(assay)) {
-        for (const m of fs.readFileSync(assay, 'utf8').matchAll(/\bcls = '([a-z0-9-]{1,33})'/g)) features.add(`assay-${m[1]}`);
+    // The Brief composes its name from the grade's class, so read the classes.
+    const brief = path.join(root, 'brief.js');
+    if (fs.existsSync(brief)) {
+        const classes = (fs.readFileSync(brief, 'utf8').match(/const GRADE_CLASS = \{([^}]*)\}/) || ['', ''])[1];
+        for (const m of classes.matchAll(/'([a-z0-9-]{1,33})'/g)) features.add(`brief-${m[1]}`);
     }
 
     const lenses = JSON.parse(fs.readFileSync(path.join(root, 'content', 'lenses.json'), 'utf8'));

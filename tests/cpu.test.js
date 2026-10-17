@@ -50,7 +50,7 @@ const key = (window, k, target, init) => {
             'Globals: script.js adds to a window.mks another script made first (count.js), and never replaces it');
 
         const shared = ['storage', 'motionOK', 'scrollMotion', 'onKey', 'keyRank', 'load', 'loaded', 'carbon', 'ready',
-            'terminal', 'narration', 'share', 'assay'];
+            'terminal', 'narration', 'share'];
         const missing = shared.filter(k => mks[k] === undefined);
         assert(missing.length === 0, `Globals: the core and its modules share everything through window.mks (missing: ${missing.join(', ') || 'none'})`);
 
@@ -64,7 +64,7 @@ const key = (window, k, target, init) => {
         const own = ['mksLoadFor', 'revealTarget', 'focusTarget', 'jumpTo', 'handleHashReveal', 'setMenuOpen'].filter(k => k in window);
         assert(own.length === 0, `Globals: the core's jump, focus and menu functions are its own, not names on window (${own.join(', ') || 'none'})`);
         const declared = [];
-        ['script.js', 'count.js', ...MODULE_FILES].forEach((rel) => {
+        ['script.js', 'count.js', 'brief.js', ...MODULE_FILES].forEach((rel) => {
             (read(rel).match(/^(?:async\s+)?function\s*\*?\s*[\w$]+/gm) || []).forEach(m => declared.push(`${rel}: ${m}`));
         });
         assert(declared.length === 0, `Globals: no shipped script declares a function at the top level, where it would land on window (${declared.join(', ') || 'none'})`);
@@ -76,7 +76,7 @@ const key = (window, k, target, init) => {
         // name the old analytics dispatcher used, kept until nothing called it.
         // Nor does the case studies' module, which makes window.mks itself.
         const assigned = [];
-        ['script.js', 'count.js', 'modules/dossier.js', ...MODULE_FILES].forEach((rel) => {
+        ['script.js', 'count.js', 'brief.js', 'modules/dossier.js', ...MODULE_FILES].forEach((rel) => {
             (read(rel).match(/\bwindow\.[A-Za-z_$][\w$]*\s*=(?!=)/g) || []).forEach((m) => {
                 const name = m.match(/window\.([\w$]+)/)[1];
                 if (name !== 'mks') assigned.push(`${rel}: window.${name}`);

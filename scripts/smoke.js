@@ -52,8 +52,11 @@
 //   - more than one listen control, a nav bar that moves when it appears,
 //     a player that covers more than 20% of a phone screen or the send
 //     button, or a recording fetched unasked
-//   - an Assay that grades a mismatched ad well, or sends anything; one
-//     whose box is not folded behind a named button, by pointer and keys
+//   - a Brief that grades a mismatched ad well, sends anything, or lets a
+//     word of the ad into a request or its link; that keys alone cannot
+//     use; whose shared link does not rebuild the same fit and dossier;
+//     whose dossier prints to more than one A4 page; or that scrolls
+//     sideways on a phone
 //   - an experience card that is not short, or whose More sits on its text;
 //     a core-log layer whose depths wrap or run onto the core
 //   - a case-study game fetched before a reader nears it, that will not
@@ -300,7 +303,7 @@ async function visit(context, page, rel, origin) {
         if (r.measured) ok(`arrival: ${fmt(r.arrivalBytes)} over the wire in ${r.arrival.length} requests`);
 
         if (rel === 'index.html') await exerciseHomepage(page, r, origin);
-        if (rel === 'index.html') await exerciseAssay(page, r);
+        if (rel === 'brief.html') await exerciseBrief(page, r);
         if (rel === 'carbon-ai.html') await exerciseCarbonTool(page, r);
         if (rel === 'case-studies.html') await exerciseCaseStudyGames(page, r);
 
@@ -310,6 +313,7 @@ async function visit(context, page, rel, origin) {
 
     await checkWithoutJs(browser, origin);
     await exerciseShell(browser, origin);
+    await exerciseBriefPage(browser, origin);
 
     // Each budgeted page's measured first view against the budget's
     // estimate. The estimate counts bodies; every response also carries a
@@ -552,43 +556,153 @@ async function checkLengths(browser, origin) {
 }
 
 // ------------------------------------------------------------------
-// The Assay: grades an ad in the page, and sends nothing while it does
+// The Brief: grades an ad in the page, and nothing that leaves it carries
+// a word of the ad
 // ------------------------------------------------------------------
-async function exerciseAssay(page, r) {
+// The ad the Assay was reported for: fluent Dutch, five years at a Big
+// Four firm, SAP. Graded honestly it is not the top grade, and each of the
+// four is a gap a reader can see. A line no rule reads rides along, so a
+// request or a link that carried any of the ad would carry it.
+const BRIEF_AD = [
+    'Senior ESG Reporting Consultant. Help clients prepare for CSRD and ESRS reporting.',
+    '- Fluent Dutch and English',
+    '- 5+ years of experience at a Big Four firm',
+    '- Hands-on experience with SAP',
+    '- Strong knowledge of GHG accounting and stakeholder engagement',
+    'Quote reference ZEBRA-4471 to Quetzalcoatl Recruitment.'
+].join('\n');
+const BRIEF_MARKS = /zebra|4471|quetzalcoatl/i;
+
+async function exerciseBrief(page, r) {
     const sent = [];
-    const onRequest = (q) => sent.push(q.url());
-    await page.evaluate(() => document.getElementById('assay').scrollIntoView());
-    await page.waitForFunction(() => (window.mks || {}).assay, null, { timeout: 5000 }).catch(() => null);
-    // Only the grading is watched. Scrolling here pulls in lazy images, and
-    // a browser with no speech voice asks the voice manifest once, 1.5 s
-    // after load — CI's headless Chrome has none, and scrolling through the
-    // features above can push load late enough that the check landed inside
-    // this window. Neither is the Assay's request, so let the page go quiet
-    // first: past that deferred check, and no request for 800 ms.
+    const onRequest = (q) => sent.push({ method: q.method(), url: q.url(), body: q.postData() || '' });
+    await page.waitForFunction(() => (window.mks || {}).brief && window.mks.brief.analyse, null, { timeout: 5000 }).catch(() => null);
+    // Only the grading is watched: the page has settled first.
     await quietNetwork(page);
     page.on('request', onRequest);
-    await page.click('#assay .assay-open');   // its box is folded until asked for
-    await page.fill('#assayInput', [
-        'Senior ESG Reporting Consultant. Help clients prepare for CSRD and ESRS reporting.',
-        '- Fluent Dutch and English',
-        '- 5+ years of experience at a Big Four firm',
-        '- Hands-on experience with SAP',
-        '- Strong knowledge of GHG accounting and stakeholder engagement'
-    ].join('\n'));
-    await page.click('#assayRun');
+    await page.fill('#briefAd', BRIEF_AD);
+    await page.click('#briefRun');
     await page.waitForTimeout(300);
+    await page.click('#briefCopy');
+    await page.waitForTimeout(200);
     page.off('request', onRequest);
 
     const out = await page.evaluate(() => {
-        const result = document.getElementById('assayResult');
-        const tag = result.querySelector('.assay-grade-tag');
-        const gaps = Array.from(result.querySelectorAll('.assay-row-gap')).filter(el => el.getBoundingClientRect().height > 0);
-        return { grade: tag && tag.textContent, gaps: gaps.length };
+        const tag = document.querySelector('#briefResult .bf-grade-tag');
+        const gaps = Array.from(document.querySelectorAll('#briefResult .bf-gaps .bf-row')).filter(el => el.getBoundingClientRect().height > 0);
+        return { grade: tag && tag.textContent, gaps: gaps.length, url: location.href };
     });
-    if (out.grade && out.grade !== 'High-grade match' && out.gaps >= 4) ok(`the Assay grades the Dutch / Big Four / SAP ad "${out.grade}" with ${out.gaps} visible gaps`);
-    else bad(`the Assay graded the Dutch / Big Four / SAP ad "${out.grade}" with ${out.gaps} visible gaps`);
-    if (sent.length === 0) ok('the Assay sent nothing while grading'); else bad(`the Assay made requests while grading: ${sent.join(', ')}`);
+    if (out.grade && out.grade !== 'High-grade match' && out.gaps >= 4) ok(`the Brief grades the Dutch / Big Four / SAP ad "${out.grade}" with ${out.gaps} visible gaps`);
+    else bad(`the Brief graded the Dutch / Big Four / SAP ad "${out.grade}" with ${out.gaps} visible gaps`);
+    // A new address (the link it leaves) may have the browser ask for the
+    // page's icon again: a GET for a file of the site's own, carrying
+    // nothing. Anything else is the ad leaving the page.
+    const origin = new URL(page.url()).origin;
+    const leaving = sent.filter(q => q.method !== 'GET' || q.body || !q.url.startsWith(origin) || BRIEF_MARKS.test(decodeURIComponent(q.url)));
+    if (!leaving.length) ok(`the Brief sent nothing while grading, nor when its link was copied${sent.length ? ` (the browser asked again for ${sent.map(q => new URL(q.url).pathname).join(', ')} for the new address)` : ''}`);
+    else bad(`the Brief made requests while grading: ${leaving.map(q => `${q.method} ${q.url} ${q.body}`).join(', ')}`);
+    if (/\?focus=[a-z0-9.:,-]+$/.test(out.url) && !BRIEF_MARKS.test(decodeURIComponent(out.url))) ok(`its address carries ids and no word of the ad (${out.url.split('?')[1]})`);
+    else bad(`its address after grading is ${out.url}`);
     if (r.errors.length) r.errors.forEach(e => bad(e));
+}
+
+// What the page shows of a result: the grade, the gaps, the matches and
+// the dossier's case studies, in order.
+const briefShown = (page) => page.evaluate(() => ({
+    grade: (document.querySelector('#briefResult .bf-grade-tag') || {}).textContent || '',
+    gaps: Array.from(document.querySelectorAll('#briefResult .bf-gaps .bf-req')).map(el => el.textContent),
+    matches: Array.from(document.querySelectorAll('#briefResult .bf-matches .bf-req')).map(el => el.textContent),
+    cases: Array.from(document.querySelectorAll('#briefCases > li')).filter(li => li.getClientRects().length).map(li => li.id)
+}));
+
+// The rest of what a reader does with it: by keys alone, the link opened
+// by whoever it is sent to, the dossier printed, and a phone.
+async function exerciseBriefPage(browser, origin) {
+    console.log('  brief.html — keys, the shared link, paper, a phone');
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+
+    // By keys: from the box, Tab to "Grade this ad" and press Enter; a
+    // sample by Space; the link copied by Enter.
+    await page.focus('#briefAd');
+    await page.keyboard.insertText(BRIEF_AD);
+    await page.keyboard.press('Tab');
+    const onRun = await page.evaluate(() => document.activeElement.id);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    const byEnter = await briefShown(page);
+    if (onRun === 'briefRun' && byEnter.grade && byEnter.gaps.length >= 4) ok(`by keys: Tab from the box reaches "Grade this ad", and Enter grades ("${byEnter.grade}")`);
+    else bad(`by keys: Tab from the box went to #${onRun}, and Enter gave "${byEnter.grade}" with ${byEnter.gaps.length} gaps`);
+    await page.focus('.bf-sample[data-sample="water"]');
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(200);
+    const bySpace = await briefShown(page);
+    if (/match/.test(bySpace.grade) && bySpace.cases.length) ok(`by keys: Space on a sample grades it ("${bySpace.grade}", ${bySpace.cases.length} case studies)`);
+    else bad(`by keys: Space on the WASH sample gave "${bySpace.grade}"`);
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin }).catch(() => null);
+    await page.focus('#briefCopy');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    const copied = await page.evaluate(() => document.getElementById('briefCopy').textContent);
+    if (/Copied/.test(copied)) ok('by keys: Enter on "Copy link" copies it'); else bad(`by keys: "Copy link" said "${copied}"`);
+
+    // The link, opened by the person it was sent to: the same grade, gaps,
+    // matches and dossier, and no ad in the box.
+    await page.fill('#briefAd', BRIEF_AD);
+    await page.click('#briefRun');
+    await page.waitForTimeout(200);
+    const here = await briefShown(page);
+    const link = page.url();
+    const other = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+    const there = await other.newPage();
+    await there.goto(link, { waitUntil: 'load' });
+    await there.waitForTimeout(200);
+    const rebuilt = await briefShown(there);
+    const box = await there.evaluate(() => document.getElementById('briefAd').value);
+    if (JSON.stringify(rebuilt) === JSON.stringify(here) && box === '' && here.cases.length) ok(`the shared link rebuilds the same fit and dossier elsewhere (${rebuilt.grade}; ${rebuilt.gaps.length} gaps; ${rebuilt.cases.join(', ')}), with no ad in it`);
+    else bad(`the shared link rebuilt ${JSON.stringify(rebuilt)} from ${JSON.stringify(here)}${box ? ', with text in the box' : ''}`);
+    await other.close();
+
+    // On paper: one A4 page, the dossier and its address, none of the
+    // screen's furniture. page.pdf is headless Chromium's.
+    if (!CHROMIUM) ok(`the dossier printed: not printed in ${BROWSER} (page.pdf is headless Chromium's) — the Chromium run counts its pages`);
+    else {
+        const { pdfText } = require('./lib/pdf-text.js');
+        for (const sample of ['esg', 'climate', 'water', null]) {
+            await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+            if (sample) await page.click(`.bf-sample[data-sample="${sample}"]`);
+            else { await page.fill('#briefAd', BRIEF_AD); await page.click('#briefRun'); }
+            await page.waitForTimeout(200);
+            const url = page.url();
+            const printed = pdfText(await page.pdf({ format: 'A4' }));
+            const text = printed.pages.join(' ').replace(/\s+/g, ' ');
+            const alnum = (s) => s.replace(/[^A-Za-z0-9]/g, '');
+            const what = sample ? `the ${sample} sample` : 'the Dutch / Big Four / SAP ad';
+            const furniture = ['Paste a job ad', 'Grade this ad', 'Get in touch', 'Copy link', 'Back to top'].filter(w => text.includes(w));
+            if (printed.pages.length === 1 && alnum(text).includes(alnum(url.split('://')[1])) && !furniture.length) ok(`printed, ${what} is one A4 page: the dossier and the address that rebuilds it`);
+            else bad(`printed, ${what} is ${printed.pages.length} page(s)${alnum(text).includes(alnum(url.split('://')[1])) ? '' : ', without its address'}${furniture.length ? `, with ${furniture.join(', ')}` : ''}`);
+        }
+    }
+
+    // A phone, 320 to 430px, before and after a grade: nothing sideways.
+    const wide = [];
+    for (const width of [320, 360, 375, 390, 414, 430]) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+        await page.evaluate(() => document.fonts.ready);
+        if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) wide.push(`${width}px`);
+        await page.fill('#briefAd', BRIEF_AD);
+        await page.click('#briefRun');
+        await page.waitForTimeout(150);
+        if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) wide.push(`${width}px graded`);
+    }
+    if (wide.length) bad(`brief.html scrolls sideways at ${wide.join(', ')}`);
+    else ok('brief.html at 320-430px: nothing scrolls sideways, before a grade or after');
+    if (errors.length) errors.forEach(e => bad(`brief.html: uncaught ${e}`));
+    await context.close();
 }
 
 // ------------------------------------------------------------------
@@ -1670,8 +1784,9 @@ async function exerciseNavigation(browser, origin) {
     // growth inside that frame was never landed for: /#assay and /#anatomy
     // stopped 250-440px short on about one visit in three, the cache warm
     // from an earlier page. Each is opened a few times. (Anatomy is on
-    // carbon-ai.html now; You Draw It is the homepage's section-05 widget.)
-    for (const id of ['ydi', 'assay']) {
+    // carbon-ai.html now, and the Assay grew into The Brief; You Draw It
+    // is the homepage's section-05 widget.)
+    for (const id of ['ydi']) {
         const misses = [];
         for (let run = 0; run < 3; run++) {
             const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -1684,23 +1799,20 @@ async function exerciseNavigation(browser, origin) {
             await pg.waitForTimeout(3000);
             const r = await pg.evaluate((i) => ({
                 top: Math.round(document.getElementById(i).getBoundingClientRect().top),
-                bar: Math.round(document.getElementById('navbar').getBoundingClientRect().bottom),
-                // A link to the Assay opens its folded box as it lands.
-                shut: i === 'assay' && document.getElementById('assayInput').getClientRects().length === 0
+                bar: Math.round(document.getElementById('navbar').getBoundingClientRect().bottom)
             }), id);
             if (Math.abs(r.top - r.bar) > 4) misses.push(`${r.top}px against ${r.bar}px`);
-            if (r.shut) misses.push('its box still folded');
             await ctx.close();
         }
-        if (misses.length) bad(`shared link /#${id} at 390px: stopped short of the nav bar, or shut (${misses.join(', ')})`);
-        else ok(`shared link /#${id} at 390px: lands under the nav bar${id === 'assay' ? ', open' : ''}, 3 of 3 times with the cache warm`);
+        if (misses.length) bad(`shared link /#${id} at 390px: stopped short of the nav bar (${misses.join(', ')})`);
+        else ok(`shared link /#${id} at 390px: lands under the nav bar, 3 of 3 times with the cache warm`);
     }
 
-    // The addresses shared for what moved off the homepage in Phase 2 go on
-    // to where it is now: they opened the homepage at its top, the feature
-    // nowhere on it.
+    // The addresses shared for what moved off the homepage go on to where
+    // it is now: they opened the homepage at its top, the feature nowhere
+    // on it. The Assay's goes to The Brief's box.
     const moved = [['anatomy', '/carbon-ai.html#anatomy'], ['boreholeGame', '/case-studies.html#play-borehole'],
-        ['strikeWidget', '/case-studies.html#play-borehole'], ['floodSim', '/case-studies.html#play-flood']];
+        ['strikeWidget', '/case-studies.html#play-borehole'], ['floodSim', '/case-studies.html#play-flood'], ['assay', '/brief.html#grade']];
     const lost = [];
     const fwd = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
     for (const [id, to] of moved) {
@@ -1772,9 +1884,8 @@ async function exerciseNavigation(browser, origin) {
     // The controls in between used to be sat on: the calculator's selects
     // (on carbon-ai.html now), a sample chip, the dossier titles (now the
     // project cards' links), the toolkit's proof links. The experience
-    // cards' More buttons are new, and the Assay's open button (its sample
-    // chips are folded away until it is pressed).
-    const GUARDED = ['.hero-availability', '.hero-cta .btn', '.corelog-more', '#ydiReveal', '.assay-open', '.project-link', 'a.toolkit-proof',
+    // cards' More buttons are new, and the line to The Brief under the form.
+    const GUARDED = ['.hero-availability', '.hero-cta .btn', '.corelog-more', '#ydiReveal', '.brief-line a', '.project-link', 'a.toolkit-proof',
         '.btn-submit', '.carbon-badge', '.receipt-btn', '.footer-fieldreport a', '.eco-mode-toggle', '.terminal-toggle'];
     const covered = [];
     let passes = 0;
@@ -1923,7 +2034,7 @@ async function checkClaimMarks(browser, origin) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await context.newPage();
     // And every field note: a note need not hold a figure, but one it holds is marked.
-    for (const rel of ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', 'claims.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
+    for (const rel of ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'brief.html', 'field-report.html', 'claims.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
         await page.goto(`${origin}/${rel}`, { waitUntil: 'load' });
         if (rel === 'index.html') {
             await page.waitForFunction(() => !document.querySelector('.hero-stat-number[aria-hidden]')
@@ -2076,8 +2187,10 @@ async function printPalette(browser, origin) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
     await context.addInitScript(() => { try { localStorage.setItem('theme', 'dark'); } catch (e) { /* the system's dark stands */ } });
     const page = await context.newPage();
-    for (const rel of ['index.html', 'case-studies.html', 'claims.html', 'carbon-ai.html', 'research.html', 'stats.html', 'field-report.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
+    for (const rel of ['index.html', 'case-studies.html', 'claims.html', 'carbon-ai.html', 'brief.html', 'research.html', 'stats.html', 'field-report.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
         await page.goto(`${origin}/${rel}`, { waitUntil: 'load' });
+        // The Brief is printed as a hiring manager gets it: a grade in it.
+        if (rel === 'brief.html') { await page.fill('#briefAd', BRIEF_AD); await page.click('#briefRun'); }
         await page.emulateMedia({ media: 'print', colorScheme: 'dark' });
         // Switching media here starts the colour transitions a card has on
         // screen (the journey's cards ease every property over 0.3 s), and
@@ -2109,19 +2222,19 @@ async function printPalette(browser, origin) {
 }
 
 // ------------------------------------------------------------------
-// The shorter sections: experience as short cards, the Assay under the
-// form behind one button
+// The shorter sections: experience as short cards, one line to The Brief
+// under the form
 // ------------------------------------------------------------------
 // The experience log was 5.3 screens on a 390px phone and 2.6 on a
 // desktop. Each role is now its dates, title, organisation and first line,
 // the rest a press away, at every width; a desktop keeps the core log's
 // depths and draws a shut card as one row. The contact form comes first in
-// #contact, the Assay under it, its box behind a button that says what it
-// does. body's overflow-x:hidden hides a card that runs off the side, so the
-// cards themselves are measured. Reduced motion throughout: nothing either
-// disclosure shows may wait on a transition.
+// #contact, then one line that leads to The Brief, which grew out of the
+// Assay that sat there. body's overflow-x:hidden hides a card that runs off
+// the side, so the cards themselves are measured. Reduced motion
+// throughout: nothing the cards show may wait on a transition.
 async function exerciseSections(browser, origin) {
-    console.log('  index.html — experience as short cards, the Assay under the form');
+    console.log('  index.html — experience as short cards, the line to The Brief under the form');
     for (const [width, height] of [[320, 700], [390, 844], [700, 900], [1280, 800]]) {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce' });
         const page = await ctx.newPage();
@@ -2198,46 +2311,23 @@ async function exerciseSections(browser, origin) {
         if (open.all && open.expanded === 'true' && shut === 'false' && /Researcher/.test(open.name)) ok(`${tag}: "More" opens the whole card and "Less" folds it (named "${open.name.trim()}")`);
         else bad(`${tag}: More showed the whole card ${open.all}, aria-expanded ${open.expanded} then ${shut}, name "${open.name}"`);
 
-        // The contact form first, the Assay under it.
+        // The contact form first, the line to The Brief under it, whole and
+        // on the screen.
         const c = await page.evaluate(() => {
             const form = document.getElementById('contactForm');
-            const assay = document.getElementById('assay');
+            const line = document.querySelector('#contact .brief-line');
             const first = document.querySelector('#contact input, #contact textarea');
+            const r = line && line.getBoundingClientRect();
             return {
-                after: !!(form.compareDocumentPosition(assay) & Node.DOCUMENT_POSITION_FOLLOWING) && !!assay.closest('#contact'),
-                below: assay.getBoundingClientRect().top >= form.getBoundingClientRect().bottom,
-                first: !!first && first.closest('form') === form
+                after: !!line && !!(form.compareDocumentPosition(line) & Node.DOCUMENT_POSITION_FOLLOWING),
+                below: !!line && r.top >= form.getBoundingClientRect().bottom,
+                inside: !!line && r.left >= 0 && r.right <= innerWidth,
+                first: !!first && first.closest('form') === form,
+                assay: !!document.getElementById('assay')
             };
         });
-        if (c.after && c.below && c.first) ok(`contact at ${width}px: the form comes first, the Assay below it`);
-        else bad(`contact at ${width}px: the Assay after the form ${c.after}, below it ${c.below}, the form's fields first ${c.first}`);
-
-        // The Assay's question and promise in view, its box a button away:
-        // opened and shut by pointer and by keyboard, shown at once.
-        const assay = () => page.evaluate(() => {
-            const btn = document.querySelector('#assay .assay-open');
-            const box = document.getElementById('assayInput');
-            const head = document.querySelector('#assay .assay-lede');
-            return {
-                name: btn ? btn.textContent.trim() : null,
-                expanded: btn && btn.getAttribute('aria-expanded'),
-                box: !!box && box.getClientRects().length > 0 && getComputedStyle(box).visibility !== 'hidden',
-                promise: !!head && head.getClientRects().length > 0 && /never leaves this page/.test(head.textContent)
-            };
-        });
-        const shutAt = await assay();
-        await page.click('#assay .assay-open');
-        const opened = await assay();
-        await page.focus('#assay .assay-open');
-        await page.keyboard.press('Enter');
-        const byEnter = await assay();
-        await page.keyboard.press('Space');
-        const bySpace = await assay();
-        const at = `the Assay at ${width}px`;
-        if (shutAt.name === 'Grade a job description' && shutAt.expanded === 'false' && !shutAt.box && shutAt.promise) ok(`${at}: its question and promise in view, its box behind "${shutAt.name}"`);
-        else bad(`${at}: on arrival the button is "${shutAt.name}" (aria-expanded ${shutAt.expanded}), the box shown ${shutAt.box}, the promise shown ${shutAt.promise}`);
-        if (opened.box && opened.expanded === 'true' && !byEnter.box && byEnter.expanded === 'false' && bySpace.box && bySpace.expanded === 'true') ok(`${at}: a press opens it at once, and Enter and Space fold and open it again`);
-        else bad(`${at}: pressed ${opened.box}/${opened.expanded}, Enter ${byEnter.box}/${byEnter.expanded}, Space ${bySpace.box}/${bySpace.expanded}`);
+        if (c.after && c.below && c.inside && c.first && !c.assay) ok(`contact at ${width}px: the form comes first, the line to The Brief below it`);
+        else bad(`contact at ${width}px: the line after the form ${c.after}, below it ${c.below}, on screen ${c.inside}, the form's fields first ${c.first}, the Assay still there ${c.assay}`);
         await ctx.close();
     }
 }
@@ -2964,14 +3054,15 @@ async function checkWithoutJs(browser, origin) {
 // (so nothing leaves this origin), and any violation fails the run. The
 // homepage is also checked scrolled through — the only time section 05's
 // interactives, the journey map and every reveal are in the page — and in
-// the states a visitor opens: the Assay's verdict on an ad it
-// finds gaps in, the carbon receipt, the docked narration player, the menu
-// on a phone and the terminal, each checked on its own. The homepage and
-// carbon-ai.html are checked once more with their scripts blocked, which is
-// the layout a reader without JavaScript gets (every nav link on show,
-// the calculator's note in place of the calculator). The case studies are
-// checked with both games loaded and played, with a row of photos open, and
-// with the lightbox open on one.
+// the states a visitor opens: the carbon receipt, the docked narration
+// player, the menu on a phone and the terminal, each checked on its own.
+// The homepage, carbon-ai.html and brief.html are checked once more with
+// their scripts blocked, which is the layout a reader without JavaScript
+// gets (every nav link on show, the calculator's note in place of the
+// calculator, the whole dossier and no box to paste into). The case
+// studies are checked with both games loaded and played, with a row of
+// photos open, and with the lightbox open on one; The Brief with its
+// verdict on an ad it finds gaps in, and as a shared link rebuilds it.
 //
 // Each size and theme gets its own browser context with reduced motion, so
 // axe judges what a reader settles on rather than an element halfway
@@ -2987,7 +3078,7 @@ const AXE_VIEWS = [];
 // without JavaScript gets is checked as well. (With its scripts blocked the
 // homepage still takes its theme from mks.theme, inline in its <head>;
 // carbon-ai.css follows the system's setting by itself.)
-const AXE_NO_SCRIPT = ['index.html', 'carbon-ai.html'];
+const AXE_NO_SCRIPT = ['index.html', 'carbon-ai.html', 'brief.html'];
 
 // What the player offers once Moses has recorded his introduction (see
 // exerciseNarration): served in place of today's empty manifest, so the
@@ -3070,6 +3161,19 @@ async function axeView(browser, origin, view, note, trouble) {
                     note(rel, 'Anatomy drawn', view, await axeRun(page, '#anatomy'));
                 });
             }
+            // The Brief's verdict, with rows for what matched and for the
+            // gaps, and the link it leaves, opened as its reader would.
+            if (rel === 'brief.html') {
+                await attempt(`${rel}: axe on the Brief's verdict`, async () => {
+                    await page.fill('#briefAd', BRIEF_AD);
+                    await page.click('#briefRun');
+                    await page.waitForSelector('#briefResult .bf-row-gap', { timeout: 5000 });
+                    note(rel, 'the Brief\'s verdict', view, await axeRun(page));
+                    await page.goto(page.url(), { waitUntil: 'load' });
+                    await page.waitForSelector('#briefResult .bf-row-gap', { timeout: 5000 });
+                    note(rel, 'a shared link', view, await axeRun(page));
+                });
+            }
             if (rel === 'case-studies.html') {
                 await attempt(`${rel}: axe with the games played`, async () => {
                     await playGames(page);
@@ -3149,16 +3253,6 @@ async function axeHomepageStates(page, view, note, attempt) {
             .filter(a => a.getClientRects().length && a.textContent.trim() && ['rgb(0, 0, 238)', 'rgb(85, 26, 139)'].includes(getComputedStyle(a).color))
             .map(a => a.textContent.trim().slice(0, 30)));
         if (plain.length) throw new Error(`links in the browser's default colours: ${plain.join(', ')}`);
-    });
-
-    // The Assay's verdict, with rows for what matched and for the gaps.
-    await attempt(`${rel}: axe on the Assay's verdict`, async () => {
-        await page.click('#assay .assay-open', within);
-        await page.fill('#assayInput','ESG Reporting Consultant for CSRD and ESRS. Fluent Dutch. ' +
-            '5+ years at a Big Four firm. Hands-on SAP. GHG accounting and stakeholder engagement.');
-        await page.click('#assayRun', within);
-        await page.waitForSelector('#assayResult .assay-row-gap', within);
-        note(rel, 'the Assay\'s verdict', view, await axeRun(page, '#assay'));
     });
 
     // The page's own carbon receipt, printed from the footer.
@@ -3324,7 +3418,9 @@ async function exerciseShell(browser, origin) {
                 const nav = document.querySelector('nav[aria-label="Main"]');
                 const links = nav ? Array.from(nav.querySelectorAll('a')).filter(a => /^(Home|Case studies|Research|CV|Contact)$/.test(a.textContent.trim())) : [];
                 const touching = links.slice(1).filter((a, i) => box(a).top === box(links[i]).top && box(a).left < box(links[i]).right).length;
-                const mail = document.querySelector('main a[href^="mailto:"]');
+                // The call to action is the last thing in <main>; The Brief's
+                // dossier carries the address too, for paper.
+                const mail = Array.from(document.querySelectorAll('main a[href^="mailto:"]')).pop();
                 const cta = mail && mail.closest('section, p');
                 const sw = document.getElementById('themeToggle');
                 const logo = document.querySelector('.ca-nav-logo');
@@ -3838,6 +3934,30 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         }
         if (wrong.length) wrong.forEach(w => bad(`the count from ${w}`));
         else ok(`every page counts itself once, by name, with the documented keys, and the server accepts each: ${everyPage.map(([, n]) => n).join(', ')}`);
+    }
+
+    // The Brief: the count says it was run and the grade it gave, and no
+    // request at all carries a word of the ad, the count's included.
+    {
+        const p = await context.newPage();
+        p.on('pageerror', (e) => errors.push(e.message));
+        const carried = [];
+        p.on('request', (q) => { if (BRIEF_MARKS.test(`${decodeURIComponent(q.url())} ${q.postData() || ''}`)) carried.push(q.url()); });
+        const before = sent.length;
+        await p.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+        await p.fill('#briefAd', BRIEF_AD);
+        await p.click('#briefRun');
+        await p.waitForTimeout(200);
+        await leave(p);
+        await settle(p, before + 1);
+        const got = sent.slice(before);
+        let body = null;
+        try { body = JSON.parse(got[0].body); } catch (e) { /* reported below */ }
+        if (got.length === 1 && body && body.page === 'brief' && body.features.includes('brief-run') && body.features.includes('brief-marginal') &&
+            !got.some(s => BRIEF_MARKS.test(s.body)) && !carried.length) {
+            ok(`brief.html: one count, saying the Brief was run and the grade it gave (${body.features.join(', ')}), and no request carries a word of the ad`);
+        } else bad(`brief.html: ${got.length} count(s) ${got.map(s => s.body).join(' | ')}; requests with the ad: ${carried.join(', ') || 'none'}`);
+        await p.close();   // its count has gone, so closing cannot send another
     }
 
     // An old homepage address, shared on LinkedIn, goes on to where its

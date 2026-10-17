@@ -250,10 +250,10 @@ function load(options = {}) {
     p.click('[data-analytics="listen"] use');
     p.window.mks.track('module-dossier');
     ['Bad Name', '', undefined, null, 42, 'x'.repeat(41), 'semi;colon'].forEach(n => p.window.mks.track(n));
-    p.window.mks.track('assay-high');
+    p.window.mks.track('brief-high');
     p.leave();
     const f = p.payload().features || [];
-    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'listen', 'module-dossier', 'assay-high']),
+    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'listen', 'module-dossier', 'brief-high']),
         `features: clicks on [data-analytics] (even on an icon inside one) and mks.track(), each once, in order (${f.join(', ')})`);
 
     // Every CV link has a name of its own, and a view that used any of them
@@ -515,12 +515,12 @@ function load(options = {}) {
     window.document.querySelector('.ft-line').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
     assert(tracked.join() === 'cv-download-terminal,cv-download', `Hooks: the terminal's cv command counts as a CV download too (${tracked.join(', ') || 'nothing'})`);
 
-    // The Assay's grade is counted, so its label cannot say nothing is sent;
+    // The Brief's grade is counted, so its label cannot say nothing is sent;
     // what it can say is that the ad is not.
-    const tracksGrade = /mks\.track\(\s*'assay-'/.test(read('modules/interactives.js'));
-    const label = new JSDOM(INDEX).window.document.querySelector('.assay-privacy').textContent;
-    assert(!tracksGrade || (!/nothing sent/.test(label) && /the ad is never sent/.test(label)),
-        `Hooks: while the Assay's grade is counted, its label says the ad is never sent, not that nothing is ("${label.trim()}")`);
+    const tracksGrade = /track\(\s*'brief-'\s*\+/.test(read('brief.js'));
+    const label = new JSDOM(read('brief.html')).window.document.querySelector('.bf-privacy').textContent;
+    assert(tracksGrade && !/nothing sent/.test(label) && /the ad is never sent/.test(label),
+        `Hooks: the Brief's grade is counted, and its label says the ad is never sent, not that nothing is ("${label.trim()}")`);
 }
 
 // Every hook name in the markup must be one the counter will keep: a name it
@@ -529,14 +529,16 @@ function load(options = {}) {
 {
     const sources = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
         .concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`))
-        .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`), ['script.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`), ['script.js', 'brief.js']);
     const names = [];
     sources.forEach((rel) => {
         (read(rel).match(/data-analytics="([^"]+)"/g) || []).forEach((m) => names.push([rel, m.slice(16, -1)]));
     });
-    // The Assay reports its grade as assay-<class>, one per grade it can give.
-    (read('modules/interactives.js').match(/\bcls = '([^']+)'/g) || [])
-        .forEach((m) => names.push(['modules/interactives.js', `assay-${m.slice(7, -1)}`]));
+    // The Brief reports its grade as brief-<class>, one per grade it can
+    // give, and that it was run, or opened from a shared link, by name.
+    const classes = (read('brief.js').match(/const GRADE_CLASS = \{([^}]*)\}/) || ['', ''])[1];
+    (classes.match(/'([a-z0-9-]+)'/g) || []).forEach((m) => names.push(['brief.js', `brief-${m.slice(1, -1)}`]));
+    (read('brief.js').match(/\btrack\('([a-z0-9-]+)'\)/g) || []).forEach((m) => names.push(['brief.js', m.slice(7, -2)]));
     const literal = names.filter(([, n]) => !n.includes('${'));
     const distinct = new Set(literal.map(([, n]) => n));
     const bad = literal.filter(([, n]) => !/^[a-z0-9-]{1,40}$/.test(n));
@@ -544,8 +546,8 @@ function load(options = {}) {
     assert(bad.length === 0, `Hooks: every name is one the counter keeps (${bad.map(b => b.join(': ')).join(', ') || 'all fine'})`);
     // The one listen control in the nav, and the player's offer of Moses's
     // own introduction, are features like any other.
-    assert(distinct.has('listen') && distinct.has('listen-intro') && distinct.has('assay-high'),
-        `Hooks: the nav's Listen control, the player's introduction and the Assay's grades are among them (${[...distinct].filter(n => /^(listen|assay-)/.test(n)).join(', ')})`);
+    assert(distinct.has('listen') && distinct.has('listen-intro') && ['brief-high', 'brief-workable', 'brief-marginal', 'brief-run', 'brief-shared'].every(n => distinct.has(n)),
+        `Hooks: the nav's Listen control, the player's introduction, the Brief's runs and its grades are among them (${[...distinct].filter(n => /^(listen|brief-)/.test(n)).join(', ')})`);
 }
 
 // A message sent from a browser that asks not to be tracked says so, and

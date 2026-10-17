@@ -361,7 +361,7 @@ const wordExempt = (text, run) => wordExemptBy(WORD_EXEMPT, text, run);
 // Marking figures in content/ text
 //
 // The generated pages print figures straight from content/ — a result's
-// "70% aquifer strike rate", a lens's "~276 KB", a team "of six". Each is
+// "70% aquifer strike rate", a lens's "~274 KB", a team "of six". Each is
 // found here by how the ledger writes it (its value or one of its `forms`)
 // and wrapped in the entry's mark, so a generated page is held to the
 // ledger as the hand-authored ones are. A single digit is never matched: in

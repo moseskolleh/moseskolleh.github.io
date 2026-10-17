@@ -387,20 +387,10 @@ const formChecks = (async () => {
     assert(sent.classList.contains('success') && !sent.hidden, 'Bug7: a recorded message is reported as sent');
 
     // --- Bug 9: a copy button gets its icon back after "Copied ✓" ---
-    {
-        const { window, clock } = run('dark', { clock: true });
-        // The Assay's copy button: Anatomy's, the first one reported, is on
-        // carbon-ai.html now, with its own copy (tests/carbon.test.js).
-        window.document.querySelector('.assay-sample').click();
-        const btn = window.document.querySelector('.assay-copy');
-        const before = btn.innerHTML;
-        window.navigator.clipboard = { writeText: async () => {} };
-        await window.mks.share.copy('x', btn);
-        await window.mks.share.copy('x', btn);   // pressed again while it still says Copied
-        assert(/Copied/.test(btn.textContent), 'Bug9: the button confirms the copy');
-        await clock.tick(1800);
-        assert(btn.innerHTML === before && !!btn.querySelector('svg'), 'Bug9: the button is restored with its icon');
-    }
+    // The homepage has no copy button now: Anatomy's, the first one
+    // reported, is on carbon-ai.html with its own (tests/carbon.test.js),
+    // and the Assay's went with it to The Brief, whose Copy link is held
+    // to the same in tests/brief.test.js.
 })();
 
 formChecks.then(() => {
