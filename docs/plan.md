@@ -509,7 +509,9 @@ axe, validation and the PR receipt run in CI.
 | Quarterly | Re-verify profile facts (`verifiedOn`); refresh AI data; ratchet budgets down; review the five numbers against the baseline |
 | Yearly | Publish the sustainability statement; regenerate the CV; review the lenses against the roles he is going for |
 
-A scheduled Action opens a "Quarterly review" issue carrying this checklist.
+A scheduled Action opens a "Quarterly review" issue carrying this checklist
+(`.github/workflows/review.yml`; the checklist's words, item by item, are in
+[review-checklist.md](review-checklist.md), held to this table by a test).
 
 ---
 
@@ -556,18 +558,17 @@ rule makes that cheap.
 ## Progress
 
 What the plan's branch implements so far, step by step, as it stands on
-the branch of pull request #51 (wave 4), checked against the code and the test runs on
-2026-10-04 (`npm test`: 2,386 passing assertions in twenty-eight suites, the
-figure the runner prints at the end; `npm run smoke -- --require` in
-Chromium: passed, and its length check measured every page within its
-ceiling). Waves 1 and 2 are on `main` (pull requests #48 and #49, merged
-by 2026-09-27, where CI's Chromium and Firefox smoke jobs passed), and so is
-wave 3 (Phase 2 and Phase 6 step 8; pull request #50, merged 2026-10-03,
-where all three CI jobs passed on its last run; GitHub Pages rebuilt from
-`main` the same day).
-Wave 4 (Phase 3) is in pull request #51 and not on `main` yet; it is built
-on `main` at `284ccd3`, so it carries `03c8c21` (the journey map's names
-measured by their glyphs, for Firefox).
+the branch of wave 5's pull request, checked against the code and the test
+runs on 2026-10-17 (`npm test`: 2,993 passing assertions in
+thirty-one suites, the figure the runner prints at the end; `npm run smoke`
+in Chromium: passed, and its length check measured every page within its
+ceiling). Waves 1 to 4 are on `main`: waves 1 and 2 by 2026-09-27 (pull
+requests #48 and #49), wave 3 (Phase 2 and Phase 6 step 8) by 2026-10-03
+(#50), and wave 4 (Phase 3) on 2026-10-04 (#51), each after CI's Chromium
+and Firefox smoke jobs passed, with GitHub Pages rebuilt from `main` the
+same day. Wave 5 (Phase 4.1, Phase 5 steps 1, 3 and 4, Phase 6 step 9 and
+Phase 7) is built on `main` at `c5ce961`, in three lanes merged into one
+branch.
 ✓ done · ◐ partial, with the reason · ✗ waiting on Moses. Everything
 Moses has to supply is listed, with where it goes, in
 [owner-checklist.md](owner-checklist.md).
@@ -757,8 +758,9 @@ fixed, and what they changed is folded into the steps below and 6.6-6.7.
    lens-link visits, as a proxy (page views that arrived through a role
    link, an upper bound, since the daily totals are kept field by field and
    cannot say whether that reader went on to a case study); the share of
-   homepage views whose deepest section was Contact; and Brief uses, empty
-   until Phase 4.1. ✗ The four-week baseline: it needs S1, S2 and four full
+   homepage views whose deepest section was Contact; and Brief uses (page
+   views in which The Brief graded an ad, `brief-run`, since wave 5). ✗ The
+   four-week baseline: it needs S1, S2 and four full
    weeks of counting; Moses records it here (S6). Baseline: not yet recorded.
    Order mattered: a baseline of the old homepage existed only if the
    counter ran for those four weeks before the Phase 2 redesign went live.
@@ -1179,17 +1181,95 @@ CV, the ministry's name, the certificates, the testimonials) and F5.
     (the narration says "as last logged", not "today"), so `npm run cv`
     follows either.
 
-**Phase 4.** 4.3 ◐ the ten stock-voice tracks (4.13 MB) are retired; the
-`intro` script (193 words, opening "Kushe") is in `content/narration.json`;
-`npm run voice:intro` installs a take; the audio budget is 800 KB; Fish
-Audio renders only with `--sections`. ✗ Moses's approval of the wording and
-his recording. 4.1 not started: the Assay's rules are plain data, ready to
-move to `content/brief.json`. 4.2 and 4.4 not started.
+**Phase 4 — wave 5: step 1.** Step 4.2 waits on a quarter of counts, which
+have not begun (S1, S2); 4.3 is as wave 1 left it; 4.4 is not started.
 
-**Phase 5** — not started (5.2, 5.5 and 5.6 ✗ Moses).
+1. ✓ **The Brief** (`brief.html`), the Assay's successor, on a page of its
+   own. The Assay's rubric and evidence moved, not rewritten, from
+   `modules/interactives.js` to `content/brief.json`, each now with an id
+   and each strength with the case studies it picks; `checkBrief` in
+   `scripts/lib/content.js` holds every evidence link to a page and section
+   that exists, every pick to `projects.json`, and every figure an evidence
+   line prints to the claims ledger. Every grading case the Assay's tests
+   held still grades the same (the Dutch / Big Four / SAP ad: "Marginal
+   match", four gaps). A recruiter pastes an ad and gets the fit as the
+   Assay gave it (the grade, each requirement and what backs it, the gaps,
+   what to confirm with Moses) and a dossier: the at-a-glance facts the
+   site states, only the case studies the matched strengths pick, each with
+   its result, checkability label and public work, and the contact lines,
+   every word from `content/` as written; it reorders and selects. "Copy
+   link" gives `brief.html?focus=…`, which carries ids from
+   `content/brief.json` only (the grade, the matched strengths, the gaps,
+   what to confirm), never the ad's words, so whoever it is forwarded to
+   sees the same dossier and the same gaps; unknown ids are dropped.
+   Printed, the dossier is one A4 page (smoke prints the three samples and
+   the Dutch ad, one page each, in Chromium). Without JavaScript the page
+   is the whole dossier and says the grading needs JavaScript. Smoke proves
+   no request carries the ad, the count included; the count carries
+   `brief-run` (the fifth of the five numbers), the grade as the Assay's
+   did (S4), and `brief-shared` for a shared link opened. One in, one out:
+   the Assay's box, code and styles left the homepage, one line under the
+   contact form links The Brief, and a shared `/#assay` goes on to
+   `brief.html#grade`. The homepage went from 9.42 and 16.49 screens to
+   9.27 and 16.22 (lane A's measure), its first view from 283,023 to
+   281,063 bytes, and the on-demand total from 73,698 to 59,091 bytes.
+   `brief.html` is 109,614 bytes over the wire with its script, under a new
+   113 KB budget, and 2.50 and 3.56 screens as it loads, under 2.63 and
+   3.74. Not done: links in from the case studies and the shared call to
+   action, which have no room under their ceilings (130 bytes and 0.04
+   screens). ✗ Moses: which case studies each strength picks (B1), whether
+   the dossier shows his phone (B2), whether the grade is counted (S4), and
+   F1–F3, which the dossier shows once stated.
 
-**Phase 6 — steps 3, 6 and 7 in wave 2, step 8 in wave 3.** Steps 1 and
-9–11 not started; 2, 4 and 5 only as far as wave 3 went in passing.
+**Phase 5 — wave 5: steps 1, 3 and 4.** Steps 2, 5 and 6 wait on Moses
+(L2, L3, L4); 7 and 8 are not started.
+
+1. ✓ **Field Notes are articles.** Their source is `content/notes/*.md`:
+   a front-matter block (number, title, slug, date, tag, one-line summary,
+   case study or lens) and a small markdown subset, parsed without a new
+   dependency by `scripts/lib/notes.js`, which refuses anything outside it
+   by line. The three notes are the first three, word for word but one
+   pointer: note 3's "further down" is "on the homepage", linked, since a
+   page of its own has nothing further down. Each is dated 2026-07-06, the
+   day it went on the site (`916a7c7`, pull request #20), and says "First
+   published on this site"; each summary is a sentence of its own note,
+   which a test holds. `build-content.js` writes `notes/<slug>.html` (the
+   shell, a permalink, its case study, older and newer notes, `Article`
+   JSON-LD, a canonical address and article Open Graph tags, the counter
+   as `note-<slug>`), their sitemap entries, and an Atom `feed.xml` linked
+   from the homepage and every note, whose ids are `tag:` URIs fixed for
+   good, so a custom domain (5.5) will not show every note again as new in
+   a reader. The homepage's three folded notes are three links (tag, title,
+   date, line), About no taller; the open counts publish the notes as one
+   row. All notes share one budget, 94 KB and 1.40 and 2.06 screens (the
+   heaviest is 90,740 bytes, 1.30 and 1.96). A `.nojekyll` at the root,
+   since the sources' front matter would have had Jekyll publish each note
+   a second time under `content/notes/`; nothing on the site used Jekyll.
+   Not done: the research page and case studies do not link their notes
+   (no room under their length ceilings). ✗ Moses: the dates, the
+   summaries and note 3's line (L5).
+2. ✗ **One note a month** (L2). The shared ceilings fit today's notes of
+   about a hundred words; a full-length note needs them raised on purpose,
+   with something of equal weight taken out.
+3. ✓ **A preview image per page and note.** `npm run og`
+   (`scripts/build-og.js`) draws a 1200×630 card for each page from its own
+   title (the homepage's from the roles in `profile.json`), in the smoke
+   test's Chromium with the site's fonts, re-encoded as an indexed PNG with
+   Node's zlib alone (`scripts/lib/png.js`): eleven cards of 11–21 KB, each
+   under a 32 KB cap, and `assets/og/og.hash` fails the tests when a title
+   changes without a new render. The nameless 122 KB drilling photo every
+   page shared is gone. Lens views have no card of their own.
+4. ◐ **Structured data.** The homepage's Person (with an `@id`, and
+   `hasCredential` from the certifications) and a `WebSite`; an `Article`
+   per note; a `SoftwareApplication` for this site's edition of the
+   EcoPrompt Coach on `carbon-ai.html`, between markers; a description for
+   `404.html`. A test traces every JSON-LD fact to `content/`. ✗
+   `knowsLanguage` waits on the languages (F1), and an X profile in
+   `sameAs` on Moses (H2).
+
+**Phase 6 — steps 3, 6 and 7 in wave 2, step 8 in wave 3, step 9 in wave
+5.** Step 1 only as far as a `.nojekyll` (wave 5); 10 and 11 not started;
+2, 4 and 5 only as far as wave 3 went in passing.
 
 2. ◐ **Images.** The dossier half is done, by the dossiers leaving: each of
    the homepage's six project cards carries one lazy thumbnail (a 480px
@@ -1293,5 +1373,33 @@ move to `content/brief.json`. 4.2 and 4.4 not started.
    measured, and a file fetched on demand that no row names stops it being
    written. It first ran on pull request #50 (2026-10-03): both runs
    succeeded, and the second edited the first one's comment in place.
+9. ✓ **Weekly health checks.** `scripts/health.js` (`npm run health`,
+   `-- --dry-run` to print rather than post), run by
+   `.github/workflows/health.yml` on Tuesdays at 05:41 UTC, keeps one
+   "Site health" issue: opened while anything is broken or waits on Moses,
+   edited in place each week, closed once nothing is. It checks that the
+   live site serves `main`'s bytes (a page changed within the hour is "not
+   rebuilt yet"); every link off the site (LinkedIn's 999 is "not
+   checkable from here"); staleness (`verifiedOn` over 90 days,
+   `confirmedOn` unset, at-a-glance facts missing, the AI factor set's
+   review date, the CV against `assets/cv.hash`); which `Code.gs` the live
+   deployment runs (`GET ?action=health` answers its `CODE_VERSION`, a hash
+   of the file a test holds current); the contact form end to end once
+   `HEALTH_URL` is set (`POST ?action=health&token=`: the form's own path
+   into a `Health` tab, no email, no count, refused unread without the
+   token); whether the open counts have a source and a week; the open
+   owner items; and `npm audit`. Each check reads broken, waiting on
+   Moses, not checkable from here, or passing. The open counts' weekly
+   job, green by design until counting is on, now says so in a notice and
+   its summary: it had run twice, green, and done nothing. Neither the live
+   site nor the deployment could be reached from where this was built, so
+   those two checks have not yet run against the real thing. ✗ Moses:
+   `HEALTH_TOKEN` and `HEALTH_URL` (H1).
 
-**Phase 7** — not started.
+**Phase 7 — wave 5.** ✓ `.github/workflows/review.yml` opens "Quarterly
+review — YYYY Qn" on the first Monday of each quarter (it runs every Monday
+of January, April, July and October and opens one issue a quarter, open or
+closed), carrying `docs/review-checklist.md`, the one copy of the
+checklist's words, with links to the open counts, the owner checklist and
+the latest health issue. The monthly rhythm (a note, `stats.html`, every
+message answered) is in the same issue, as the plan's table puts it.

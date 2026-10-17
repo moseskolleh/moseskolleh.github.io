@@ -128,8 +128,8 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         });
         assert(health.itemsFor(checklist, health.NEEDS.publish).join() === 'C2' && health.itemsFor(checklist, health.NEEDS.statsSource).join() === 'S2'
             && health.itemsFor(checklist, health.NEEDS.counter).join() === 'S1' && health.itemsFor(checklist, health.NEEDS.confirm).join() === 'F5'
-            && health.itemsFor(checklist, health.NEEDS.form).join() === 'C1,C3',
-            'Checklist: the needles find publishing the script (C2), the counter (S1), the open counts\' secret (S2), the confirmation (F5) and the form (C1, C3)');
+            && health.itemsFor(checklist, health.NEEDS.form).join() === 'C1,C3,H1',
+            'Checklist: the needles find publishing the script (C2), the counter (S1), the open counts\' secret (S2), the confirmation (F5) and the form (C1, C3, and H1 for HEALTH_URL)');
 
         const fixture = health.parseChecklist([
             '## Do first', '',
@@ -364,7 +364,7 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         };
         const ok = json({ status: 'success', message: 'Response recorded successfully!', version: VERSION, ownerEmail: true, turnstile: false });
         let c = await health.checkContact(context());
-        assert(c.status === 'waiting' && /HEALTH_URL/.test(c.summary) && c.items.join() === 'C1,C3', `Contact: no HEALTH_URL is waiting on Moses, on C1 and C3 (${c.items})`);
+        assert(c.status === 'waiting' && /HEALTH_URL/.test(c.summary) && c.items.join() === 'C1,C3,H1', `Contact: no HEALTH_URL is waiting on Moses, on C1, C3 and H1 (${c.items})`);
         ({ r: c, n } = await e2e(ok));
         assert(c.status === 'pass' && /recorded on the Health tab/.test(c.summary), `Contact: a recorded test message with OWNER_EMAIL set passes (${c.summary})`);
         const post = n.calls.find(x => x.method === 'POST');
