@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- JavaScript is on (html.js): carbon-ai.css shows the calculator rather
-         than the note that stands in for it. Either script failing to load
-         takes the mark off again (their onerror), so the note is back. -->
+    <!-- html.js: the calculator, not the note standing in for it, until a
+         script fails to load (their onerror takes the mark off). -->
     <script>document.documentElement.classList.add('js')</script>
     <title>EcoPrompt Coach — the footprint of an AI answer | Moses Kolleh Sesay</title>
     <meta name="description" content="EcoPrompt Coach: visualize the energy, water, and carbon cost of LLM queries across named models and electricity grids.">
@@ -25,8 +24,28 @@
     <meta name="twitter:title" content="EcoPrompt Coach — what does one AI answer cost the planet?">
     <meta name="twitter:description" content="Energy, water and carbon of LLM queries across models and electricity grids.">
     <meta name="twitter:image" content="https://moseskolleh.github.io/sustaintheworld/assets/img/og-image.jpg">
-    <!-- The three typefaces are self-hosted (assets/fonts/, built by scripts/build-fonts.js):
-         no request leaves this origin, and the bytes are counted in the budget. -->
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "EcoPrompt Coach — this site's edition, with its evidence ledger",
+        "description": "Interactive per-query footprint calculator, with an evidence ledger giving every emission factor a source, publication date, vintage, uncertainty range and review date. Input and output tokens are priced separately, because decode costs several times what prefill does.",
+        "url": "https://moseskolleh.github.io/sustaintheworld/carbon-ai.html",
+        "author": {
+            "@type": "Person",
+            "@id": "https://moseskolleh.github.io/sustaintheworld/#person",
+            "name": "Moses Kolleh Sesay",
+            "url": "https://moseskolleh.github.io/sustaintheworld/"
+        },
+        "mentions": {
+            "@type": "SoftwareSourceCode",
+            "name": "EcoPrompt Coach — the maintained tool (promptcoach)",
+            "codeRepository": "https://github.com/moseskolleh/promptcoach"
+        }
+    }
+    </script>
+    <!-- /JSON-LD -->
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/space-grotesk-latin.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/ibm-plex-mono-latin-400.woff2" crossorigin>
@@ -96,9 +115,7 @@
         <section class="ca-grid">
             <div class="ca-card">
                 <h2>Inputs</h2>
-                <!-- A closed select cannot wrap, so its options stay short
-                     enough for a 320px phone and the detail they used to
-                     carry (and clip) is spelled out in the line beneath. -->
+                <!-- A closed select cannot wrap: short options, the detail in the line beneath. -->
                 <div class="ca-field ca-field-select">
                     <label for="modelSelect">Model</label>
                     <select id="modelSelect" aria-describedby="modelHint"></select>
@@ -130,9 +147,7 @@
                     <label for="pue">Data-centre PUE</label>
                     <input id="pue" type="number" inputmode="decimal" step="0.05" min="1" max="3" value="1.2">
                 </div>
-                <!-- The min/max above are a browser convenience only; the
-                     binding limits live in carbon-ai.js. This is where it
-                     says so when the two disagree. -->
+                <!-- Where carbon-ai.js, whose limits bind (min/max are the browser's), says it changed an input. -->
                 <p class="ca-notice" id="inputNotice" role="status" aria-live="polite" hidden></p>
             </div>
 

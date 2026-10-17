@@ -3149,7 +3149,6 @@ html.light-mode .journey-map-readout {
 
 .ecoprompt .section-description a,
 .eco-footnote a,
-.fieldnote-body a,
 .cert-meta a,
 .testimonial a {
     color: var(--primary-green);
@@ -3224,8 +3223,11 @@ html.light-mode .impact-seg-c { background: rgba(34, 139, 34, 0.3); }
     margin-bottom: 12px;
 }
 
-/* Three notes in a row on a desktop, each its tag and title until opened;
-   a list of three on a phone. */
+/* Three notes in a row on a desktop, a list of three on a phone: each its
+   number, tag and date, its title (the link to the note's own page) and its
+   one line, under a rule rather than in a card, so the three links take no
+   more of the page than the three folded notes they replaced. The grid is
+   the testimonials' too. */
 .fieldnotes-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3234,81 +3236,40 @@ html.light-mode .impact-seg-c { background: rgba(34, 139, 34, 0.3); }
 }
 
 .fieldnote {
-    background: var(--card-bg);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--border-radius);
-    transition: var(--transition);
-}
-
-.fieldnote[open],
-.fieldnote:hover {
-    border-color: var(--line-color);
-}
-
-.fieldnote summary {
-    list-style: none;
-    cursor: pointer;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 30px;
-    align-items: center;
-    gap: 4px 14px;
-    padding: 16px 20px;
-}
-
-.fieldnote summary::-webkit-details-marker {
-    display: none;
+    border-top: 1px solid var(--line-color);
+    padding-top: 8px;
 }
 
 .fieldnote-tag {
     color: var(--primary-green);
 }
 
-.fieldnote summary h3 {
-    grid-column: 1;
-    font-size: 1.05rem;
+.fieldnote h3 {
+    font-size: 1rem;
     font-weight: 600;
+    margin: 3px 0;
 }
 
-.fieldnote-toggle {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1px solid var(--line-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.fieldnote h3 a {
+    color: inherit;
+}
+
+.fieldnote h3 a:hover,
+.fieldnote h3 a:focus-visible {
     color: var(--primary-green);
-    font-size: 0.7rem;
-    transition: var(--transition);
 }
 
-.fieldnote[open] .fieldnote-toggle {
-    transform: rotate(45deg);
-    background: var(--primary-green);
-    color: var(--darker-bg);
-}
-
-.fieldnote-body {
-    padding: 0 20px 20px;
+.fieldnote-line {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.5;
 }
 
 @media (max-width: 899px) {
     .fieldnotes-grid {
         grid-template-columns: minmax(0, 1fr);
-        gap: 12px;
+        gap: 10px;
     }
-}
-
-.fieldnote-body p {
-    color: var(--text-secondary);
-    margin-bottom: 12px;
-    line-height: 1.7;
-}
-
-.fieldnote-body p:last-child {
-    margin-bottom: 0;
 }
 
 /* ===================================

@@ -1,0 +1,58 @@
+/* ===================================================================
+   FIELD NOTES — notes/<slug>.html only
+   Layered on carbon-ai.css, which carries the shell (the nav, the hero,
+   the closing call to action, the typefaces and both themes' colours);
+   the notes load nothing else, not content.css, whose case-study and
+   research blocks they have no use for. Every rule is on an nt- class.
+
+   A note is prose to be read: one column at a reading measure, then the
+   case study it belongs with, the older and newer note, and the feed.
+   =================================================================== */
+
+.nt-text {
+    max-width: 68ch;
+    margin: 0 0 32px;
+    font-size: 1.05rem;
+    line-height: 1.75;
+}
+.nt-text p,
+.nt-text ul,
+.nt-text ol { margin: 0 0 1.1em; }
+.nt-text h2 { margin: 1.6em 0 0.5em; font-size: 1.3rem; }
+.nt-text h3 { margin: 1.4em 0 0.4em; font-size: 1.1rem; }
+.nt-text a { text-underline-offset: 3px; }
+
+.nt-label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.nt-tie,
+.nt-near,
+.nt-feed {
+    max-width: 68ch;
+    margin: 0 0 20px;
+    line-height: 1.6;
+}
+
+/* The older note and the newer, side by side where there is room. */
+.nt-near {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding: 16px 0;
+    border-top: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider);
+}
+.nt-near a { flex: 1 1 220px; text-decoration: none; }
+.nt-near a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.nt-near a[rel="next"] { text-align: right; }
+
+.nt-feed {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}

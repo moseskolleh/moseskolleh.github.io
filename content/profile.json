@@ -219,7 +219,7 @@
 
   "$pages": "Drives sitemap.xml. lastmod is set by hand when a page's content changes — a build timestamp would claim every page changed on every deploy, which is the fastest way to teach a crawler to ignore the field.",
   "pages": [
-    { "path": "index.html", "loc": "https://moseskolleh.github.io/sustaintheworld/", "lastmod": "2026-10-04", "changefreq": "monthly", "priority": "1.0" },
+    { "path": "index.html", "loc": "https://moseskolleh.github.io/sustaintheworld/", "lastmod": "2026-10-17", "changefreq": "monthly", "priority": "1.0" },
     { "path": "case-studies.html", "loc": "https://moseskolleh.github.io/sustaintheworld/case-studies.html", "lastmod": "2026-10-04", "changefreq": "monthly", "priority": "0.9" },
     { "path": "research.html", "loc": "https://moseskolleh.github.io/sustaintheworld/research.html", "lastmod": "2026-10-04", "changefreq": "monthly", "priority": "0.8" },
     { "path": "carbon-ai.html", "loc": "https://moseskolleh.github.io/sustaintheworld/carbon-ai.html", "lastmod": "2026-10-04", "changefreq": "monthly", "priority": "0.8" },

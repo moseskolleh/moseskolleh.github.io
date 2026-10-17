@@ -168,6 +168,16 @@ const BUDGETS = {
         max: 101 * KB,
         readme: 'Check my numbers (`claims.html`), over the wire (fonts included)'
     },
+    // The field notes, a page each in notes/ (Phase 5.1), held to one
+    // budget, the heaviest of them, so that a new note needs no ceiling of
+    // its own, only to fit under the one there is. Set when the notes were
+    // made (October 2026) at the heaviest's measure plus 5%, as the ratchet
+    // would set it.
+    notesWire: {
+        label: 'Each field note (notes/*.html), over the wire (with fonts): the heaviest',
+        max: 94 * KB,
+        readme: 'Each field note (`notes/*.html`), over the wire (fonts included; the heaviest)'
+    },
     // The EcoPrompt Coach's page carries its calculator and the emission-factor
     // data on arrival, so it is the heaviest page after the homepage and it went
     // unbudgeted until a real browser measured it at 106 KB. The ceiling is
@@ -189,6 +199,8 @@ const PAGE_BUDGETS = {
     'research.html': 'researchWire',
     'carbon-ai.html': 'carbonAiWire',
     'claims.html': 'claimsWire',
+    // Every page the pattern matches, each measured in smoke against it.
+    'notes/*.html': 'notesWire',
     'stats.html': 'statsWire',
     'field-report.html': 'fieldReportWire'
 };
@@ -220,7 +232,9 @@ const PAGE_BUDGETS = {
 // the figures written in words on the list (36 entries, not 30).
 // stats.html is held drawn full, as the smoke's fixture draws a busy
 // quarter: that is the page the weekly Action will commit, and the page as
-// committed today is shorter.
+// committed today is shorter. The field notes share one, set in October
+// 2026 at the longest of the first three plus 5%: they are short (about a
+// hundred words each), so a longer note will need it raised, on purpose.
 // ------------------------------------------------------------------
 const VIEWPORTS = {
     '1440x900': { width: 1440, height: 900, label: 'desktop' },
@@ -234,12 +248,39 @@ const LENGTH = {
     'research.html': { '1440x900': 5.86, '390x844': 8.99 },
     'stats.html': { '1440x900': 10.97, '390x844': 16.25 },
     'field-report.html': { '1440x900': 4.4, '390x844': 7.44 },
-    '404.html': { '1440x900': 1.05, '390x844': 1.05 }
+    '404.html': { '1440x900': 1.05, '390x844': 1.05 },
+    'notes/*.html': { '1440x900': 1.4, '390x844': 2.06 }
 };
+
+// A key with a * in it stands for every page it matches: the field notes
+// share one byte budget and one length budget, each held by the heaviest
+// and the longest of them (see notesWire). A page's own key wins over a
+// pattern's.
+const globRe = (key) => new RegExp(`^${key.split('*').map(k => k.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('[^/]*')}$`);
+const covers = (key, page) => (key.includes('*') ? globRe(key).test(page) : key === page);
+const keyFor = (page, keys) => (keys.includes(page) ? page : keys.find(k => k.includes('*') && covers(k, page)) || null);
+
+// Every page the site has, the field notes' folder included, in order:
+// the homepage, the rest of the root, then the notes.
+function sitePages(root = ROOT) {
+    const notesDir = path.join(root, 'notes');
+    const notes = fs.existsSync(notesDir) ? fs.readdirSync(notesDir).filter(f => f.endsWith('.html')).sort().map(f => `notes/${f}`) : [];
+    return fs.readdirSync(root).filter(f => f.endsWith('.html'))
+        .sort((a, b) => (b === 'index.html') - (a === 'index.html') || a.localeCompare(b))
+        .concat(notes);
+}
 
 // A page's length as a budget reads it: the longest state the smoke draws
 // it in (stats.html also drawn full; see above).
 const heldLength = (m) => (m ? Math.max(m.screens, m.full ? m.full.screens : 0) : null);
+// What a length budget holds at one size: its page's, or the longest of the
+// pages its pattern matches.
+function lengthHeld(lengths, key, vp) {
+    if (!lengths) return null;
+    const held = Object.keys(lengths.pages).filter(p => covers(key, p) && lengths.pages[p][vp])
+        .map(p => heldLength(lengths.pages[p][vp]));
+    return held.length ? Math.max(...held) : null;
+}
 
 // ------------------------------------------------------------------
 // The ratchet: a ceiling earned by a measurement is 5% above it, and at
@@ -294,8 +335,13 @@ const wireOf = (rel) => (isText(rel) ? gzipOf(rel) : sizeOf(rel));
 function criticalAssets(page = 'index.html') {
     const html = fs.readFileSync(path.join(ROOT, page), 'utf8');
     const assets = [page];
-    const add = (rel) => {
-        if (isLocal(rel) && !assets.includes(rel) && sizeOf(rel) !== null) assets.push(rel);
+    // An address in a page in notes/ ("../carbon-ai.css") is the page's
+    // folder's; in a stylesheet, the stylesheet's (from), and either is
+    // counted once by its path from the site's root.
+    const add = (href, from = page) => {
+        if (!isLocal(href)) return;
+        const rel = path.posix.normalize(path.posix.join(path.posix.dirname(from), href.split('#')[0]));
+        if (!assets.includes(rel) && sizeOf(rel) !== null) assets.push(rel);
     };
 
     // Stylesheets and scripts block or accompany the first render.
@@ -326,12 +372,13 @@ function criticalAssets(page = 'index.html') {
     // Every face a stylesheet declares. Not every page uses every weight
     // above the fold, but the four here are all used somewhere on a first
     // screen, and counting them all is the conservative side to err on.
-    stylesheets.forEach((css) => {
-        if (!isLocal(css) || sizeOf(css) === null) return;
+    stylesheets.forEach((href) => {
+        const css = path.posix.normalize(path.posix.join(path.posix.dirname(page), href));
+        if (!isLocal(href) || sizeOf(css) === null) return;
         const text = fs.readFileSync(path.join(ROOT, css), 'utf8');
         (text.match(/@font-face\s*{[^}]*}/g) || []).forEach((face) => {
             const m = face.match(/url\(['"]?([^'")]+)['"]?\)/);
-            if (m) add(m[1]);
+            if (m) add(m[1], css);
         });
     });
 
@@ -437,6 +484,8 @@ function measure() {
         researchWire: pageWire('research.html'),
         carbonAiWire: pageWire('carbon-ai.html'),
         claimsWire: pageWire('claims.html'),
+        // The heaviest note; null with none.
+        notesWire: sitePages().filter(p => covers('notes/*.html', p)).reduce((n, p) => Math.max(n === null ? 0 : n, pageWire(p)), null),
         largestImage: images.reduce((n, f) => Math.max(n, sizeOf(f) || 0), 0),
         allImages: images.reduce((n, f) => n + (sizeOf(f) || 0), 0),
         introAudio: audio.reduce((n, f) => n + (sizeOf(f) || 0), 0),
@@ -521,7 +570,7 @@ function budgetJson(measured, lengths = null, ceilings = { BUDGETS, LENGTH }) {
     pages.forEach((page) => {
         length[page] = {};
         Object.keys(VIEWPORTS).forEach((vp) => {
-            const m = lengths && lengths.pages[page] ? heldLength(lengths.pages[page][vp]) : null;
+            const m = lengthHeld(lengths, page, vp);
             const c = ceilings.LENGTH[page] && typeof ceilings.LENGTH[page][vp] === 'number' ? ceilings.LENGTH[page][vp] : null;
             length[page][vp] = {
                 unit: 'screens',
@@ -798,7 +847,7 @@ if (require.main === module) {
 
 module.exports = {
     BUDGETS, PAGE_BUDGETS, LENGTH, VIEWPORTS, RATCHET, SCHEMA, README_TABLES, MODULE_TABLE,
-    measure, criticalAssets, onDemandAssets, moduleRows,
+    measure, criticalAssets, onDemandAssets, moduleRows, sitePages, covers, keyFor, lengthHeld,
     budgetJson, ceilingsOf, readLengths, heldLength, hints, ratchetTarget, couldLowerTo, ratchetSource, loadSource,
     readmeTables, renderReadme, fmtCeiling
 };

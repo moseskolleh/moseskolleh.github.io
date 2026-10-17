@@ -190,8 +190,22 @@ try {
 
     // --- Length budgets ------------------------------------------------------
     {
-        const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).sort();
-        assert(JSON.stringify(Object.keys(LENGTH).sort()) === JSON.stringify(pages), `Length: every page at the root has a length budget, and every budget is a page (${Object.keys(LENGTH).length} of ${pages.length})`);
+        // Every page, the field notes in notes/ included, is held by exactly
+        // one length budget, its own or a pattern's (the notes share one),
+        // and every budget holds at least one page.
+        const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
+            .concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`)).sort();
+        const keys = Object.keys(LENGTH);
+        const held = pages.filter(p => keys.filter(k => budget.covers(k, p)).length === 1);
+        const idle = keys.filter(k => !pages.some(p => budget.covers(k, p)));
+        assert(held.length === pages.length && idle.length === 0 && JSON.stringify(budget.sitePages().slice().sort()) === JSON.stringify(pages),
+            `Length: every page has one length budget, and every budget holds a page (${held.length} of ${pages.length} held; idle: ${idle.join(', ') || 'none'})`);
+        assert(keys.includes('notes/*.html') && pages.filter(p => p.startsWith('notes/')).length >= 3 && pages.filter(p => p.startsWith('notes/')).every(p => budget.keyFor(p, keys) === 'notes/*.html'),
+            'Length: the field notes share one budget, notes/*.html');
+        // A pattern's budget is held by the longest page it matches.
+        const fake = { pages: { 'notes/a.html': { '1440x900': { screens: 2 } }, 'notes/b.html': { '1440x900': { screens: 3.5 } }, 'index.html': { '1440x900': { screens: 9 } } } };
+        assert(budget.lengthHeld(fake, 'notes/*.html', '1440x900') === 3.5 && budget.lengthHeld(fake, 'index.html', '1440x900') === 9,
+            'Length: a pattern\'s budget is held by the longest page it matches, a page\'s by its own');
         assert(JSON.stringify(Object.keys(VIEWPORTS)) === '["1440x900","390x844"]' && VIEWPORTS['390x844'].width === 390 && VIEWPORTS['1440x900'].height === 900,
             'Length: measured at 1440×900 and 390×844, the sizes the accessibility pass uses');
         // The plan's targets were its first ceilings; the ratchet has only

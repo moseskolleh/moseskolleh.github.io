@@ -17,6 +17,7 @@
     <meta name="author" content="Moses Kolleh Sesay">
     <title>Moses Kolleh Sesay | Sustainability &amp; Climate Analyst</title>
     <link rel="canonical" href="https://moseskolleh.github.io/sustaintheworld/">
+    <link rel="alternate" type="application/atom+xml" title="Field notes — Moses Kolleh Sesay" href="feed.xml">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 
@@ -39,6 +40,7 @@
     {
         "@context": "https://schema.org",
         "@type": "Person",
+        "@id": "https://moseskolleh.github.io/sustaintheworld/#person",
         "name": "Moses Kolleh Sesay",
         "jobTitle": "Sustainability & Climate Analyst",
         "url": "https://moseskolleh.github.io/sustaintheworld/",
@@ -68,6 +70,48 @@
                 "name": "University of Sierra Leone"
             }
         ],
+        "hasCredential": [
+            {
+                "@type": "EducationalOccupationalCredential",
+                "name": "ESG Specialist Program",
+                "credentialCategory": "certificate",
+                "recognizedBy": {
+                    "@type": "Organization",
+                    "name": "Corporate Finance Institute"
+                },
+                "dateCreated": "2024"
+            },
+            {
+                "@type": "EducationalOccupationalCredential",
+                "name": "Google Advanced Data Analytics",
+                "credentialCategory": "certificate",
+                "recognizedBy": {
+                    "@type": "Organization",
+                    "name": "Google — Coursera"
+                },
+                "dateCreated": "2024"
+            },
+            {
+                "@type": "EducationalOccupationalCredential",
+                "name": "Data Analytics Training",
+                "credentialCategory": "certificate",
+                "recognizedBy": {
+                    "@type": "Organization",
+                    "name": "Masterschool"
+                },
+                "dateCreated": "2023"
+            },
+            {
+                "@type": "EducationalOccupationalCredential",
+                "name": "Synergizing DRR & Climate Change Adaptation",
+                "credentialCategory": "certificate",
+                "recognizedBy": {
+                    "@type": "Organization",
+                    "name": "UN System Staff College"
+                },
+                "dateCreated": "2023"
+            }
+        ],
         "knowsAbout": [
             "Sustainability",
             "Climate Risk",
@@ -80,6 +124,18 @@
             "https://github.com/moseskolleh",
             "https://linkedin.com/in/moseskollehsesay"
         ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://moseskolleh.github.io/sustaintheworld/#website",
+        "name": "Moses Kolleh Sesay",
+        "url": "https://moseskolleh.github.io/sustaintheworld/",
+        "author": {
+            "@id": "https://moseskolleh.github.io/sustaintheworld/#person"
+        }
     }
     </script>
     <!-- JSON-LD:END -->
@@ -363,46 +419,30 @@
                     </div>
                 </div>
             </div>
-            <!-- Field Notes: how I think, under who I am. They were a section
-                 of their own; each is still its tag and title, a press away
-                 from the whole note. -->
+            <!-- Field Notes: how I think, under who I am. Each is an article of
+                 its own now (notes/, from content/notes/); this is a link to
+                 each of the newest three, written by build-content.js. -->
             <div class="fieldnotes" id="notes">
                 <p class="panel-label mono-label">Field notes &mdash; short dispatches from the intersection of mud, models and megawatts</p>
+                <!-- NOTES -->
                 <div class="fieldnotes-grid">
-                    <details class="fieldnote reveal">
-                        <summary>
-                            <span class="fieldnote-tag mono-label">Note 01 · Water</span>
-                            <h3>What <span data-claim="water-points">164</span> water points taught me about data</h3>
-                            <span class="fieldnote-toggle" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-plus"></use></svg></span>
-                        </summary>
-                        <div class="fieldnote-body">
-                            <p>In the Freetown Complex, a wrong guess isn't a bad cell in a spreadsheet — it's a dry hole a community paid for. Geophysics taught me that data only matters when someone stakes something on it. The resistivity surveys behind our groundwater maps pushed the strike rate to <span data-claim="strike-rate">70%</span> in rock where drilling is a gamble, and every strike was the same lesson: collect the data <em>before</em> the drill bit, not after.</p>
-                            <p>I carry that into every ESG analysis and every AI framework I build now. The question is never "what does the data say?" — it's "who is about to spend money, or drink water, based on what I claim it says?"</p>
-                        </div>
-                    </details>
-                    <details class="fieldnote reveal">
-                        <summary>
-                            <span class="fieldnote-tag mono-label">Note 02 · Scenarios</span>
-                            <h3>Why I wrote a pessimistic future on purpose</h3>
-                            <span class="fieldnote-toggle" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-plus"></use></svg></span>
-                        </summary>
-                        <div class="fieldnote-body">
-                            <p>My Wageningen thesis ended with "Dirty Delta" — a deliberately dark storyline for Africa's coastal waters by mid-century. Model output rarely moves a policymaker; a story they can picture does. Turning regression coefficients on income, urbanisation and agriculture into a narrative was the most useful translation work I've done.</p>
-                            <p>The lesson survived the thesis: if your analysis can't be retold in a corridor after the meeting, it doesn't exist. I now write the storyline first and let it demand the numbers it needs.</p>
-                        </div>
-                    </details>
-                    <details class="fieldnote reveal">
-                        <summary>
-                            <span class="fieldnote-tag mono-label">Note 03 · Sustainable AI</span>
-                            <h3>Every prompt has a footprint — so what?</h3>
-                            <span class="fieldnote-toggle" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-plus"></use></svg></span>
-                        </summary>
-                        <div class="fieldnote-body">
-                            <p>A watt-hour means nothing to most people. The same answer counted in phone charges or cups of coffee does. At the Digital Society School I'm building decision tools for the Dutch Ministry of Finance around exactly that translation — because the gap between the most and least efficient model on the same task can exceed an order of magnitude, and few tools put that in front of the person typing the prompt.</p>
-                            <p>The point is not AI guilt. It's the same soft-path thinking I learned in water management: before you build a bigger pipe — or call a bigger model — ask whether the demand itself can be smarter. Try the <a href="#ecoprompt">EcoPrompt Coach chart</a>, further down; that's the argument, running live.</p>
-                        </div>
-                    </details>
+                    <article class="fieldnote reveal">
+                        <p class="fieldnote-tag mono-label">Note 01 &middot; Water &middot; <time datetime="2026-07-06">6 Jul 2026</time></p>
+                        <h3><a href="notes/what-164-water-points-taught-me.html" data-analytics="notes-to-note">What <span data-claim="water-points">164</span> water points taught me about data</a></h3>
+                        <p class="fieldnote-line">Geophysics taught me that data only matters when someone stakes something on it.</p>
+                    </article>
+                    <article class="fieldnote reveal">
+                        <p class="fieldnote-tag mono-label">Note 02 &middot; Scenarios &middot; <time datetime="2026-07-06">6 Jul 2026</time></p>
+                        <h3><a href="notes/why-i-wrote-a-pessimistic-future.html" data-analytics="notes-to-note">Why I wrote a pessimistic future on purpose</a></h3>
+                        <p class="fieldnote-line">Model output rarely moves a policymaker; a story they can picture does.</p>
+                    </article>
+                    <article class="fieldnote reveal">
+                        <p class="fieldnote-tag mono-label">Note 03 &middot; Sustainable AI &middot; <time datetime="2026-07-06">6 Jul 2026</time></p>
+                        <h3><a href="notes/every-prompt-has-a-footprint.html" data-analytics="notes-to-note">Every prompt has a footprint &mdash; so what?</a></h3>
+                        <p class="fieldnote-line">A watt-hour means nothing to most people.</p>
+                    </article>
                 </div>
+                <!-- /NOTES -->
             </div>
         </div>
     </section>

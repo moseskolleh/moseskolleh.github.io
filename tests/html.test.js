@@ -26,7 +26,8 @@ const PAGES = [
     'claims.html',
     'field-report.html',
     '404.html'
-];
+].concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).sort().map(f => `notes/${f}`));
+// The field notes sit in notes/, so their links climb back with "../".
 
 let failures = 0;
 function assert(cond, msg) {
@@ -57,8 +58,8 @@ const BASE = (() => {
     }
 })();
 
-/** Repo-relative path for a link, or null when it is not ours to resolve. */
-function localTarget(ref) {
+/** Repo-relative path for a link on `page`, or null when it is not ours to resolve. */
+function localTarget(ref, page = 'index.html') {
     if (!ref) return null;
     if (/^(https?:|mailto:|tel:|data:|#|\/\/)/i.test(ref)) return null;
 
@@ -69,6 +70,12 @@ function localTarget(ref) {
         if (!target.startsWith(BASE)) return target;      // outside the deployed base — a real error
         target = target.slice(BASE.length);
         if (!target) target = 'index.html';               // the base itself is the homepage
+    } else {
+        // Relative to the page's own folder; one that climbs out of the
+        // site is a real error, kept as it is so it cannot resolve.
+        const joined = path.posix.normalize(path.posix.join(path.posix.dirname(page), target));
+        if (joined.startsWith('..')) return ref;
+        target = joined;
     }
     if (target.endsWith('/')) target += 'index.html';
     return target;
@@ -153,7 +160,7 @@ PAGES.forEach((page) => {
     ].map(m => m.replace(/.*["']([^"']*)["']/, '$1'));
 
     const broken = refs.filter((ref) => {
-        const target = localTarget(ref);
+        const target = localTarget(ref, page);
         if (!target) return false;
         return !fs.existsSync(path.join(ROOT, target));
     });
@@ -203,7 +210,7 @@ PAGES.forEach((page) => {
 PAGES.forEach((page) => {
     const html = read(page);
     const symbols = new Set((html.match(/<symbol\b[^>]*\bid=["']([^"']+)["']/gi) || []).map(t => attr(t, 'id')));
-    const scripts = new Set((html.match(/<script\b[^>]*\bsrc=["'][^"']+["']/gi) || []).map(t => attr(t, 'src')).filter(src => !/^(https?:)?\/\//.test(src)));
+    const scripts = new Set((html.match(/<script\b[^>]*\bsrc=["'][^"']+["']/gi) || []).map(t => localTarget(attr(t, 'src'), page)).filter(Boolean));
     const inline = (html.match(/<script(?![^>]*\bsrc=)[^>]*>[\s\S]*?<\/script>/gi) || []).join('\n');
     // Code only: a module a comment mentions is not one the page fetches.
     const source = (src) => (fs.existsSync(path.join(ROOT, src)) ? fs.readFileSync(path.join(ROOT, src), 'utf8') : '')
@@ -311,6 +318,11 @@ PAGES.forEach((page) => {
     if (scripts[0]) assert(/\bdefer\b/.test(scripts[0]), `${page}: count.js is deferred, so it never holds up the page`);
     if (page === '404.html' && scripts[0]) {
         assert(attr(scripts[0], 'data-page') === '404', '404.html: names itself to the counter, since its address is whatever was missing');
+    }
+    // A field note's file name could be a page's at the root, so it names
+    // itself too: "note-" and its slug.
+    if (page.startsWith('notes/') && scripts[0]) {
+        assert(attr(scripts[0], 'data-page') === `note-${page.slice(6, -5)}`, `${page}: names itself to the counter as "note-" and its slug`);
     }
 });
 

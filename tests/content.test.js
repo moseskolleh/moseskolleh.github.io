@@ -214,10 +214,15 @@ const fieldText = plain(fieldReport);
     const missing = profile.pages.filter(p => !sitemap.includes(p.loc)).map(p => p.path);
     assert(missing.length === 0, `Sitemap: lists every page (missing: ${missing.join(', ') || 'none'})`);
 
+    // And every field note, each at its own address, dated the day it was published.
+    const notes = require('../scripts/lib/content.js').loadAll().notes;
+    const noteMissing = notes.filter(n => !sitemap.includes(`<loc>${profile.links.site}notes/${n.slug}.html</loc>\n    <lastmod>${n.date}</lastmod>`)).map(n => n.slug);
+    assert(notes.length >= 3 && noteMissing.length === 0, `Sitemap: lists every field note, with the day it was published as its lastmod (missing: ${noteMissing.join(', ') || 'none'})`);
+
     const locs = sitemap.match(/<loc>([^<]+)<\/loc>/g) || [];
-    const known = profile.pages.map(p => p.loc);
+    const known = profile.pages.map(p => p.loc).concat(notes.map(n => `${profile.links.site}notes/${n.slug}.html`));
     const extra = locs.map(l => l.replace(/<\/?loc>/g, '')).filter(l => !known.includes(l));
-    assert(extra.length === 0, `Sitemap: lists no page that is not in profile.json (${extra.join(', ') || 'none'})`);
+    assert(extra.length === 0, `Sitemap: lists no page that is not in profile.json or content/notes/ (${extra.join(', ') || 'none'})`);
 
     // Every page needs a lastmod, and none of them may claim a future date —
     // a sitemap that says a page changed tomorrow is one crawlers distrust.
@@ -644,7 +649,9 @@ const fieldText = plain(fieldReport);
 {
     const shipped = fs.readdirSync(ROOT).filter(f => /\.(html|js|css)$/.test(f))
         .concat(fs.readdirSync(path.join(ROOT, 'modules')).map(f => `modules/${f}`),
-            fs.readdirSync(path.join(ROOT, 'content')).map(f => `content/${f}`), ['README.md']);
+            fs.readdirSync(path.join(ROOT, 'content')).filter(f => /\.json$/.test(f)).map(f => `content/${f}`),
+            fs.readdirSync(path.join(ROOT, 'content', 'notes')).map(f => `content/notes/${f}`),
+            fs.readdirSync(path.join(ROOT, 'notes')).map(f => `notes/${f}`), ['README.md']);
     const old = shipped.filter(f => /AI,(?:\s|&nbsp;)+Weighed/i.test(read(f)));
     assert(old.length === 0, `One name: "AI, Weighed" is gone (${old.join(', ') || 'nowhere'})`);
 

@@ -77,7 +77,10 @@ const byId = new Map(CLAIMS.map(c => [c.id, c]));
 // page says of the counter's rules (30 counts a minute, nothing under 5)
 // is about the site itself, and is read like any page's, each rule marked
 // [data-rule] and held to the code that sets it.
-const PAGES = ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', '404.html', 'claims.html', 'stats.html'];
+// The field notes, each a page in notes/, are read like the rest: a figure
+// in a note is marked from the ledger as the generated pages mark theirs.
+const NOTE_PAGES = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).sort().map(f => `notes/${f}`);
+const PAGES = ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', '404.html', 'claims.html', 'stats.html'].concat(NOTE_PAGES);
 const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.document]));
 
 // ===================================================================
@@ -663,7 +666,7 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
     }).map(li => li.id);
     assert(unvalued.length === 0, `claims.html: each entry opens with its figure, marked (${unvalued.join(', ') || 'all do'})`);
 
-    const { CLAIM_PAGES, marksIn } = require('../scripts/build-content.js');
+    const { CLAIM_PAGES, claimPages, marksIn } = require('../scripts/build-content.js');
     // Where the generator sends a reader, on a page written to test it: the
     // figure in sight wins over the same figure folded earlier in a field
     // note; a figure only in a [hidden] note is addressed inside it, named
@@ -731,6 +734,9 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
         }
     });
     assert(Object.keys(CLAIM_PAGES).every(p => PAGES.includes(p)), 'claims.html: reads the marks on every page this test scans');
+    const named = claimPages(data.notes);
+    assert(NOTE_PAGES.length >= 3 && NOTE_PAGES.every(p => /^Field note \d{2}$/.test(named[p] || '')),
+        `claims.html: reads every field note's marks too, each named by its number (${NOTE_PAGES.map(p => named[p]).join(', ')})`);
 
     // "Not on this list" names what the scan lets by. The core log's depths
     // and the flood game's steps were let by here and named nowhere there;
@@ -758,9 +764,9 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
     assert(!!home.querySelector('footer a[href="claims.html"]'), 'Homepage: the footer links the ledger too');
 
     // Every page with the shell's footer links it, the ledger itself marked as here.
-    const footed = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).filter(f => /<footer class="ca-foot">/.test(read(f)));
+    const footed = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).concat(NOTE_PAGES).filter(f => /<footer class="ca-foot">/.test(read(f)));
     const missing = footed.filter((f) => {
-        const a = new JSDOM(read(f)).window.document.querySelector('footer.ca-foot a[href="claims.html"]');
+        const a = new JSDOM(read(f)).window.document.querySelector(`footer.ca-foot a[href="${f.startsWith('notes/') ? '../' : ''}claims.html"]`);
         return !a || (f === 'claims.html') !== (a.getAttribute('aria-current') === 'page');
     });
     assert(footed.length >= 5 && missing.length === 0, `Shell: every footer links "Check my numbers", marked current on its own page (${footed.length} footers; wrong: ${missing.join(', ') || 'none'})`);

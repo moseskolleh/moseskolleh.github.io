@@ -15,7 +15,7 @@
     "fonts:check": "node scripts/build-fonts.js --check",
     "smoke": "node scripts/smoke.js",
     "test:unit": "node scripts/run-tests.js",
-    "lint:html": "html-validate \"*.html\" \"google-apps-script/*.html\"",
+    "lint:html": "html-validate \"*.html\" \"notes/*.html\" \"google-apps-script/*.html\"",
     "budget": "node scripts/check-budget.js",
     "cv": "node scripts/build-cv.js",
     "mcp:verify": "node scripts/verify-mcp-pin.js",

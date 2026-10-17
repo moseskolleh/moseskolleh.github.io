@@ -255,12 +255,20 @@ const countScrolls = (window) => {
     // --- An address into a fold opens it ---
     // claims.html's "Where" links send a reader to figures the homepage
     // keeps out of sight until asked: the badge's method note ([hidden],
-    // opened by its "?"), a role's depth behind its More, a field note's
-    // closed fold. A link to the method note landed at the top of the page,
-    // and one to a role on a card that did not show the figure. Each opens
-    // before the landing now, by the control a reader would press.
+    // opened by its "?"), a role's depth behind its More, a closed fold (the
+    // field notes were three, until each became a page of its own; the
+    // probe stands in for the next). A link to the method note landed at the
+    // top of the page, and one to a role on a card that did not show the
+    // figure. Each opens before the landing now, by the control a reader
+    // would press.
     {
-        const { window, clock } = run('dark', { clock: true, before: (w) => { w.document.querySelector('details.fieldnote').id = 'noteProbe'; } });
+        const probe = (w) => {
+            const fold = w.document.createElement('details');
+            fold.id = 'noteProbe';
+            fold.innerHTML = '<summary>A fold</summary><p>What it holds.</p>';
+            w.document.getElementById('notes').appendChild(fold);
+        };
+        const { window, clock } = run('dark', { clock: true, before: probe });
         const doc = window.document;
         const scrolled = countScrolls(window);
         const method = doc.getElementById('carbonMethod');
@@ -280,7 +288,7 @@ const countScrolls = (window) => {
         const note = doc.getElementById('noteProbe');
         window.location.hash = '#noteProbe';
         await clock.tick(400);
-        assert(note.open, 'Folds: an address into a field note opens its fold');
+        assert(note.open, 'Folds: an address into a closed <details> opens it');
     }
 
     {
