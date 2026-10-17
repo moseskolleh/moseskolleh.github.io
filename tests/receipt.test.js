@@ -103,6 +103,16 @@ const cells = (line) => line.split('|').slice(1, -1).map(s => s.trim());
     assert(stats[4] === '0' && stats[5] === '✓ 15.66 (drawn full: 12.00)', `Length: stats.html is held drawn full, and says so (${stats.join(' | ')})`);
     assert(/\*\*✗ 2 budgets over the ceiling on this branch:\*\*/.test(md) && /`index\.html` at 390×844: 18\.50 screens of 18/.test(md),
         'Summary: names every budget over its ceiling, bytes and length, before the tables');
+
+    // A budget over a pattern (every note): main's side, measured without
+    // --lengths, is read from main's measurements of the pages it matches.
+    const noteLen = (a, b) => ({ pages: { 'notes/a.html': { '1440x900': { screens: a } }, 'notes/b.html': { '1440x900': { screens: b } } } });
+    const lengthBudget = { 'notes/*.html': { '1440x900': { ceiling: 1.4 } } };
+    const pmd = receipt({ base: { ...base, length: lengthBudget }, head: { ...head, length: { 'notes/*.html': { '1440x900': { ceiling: 1.4, measured: 1.31 } } } },
+        baseLength: noteLen(1.2, 1.27), headLength: noteLen(1.31, 1.2), baseSha: '0123456789abcdef', headSha: 'fedcba9876543210' });
+    const pattern = cells(pmd.split('\n').find(l => l.startsWith('| `notes/*.html` | 1440×900 |')) || '');
+    assert(pattern[2] === '1.27' && pattern[3] === '1.31' && pattern[4] === '+0.04',
+        `Length: a pattern's row reads main's longest matching page from main's measurements (${pattern.join(' | ')})`);
 }
 
 // --- Could come down ----------------------------------------------------------
