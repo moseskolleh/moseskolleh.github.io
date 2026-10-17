@@ -157,6 +157,42 @@ function load(options = {}) {
     const odd = load({ url: `${SITE}%E2%9C%93.html` });
     odd.leave();
     assert(odd.calls.length === 0, 'page: a name the server would refuse is not sent at all');
+
+    // A field note lives in notes/, and its last path segment could be a
+    // root page's name ("research.html" is a page; so could a note be), so
+    // it names itself: "note-" and its slug, which no root page is called.
+    // That name is held to one rule at all three ends: the validator's
+    // NOTE_PAGE (scripts/lib/content.js), count.js's, and Code.gs's
+    // BEACON_NAME, which accepts nothing else.
+    const content = require('../scripts/lib/content.js');
+    const notes = content.loadAll().notes;
+    notes.forEach((n) => {
+        const tag = read(`notes/${n.slug}.html`).match(/<script[^>]*src="\.\.\/count\.js"[^>]*>/);
+        const dataPage = tag && (tag[0].match(/data-page="([^"]+)"/) || [])[1];
+        const p = load({ url: `${SITE}notes/${n.slug}.html`, dataPage });
+        p.leave();
+        const body = p.payload();
+        assert(dataPage === content.notePage(n.slug) && body && body.page === dataPage && serverAccepts(body),
+            `page: notes/${n.slug}.html counts as "${dataPage}", and the server accepts it`);
+    });
+    const ruleOf = (src, re) => (src.match(re) || [])[1];
+    const rules = [
+        ruleOf(COUNT, /const ok = \(s\) => typeof s === 'string' && \/(\^\[a-z0-9-\]\{1,40\}\$)\/\.test\(s\)/),
+        ruleOf(read('google-apps-script/Code.gs'), /var BEACON_NAME = \/(.+?)\/;/),
+        content.NOTE_PAGE.source
+    ];
+    assert(rules.every(r => r === '^[a-z0-9-]{1,40}$'), `page: one page-name rule at all three ends (${rules.join(' · ')})`);
+    // The longest slug the validator lets through still names a page the
+    // server takes; one character more is refused before it is published.
+    const longest = 'a'.repeat(40 - content.notePage('').length);
+    const atLimit = load({ url: `${SITE}notes/${longest}.html`, dataPage: content.notePage(longest) });
+    atLimit.leave();
+    const tooLong = load({ url: `${SITE}notes/${longest}a.html`, dataPage: content.notePage(`${longest}a`) });
+    tooLong.leave();
+    const refused = content.checkNotes([Object.assign({}, notes[0], { slug: `${longest}a`, file: `${longest}a.md`, problems: [] })],
+        { projects: content.load('projects'), lenses: content.load('lenses') });
+    assert(atLimit.calls.length === 1 && serverAccepts(atLimit.payload()) && tooLong.calls.length === 0 && refused.some(p => /slug/.test(p)),
+        `page: a slug of ${longest.length} characters is counted; one longer is refused by the validator, and count.js would not send it`);
 }
 
 // --- lens ------------------------------------------------------------------
@@ -214,10 +250,10 @@ function load(options = {}) {
     p.click('[data-analytics="listen"] use');
     p.window.mks.track('module-dossier');
     ['Bad Name', '', undefined, null, 42, 'x'.repeat(41), 'semi;colon'].forEach(n => p.window.mks.track(n));
-    p.window.mks.track('assay-high');
+    p.window.mks.track('brief-high');
     p.leave();
     const f = p.payload().features || [];
-    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'listen', 'module-dossier', 'assay-high']),
+    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'listen', 'module-dossier', 'brief-high']),
         `features: clicks on [data-analytics] (even on an icon inside one) and mks.track(), each once, in order (${f.join(', ')})`);
 
     // Every CV link has a name of its own, and a view that used any of them
@@ -450,7 +486,9 @@ function load(options = {}) {
 // hook, or its clicks are missing from the CV-downloads figure and from the
 // features table. The text-only field report's two once had none.
 {
-    const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && /<script[^>]*src="(?:\/sustaintheworld\/)?count\.js"/.test(read(f)));
+    const notePages = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`);
+    const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).concat(notePages)
+        .filter(f => /<script[^>]*src="(?:\/sustaintheworld\/|\.\.\/)?count\.js"/.test(read(f)));
     const bare = [];
     pages.forEach((rel) => {
         const doc = new JSDOM(read(rel)).window.document;
@@ -461,7 +499,7 @@ function load(options = {}) {
             if (!a.hasAttribute('data-analytics')) bare.push(`${rel}: email link "${a.textContent.trim()}"`);
         });
     });
-    assert(pages.includes('field-report.html') && bare.length === 0,
+    assert(pages.includes('field-report.html') && notePages.every(p => pages.includes(p)) && bare.length === 0,
         `Hooks: every CV link is a cv-download-* hook and every email link a hook, on every counted page (${bare.join('; ') || 'all hooked'})`);
     // The terminal's `cv` command fetches the CV without a link on the page.
     const { run } = require('./harness.js');
@@ -477,12 +515,12 @@ function load(options = {}) {
     window.document.querySelector('.ft-line').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
     assert(tracked.join() === 'cv-download-terminal,cv-download', `Hooks: the terminal's cv command counts as a CV download too (${tracked.join(', ') || 'nothing'})`);
 
-    // The Assay's grade is counted, so its label cannot say nothing is sent;
+    // The Brief's grade is counted, so its label cannot say nothing is sent;
     // what it can say is that the ad is not.
-    const tracksGrade = /mks\.track\(\s*'assay-'/.test(read('modules/interactives.js'));
-    const label = new JSDOM(INDEX).window.document.querySelector('.assay-privacy').textContent;
-    assert(!tracksGrade || (!/nothing sent/.test(label) && /the ad is never sent/.test(label)),
-        `Hooks: while the Assay's grade is counted, its label says the ad is never sent, not that nothing is ("${label.trim()}")`);
+    const tracksGrade = /track\(\s*'brief-'\s*\+/.test(read('brief.js'));
+    const label = new JSDOM(read('brief.html')).window.document.querySelector('.bf-privacy').textContent;
+    assert(tracksGrade && !/nothing sent/.test(label) && /the ad is never sent/.test(label),
+        `Hooks: the Brief's grade is counted, and its label says the ad is never sent, not that nothing is ("${label.trim()}")`);
 }
 
 // Every hook name in the markup must be one the counter will keep: a name it
@@ -490,14 +528,17 @@ function load(options = {}) {
 // module is read, so a hook added anywhere is held to the same rule.
 {
     const sources = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-        .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`), ['script.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`))
+        .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`), ['script.js', 'brief.js']);
     const names = [];
     sources.forEach((rel) => {
         (read(rel).match(/data-analytics="([^"]+)"/g) || []).forEach((m) => names.push([rel, m.slice(16, -1)]));
     });
-    // The Assay reports its grade as assay-<class>, one per grade it can give.
-    (read('modules/interactives.js').match(/\bcls = '([^']+)'/g) || [])
-        .forEach((m) => names.push(['modules/interactives.js', `assay-${m.slice(7, -1)}`]));
+    // The Brief reports its grade as brief-<class>, one per grade it can
+    // give, and that it was run, or opened from a shared link, by name.
+    const classes = (read('brief.js').match(/const GRADE_CLASS = \{([^}]*)\}/) || ['', ''])[1];
+    (classes.match(/'([a-z0-9-]+)'/g) || []).forEach((m) => names.push(['brief.js', `brief-${m.slice(1, -1)}`]));
+    (read('brief.js').match(/\btrack\('([a-z0-9-]+)'\)/g) || []).forEach((m) => names.push(['brief.js', m.slice(7, -2)]));
     const literal = names.filter(([, n]) => !n.includes('${'));
     const distinct = new Set(literal.map(([, n]) => n));
     const bad = literal.filter(([, n]) => !/^[a-z0-9-]{1,40}$/.test(n));
@@ -505,8 +546,8 @@ function load(options = {}) {
     assert(bad.length === 0, `Hooks: every name is one the counter keeps (${bad.map(b => b.join(': ')).join(', ') || 'all fine'})`);
     // The one listen control in the nav, and the player's offer of Moses's
     // own introduction, are features like any other.
-    assert(distinct.has('listen') && distinct.has('listen-intro') && distinct.has('assay-high'),
-        `Hooks: the nav's Listen control, the player's introduction and the Assay's grades are among them (${[...distinct].filter(n => /^(listen|assay-)/.test(n)).join(', ')})`);
+    assert(distinct.has('listen') && distinct.has('listen-intro') && ['brief-high', 'brief-workable', 'brief-marginal', 'brief-run', 'brief-shared'].every(n => distinct.has(n)),
+        `Hooks: the nav's Listen control, the player's introduction, the Brief's runs and its grades are among them (${[...distinct].filter(n => /^(listen|brief-)/.test(n)).join(', ')})`);
 }
 
 // A message sent from a browser that asks not to be tracked says so, and

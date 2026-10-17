@@ -338,6 +338,25 @@ const snapshot = (w) => JSON.stringify(Array.from(w.sheets.entries()).map(([n, s
     assert(cell(w, 'visits', '', 'Daily', '2026-09-27') === 1, 'Counter: a new day starts its own totals at 1');
 }
 
+// --- A field note's page view -------------------------------------------
+// A note lives in notes/ and names itself "note-" and its slug (data-page,
+// count.js), at most 40 characters, as the validator holds its slug to.
+// It is kept under its own name, page and KB alike; one longer is not v1.
+{
+    const w = world();
+    const content = require('../scripts/lib/content.js');
+    const notes = content.loadAll().notes;
+    assert(notes.length >= 3 && notes.every(n => w.ctx.isBeaconV1({ ...beacon, page: content.notePage(n.slug) })),
+        `Counter: every field note's page name is one schema v1 accepts (${notes.map(n => content.notePage(n.slug)).join(', ')})`);
+    const longest = content.notePage('a'.repeat(40 - content.notePage('').length));
+    const before = snapshot(w);
+    postCount(w, { ...beacon, page: `${longest}a` });
+    assert(snapshot(w) === before, 'Counter: a page name over 40 characters changes nothing');
+    postCount(w, { ...beacon, page: longest, deepest: 'note', features: ['notes-to-note'], ref: '', kb: 90 });
+    assert(cell(w, 'page', longest) === 1 && cell(w, 'kb', longest) === 90 && cell(w, 'deepest', 'note') === 1 && cell(w, 'feature', 'notes-to-note') === 1,
+        'Counter: a field note\'s page view is kept under its own name, with its KB, its furthest part and its features');
+}
+
 // --- Today's block is found however long the history above it -----------
 {
     const w = world();
@@ -557,6 +576,112 @@ const snapshot = (w) => JSON.stringify(Array.from(w.sheets.entries()).map(([n, s
     noCount.ctx.addToDaily = () => { throw new Error('sheet unavailable'); };
     const saved = JSON.parse(postJson(noCount, valid).getContent());
     assert(saved.status === 'success' && noCount.rows.length === 2, 'Contact + counter: a count that fails does not fail the message');
+}
+
+// =========================================================================
+// The weekly health check: GET ?action=health, POST ?action=health&token=
+// =========================================================================
+// scripts/health.js asks which version of this file a deployment runs, and
+// (with HEALTH_TOKEN) sends one test message down the contact form's own
+// path, to a Health tab, emailing nobody and counting nothing.
+const HEALTH_TOKEN = 'another-long-random-string-for-the-health-check';
+const health = require('../scripts/health.js');
+const testMessage = health.HEALTH_MESSAGE;
+const postHealth = (w, data, parameter = { action: 'health', token: HEALTH_TOKEN }) => w.ctx.doPost({
+    parameter,
+    postData: { type: 'text/plain', contents: typeof data === 'string' ? data : JSON.stringify(data) }
+});
+
+// --- The version: which Code.gs a deployment runs ----------------------------
+{
+    assert(health.declaredVersion(SOURCE) === health.codeVersion(SOURCE),
+        `Version: CODE_VERSION is this file's own (${health.declaredVersion(SOURCE)}; it should be ${health.codeVersion(SOURCE)}: npm run health -- --code-version prints it)`);
+    const edited = SOURCE.replace('var LOCK_TIMEOUT_MS = 15000;', 'var LOCK_TIMEOUT_MS = 16000;');
+    assert(health.codeVersion(edited) !== health.codeVersion(SOURCE) && health.codeVersion(SOURCE.replace(/\n/g, '\r\n')) === health.codeVersion(SOURCE),
+        'Version: any edit to the file changes it, and line endings do not');
+
+    const w = world({ HEALTH_TOKEN });
+    const out = w.ctx.doGet({ parameter: { action: 'health' } });
+    const body = JSON.parse(out.getContent());
+    assert(body.version === health.declaredVersion(SOURCE) && body.status === 'ok' && Object.keys(body).sort().join() === 'message,status,version',
+        `Version: GET ?action=health says the version and nothing else, with no token (${Object.keys(body).join(', ')})`);
+    assert(w.rows.length === 0 && w.tab('Health') === null && w.lock.taken === 0, 'Version: asking touches no sheet and takes no lock');
+}
+
+// --- Refused without the token -------------------------------------------------
+{
+    const refused = (label, parameter, props) => {
+        const w = world(props === undefined ? { HEALTH_TOKEN } : props);
+        const body = JSON.parse(postHealth(w, testMessage, { action: 'health', ...parameter }).getContent());
+        assert(body.status === 'refused' && w.rows.length === 0 && w.tab('Health') === null && w.mail.length === 0 && w.lock.taken === 0 &&
+            !('ownerEmail' in body) && !('version' in body),
+            `Health: ${label} is refused before anything is read or written, and the reply says nothing of the configuration (${body.status})`);
+    };
+    refused('a request with no token', {});
+    refused('a wrong token', { token: 'guess' });
+    refused('the token less its last character', { token: HEALTH_TOKEN.slice(0, -1) });
+    refused('the stats token', { token: TOKEN }, { HEALTH_TOKEN, STATS_TOKEN: TOKEN });
+    refused('any request while HEALTH_TOKEN is unset', { token: '' }, {});
+    refused('...even one whose token is "null"', { token: 'null' }, {});
+}
+
+// --- With it: the form's own path, to the Health tab --------------------------
+{
+    const w = world({ HEALTH_TOKEN });
+    const out = postHealth(w, testMessage);
+    const body = JSON.parse(out.getContent());
+    const tab = w.tab('Health') || [];
+    assert(body.status === 'success' && body.version === health.declaredVersion(SOURCE), `Health: the test message is accepted (${body.status}: ${body.message})`);
+    assert(tab.length === 2 && JSON.stringify(tab[0]) === JSON.stringify(w.ctx.HEADERS) && tab[1][1] === testMessage.name && tab[1][4] === testMessage.message,
+        `Health: it lands on a Health tab, under the form's own header row (${tab.length} rows)`);
+    assert(w.rows.length === 0, 'Health: the Responses tab, where real messages go, is untouched');
+    assert(w.mail.length === 0, 'Health: nobody is emailed');
+    assert(w.tab('Daily') === null, 'Health: nothing is added to the public contact count');
+    assert(w.lock.taken === 1 && w.lock.released === 1 && w.lock.waits[0] >= 10000, 'Health: written under the form\'s lock, waiting as long as a message would');
+    assert(body.ownerEmail === true && body.turnstile === false, 'Health: the reply says OWNER_EMAIL is set and TURNSTILE_SECRET is not');
+
+    // The same limits as a message: a second test straight after is held back.
+    const again = JSON.parse(postHealth(w, testMessage).getContent());
+    assert(again.status === 'error' && /wait a moment/.test(again.message) && w.tab('Health').length === 2,
+        'Health: the per-submitter limit applies, as it would to a visitor');
+
+    // The same validation and escaping.
+    const v = world({ HEALTH_TOKEN });
+    const bad = JSON.parse(postHealth(v, { ...testMessage, email: 'not-an-address' }).getContent());
+    assert(bad.status === 'error' && /valid email/.test(bad.message) && v.tab('Health') === null, 'Health: an invalid message is refused by the same validation, and nothing is written');
+    postHealth(v, { ...testMessage, message: '=IMPORTXML("https://evil.example","//a")' });
+    assert(String((v.tab('Health') || [])[1][4]).startsWith("'="), 'Health: a formula is stored as text, as in the Responses tab');
+    const unreadable = JSON.parse(postHealth(world({ HEALTH_TOKEN }), '{"name":').getContent());
+    assert(unreadable.status === 'error' && !('ownerEmail' in unreadable), 'Health: a body that is not JSON is refused');
+
+    // The two settings that break the form for real visitors, which the test
+    // message itself would not notice.
+    const noOwner = JSON.parse(postHealth(world({ HEALTH_TOKEN, OWNER_EMAIL: '' }), testMessage).getContent());
+    assert(noOwner.status === 'success' && noOwner.ownerEmail === false, 'Health: the reply says so when OWNER_EMAIL is unset');
+    const t = world({ HEALTH_TOKEN, TURNSTILE_SECRET: 'x' });
+    const challenged = JSON.parse(postHealth(t, testMessage).getContent());
+    assert(challenged.status === 'success' && challenged.turnstile === true && t.tab('Health').length === 2,
+        'Health: with TURNSTILE_SECRET set the test is still recorded (the token stands in for the challenge), and the reply says the setting is on');
+    const visitor = JSON.parse(postJson(t, valid).getContent());
+    assert(visitor.status === 'error' && t.rows.length === 0, 'Health: ...while a real message without a challenge is still refused, as before');
+
+    const locked = world({ HEALTH_TOKEN });
+    locked.lock.refuse = true;
+    const busy = JSON.parse(postHealth(locked, testMessage).getContent());
+    assert(busy.status === 'error' && locked.tab('Health') === null, 'Health: when the lock cannot be had, the reply says the path failed, and nothing is written');
+
+    const ed = world({ HEALTH_TOKEN });
+    const fromEditor = ed.ctx.testHealth();
+    assert(fromEditor.status === 'success' && ed.tab('Health').length === 2 && ed.mail.length === 0 && ed.rows.length === 0,
+        "Health: the script's own testHealth() writes one row to the Health tab, and emails nobody");
+}
+
+// --- A health check that names no action is a contact message, as before ----
+{
+    const w = world({ HEALTH_TOKEN });
+    postHealth(w, valid, { token: HEALTH_TOKEN });
+    assert(w.rows.length === 2 && w.mail.length === 1 && w.tab('Health') === null,
+        'Routing: only ?action=health takes the health path; the token alone changes nothing');
 }
 
 if (failures > 0) {

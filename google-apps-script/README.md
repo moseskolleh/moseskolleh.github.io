@@ -39,9 +39,13 @@ Properties** before the first submission (see `DEPLOYMENT_GUIDE.md` step 2b):
 | `OWNER_EMAIL` | yes | Where notifications go |
 | `SHEET_NAME` | no | Tab name, default `Responses` |
 | `TURNSTILE_SECRET` | no | Enables per-visitor challenge verification |
+| `STATS_TOKEN` | for the counts | Lets the weekly build read the daily visit totals |
+| `HEALTH_TOKEN` | for the health check | Lets the weekly health check send one test message to a `Health` tab, emailing nobody |
 
-Run `testConfiguration()` from the editor to check them, and
-`testFormulaEscaping()` to confirm the injection defences are intact.
+Run `testConfiguration()` from the editor to check them,
+`testFormulaEscaping()` to confirm the injection defences are intact, and
+`testHealth()` to send one test message down the form's own path, as the
+weekly health check does.
 
 ## 📈 The visit counter
 

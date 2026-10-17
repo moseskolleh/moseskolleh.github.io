@@ -154,7 +154,7 @@ function checkCard(at, cs) {
         if (!cs[field]) problems.push(`${at}: missing ${field} (the homepage card prints it)`);
     });
     if (!Array.isArray(cs.tags) || !cs.tags.length || !cs.tags.every(t => typeof t === 'string' && t.trim())) {
-        problems.push(`${at}: tags must be a list of tools and topics (the homepage card shows them, the Assay reads them)`);
+        problems.push(`${at}: tags must be a list of tools and topics (the homepage card shows them, The Brief reads them)`);
     }
 
     // The first result is the headline. Its brief stands in for the basis
@@ -265,15 +265,15 @@ function checkGallery(at, cs) {
     return problems;
 }
 
-// A language level the Assay can compare with what a job ad asks for.
+// A language level The Brief can compare with what a job ad asks for.
 // "Good" or "fluent" means different things to different readers; a CEFR
 // level (or "native") means the same thing to all of them.
 const LANGUAGE_LEVEL = /^(?:[ABC][12]|native)$/;
 
 /**
- * profile.languages is optional: absent or null, the Assay treats every
+ * profile.languages is optional: absent or null, The Brief treats every
  * non-English language an ad asks for as a gap. Present, each entry must
- * say which language and at what level, or it would be a claim the Assay
+ * say which language and at what level, or it would be a claim the Brief
  * cannot weigh.
  */
 function checkLanguages(languages) {
@@ -878,6 +878,130 @@ function checkQuotedFigures({ testimonials, certifications }, claims) {
 }
 
 // ------------------------------------------------------------------
+// content/notes/*.md — the Field Notes, one article each
+//
+// A note is published as notes/<slug>.html, in the feed and in the
+// sitemap, and the newest three are linked from the homepage. What it
+// must say before any of that (scripts/lib/notes.js reads the file):
+//
+//   number     its place in the series ("Note 01"), a whole number, never
+//              reused, and no lower than an earlier-dated note's
+//   title      plain text: it is the page's <h1> and the feed's title
+//   slug       its file's name and its address, and "note-" and the slug
+//              is the name the visit counter sends for it, so the slug
+//              keeps to the counter's page-name rule (NOTE_PAGE)
+//   date       the day it was first published on this site, a real day
+//              and not one still to come
+//   tag        the topic the homepage shows ("Water", "Scenarios")
+//   summary    one line, plain text: the homepage's line under the title,
+//              the page's description and the feed's summary
+//   caseStudy  or lens, one of the two: the case study or role view it is
+//              tied to, which has to exist, and which the note links
+//
+// A figure in a note is held to the claims ledger like any other: one the
+// ledger does not hold as written is refused here, by name.
+// ------------------------------------------------------------------
+const NOTES_DIR = path.join(CONTENT_DIR, 'notes');
+const NOTE_KEYS = ['number', 'title', 'slug', 'date', 'tag', 'summary', 'caseStudy', 'lens'];
+const NOTE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// The counter's page-name rule: count.js sends a page only under a name
+// that passes it, and Code.gs (BEACON_NAME) accepts nothing else.
+// tests/count.test.js holds the three to one rule.
+const NOTE_PAGE = /^[a-z0-9-]{1,40}$/;
+const notePage = (slug) => `note-${slug}`;
+const NOTE_LIMITS = { title: 90, tag: 24, summary: 160 };
+// Markdown in a field that is printed as plain text would show as its source.
+const NOTE_PLAIN = /[*_`[\]<>\\]/;
+
+/** Every note file, read and parsed, in file-name order. Problems are kept with each, for checkNotes. */
+function loadNotes(dir = NOTES_DIR) {
+    const notesLib = require('./notes.js');
+    if (!fs.existsSync(dir)) return [];
+    return fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort().map((file) => {
+        const split = notesLib.splitNote(fs.readFileSync(path.join(dir, file), 'utf8'));
+        const md = notesLib.parseMarkdown(split.body, split.bodyLine);
+        const m = split.meta;
+        return {
+            file,
+            number: /^[1-9]\d*$/.test(m.number || '') ? Number(m.number) : m.number,
+            title: m.title,
+            slug: m.slug,
+            date: m.date,
+            tag: m.tag,
+            summary: m.summary,
+            caseStudy: m.caseStudy,
+            lens: m.lens,
+            keys: Object.keys(m),
+            blocks: md.blocks,
+            text: notesLib.plainText(md.blocks),
+            links: notesLib.linksIn(md.blocks),
+            problems: split.problems.concat(md.problems)
+        };
+    });
+}
+
+/** The notes newest first: by date, then by number. */
+const notesNewestFirst = (notes) => notes.slice().sort((a, b) => (a.date === b.date ? b.number - a.number : a.date < b.date ? 1 : -1));
+
+function checkNotes(notes, { projects, lenses, claims }) {
+    const problems = [];
+    const seen = { slug: new Map(), number: new Map(), title: new Map() };
+    // A calendar day, as for confirmedOn: the latest day anywhere on Earth is UTC+14.
+    const latest = new Date(Date.now() + 14 * 3600e3).toISOString().slice(0, 10);
+    notes.forEach((n) => {
+        const at = `content/notes/${n.file}`;
+        n.problems.forEach(p => problems.push(`${at}: ${p}`));
+        n.keys.filter(k => !NOTE_KEYS.includes(k)).forEach(k => problems.push(`${at}: unknown front-matter key "${k}" (${NOTE_KEYS.join(', ')})`));
+
+        if (!Number.isInteger(n.number)) problems.push(`${at}: number must be a whole number from 1, its place in the series (got ${JSON.stringify(n.number)})`);
+        ['title', 'tag', 'summary'].forEach((k) => {
+            const v = n[k];
+            if (typeof v !== 'string' || !v.trim() || PLACEHOLDER.test(v)) problems.push(`${at}: no ${k}`);
+            else if (v.length > NOTE_LIMITS[k]) problems.push(`${at}: the ${k} is ${v.length} characters; at most ${NOTE_LIMITS[k]}`);
+            else if (NOTE_PLAIN.test(v)) problems.push(`${at}: the ${k} is printed as plain text, so it holds no markdown or HTML`);
+        });
+
+        if (typeof n.slug !== 'string' || !NOTE_SLUG.test(n.slug) || !NOTE_PAGE.test(notePage(n.slug))) {
+            problems.push(`${at}: the slug must be lower-case words joined by hyphens, at most ${40 - notePage('').length} characters, so the visit counter can name the page "${notePage('…')}" (got ${JSON.stringify(n.slug)})`);
+        } else if (n.file !== `${n.slug}.md`) {
+            problems.push(`${at}: the file is named for its slug, ${n.slug}.md`);
+        }
+
+        if (!realDay(String(n.date))) problems.push(`${at}: date must be a day, as YYYY-MM-DD (got ${JSON.stringify(n.date)})`);
+        else if (n.date > latest) problems.push(`${at}: date ${n.date} is still to come; a note is dated the day it was first published on this site`);
+
+        const ties = ['caseStudy', 'lens'].filter(k => n[k] !== undefined);
+        if (ties.length !== 1) problems.push(`${at}: ties to one case study or one lens (caseStudy or lens, not ${ties.length ? 'both' : 'neither'})`);
+        else if (n.caseStudy !== undefined && !projects.caseStudies.some(cs => cs.id === n.caseStudy)) problems.push(`${at}: there is no case study "${n.caseStudy}"`);
+        else if (n.lens !== undefined && !lenses.lenses.some(l => l.id === n.lens)) problems.push(`${at}: there is no lens "${n.lens}"`);
+
+        if (!n.blocks.length) problems.push(`${at}: the note is empty`);
+        n.links.forEach((l) => {
+            const bad = urlProblem(l.href);
+            if (bad) problems.push(`${at}: the link "${l.text}" ${bad}`);
+        });
+
+        if (claims) {
+            [['title', n.title], ['summary', n.summary], ['tag', n.tag], ['note', n.text]].forEach(([where, text]) => {
+                if (typeof text === 'string') figures.unheld(text, claims).forEach((f) => problems.push(`${at}: "${f}" in its ${where} is a figure the claims ledger does not hold as written; add it to content/claims.json (an entry, or a form of one)`));
+            });
+        }
+
+        Object.keys(seen).forEach((k) => {
+            if (n[k] === undefined) return;
+            if (seen[k].has(n[k])) problems.push(`${at}: the same ${k} as ${seen[k].get(n[k])}`);
+            seen[k].set(n[k], n.file);
+        });
+    });
+    // The numbers go up with the dates: a later note is never numbered below an earlier one.
+    const dated = notes.filter(n => Number.isInteger(n.number) && realDay(String(n.date))).sort((a, b) => a.number - b.number);
+    dated.slice(1).forEach((n, i) => {
+        if (n.date < dated[i].date) problems.push(`content/notes/${n.file}: note ${n.number} is dated before note ${dated[i].number}`);
+    });
+    return problems;
+}
+
+// ------------------------------------------------------------------
 // content/claims.json — the claims ledger
 //
 // Every number the site prints, with its basis. The page side (each
@@ -1118,6 +1242,169 @@ function checkLensWork(lensList, projects, research) {
         .map(l => `lens "${l.id}": no public work beyond this site's own pages belongs to it — a lens needs an artifact or research output a reader can open elsewhere`);
 }
 
+// ------------------------------------------------------------------
+// content/brief.json — The Brief's rubric and evidence
+//
+// The Assay kept these as code in modules/interactives.js, where nothing
+// held them to the case studies. Here they are held:
+//
+//   · every evidence line links to a case study, a public artifact, a
+//     research output or a place on the homepage that exists, named by
+//     the page it is on (the Brief is a page of its own: "#experience"
+//     would point into itself);
+//   · a strength's caseStudies (what the dossier selects when it
+//     matches) exist, and include every case study its evidence links to;
+//   · every figure an evidence line, a gap or a label prints is one the
+//     claims ledger holds as written, and every gap sends the reader to
+//     Moses;
+//   · every id is kebab-case and unique across the file (a shared link
+//     carries them, and a bare one could otherwise mean two things), and
+//     every pattern compiles.
+// ------------------------------------------------------------------
+const BRIEF_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const BRIEF_GRADES = ['high', 'workable', 'marginal', 'field'];
+const briefSlug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+/** Where an evidence link goes: the case studies it shows, or null when it goes nowhere this site has. */
+function briefTarget(href, { projects, research, homeIds }) {
+    const cases = projects.caseStudies;
+    const holders = cases.filter(cs => (cs.artifacts || []).some(a => a.status === 'public' && a.url === href)).map(cs => cs.id);
+    if (holders.length) return holders;
+    let m = String(href).match(/^index\.html#([\w-]+)$/);
+    if (m) return homeIds.has(m[1]) ? [] : null;
+    m = String(href).match(/^case-studies\.html#([\w-]+)$/);
+    if (m) return cases.some(cs => cs.id === m[1]) ? [m[1]] : null;
+    m = String(href).match(/^research\.html(?:#([\w-]+))?$/);
+    if (m) return !m[1] || research.outputs.some(o => o.id === m[1]) ? [] : null;
+    const output = research.outputs.find(o => o.status === 'public' && o.url === href);
+    return output ? [] : null;
+}
+
+function checkBrief(brief, { projects, research, claims, indexHtml }) {
+    const at = 'content/brief.json';
+    if (!brief || typeof brief !== 'object' || Array.isArray(brief)) return [`${at}: is not an object`];
+    const problems = [];
+    const say = (m) => problems.push(`${at}: ${m}`);
+    const list = (v) => Array.isArray(v) && v.length > 0 && v.every(x => typeof x === 'string' && x.trim());
+    const pattern = (where, re, flags) => {
+        try { new RegExp(re, flags || ''); } catch (err) { say(`${where}: the pattern does not compile (${err.message})`); }
+    };
+    // A figure the page prints is one the ledger holds, as it writes it.
+    const held = (where, text) => figures.unheld(text, claims).forEach((n) => {
+        say(`${where}: "${n}" is a figure the claims ledger does not hold as written; give it an entry in content/claims.json, or reword the line`);
+    });
+    const homeIds = new Set((String(indexHtml || '').match(/\sid="([^"]+)"/g) || []).map(m => m.slice(5, -1)));
+    const caseIds = projects.caseStudies.map(cs => cs.id);
+
+    if (!(Number.isInteger(brief.minWords) && brief.minWords > 0)) say('minWords must be a whole number of words');
+    const grades = brief.grades || {};
+    if (JSON.stringify(Object.keys(grades)) !== JSON.stringify(BRIEF_GRADES) || !BRIEF_GRADES.every(k => typeof grades[k] === 'string' && grades[k].trim())) {
+        say(`grades must name each of ${BRIEF_GRADES.join(', ')}, in that order`);
+    }
+    [['high', ['areas', 'domain', 'coverage']], ['workable', ['areas', 'domain', 'coverage', 'hardGaps']]].forEach(([key, fields]) => {
+        if (!brief[key] || !fields.every(f => typeof brief[key][f] === 'number')) say(`${key} needs ${fields.join(', ')} as numbers`);
+    });
+    ['requirementCues', 'softCues', 'languageCues', 'applyIn', 'nationalStems', 'notCountedAsYears']
+        .forEach((key) => { if (!list(brief[key])) say(`${key} must be a list of phrases`); });
+    ['softHeading', 'hardHeading'].forEach(key => pattern(key, brief[key]));
+
+    // Ids, across the file: the strengths, the tools and languages (by
+    // name), the gap rules, the facts to confirm and the grades. "years"
+    // is the years rule's.
+    const ids = new Map([['years', 'the years rule']]);
+    const claimId = (id, what) => {
+        if (!BRIEF_ID.test(id || '')) say(`${what}: id "${id}" must be kebab-case`);
+        else if (ids.has(id)) say(`${what}: id "${id}" is ${ids.get(id)}'s too`);
+        else ids.set(id, what);
+    };
+    BRIEF_GRADES.forEach(id => claimId(id, `grade ${id}`));
+
+    if (!Array.isArray(brief.strengths) || !brief.strengths.length) say('strengths must be a list');
+    (Array.isArray(brief.strengths) ? brief.strengths : []).forEach((s, i) => {
+        const what = `strength ${s && s.id ? `"${s.id}"` : i + 1}`;
+        claimId(s.id, what);
+        if (typeof s.label !== 'string' || !s.label.trim()) say(`${what}: no label`);
+        else held(`${what}'s label`, s.label);
+        if (!list(s.syn)) say(`${what}: syn must be a list of phrases`);
+        if (s.general !== undefined && s.general !== true) say(`${what}: general is true or left out`);
+        if (!Array.isArray(s.ev) || !s.ev.length) { say(`${what}: no evidence`); return; }
+        const linked = new Set();
+        s.ev.forEach((e, j) => {
+            const line = `${what}, evidence ${j + 1}`;
+            if (!e || typeof e.t !== 'string' || !e.t.trim()) return say(`${line}: no text`);
+            held(line, e.t);
+            const goes = typeof e.href === 'string' ? briefTarget(e.href, { projects, research, homeIds }) : null;
+            if (!goes) return say(`${line}: "${e.href}" is not a case study, a public artifact, a research output or a place on the homepage (write it as index.html#id)`);
+            goes.forEach(id => linked.add(id));
+        });
+        if (!Array.isArray(s.caseStudies)) return say(`${what}: caseStudies must be a list of case-study ids (empty selects none)`);
+        s.caseStudies.filter(id => !caseIds.includes(id)).forEach(id => say(`${what}: caseStudies names "${id}", which is not a case study`));
+        if (new Set(s.caseStudies).size !== s.caseStudies.length) say(`${what}: caseStudies names one twice`);
+        Array.from(linked).filter(id => !s.caseStudies.includes(id))
+            .forEach(id => say(`${what}: its evidence links to "${id}", so caseStudies must include it`));
+    });
+
+    // Tools and languages: a bare name, or { name, syn, re, flags }.
+    [['tools', 'tool'], ['languages', 'language']].forEach(([key, noun]) => {
+        if (!Array.isArray(brief[key]) || !brief[key].length) return say(`${key} must be a list`);
+        brief[key].forEach((x, i) => {
+            const name = typeof x === 'string' ? x : x && x.name;
+            const what = `${noun} ${name ? `"${name}"` : i + 1}`;
+            if (typeof name !== 'string' || !name.trim()) return say(`${what}: no name`);
+            claimId(briefSlug(name), what);
+            if (typeof x === 'object') {
+                if (x.syn !== undefined && !list(x.syn)) say(`${what}: syn must be a list of phrases`);
+                if (x.re !== undefined) pattern(what, x.re, x.flags);
+                if (x.syn === undefined && x.re === undefined) say(`${what}: give it syn or re`);
+                if (x.confirm !== undefined && (typeof x.confirm !== 'string' || !x.confirm.trim())) say(`${what}: confirm is a label`);
+            }
+        });
+    });
+
+    if (!Array.isArray(brief.levels) || !brief.levels.length) say('levels must be a list');
+    else {
+        const levelIds = new Set();
+        brief.levels.forEach((l, i) => {
+            const what = `level ${l && l.id ? `"${l.id}"` : i + 1}`;
+            if (!/^[a-z0-9]{1,8}$/.test(l.id || '') || levelIds.has(l.id)) say(`${what}: id must be short, lower case and unique`);
+            levelIds.add(l.id);
+            if (!Number.isInteger(l.level) || typeof l.label !== 'string') say(`${what}: needs a level number and a label`);
+            pattern(what, l.re, l.flags);
+            if (i && l.level >= brief.levels[i - 1].level) say(`${what}: levels go highest first`);
+        });
+        if (!brief.levels.some(l => l.level === brief.defaultLevel)) say('defaultLevel must be one of the levels');
+    }
+
+    const y = brief.years || {};
+    pattern('years', y.re, 'gi');
+    ['cue', 'not', 'we', 'you'].forEach((key) => { if (!list(y[key])) say(`years.${key} must be a list of phrases`); });
+    if (!y.words || !Object.values(y.words).every(n => Number.isInteger(n) && n > 0)) say('years.words must map words to whole numbers');
+
+    (Array.isArray(brief.gaps) ? brief.gaps : []).forEach((g, i) => {
+        const what = `gap ${g && g.id ? `"${g.id}"` : i + 1}`;
+        claimId(g.id, what);
+        if (typeof g.label !== 'string' || typeof g.text !== 'string') return say(`${what}: needs a label and a text`);
+        held(`${what}'s label`, g.label);
+        held(what, g.text);
+        if (!/(?:ask|confirm with) Moses/i.test(g.text)) say(`${what}: a gap sends the reader to Moses ("Ask Moses.")`);
+        if (g.re !== undefined) pattern(what, g.re, g.flags);
+        if (g.re === undefined && !list(g.syn)) say(`${what}: give it syn or re`);
+        ['cue', 'not'].forEach((key) => { if (g[key] !== undefined && !list(g[key])) say(`${what}: ${key} must be a list of phrases`); });
+    });
+    (Array.isArray(brief.confirm) ? brief.confirm : []).forEach((c, i) => {
+        const what = `confirm ${c && c.id ? `"${c.id}"` : i + 1}`;
+        claimId(c.id, what);
+        if (typeof c.label !== 'string' || !c.label.trim() || !list(c.syn)) say(`${what}: needs a label and syn`);
+    });
+    if (!Array.isArray(brief.samples) || !brief.samples.length) say('samples must be a list');
+    else brief.samples.forEach((s, i) => {
+        const what = `sample ${s && s.id ? `"${s.id}"` : i + 1}`;
+        if (!BRIEF_ID.test(s.id || '') || typeof s.label !== 'string' || typeof s.text !== 'string') return say(`${what}: needs an id, a label and a text`);
+        if ((s.text.match(/[A-Za-z0-9À-ÿ][\w'’&+-]*/g) || []).length < brief.minWords) say(`${what}: shorter than minWords, so it would not be graded`);
+    });
+    return problems;
+}
+
 /**
  * Reads everything and returns it validated, or throws with every problem
  * listed at once — one run of the build should tell you all of them.
@@ -1131,6 +1418,8 @@ function loadAll() {
     const stats = load('stats');
     const testimonials = load('testimonials');
     const claims = load('claims');
+    const notes = loadNotes();
+    const brief = load('brief');
 
     const problems = checkStats(stats);
     problems.push(...checkClaims(claims, { profile, projects, factors: loadFactors() }));
@@ -1276,11 +1565,16 @@ function loadAll() {
     problems.push(...checkTestimonials(testimonials));
     problems.push(...checkQuotedFigures({ testimonials, certifications: profile.certifications }, claims.claims));
 
+    // --- the field notes -----------------------------------------------
+    problems.push(...checkNotes(notes, { projects, lenses, claims: claims.claims }));
+    // --- The Brief: its rubric held to the case studies and the ledger ---
+    problems.push(...checkBrief(brief, { projects, research, claims: claims.claims, indexHtml: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8') }));
+
     if (problems.length) {
         throw new Error(`content failed validation:\n  - ${problems.join('\n  - ')}`);
     }
 
-    return { profile, projects, research, lenses, narration, stats, testimonials, claims, lensIds };
+    return { profile, projects, research, lenses, narration, stats, testimonials, claims, notes: notesNewestFirst(notes), brief, lensIds };
 }
 
 /**
@@ -1332,6 +1626,14 @@ module.exports = {
     TESTIMONIAL_LIMITS,
     checkTestimonials,
     checkQuotedFigures,
+    NOTES_DIR,
+    NOTE_PAGE,
+    notePage,
+    loadNotes,
+    notesNewestFirst,
+    checkNotes,
+    checkBrief,
+    briefTarget,
     CHECKABLE,
     BASIS_KINDS,
     checkClaims,

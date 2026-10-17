@@ -13,25 +13,35 @@ check it. A path such as `content/profile.json` → `experience[4].teamSize`
 means that file, then that field (lists count from 0). After editing anything
 in `content/`, run `npm run build:content` and then `npm test`.
 
-Last updated with wave 4 of the plan (Phase 3, closing the proof gaps),
-2026-10-03. Wave 1 covered Phase 0 and the narration steps of Phases 2.5 and
-4.3; wave 2 covered Phase 1 (the visit counter and open counts) and Phase 6
-steps 3, 6 and 7; wave 3 covered Phase 2 (the recruiter-first homepage) and
-Phase 6 step 8. Waves 1 to 3 are on `main` (pull requests #48, #49 and #50,
-the last merged 2026-10-03). Wave 4 is in pull request #51 and
-not on `main` yet. Its items are in four groups headed "wave 4" below: the
-ESG case and the findings (G), your public repositories (R), the claims
-ledger (N), and the CV, the ministry's name, the certificates and the
-testimonials (D1–D3 and L1). It also adds to F5 (the "Present" role) and E1
-(the 30%).
+Last updated with wave 5 of the plan, 2026-10-17. Waves 1 to 4 are on
+`main` (pull requests #48 to #51, the last merged 2026-10-04): Phase 0, the
+narration steps of 2.5 and 4.3, Phase 1, Phase 2, Phase 3, and Phase 6
+steps 3, 6, 7 and 8. Wave 5 (The Brief, the notes as articles with a feed
+and preview cards, structured data, and the weekly health and quarterly
+review issues) is in its own pull request until it is merged. Its items are
+the group headed "wave 5" below (H1, H2, B1, B2, L5); it also changes C2's
+check, S4 and L2.
 
-**Now that waves 2 and 3 are on `main`** (and on the live site: GitHub Pages
-rebuilt from `main` on 2026-10-03), run the one-line check at the top of S1, and if you can,
-do C2 (publish the current `Code.gs`, which includes the visit counter). The
-site's visit counter, on every page since #49 was merged, posts to the same
-deployment as the contact form, and the 2025 versions of
-the script would record every page view as a message and email it to you; if
-the check says the live script might be one of those, do C2 at once.
+**Start here.** Of the items below, these unlock the most, and take under
+an hour together. Everything else can wait for them.
+
+1. **C1, C2, C3** — prove the contact form works on the live site. Nobody
+   has yet, and every page's visit counter posts to the same deployment.
+   The 2025 versions of the script would record each page view as a
+   message and email it to you; if the one-line check at the top of S1
+   says the live script might be one of those, do C2 at once.
+2. **S1, S2** — switch on the visit counts. Until then the open-counts job
+   runs each Monday and finds nothing, the four-week baseline every later
+   change is judged by (S6) cannot start, and the sustainability statement
+   (Phase 4.2) has no data.
+3. **F1, F2, F3** — your languages and Dutch level, right to work, target
+   roles, seniority and available-from date. They are what a recruiter
+   asks first. Until they are stated, the at-a-glance strip and The Brief's
+   dossier leave them out, and The Brief lists every non-English language
+   an ad asks for as a gap.
+
+Once a week the "Site health" issue on GitHub (from wave 5) lists which of
+these are still open, beside anything on the site that has broken.
 
 ---
 
@@ -98,8 +108,13 @@ https://script.google.com/macros/s/AKfycbzgyqRUmu0d2UFjb0WxbYyoDbO8F9jVnlvIQnNAf
     dated today; the editor's `handleSubmission` contains
     `var reply = function (status, message)` (the #42 fix), and the file has a
     `function handleCount` (the counter). From outside,
-    `curl -L "<the URL above>?action=stats"` now prints `{"v":1,"rows":[...]}`
-    instead of the health check.
+    `curl -L "<the URL above>?action=health"` prints the version the
+    deployment runs, `{"status":"ok","version":"…",…}`, and that version is
+    the `CODE_VERSION` at the top of the repository's `Code.gs`. (Before
+    wave 5 this said to try `?action=stats`, but without the token that
+    answers `{"status":"refused",…}` from any current script, published or
+    not.) The weekly Site health issue makes the same comparison and says
+    whether it matches.
   - *Unlocks:* the no-JavaScript form, which wave 1 made reachable, tells the
     visitor the truth.
 
@@ -252,21 +267,20 @@ README under "The visit counter and privacy".
   - *Check:* after S1, `curl -L "<the URL above>?action=stats"`, without a
     token, prints `{"status":"refused",...}` and no `rows`.
 
-- [ ] **S4. Decide whether the Assay's grade should be counted at all.**
-  - *What:* when the Assay grades a pasted job ad, that page view's count
-    carries the grade: `assay-high`, `assay-workable` or `assay-marginal`.
-    The ad itself never leaves the page, but the grade is derived from it.
-    The label beside the Assay's button says "in-browser · the ad is never
-    sent", and its result note "the ad is never sent"; both are true either
-    way. (The label used to say "nothing sent", which stopped being true
-    when the grade began to be counted; wave 2's review corrected it.)
+- [ ] **S4. Decide whether The Brief's grade should be counted at all.**
+  - *What:* when The Brief (`brief.html`, the Assay's successor since wave
+    5) grades a pasted job ad, that page view's count carries the grade:
+    `brief-high`, `brief-workable` or `brief-marginal`, as the Assay's did
+    (`assay-…`), beside `brief-run` (the fifth of the five numbers). The ad
+    itself never leaves the page, but the grade is derived from it. The
+    page says "the ad is never sent", which is true either way.
     `stats.html` names the grade among the features a page view can carry.
   - *Where:* if it should not be counted, say so: it is one line in
-    `modules/interactives.js` (the `window.mks.track('assay-' + a.cls)`
-    call), and `tests/count.test.js` and `tests/stats.test.js` would change
-    with it.
-  - *Check:* once removed, `modules/interactives.js` no longer calls
-    `mks.track` with an `assay-` name, and `npm test` passes.
+    `brief.js` (the `mks.track('brief-' + …)` call for the grade), and
+    `tests/count.test.js`, `tests/stats.test.js` and `scripts/fetch-stats.js`
+    (which reads the grade names from `brief.js`) would change with it.
+  - *Check:* once removed, `brief.js` tracks no grade name, and `npm test`
+    passes.
 
 - [ ] **S5. Confirm the wording of `stats.html`.**
   - *What:* it speaks in the first person: "Every change I plan for this
@@ -988,10 +1002,89 @@ keep, and some figures could move to "public" with a link only you have.
 
 ---
 
+## The Brief, the notes and the health checks (Phase 4.1, 5 and 6.9, wave 5)
+
+Wave 5 moved the Assay to a page of its own, The Brief (`brief.html`),
+made the Field Notes dated articles with a feed and a preview card each,
+and added a weekly "Site health" issue. These are the choices it made for
+you, and one switch for the health check.
+
+- [ ] **H1. Give the health check its token: `HEALTH_TOKEN`, then the
+  repository secret `HEALTH_URL`** (after C2).
+  - *What:* once a week, `.github/workflows/health.yml` can send one test
+    message down the contact form's own path (the same checks and limits a
+    visitor's message meets), into a `Health` tab of the same spreadsheet,
+    emailing nobody and counting nothing. Without it, nothing shows each
+    week that the live form still records a message.
+  - *Where:* in the Apps Script project's Script Properties, add
+    `HEALTH_TOKEN`: a long random string, not the same as `STATS_TOKEN`.
+    Publish the current `Code.gs` (C2). Then in the repository, **Settings
+    → Secrets and variables → Actions → New repository secret**: name
+    `HEALTH_URL`, value `<the web app URL>?action=health&token=<HEALTH_TOKEN>`.
+    In the editor, the function `testHealth` does the same without the
+    token, as a first try.
+  - *Check:* **Actions → Site health → Run workflow**. The issue's line
+    "The contact form, end to end" passes, and a row appears in the
+    `Health` tab.
+
+- [ ] **H2. An X profile, if you want one listed** (Phase 5.4). The plan
+  named "the missing X profile in `sameAs`", but `content/profile.json` →
+  `links` has none, so the structured data lists GitHub and LinkedIn only.
+  If you use one and want it there, add its address as `links.x` and say
+  so; `personLd` in `scripts/build-content.js` takes one line to list it.
+  If not, tick this as "none".
+
+- [ ] **B1. Which case studies The Brief shows for each strength.**
+  - *What:* when a job ad matches a strength, the dossier shows the case
+    studies that strength picks. Wave 5 chose them: ESG analysis,
+    reporting, GHG and sustainable AI pick GAIA and the sustainable-AI
+    case; climate risk picks the UN disaster-risk case and Wuppertal;
+    water picks the groundwater and soft-path cases; GIS picks groundwater
+    and Wuppertal; water quality picks the coastal case; stakeholders picks
+    Wuppertal and sustainable AI; data, delivery, international work and
+    research pick none of their own.
+  - *Where:* `content/brief.json` → `strengths[n].caseStudies`. The
+    validator refuses an id that is not a case study, or a list that leaves
+    out a case study the strength's evidence links to.
+  - *Check:* paste an ad of the kind you are going for into `brief.html`;
+    the dossier shows the cases you would show.
+
+- [ ] **B2. Your phone number in The Brief's dossier?** The homepage's
+  contact card publishes it, and so does the CV; the dossier, the page a
+  recruiter forwards, gives the email, the CV and the contact form only.
+  Say if it should carry the phone too.
+
+- [ ] **L5. The notes as articles: their dates, their summaries and one
+  changed line.**
+  - *Dates:* all three are dated 6 July 2026, the day they first went on
+    the site (`916a7c7`, pull request #20), and each says "First published
+    on this site". If you wrote them earlier and want that date, say so.
+  - *Summaries:* each note's one line on the homepage and in the feed is a
+    sentence lifted from the note itself, since none had been written. Say
+    if you want your own.
+  - *One line:* note 3 pointed at the homepage chart as "further down"; on
+    a page of its own it says "on the homepage", linked.
+  - *The ministry:* note 3 names "the Dutch Ministry of Finance", as the
+    homepage's note always has, while the CV leaves it unnamed (D2). It now
+    has a permalink and an entry in the feed. If D2's answer is no, the
+    note's sentence changes with it.
+  - *Where:* `content/notes/*.md`, then `npm run build:content`,
+    `npm run og` and `npm test`.
+
+---
+
 ## Later phases
 
 - [ ] **L2. One Field Note a month** (Phase 5.2), starting with the six topics
-  in the plan.
+  in the plan. Since wave 5 a note is a markdown file in `content/notes/`
+  (copy one of the three there; the README's "Field Notes and the feed"
+  says what each front-matter line means), then `npm run build:content`,
+  `npm run og` (its preview card) and `npm test`. The notes share one
+  byte and length budget sized for today's notes of about a hundred
+  words: a longer note needs those ceilings in `scripts/check-budget.js`
+  raised on purpose, with something of the same weight taken out
+  elsewhere. Once notes are dated, a long gap between them shows; a
+  rhythm you can keep (one a quarter, say) beats one you cannot.
 - [ ] **L3. A custom domain, and a decision on `moseskolleh.github.io`**
   (Phase 5.5). Buy the domain; decide whether the untouched academicpages
   template at `moseskolleh.github.io` is unpublished or becomes a redirect.

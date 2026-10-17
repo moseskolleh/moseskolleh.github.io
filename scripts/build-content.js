@@ -19,21 +19,30 @@
 //   stats.html          what the visit counter has counted, suppressed
 //                       below 5, and exactly what it sends (content/stats.json,
 //                       which scripts/fetch-stats.js writes once a week)
+//   brief.html          The Brief: paste a job ad, get an honest fit and
+//                       a one-page dossier, graded in the browser by
+//                       brief.js over content/brief.json, the facts in
+//                       content/profile.json and where the homepage shows
+//                       each named tool; the dossier is the case studies,
+//                       selected and reordered, never reworded
 //   claims.html         'Check my numbers': every figure in
 //                       content/claims.json, its basis, whether a reader
 //                       can check it, and where the pages below mark it
-//   sitemap.xml         every page, with a lastmod that is not in the future
+//   notes/<slug>.html   a field note, one page each, from content/notes/
+//   feed.xml            every note, as an Atom feed
+//   sitemap.xml         every page and note, with a lastmod that is not in
+//                       the future
 //   voice-scripts.js    the narration module, from content/narration.json
-//   index.html          the JSON-LD block, the hero's at-a-glance strip
-//                       and the six project cards, each between its
-//                       markers; the certificates and the testimonials
+//   index.html          the JSON-LD block (the Person and the WebSite), the
+//                       hero's at-a-glance strip and the six project cards,
+//                       each between its markers; the links to the newest
+//                       field notes, the certificates and the testimonials
 //                       (none yet), between short ones; and in place, the
 //                       core log's depths and the date it was logged
-//   modules/interactives.js   the Assay's facts block only, between its
-//                       markers: what the fit-check may say about Moses
 //   carbon-ai.html, field-report.html, 404.html
 //                       the shared shell only (the nav, the closing call to
-//                       action, carbon-ai.html's footer), between its markers
+//                       action, carbon-ai.html's footer), between its
+//                       markers, and carbon-ai.html's JSON-LD (the coach)
 //
 // Every figure the generated pages print from content/ is marked with its
 // claims-ledger entry on the way (see `prose`, below).
@@ -51,6 +60,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 const content = require('./lib/content.js');
 const figures = require('./lib/claims.js');
 
@@ -170,17 +180,19 @@ const SHELL_HOOKS = {
 };
 
 // A page's own address, or a root-absolute one under `base` for 404.html,
-// which answers at whatever address was missing.
-const shellHref = (href, base) => (base ? base + href.replace(/^index\.html/, '') : href);
+// which answers at whatever address was missing; a page in a folder of its
+// own (a field note, in notes/) climbs to the site's root with `root`.
+const shellHref = (href, base, root = '') => (base ? base + href.replace(/^index\.html/, '') : root + href);
 
 // The five places, in this order on every page.
-function shellLinks(facts, base = '') {
+function shellLinks(facts, base = '', root = '') {
+    const at = href => shellHref(href, base, root);
     return [
-        { label: 'Home', href: shellHref('index.html', base), page: 'index.html' },
-        { label: 'Case studies', href: shellHref('case-studies.html', base), page: 'case-studies.html' },
-        { label: 'Research', href: shellHref('research.html', base), page: 'research.html' },
-        { label: 'CV', href: shellHref(facts.cv, base), download: true, hook: SHELL_HOOKS.nav.cv },
-        { label: 'Contact', href: shellHref('index.html#contact', base), hook: SHELL_HOOKS.nav.contact, contact: true }
+        { label: 'Home', href: at('index.html'), page: 'index.html' },
+        { label: 'Case studies', href: at('case-studies.html'), page: 'case-studies.html' },
+        { label: 'Research', href: at('research.html'), page: 'research.html' },
+        { label: 'CV', href: at(facts.cv), download: true, hook: SHELL_HOOKS.nav.cv },
+        { label: 'Contact', href: at('index.html#contact'), hook: SHELL_HOOKS.nav.contact, contact: true }
     ];
 }
 
@@ -199,14 +211,14 @@ const linkAttrs = (l, current, plain) => [
  * any `icons` the page asks for). The plain flavour is a line of links, for
  * the two pages that style themselves and run no script but the counter.
  */
-function shellNav(facts, { current = '', plain = false, base = '', icons = [] } = {}) {
-    const links = shellLinks(facts, base);
+function shellNav(facts, { current = '', plain = false, base = '', icons = [], root = '' } = {}) {
+    const links = shellLinks(facts, base, root);
     if (plain) {
         return `<nav aria-label="Main">${links.map(l => `<a ${linkAttrs(l, current, true)}>${l.label}</a>`).join(' · ')}</nav>`;
     }
     return `${sprite(['i-moon', 'i-sun'].concat(icons))}
 <nav class="ca-nav" aria-label="Main">
-    <a href="index.html" class="ca-nav-logo" aria-label="Back to portfolio home">
+    <a href="${root}index.html" class="ca-nav-logo" aria-label="Back to portfolio home">
         <svg viewBox="0 0 40 40" aria-hidden="true">
             <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.35"/>
             <circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
@@ -232,7 +244,7 @@ ${links.map(l => `        <li><a ${linkAttrs(l, current)}>${l.label}</a></li>`).
  * plain one is the three ways in a line: on the field report every byte
  * counts towards the size the homepage quotes.
  */
-function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta } = {}) {
+function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta, root = '' } = {}) {
     const mail = `<a href="mailto:${esc(facts.email)}" data-analytics="${hooks.email}">${esc(facts.email)}</a>`;
     if (plain) {
         return `<p>Email ${mail}, <a href="${esc(shellHref('index.html#contact', base))}" data-analytics="${hooks.contact}">send a message</a> or download <a href="${esc(shellHref(facts.cv, base))}" download data-analytics="${hooks.cv}">my CV</a>.</p>`;
@@ -241,8 +253,8 @@ function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta } =
     <h2 id="ctaTitle">Get in touch</h2>
     <p>Open to ${esc(facts.roles)}: write to me at ${mail}.</p>
     <p class="ca-cta-go">
-        <a class="ca-btn ca-btn-primary" href="index.html#contact" data-analytics="${hooks.contact}">Send a message</a>
-        <a class="ca-btn" href="${esc(facts.cv)}" download data-analytics="${hooks.cv}">Download CV</a>
+        <a class="ca-btn ca-btn-primary" href="${root}index.html#contact" data-analytics="${hooks.contact}">Send a message</a>
+        <a class="ca-btn" href="${esc(root + facts.cv)}" download data-analytics="${hooks.cv}">Download CV</a>
     </p>
 </section>
 <p class="ca-top"><a href="#top">Back to top</a></p>`;
@@ -253,10 +265,10 @@ function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta } =
  * visits, and every number it prints with its basis, the page it is on
  * marked as current.
  */
-function shellFoot({ current = '' } = {}) {
+function shellFoot({ current = '', root = '' } = {}) {
     const here = (page) => (page === current ? ' aria-current="page"' : '');
-    return `<p><a href="stats.html"${here('stats.html')}>Open counts</a>: what this site counts about its visits, and what it never collects.</p>
-<p><a href="claims.html"${here('claims.html')} data-analytics="claims-foot">Check my numbers</a>: every number on this site, with its basis.</p>`;
+    return `<p><a href="${root}stats.html"${here('stats.html')}>Open counts</a>: what this site counts about its visits, and what it never collects.</p>
+<p><a href="${root}claims.html"${here('claims.html')} data-analytics="claims-foot">Check my numbers</a>: every number on this site, with its basis.</p>`;
 }
 
 // Not deferred, and ahead of the stylesheets: theme.js sets the theme
@@ -267,14 +279,32 @@ const THEME_SCRIPT = '<script src="theme.js"></script>';
 /** Every line of a block indented; blank lines stay empty. */
 const indentBlock = (block, indent) => block.split('\n').map(l => (l ? indent + l : l)).join('\n');
 
-function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead, main, bodyEnd = '', icons = [], current = '', styles = [], profile }) {
+/**
+ * A generated page, whole. Most of them sit at the site's root; a field note
+ * sits in notes/, and `root` ("../") climbs back to it, so every stylesheet,
+ * script, font and link in the shell resolves from there. `pageName` is the
+ * name the visit counter sends for a page whose last path segment could be
+ * mistaken for a root page's (count.js reads data-page first). `head` takes
+ * what a page adds to <head> (a feed link, an article's structured data);
+ * `ogType` and `published` make the Open Graph tags an article's. `scripts`
+ * are the page's own, deferred, each taking the html.js mark off again if
+ * it fails to arrive.
+ */
+function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead, heroId = '', main, bodyEnd = '', icons = [], current = '',
+    styles = [], scripts = [], profile, root = '', pageName = '', head = '', ogType = 'website', published = '', contentCss = true }) {
     const facts = shellFacts(profile || content.load('profile'));
     // A page that runs a script says so before first paint (html.js), so its
     // stylesheet can offer the controls that script drives and hide them
-    // when it cannot run. A page with no script has nothing to announce.
-    const jsMark = /<script\b/.test(bodyEnd)
+    // when it cannot run; a script of its own that fails to arrive takes
+    // the mark off again. A page with no script has nothing to announce.
+    const jsMark = /<script\b/.test(bodyEnd) || scripts.length
         ? `\n    <script>document.documentElement.classList.add('js')</script>`
         : '';
+    const sheets = ['carbon-ai.css'].concat(styles, contentCss ? ['content.css'] : []);
+    // Its own preview card (npm run og, scripts/build-og.js), named as the
+    // counter names the page: a page the nav does not list (The Brief) is
+    // named by its own address.
+    const card = `${SITE}assets/og/${pageName || (current || canonical.slice(SITE.length)).replace(/\.html$/, '')}.png`;
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -286,45 +316,45 @@ function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead
     <meta name="description" content="${esc(description)}">
     <meta name="author" content="Moses Kolleh Sesay">
     <link rel="canonical" href="${esc(canonical)}">
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="${root}assets/favicon.svg">
     <meta name="theme-color" content="#0a0a0a">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="${ogType}">
     <meta property="og:title" content="${esc(title)}">
     <meta property="og:description" content="${esc(description)}">
     <meta property="og:url" content="${esc(canonical)}">
-    <meta property="og:image" content="${SITE}assets/img/og-image.jpg">
+    <meta property="og:image" content="${card}">
     <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:image:height" content="630">${published ? `
+    <meta property="article:published_time" content="${esc(published)}">` : ''}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${esc(title)}">
     <meta name="twitter:description" content="${esc(description)}">
-    <meta name="twitter:image" content="${SITE}assets/img/og-image.jpg">
+    <meta name="twitter:image" content="${card}">${head ? `\n${indentBlock(head, '    ')}` : ''}
     <!-- The three typefaces are self-hosted (assets/fonts/, built by scripts/build-fonts.js):
          no request leaves this origin, and the bytes are counted in the budget. -->
-    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/space-grotesk-latin.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/ibm-plex-mono-latin-400.woff2" crossorigin>
-    ${THEME_SCRIPT}
-    <link rel="stylesheet" href="carbon-ai.css">${styles.map(href => `
-    <link rel="stylesheet" href="${esc(href)}">`).join('')}
-    <link rel="stylesheet" href="content.css">
-    <script defer src="count.js"></script>
+    <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/space-grotesk-latin.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/inter-latin.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/ibm-plex-mono-latin-400.woff2" crossorigin>
+    ${root ? THEME_SCRIPT.replace('src="', `src="${root}`) : THEME_SCRIPT}${sheets.map(href => `
+    <link rel="stylesheet" href="${esc(root + href)}">`).join('')}
+    <script defer src="${root}count.js"${pageName ? ` data-page="${esc(pageName)}"` : ''}></script>${scripts.map(src => `
+    <script defer src="${esc(root + src)}" onerror="document.documentElement.classList.remove('js')"></script>`).join('')}
 </head>
 <body id="top">
     <a class="skip-link" href="#main">Skip to content</a>
-${indentBlock(shellNav(facts, { current, icons }), '    ')}
+${indentBlock(shellNav(facts, { current, icons, root }), '    ')}
     <main class="ca-shell" id="main">
-        <header class="ca-hero">
+        <header class="ca-hero"${heroId ? ` id="${heroId}"` : ''}>
             <div class="ca-hero-tag">${heroTag}</div>
             <h1>${heroTitle}</h1>
             <p>${heroLead}</p>
         </header>
 ${main}
 
-${indentBlock(shellCta(facts), '        ')}
+${indentBlock(shellCta(facts, { root }), '        ')}
     </main>
     <footer class="ca-foot">
-${indentBlock(shellFoot({ current }), '        ')}
+${indentBlock(shellFoot({ current, root }), '        ')}
     </footer>
 ${bodyEnd}
 </body>
@@ -1018,7 +1048,11 @@ const PAGE_NAMES = {
     'field-report': 'Field report (text only)',
     'stats': 'Open counts (this page)',
     'claims': 'Check my numbers',
-    '404': 'Page not found (404)'
+    'brief': 'The Brief',
+    '404': 'Page not found (404)',
+    // Every field note's page views together (scripts/fetch-stats.js
+    // groups them): one note's would mostly read "<5".
+    'notes': 'Field notes, every note together'
 };
 // The width of the browser window, which is not always the screen's: a
 // desktop window at half width is in the middle class. Where the classes
@@ -1069,8 +1103,8 @@ function fiveNumbers(stats, under) {
         {
             key: 'briefUses',
             name: 'Brief uses',
-            def: 'Page views in which The Brief was run: the planned successor to the Assay, which is to turn a pasted ' +
-                 'job ad into an honest fit and a one-page dossier tailored to it.' +
+            def: 'Page views in which <a href="brief.html">The Brief</a> graded a job ad: it turns a pasted ad into an ' +
+                 'honest fit and a one-page dossier tailored to it.' +
                  (stats.briefLive ? '' : ' It is not built yet, so there is nothing to count; the figure appears here once it is.')
         }
     ];
@@ -1352,8 +1386,8 @@ ${table('Kilobytes transferred per page view', cols('Per page view'), [
                 <dd>The page, the role lens in its address if there was one, and the id of the furthest section reached.</dd>
                 <dt><code>features</code></dt>
                 <dd>
-                    Up to ${rule('featuresMax')} names of things used on the page, such as a CV link or the carbon receipt, and, if the
-                    Assay graded a job ad, the grade it gave. Never the ad itself.
+                    Up to ${rule('featuresMax')} names of things used on the page, such as a CV link or the carbon receipt, and, if
+                    The Brief graded a job ad, the grade it gave. Never the ad itself.
                 </dd>
                 <dt><code>ref</code></dt>
                 <dd>The host name of the site you came from; empty if there was none, or if it was this site. An old homepage address for something that has since moved sends you on to its new page with that host name, so the visit is not counted as direct.</dd>
@@ -1450,9 +1484,13 @@ const CLAIM_PAGES = {
     'case-studies.html': 'Case studies',
     'research.html': 'Research',
     'carbon-ai.html': 'EcoPrompt Coach',
+    'brief.html': 'The Brief',
     'field-report.html': 'Field report',
     '404.html': 'Page not found'
 };
+// And every field note's page, by its number ("Field note 01").
+const claimPages = (notes) => Object.assign({}, CLAIM_PAGES,
+    Object.fromEntries(inSeries(notes).map(n => [notePath(n), `Field ${noteNumber(n).toLowerCase()}`])));
 
 const CHECK_GROUPS = [
     { key: 'public', title: 'Checkable from outside',
@@ -1585,7 +1623,8 @@ function renderClaims(data, pages) {
     // like any other: "From 10 KB: the text-only field report…".
     const ref = (c) => `<a href="#claim-${esc(c.id)}"><span data-claim="${esc(c.id)}">${esc(c.value)}</span> ${prose(c.unit)}</a>`;
 
-    const marked = Object.keys(CLAIM_PAGES).filter(p => pages[p]).map(p => [p, marksIn(pages[p])]);
+    const named = claimPages(data.notes);
+    const marked = Object.keys(named).filter(p => pages[p]).map(p => [p, marksIn(pages[p])]);
     const spokenText = [data.narration.intro ? data.narration.intro.text : ''].concat(data.narration.scripts.map(s => s.text)).join(' ').toLowerCase();
 
     // A source file named once, so a reader of the repository knows where to look.
@@ -1636,7 +1675,7 @@ function renderClaims(data, pages) {
         // The chip is the label; the place to check follows it, unpunctuated.
         const check = `<span class="cl-check cl-check-${checkable}">${esc(CHECK_GROUPS.find(g => g.key === checkable).title)}</span>${checkable === 'public' && href ? ` ${checkLink(href)}` : ''}`;
         const places = marked.filter(([, marks]) => marks.has(c.id))
-            .map(([page, marks]) => `<a href="${page}${marks.get(c.id).place}">${esc(CLAIM_PAGES[page])}${foldSaid(marks.get(c.id).fold)}</a>`);
+            .map(([page, marks]) => `<a href="${page}${marks.get(c.id).place}">${esc(named[page])}${foldSaid(marks.get(c.id).fold)}</a>`);
         if ((c.spoken || []).some(s => spokenText.includes(s.toLowerCase()))) places.push('the narration');
         return `
                 <li class="cl-item" id="claim-${esc(c.id)}">
@@ -1671,7 +1710,7 @@ function renderClaims(data, pages) {
                 on, whether it is written in digits or in words. The pages mark each one with its entry, and a
                 test fails the build if a page prints a number that is not here, or one that disagrees with its
                 entry, in its text, a label or a photo&rsquo;s caption. What the scripts print of their own is
-                read from their source and held to the same list: the field terminal, the Assay, the receipt,
+                read from their source and held to the same list: the field terminal, The Brief, the receipt,
                 the narration player, the coach&rsquo;s tips. So is what the narration says aloud. The open counts
                 page is held another way, below.
             </p>
@@ -1715,19 +1754,212 @@ ${groups}
 }
 
 // ------------------------------------------------------------------
+// The Field Notes: notes/<slug>.html, feed.xml, and the homepage's links
+//
+// They were three teasers of about a hundred words, folded into the
+// homepage's About and undated. Each is an article now, from
+// content/notes/<slug>.md (scripts/lib/notes.js reads it; checkNotes in
+// scripts/lib/content.js refuses one without a title, a real date, a slug
+// the counter can name or a tie to a case study or lens that exists): a
+// page of its own in notes/, dated the day it was first published on this
+// site, with its permalink, its tag, a link to the case study or role view
+// it belongs with, the older and newer note, an Article in its structured
+// data, and the shared shell. The homepage keeps a short link to each of
+// the newest three; the feed and the sitemap list every one.
+//
+// A note sits a folder down, so its page climbs to the site's root
+// ("../") for everything it loads and links (pageShell's `root`), and it
+// names itself to the visit counter as "note-" and its slug (data-page),
+// which no page at the root can be called.
+// ------------------------------------------------------------------
+const NOTES_ON_HOMEPAGE = 3;
+const NOTE_ROOT = '../';
+const FEED = 'feed.xml';
+const FEED_TITLE = 'Field notes — Moses Kolleh Sesay';
+// The feed's id and each entry's: a tag URI (RFC 4151). A feed reader takes
+// an entry whose id has changed for a new one, and the site's address is
+// due to change (a domain of its own, docs/plan.md, Phase 5.5), so the id
+// never carries it: the authority and the date are written here once, not
+// read from SITE, and are never to change. The links carry the address.
+const TAG_ID = 'tag:moseskolleh.github.io,2026:sustaintheworld';
+const noteId = (slug) => `${TAG_ID}/notes/${slug}`;
+const notePath = (note) => `notes/${note.slug}.html`;
+const noteNumber = (note) => `Note ${String(note.number).padStart(2, '0')}`;
+const noteDate = (note) => `<time datetime="${esc(note.date)}">${dayName(note.date)}</time>`;
+// The structured data's people and site, by name, so a page's blocks point at one another.
+const personId = (profile) => `${profile.links.site}#person`;
+const websiteId = (profile) => `${profile.links.site}#website`;
+
+/** A note's inline runs as HTML: figures marked from the ledger (or not, for the feed), local links from `root`. */
+function runsHtml(runs, { root = '', mark = true } = {}) {
+    const text = mark ? prose : esc;
+    return runs.map((r) => {
+        if (r.t === 'em') return `<em>${text(r.v)}</em>`;
+        if (r.t === 'strong') return `<strong>${text(r.v)}</strong>`;
+        if (r.t === 'a') return `<a href="${esc(/^[a-z][a-z0-9+.-]*:/i.test(r.href) ? r.href : root + r.href)}">${text(r.v)}</a>`;
+        return text(r.v);
+    }).join('');
+}
+
+/** A note's blocks as HTML, a block to a line. */
+const blocksHtml = (blocks, opts) => blocks.map(b => (b.items
+    ? `<${b.type}>${b.items.map(i => `<li>${runsHtml(i, opts)}</li>`).join('')}</${b.type}>`
+    : `<${b.type}>${runsHtml(b.runs, opts)}</${b.type}>`)).join('\n');
+
+/** A <script type="application/ld+json"> block, indented as the homepage's is. Entities are not escaped: it is raw text. */
+const ldScript = (ld) => `<script type="application/ld+json">\n${JSON.stringify(ld, null, 4)}\n</script>`;
+
+/** The notes in series order: oldest first, by date and then by number. */
+const inSeries = (notes) => notes.slice().sort((a, b) => (a.date === b.date ? a.number - b.number : a.date < b.date ? -1 : 1));
+
+function renderNote(data, note) {
+    const { profile, projects, lenses } = data;
+    const series = inSeries(data.notes);
+    const at = series.indexOf(note);
+    const canonical = `${SITE}${notePath(note)}`;
+    const own = `${note.slug}.html`;
+
+    // Where the note belongs: its case study, or else its role view.
+    const cs = note.caseStudy && projects.caseStudies.find(c => c.id === note.caseStudy);
+    const lens = note.lens && lenses.lenses.find(l => l.id === note.lens);
+    const tie = cs
+        ? `<span class="nt-label">The case study</span> <a href="${NOTE_ROOT}case-studies.html#${esc(cs.id)}">${prose(cs.title)}</a>`
+        : `<span class="nt-label">The role view</span> <a href="${NOTE_ROOT}case-studies.html?lens=${esc(lens.id)}">${prose(lens.label)}</a>`;
+
+    // The older and newer note: from the three newest on the homepage, every
+    // note is a few presses away, and the page stays the same length however
+    // many there come to be.
+    const step = (other, rel, label) => (other
+        ? `<a href="${esc(other.slug)}.html" rel="${rel}"><span class="nt-label">${label}</span> ${prose(other.title)}</a>`
+        : '');
+    const near = [step(series[at - 1], 'prev', 'Older note'), step(series[at + 1], 'next', 'Newer note')].filter(Boolean);
+
+    const ld = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: note.title,
+        description: note.summary,
+        datePublished: note.date,
+        articleSection: note.tag,
+        url: canonical,
+        mainEntityOfPage: canonical,
+        image: `${SITE}assets/og/${content.notePage(note.slug)}.png`,
+        author: { '@type': 'Person', '@id': personId(profile), name: profile.person.name, url: profile.links.site },
+        isPartOf: { '@type': 'WebSite', '@id': websiteId(profile), url: profile.links.site }
+    };
+
+    const main = `
+        <div class="nt-text" id="note">
+${indentBlock(blocksHtml(note.blocks, { root: NOTE_ROOT }), '            ')}
+        </div>
+        <p class="nt-tie">${tie}</p>${near.length ? `
+        <nav class="nt-near" id="near" aria-label="More field notes">
+            ${near.join('\n            ')}
+        </nav>` : ''}
+        <p class="nt-feed">Every note is in the <a href="${NOTE_ROOT}${FEED}" type="application/atom+xml">Atom feed</a>, for a feed reader, and the newest are on the <a href="${NOTE_ROOT}index.html#notes">homepage</a>.</p>`;
+
+    return pageShell({
+        title: `${note.title} — Moses Kolleh Sesay`,
+        description: note.summary,
+        canonical,
+        heroTag: `FIELD ${esc(noteNumber(note).toUpperCase())} &middot; ${esc(note.tag.toUpperCase())}`,
+        heroTitle: prose(note.title),
+        heroId: 'note-head',
+        heroLead: `First published on this site on ${noteDate(note)} &middot; <a href="${esc(own)}" rel="bookmark">Permalink</a>`,
+        main,
+        head: [
+            `<link rel="alternate" type="application/atom+xml" title="${esc(FEED_TITLE)}" href="${NOTE_ROOT}${FEED}">`,
+            ldScript(ld)
+        ].join('\n'),
+        ogType: 'article',
+        published: note.date,
+        root: NOTE_ROOT,
+        pageName: content.notePage(note.slug),
+        styles: ['notes.css'],
+        contentCss: false,
+        profile
+    });
+}
+
+/**
+ * feed.xml, Atom (RFC 4287): every note, newest first, whole. Deterministic,
+ * as everything here is: no build time, and `updated` is the newest note's
+ * date. A note is dated by the day, so each time is that day's midnight, UTC.
+ */
+function renderFeed(data) {
+    const { notes, profile } = data;   // newest first (loadAll)
+    if (!notes.length) throw new Error('feed.xml: there is no note to put in it');
+    const when = (day) => `${day}T00:00:00Z`;
+    const entries = notes.map(n => `  <entry>
+    <id>${esc(noteId(n.slug))}</id>
+    <title>${esc(n.title)}</title>
+    <link rel="alternate" type="text/html" href="${esc(SITE + notePath(n))}"/>
+    <published>${when(n.date)}</published>
+    <updated>${when(n.date)}</updated>
+    <category term="${esc(n.tag)}"/>
+    <summary>${esc(n.summary)}</summary>
+    <content type="html">${esc(blocksHtml(n.blocks, { root: SITE, mark: false }))}</content>
+  </entry>`).join('\n');
+
+    return `<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED by ${GENERATED_BY} from content/notes/ — do not edit by hand.
+     tests/notes.test.js holds it to Atom (RFC 4287), and its ids to tag URIs
+     that never carry the site's address. -->
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <id>${esc(`${TAG_ID}/notes`)}</id>
+  <title>${esc(FEED_TITLE)}</title>
+  <subtitle>Short dispatches from the intersection of mud, models and megawatts</subtitle>
+  <link rel="self" type="application/atom+xml" href="${esc(SITE + FEED)}"/>
+  <link rel="alternate" type="text/html" href="${esc(SITE)}"/>
+  <updated>${when(notes[0].date)}</updated>
+  <author>
+    <name>${esc(profile.person.name)}</name>
+    <uri>${esc(profile.links.site)}</uri>
+  </author>
+${entries}
+</feed>
+`;
+}
+
+/**
+ * The homepage's field notes: a short link to each of the newest three, in
+ * series order, between the NOTES markers. Each is its number, tag and date,
+ * its title (the link) and its one line. They were three folds of the whole
+ * notes; the notes are a page each now, one press away.
+ */
+function renderHomeNotes(data) {
+    // None (a test drawing the homepage's other regions from fixtures): no block.
+    const shown = inSeries((data.notes || []).slice(0, NOTES_ON_HOMEPAGE));
+    if (!shown.length) return '';
+    return [
+        '<div class="fieldnotes-grid">',
+        ...shown.map(n => [
+            '    <article class="fieldnote reveal">',
+            `        <p class="fieldnote-tag mono-label">${esc(noteNumber(n))} &middot; ${esc(n.tag)} &middot; ${noteDate(n)}</p>`,
+            `        <h3><a href="${esc(notePath(n))}" data-analytics="notes-to-note">${prose(n.title)}</a></h3>`,
+            `        <p class="fieldnote-line">${prose(n.summary)}</p>`,
+            '    </article>'
+        ].join('\n')),
+        '</div>'
+    ].join('\n');
+}
+
+// ------------------------------------------------------------------
 // sitemap.xml
 // ------------------------------------------------------------------
 function renderSitemap(data) {
-    const pages = data.profile.pages;
-    const entries = pages.map(p => `  <url>
+    const url = p => `  <url>
     <loc>${esc(p.loc)}</loc>
     <lastmod>${esc(p.lastmod)}</lastmod>
     <changefreq>${esc(p.changefreq || 'monthly')}</changefreq>
     <priority>${esc(p.priority || '0.5')}</priority>
-  </url>`).join('\n');
+  </url>`;
+    // Each note as of the day it was published: it is not edited after.
+    const notes = inSeries(data.notes).map(n => ({ loc: SITE + notePath(n), lastmod: n.date, changefreq: 'yearly', priority: '0.6' }));
+    const entries = data.profile.pages.concat(notes).map(url).join('\n');
 
     return `<?xml version="1.0" encoding="UTF-8"?>
-<!-- GENERATED by ${GENERATED_BY} from content/profile.json — do not edit by hand.
+<!-- GENERATED by ${GENERATED_BY} from content/profile.json and content/notes/ — do not edit by hand.
      Every entry needs a lastmod, and none may be dated in the future;
      tests/content.test.js checks both. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -1830,58 +2062,193 @@ const SPLIT_SENTENCES = String.raw`    // Sentence splitting, shared by the play
     }`;
 
 // ------------------------------------------------------------------
-// modules/interactives.js — the Assay's facts block only
+// brief.html — The Brief
 //
-// The fit-check has to compare a job ad's "5+ years" or "fluent Dutch"
-// against something, and the only honest something is content/profile.json.
-// Fetching the JSON at runtime would be one more request for every visitor
-// who uses it; embedding the few fields it needs in the module it already
-// loads costs nothing extra, and --check keeps the copy from going stale.
-// `languages` is optional in profile.json and null until Moses adds it:
-// until then every non-English language an ad asks for is a gap.
+// A recruiter pastes a job ad and gets an honest fit (each requirement
+// mapped to the work that backs it, the gaps as plainly as the matches,
+// what only Moses can confirm) and a one-page dossier: the at-a-glance
+// facts, the case studies that match and how to reach him. brief.js does
+// the grading in the browser, over what this writes into the page's
+// #briefData block: the rubric (content/brief.json), the facts it may
+// state about Moses (content/profile.json only: the roles, the degrees and
+// `languages`, which stay null until he states them) and, for each named
+// tool, where the homepage shows it. One block, written whole, so
+// --check compares the page and nothing else; fetching the JSON instead
+// would be one more request for every visit.
+//
+// The dossier is written here, every case study in content/projects.json's
+// order, which is what a reader without JavaScript gets: its title, dates
+// and place, its headline result with whether a reader can check it, its
+// public work and a link to it on the case studies. A grade selects and
+// reorders those lines; nothing on this page says anything content/ does
+// not, word for word (tests/brief.test.js).
 // ------------------------------------------------------------------
-const FACTS_START = '    // ASSAY-FACTS:START — generated by scripts/build-content.js from content/profile.json. Do not edit by hand.';
-const FACTS_END = '    // ASSAY-FACTS:END';
 
-function renderAssayFacts(data) {
-    const { profile } = data;
-    const facts = {
+/** What the Brief may say about Moses, from content/profile.json alone. */
+function briefFacts(profile) {
+    return {
         languages: Array.isArray(profile.languages) && profile.languages.length
             ? profile.languages.map(l => ({ language: l.language, level: l.level }))
             : null,
         experience: profile.experience.map(r => ({ title: r.title, displayDates: r.displayDates, start: r.start, end: r.end })),
         degrees: profile.education.map(e => e.degree)
     };
-    // A role per line: it ships to every visitor who uses the Assay, and a
-    // diff of one changed role should be one changed line.
-    const list = (items) => `[\n${items.map(x => `            ${JSON.stringify(x)}`).join(',\n')}\n        ]`;
-    const lines = Object.entries(facts).map(([key, value]) =>
-        `        ${JSON.stringify(key)}: ${Array.isArray(value) && typeof value[0] === 'object' ? list(value) : JSON.stringify(value)}`);
-    return `${FACTS_START}\n    const FACTS = {\n${lines.join(',\n')}\n    };\n${FACTS_END}`;
 }
 
-function injectAssayFacts(data) {
-    const file = path.join(ROOT, 'modules', 'interactives.js');
-    const js = fs.readFileSync(file, 'utf8');
-    const start = js.indexOf(FACTS_START);
-    const end = js.indexOf(FACTS_END);
-    if (start === -1 || end === -1) {
-        throw new Error('modules/interactives.js is missing the ASSAY-FACTS:START / ASSAY-FACTS:END markers');
-    }
-    return js.slice(0, start) + renderAssayFacts(data) + js.slice(end + FACTS_END.length);
+// Where the homepage shows a named tool, best proof first: the skills
+// toolkit (it carries a proof line), then the experience bullets, the
+// project tags, the courses and the skill lists. Read from the homepage
+// as this run writes it, so a tool it stops showing stops being matched.
+// Each link names the homepage: the Brief is a page of its own.
+const BRIEF_SOURCES = [
+    ['#skills .toolkit-name', 'index.html#skills', (el, read) => `Skills: ${read.up(el, '.toolkit-item', '.toolkit-proof') || read.clean(el)}`],
+    ['#experience li', 'index.html#experience', (el, read) => read.clean(el) + (read.up(el, '.timeline-content', 'h3') ? ` (${read.up(el, '.timeline-content', 'h3')})` : '')],
+    ['#projects .project-tech span', 'index.html#projects', (el, read) => `Listed as a tool on the ${read.up(el, '.project-card', 'h3')} project`],
+    ['#education li, #education .cert-line', 'index.html#education', (el, read) => `Covered in ${read.up(el, '.education-card', 'h3, .cert-title')}: ${read.clean(el)}`],
+    ['#skills .skills-checklist li, #skills .frameworks-list li', 'index.html#skills', (el, read) => `Listed under ${read.clean(read.doc.querySelector('#skills h2'))}`]
+];
+
+/**
+ * brief.js's own matcher. The script hands it over before it looks for
+ * the page's data, so the build asks the page's own code, not a copy of
+ * it, where the homepage shows each tool.
+ */
+function briefMatcher() {
+    const sandbox = { window: {}, document: { getElementById: () => null } };
+    vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'brief.js'), 'utf8'), sandbox, { filename: 'brief.js' });
+    return sandbox.window.mks.brief;
+}
+
+/** Each named tool the homepage `doc` shows: its name → [{ t, href }]. Tools it does not show are left out. */
+function briefToolEvidence(tools, doc, matcher = briefMatcher()) {
+    const read = {
+        doc,
+        clean: (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : ''),
+        up: (el, sel, inner) => read.clean(el.closest(sel) && el.closest(sel).querySelector(inner))
+    };
+    const out = {};
+    tools.map(matcher.named).forEach((tool) => {
+        for (const [sel, href, say] of BRIEF_SOURCES) {
+            const el = Array.from(doc.querySelectorAll(sel)).find(e => matcher.matches(read.clean(e), tool));
+            if (el) { out[tool.name] = [{ t: say(el, read), href }]; return; }
+        }
+    });
+    return out;
+}
+
+/** What #briefData holds: the rubric without its notes, the facts, the tools' evidence and the address. */
+function briefData(data, indexHtml) {
+    const { JSDOM } = require('jsdom');
+    const rules = Object.fromEntries(Object.entries(data.brief).filter(([key]) => !key.startsWith('$')));
+    return {
+        rules,
+        facts: briefFacts(data.profile),
+        toolEvidence: briefToolEvidence(rules.tools, new JSDOM(indexHtml).window.document),
+        email: data.profile.person.email
+    };
+}
+
+function renderBrief(data, pages) {
+    const { profile, projects, brief } = data;
+    const g = profile.atAGlance;
+    const area = g.workArea && g.workArea.length ? ` &mdash; ${g.workArea.map(esc).join(', ')}` : '';
+    const facts = glanceFacts(profile);
+
+    // A case study as the dossier lists it: every line is the case study's
+    // own, figures marked, nothing typeset or shortened.
+    const card = (cs) => {
+        const head = cs.results[0];
+        const work = cs.artifacts.filter(a => a.status === 'public' && a.url);
+        return `
+                    <li class="bf-cs" id="${esc(cs.id)}">
+                        <h4><a href="case-studies.html#${esc(cs.id)}">${markOnly(cs.title)}</a></h4>
+                        <p class="bf-cs-when mono-label">${esc(cs.period)}${cs.location ? ` &middot; ${esc(cs.location)}` : ''}</p>
+                        <p class="bf-cs-result"><span class="bf-check${head.verifiable ? ' bf-check-yes' : ''}">${head.verifiable ? 'Checkable from outside' : 'Not checkable from outside'}</span> <span class="bf-cs-claim">${markOnly(head.claim)}</span></p>${work.length ? `
+                        <p class="bf-cs-work"><span class="mono-label">Public work</span> ${work.map(a => `<a href="${esc(a.url)}">${markOnly(a.name)}</a>`).join(' &middot; ')}</p>` : ''}
+                    </li>`;
+    };
+
+    const samples = brief.samples.map(s => `<button type="button" class="bf-sample" data-sample="${esc(s.id)}" data-analytics="brief-sample">${esc(s.label)}</button>`).join(' ');
+    const main = `
+        <section class="bf-input" id="grade" aria-labelledby="gradeTitle">
+            <h2 id="gradeTitle">Paste a job ad</h2>
+            <label class="mono-label" for="briefAd">The ad, or its requirements</label>
+            <textarea id="briefAd" rows="7" placeholder="Paste the role&rsquo;s description or its requirements here&hellip;"></textarea>
+            <div class="bf-actions">
+                <button type="button" class="ca-btn ca-btn-primary" id="briefRun">Grade this ad</button>
+                <button type="button" class="ca-btn" id="briefClear" hidden>Clear</button>
+                <span class="bf-privacy mono-label">in your browser &middot; the ad is never sent</span>
+            </div>
+            <div class="bf-msg" id="briefMsg" role="status"></div>
+            <p class="bf-samples"><span class="mono-label">No ad to hand? Try a sample:</span> ${samples}</p>
+        </section>
+        <p class="nojs-note">Grading an ad needs JavaScript, which is off here; it would run in your browser and send nothing. Below is the whole dossier: every case study, in the order the case studies page gives them.</p>
+
+        <div class="bf-share" id="briefShare" hidden>
+            <p>This page&rsquo;s address now rebuilds this fit and this dossier for whoever you send it to. It carries only the names of what matched and what did not, from this page&rsquo;s own list: never a word of the ad.</p>
+            <p class="bf-link"><code id="briefLink">${esc(SITE)}brief.html</code></p>
+            <p class="bf-share-go"><button type="button" class="ca-btn" id="briefCopy" data-analytics="brief-copy">Copy link</button> <button type="button" class="ca-btn" id="briefPrint" data-analytics="brief-print">Print the dossier</button></p>
+        </div>
+
+        <section class="bf-dossier" id="dossier" aria-labelledby="dossierName">
+            <header class="bf-head">
+                <h2 id="dossierName">${esc(profile.person.name)}</h2>
+                <p class="bf-role">${esc(profile.person.jobTitle)}</p>
+                <p class="bf-open">Open to ${prose(g.targetRoles)}${area}</p>
+                <dl class="bf-facts">${facts.map(([label, value]) => `<div><dt class="mono-label">${label}</dt><dd>${value}</dd></div>`).join('')}</dl>
+            </header>
+            <section class="bf-fit" id="briefFit" aria-labelledby="fitTitle" hidden>
+                <h3 id="fitTitle">How the ad fits</h3>
+                <div id="briefResult"></div>
+            </section>
+            <section class="bf-cases-wrap" aria-labelledby="casesTitle">
+                <h3 id="casesTitle">Case studies</h3>
+                <p class="bf-selected" id="briefSelected">Every case study, in the case studies&rsquo; own order. Grade an ad and only those that match it stay, the most relevant first.</p>
+                <ol class="bf-cases" id="briefCases">${projects.caseStudies.map(card).join('')}
+                </ol>
+            </section>
+            <p class="bf-contact"><span class="mono-label">Contact</span> <a href="mailto:${esc(profile.person.email)}" data-analytics="email-brief">${esc(profile.person.email)}</a> &middot; <a href="index.html#contact" data-analytics="contact-brief">the contact form</a> &middot; <a href="${esc(profile.links.cv)}" download data-analytics="cv-download-brief">the CV</a></p>
+            <p class="bf-address" id="briefAddress">${esc(SITE)}brief.html</p>
+        </section>`;
+
+    // Raw text in a script element: only "</" could end it early.
+    const json = JSON.stringify(briefData(data, pages['index.html'])).replace(/</g, '\\u003c');
+    return pageShell({
+        title: 'The Brief — Moses Kolleh Sesay',
+        description: 'Paste a job ad: an honest fit, each requirement mapped to the evidence that backs it or listed as a gap, and a one-page dossier of the case studies that match. It runs in your browser; the ad is never sent.',
+        canonical: `${SITE}brief.html`,
+        heroTag: 'PASTE A JOB AD &middot; AN HONEST FIT &middot; A ONE-PAGE DOSSIER',
+        heroTitle: 'The <span class="ca-accent">Brief</span>',
+        heroLead: 'Paste a job ad and get an honest fit: each requirement mapped to the work that backs it, the gaps listed as plainly as the matches, and what only I can confirm. Then a one-page dossier of the case studies that match, to print or forward. It runs in your browser, with no AI, and the ad never leaves this page.',
+        main,
+        bodyEnd: `    <script type="application/json" id="briefData">${json}</script>`,
+        // content.css is the case studies' and the research page's; of it
+        // this page would use one rule, which brief.css has.
+        styles: ['brief.css'],
+        contentCss: false,
+        scripts: ['brief.js'],
+        profile
+    });
 }
 
 // ------------------------------------------------------------------
-// index.html — the JSON-LD block
+// index.html — the JSON-LD block: who Moses is, and the site
+//
+// Two blocks between the markers, each whole (an @context and an @type):
+// the Person, and the WebSite, which names him as its author by @id, as
+// each note's Article and the coach's SoftwareApplication do. Every fact in
+// them is content/'s: the certificates (hasCredential) are profile.json's,
+// and knowsLanguage appears only once profile.json states his languages,
+// which it does not yet. tests/notes.test.js holds each value to content/.
 // ------------------------------------------------------------------
 const LD_START = '    <!-- JSON-LD:START — generated by scripts/build-content.js from content/profile.json. Do not edit by hand. -->';
 const LD_END = '    <!-- JSON-LD:END -->';
 
-function renderJsonLd(data) {
-    const { profile } = data;
+function personLd(profile) {
     const ld = {
         '@context': 'https://schema.org',
         '@type': 'Person',
+        '@id': personId(profile),
         name: profile.person.name,
         jobTitle: profile.person.jobTitle,
         url: profile.links.site,
@@ -1898,22 +2265,66 @@ function renderJsonLd(data) {
             addressCountry: profile.person.country
         },
         alumniOf: profile.education.map(e => ({ '@type': 'CollegeOrUniversity', name: e.institution })),
+        // A certificate as the homepage shows it: its name, its issuer and
+        // its year, and the issuer's own page for it once there is one.
+        hasCredential: profile.certifications.map(c => Object.assign({
+            '@type': 'EducationalOccupationalCredential',
+            name: c.name,
+            credentialCategory: 'certificate',
+            recognizedBy: { '@type': 'Organization', name: c.issuer },
+            dateCreated: c.year
+        }, c.verifyUrl ? { url: c.verifyUrl } : {})),
         knowsAbout: profile.knowsAbout,
         sameAs: [profile.links.github, profile.links.linkedin]
     };
+    if (Array.isArray(profile.languages) && profile.languages.length) {
+        ld.knowsLanguage = profile.languages.map(l => ({ '@type': 'Language', name: l.language }));
+    }
+    return ld;
+}
 
+const websiteLd = (profile) => ({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': websiteId(profile),
+    name: profile.person.name,
+    url: profile.links.site,
+    author: { '@id': personId(profile) }
+});
+
+function renderJsonLd(data) {
+    const { profile } = data;
     // Entities are NOT escaped: a script block of type application/ld+json is
     // raw text, and "&amp;" inside it reaches a consumer literally.
-    const body = JSON.stringify(ld, null, 4)
-        .split('\n')
-        .map(line => `    ${line}`)
-        .join('\n');
-
+    const blocks = [personLd(profile), websiteLd(profile)].map(ld => indentBlock(ldScript(ld), '    '));
     return `${LD_START}
-    <script type="application/ld+json">
-${body}
-    </script>
+${blocks.join('\n')}
 ${LD_END}`;
+}
+
+// ------------------------------------------------------------------
+// carbon-ai.html — the coach as a SoftwareApplication, between markers
+//
+// The page is hand-authored; its structured data is not, so it cannot say
+// more than content/research.json does: this site's edition, as that entry
+// names and describes it, with the maintained tool named only as the page
+// and the entry name it, a separate piece of code (mentions), never the
+// same application or its source.
+// ------------------------------------------------------------------
+function softwareLd(data) {
+    const { profile, research } = data;
+    const edition = research.outputs.find(o => o.id === 'ecoprompt-web');
+    const maintained = research.outputs.find(o => o.id === 'promptcoach');
+    if (!edition || !maintained) throw new Error('research.json: the coach\'s structured data needs the ecoprompt-web and promptcoach outputs');
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: edition.title,
+        description: edition.summary,
+        url: profile.links.site + edition.url,
+        author: { '@type': 'Person', '@id': personId(profile), name: profile.person.name, url: profile.links.site },
+        mentions: { '@type': 'SoftwareSourceCode', name: maintained.title, codeRepository: maintained.url }
+    };
 }
 
 function injectJsonLd(data) {
@@ -1933,14 +2344,20 @@ function injectJsonLd(data) {
 // What a recruiter checks before reading on: the roles he wants, the
 // level, when he can start, his languages, whether he may work here, and
 // where he is. Each comes from content/profile.json, so the hero cannot
-// say one thing and the Assay or the structured data another. A fact that
+// say one thing and the Brief or the structured data another. A fact that
 // is null is left out entirely — not "TBC", not an empty label: the strip
 // grows as Moses states things, and until then shows only what he has.
 // ------------------------------------------------------------------
 const GLANCE_START = '            <!-- AT-A-GLANCE:START — generated by scripts/build-content.js from content/profile.json. Do not edit by hand. -->';
 const GLANCE_END = '            <!-- AT-A-GLANCE:END -->';
 
-function renderAtAGlance(profile) {
+/**
+ * The facts a recruiter checks first, as [label, value] in the order they
+ * ask: level, start date, languages, right to work, place. A null one is
+ * left out. Values arrive escaped (or built from escaped parts). The strip
+ * here and the Brief's dossier both print these.
+ */
+function glanceFacts(profile) {
     const g = profile.atAGlance;
     const from = g.availableFrom;
     const when = !from ? null
@@ -1949,20 +2366,22 @@ function renderAtAGlance(profile) {
     const languages = Array.isArray(profile.languages) && profile.languages.length
         ? profile.languages.map(l => `${esc(l.language)} (${esc(l.level)})`).join(' &middot; ')
         : null;
-    // Where he would work is a preference, so it goes with what he is open
-    // to, as the contact section says it. Under "Location", "EU" read as
-    // where he is, or may work, beside a right to work not yet stated.
-    const area = g.workArea && g.workArea.length ? ` &mdash; ${g.workArea.map(esc).join(', ')}` : '';
-
-    // In the order a recruiter asks: level, start date, languages, right
-    // to work, place. Values arrive escaped (or built from escaped parts).
-    const facts = [
+    return [
         ['Seniority', g.seniority && esc(g.seniority)],
         ['Available', when],
         ['Languages', languages],
         ['Right to work', g.rightToWork && esc(g.rightToWork)],
         ['Location', esc(`${profile.person.locality}, ${profile.person.country}`)]
     ].filter(([, value]) => value);
+}
+
+function renderAtAGlance(profile) {
+    const g = profile.atAGlance;
+    // Where he would work is a preference, so it goes with what he is open
+    // to, as the contact section says it. Under "Location", "EU" read as
+    // where he is, or may work, beside a right to work not yet stated.
+    const area = g.workArea && g.workArea.length ? ` &mdash; ${g.workArea.map(esc).join(', ')}` : '';
+    const facts = glanceFacts(profile);
 
     const lines = [
         GLANCE_START,
@@ -2160,6 +2579,7 @@ function renderTestimonials(file) {
 }
 
 const homeRegions = (data) => ({
+    NOTES: renderHomeNotes(data),
     CERTIFICATES: renderCertificates(data.profile),
     TESTIMONIALS: renderTestimonials(data.testimonials)
 });
@@ -2214,6 +2634,8 @@ function injectShell(data, page) {
     Object.entries(shellRegions(page, shellFacts(data.profile))).forEach(([name, block]) => {
         html = fillRegion(html, page, name, block);
     });
+    // The coach's structured data, from content/research.json (softwareLd).
+    if (page === 'carbon-ai.html') html = fillRegion(html, page, 'JSON-LD', ldScript(softwareLd(data)));
     return html;
 }
 
@@ -2239,15 +2661,31 @@ function main() {
         ['sitemap.xml', renderSitemap(data)],
         ['voice-scripts.js', renderVoiceScripts(data)],
         ['index.html', injectHomeRegions(data, injectCorelog(data, injectProjectCards(data, injectAtAGlance(data, injectJsonLd(data)))))],
-        ['modules/interactives.js', injectAssayFacts(data)],
         ['carbon-ai.html', injectShell(data, 'carbon-ai.html')],
         ['field-report.html', injectShell(data, 'field-report.html')],
-        ['404.html', injectShell(data, '404.html')]
+        ['404.html', injectShell(data, '404.html')],
+        ...inSeries(data.notes).map(n => [notePath(n), renderNote(data, n)]),
+        [FEED, renderFeed(data)]
     ];
-    // Last: where each figure appears is read off the pages above, as written.
+    // The Brief reads where the homepage shows each tool off the homepage
+    // as written above; the ledger, last, where each figure appears off
+    // every page.
+    outputs.push(['brief.html', renderBrief(data, Object.fromEntries(outputs))]);
     outputs.push(['claims.html', renderClaims(data, Object.fromEntries(outputs))]);
 
+    // A note's page whose source has gone would go on being served, and in
+    // nothing that lists the notes: it is removed with its source.
+    const notesDir = path.join(ROOT, 'notes');
+    const orphans = (fs.existsSync(notesDir) ? fs.readdirSync(notesDir) : [])
+        .map(f => `notes/${f}`).filter(rel => !outputs.some(([out]) => out === rel));
+    if (!CHECK) fs.mkdirSync(notesDir, { recursive: true });
+
     const stale = [];
+    orphans.forEach((rel) => {
+        if (CHECK) { stale.push(rel); console.log(`  ✗ ${rel.padEnd(20)} NO LONGER IN content/notes/`); return; }
+        fs.rmSync(path.join(ROOT, rel));
+        console.log(`  → ${rel.padEnd(20)} removed (its note is gone)`);
+    });
     outputs.forEach(([rel, next]) => {
         const file = path.join(ROOT, rel);
         const current = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
@@ -2271,14 +2709,16 @@ function main() {
         process.exit(1);
     }
 
-    console.log(`\n  ${data.projects.caseStudies.length} case studies · ${data.research.outputs.length} research outputs · ${data.lenses.lenses.length} lenses · ${data.claims.claims.length} claims · counts ${data.stats.status}\n`);
+    console.log(`\n  ${data.projects.caseStudies.length} case studies · ${data.research.outputs.length} research outputs · ${data.lenses.lenses.length} lenses · ${data.claims.claims.length} claims · ${data.notes.length} field notes · counts ${data.stats.status}\n`);
 }
 
-// Run as a script it builds; required (by tests/stats.test.js,
+// Run as a script it builds; required (by tests/stats.test.js, tests/notes.test.js,
 // tests/firstview.test.js and tests/shell.test.js) it only lends its
 // renderers, so a test can draw stats.html, the at-a-glance strip or the
 // shell from fixtures without writing anything.
 if (require.main === module) main();
 
-module.exports = { renderStats, EXAMPLE_PAYLOAD, BASELINE_WEEKS, renderAtAGlance, shellFacts, shellRegions, shellMarkers,
-    corelogDepths, injectCorelog, renderCertificates, renderTestimonials, homeRegions, fillRegion, marksIn, CLAIM_PAGES, PAGE_NAMES, useLedger };
+module.exports = { renderStats, EXAMPLE_PAYLOAD, BASELINE_WEEKS, renderAtAGlance, glanceFacts, shellFacts, shellRegions, shellMarkers,
+    corelogDepths, injectCorelog, renderCertificates, renderTestimonials, homeRegions, fillRegion, marksIn, CLAIM_PAGES, claimPages, PAGE_NAMES, useLedger,
+    renderNote, renderFeed, renderHomeNotes, notePath, inSeries, TAG_ID, FEED, NOTES_ON_HOMEPAGE, personLd, websiteLd, softwareLd,
+    briefFacts, briefToolEvidence, briefMatcher, briefData };

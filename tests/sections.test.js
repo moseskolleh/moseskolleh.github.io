@@ -11,7 +11,8 @@
 //   - the experience log as short cards at every width, each opened by a
 //     More button named for its role;
 //   - the Assay under the contact form, its question and promise in view and
-//     its box behind one button.
+//     its box behind one button, until it grew into The Brief, a page of
+//     its own: one line under the form leads there now.
 //
 // A real browser measures the length and checks the same at 320, 390 and
 // 1280/1440px (scripts/smoke.js: exerciseSections, and checkLengths against
@@ -111,73 +112,30 @@ const profile = JSON.parse(read('content/profile.json'));
 }
 
 // ===================================================================
-// Contact: the form first, the Assay under it, folded behind one button
+// Contact: the form first, then one line to The Brief
 // ===================================================================
+// The Assay sat under the form, folded behind a button: 470px of a desktop
+// and 660 of a phone open, for the few who wanted it. It grew into The
+// Brief (brief.html), and the section keeps one line that leads there.
 {
     const contact = bare.getElementById('contact');
     const form = bare.getElementById('contactForm');
-    const assay = bare.getElementById('assay');
-    assert(!!assay && assay.closest('#contact') === contact, 'Contact: the Assay is still in the contact section');
-    assert(!!(form.compareDocumentPosition(assay) & bare.defaultView.Node.DOCUMENT_POSITION_FOLLOWING) && !assay.contains(form),
-        'Contact: the Assay comes after the contact form');
+    assert(!bare.getElementById('assay') && !bare.querySelector('[class*="assay"], #assayInput, #assayResult'), 'Contact: the Assay\'s box has left the homepage');
+    const line = bare.querySelector('#contact .brief-line');
+    const link = line && line.querySelector('a[href="brief.html"]');
+    assert(!!line && !!(form.compareDocumentPosition(line) & bare.defaultView.Node.DOCUMENT_POSITION_FOLLOWING) && !line.closest('form'),
+        'Contact: one line under the form leads to The Brief');
+    assert(!!link && link.getAttribute('data-analytics') === 'brief-home', 'Contact: the link is counted when followed');
+    assert(/the ad is never sent/.test(text(line)) && !/nothing (?:is )?sent/.test(text(line)), `Contact: and says the ad is never sent ("${text(line)}")`);
     const firstField = contact.querySelector('input, textarea, select');
     assert(firstField && firstField.closest('form') === form, `Contact: the first field in the section is the form's (${firstField && firstField.id})`);
-    assert(!assay.querySelector('.btn-primary'), 'Contact: the Assay is the secondary step, with no primary button to compete with Send');
+    assert(!line.querySelector('.btn-primary, button'), 'Contact: a line, with no button to compete with Send');
+    assert(!/\.assay\b|assay-/.test(css), 'Contact: the Assay\'s rules have left style.css with it');
+    assert(!/assay/i.test(read('modules/interactives.js').replace(/^\s*\/\/.*$/gm, '')), 'Contact: and its code has left modules/interactives.js');
 
-    // Served, the Assay is whole: its question and promise, then the box,
-    // the samples and the verdict's place, none of them [hidden]. Without
-    // JavaScript the stylesheet takes the whole of it away, as it cannot
-    // run, and nothing else: the fold waits for the button script.js makes.
-    const body = bare.getElementById('assayBody');
-    assert(!!body && body.closest('#assay') === assay && !body.hidden && !!body.querySelector('#assayInput') && !!body.querySelector('#assayRun') &&
-        body.querySelectorAll('.assay-sample').length === 3 && !!body.querySelector('#assayResult'),
-        'Assay: the box, the button that grades, the three samples and the verdict\'s place are in the page, in #assayBody');
-    assert(/entirely in your browser/.test(text(assay.querySelector('.assay-head'))) && /the text never leaves this page/.test(text(assay.querySelector('.assay-head'))),
-        'Assay: its promise, that the text never leaves the page, is in the part that stays in view');
-    assert(/in-browser · the ad is never sent/.test(text(body)), 'Assay: and again beside the button that grades');
-    assert(!bare.querySelector('.assay-open'), 'Assay: the markup has no open button; script.js makes it');
-    assert(/html:not\(\.js\)[^{]*\.assay,/.test(css) && /html\.js \.assay\.is-folding:not\(\.is-open\) \.assay-body \{ display: none; \}/.test(css),
-        'Assay: without JavaScript it is not shown (it cannot run); with it, the box folds only once the button is there');
-
-    const { window, errors } = run('dark');
-    const doc = window.document;
-    const box = doc.getElementById('assay');
-    const btn = box.querySelector('.assay-open');
-    assert(errors.length === 0, `Assay: the page boots without errors (${errors.map(String).join('; ') || 'none'})`);
-    assert(!!btn && btn.tagName === 'BUTTON' && btn.type === 'button' && btn.previousElementSibling === box.querySelector('.assay-head') &&
-        btn.nextElementSibling === doc.getElementById('assayBody'),
-        'Assay: script.js puts one real button between the question and the box');
-    assert(!!btn && text(btn) === 'Grade a job description' && btn.getAttribute('aria-controls') === 'assayBody' && btn.getAttribute('aria-expanded') === 'false',
-        `Assay: it says what it does ("${text(btn)}"), names the box it opens, and says it is shut`);
-    assert(box.classList.contains('is-folding') && !box.classList.contains('is-open'), 'Assay: folded on arrival');
-    assert(btn && btn.getAttribute('data-analytics') === 'assay-open', 'Assay: opening it is counted, as a feature a reader reached');
-
-    // A press before the module has arrived opens it once: the core's
-    // interactives trigger replays presses on the module's buttons, and a
-    // replay would have shut it again.
-    window.mks.loaded.interactives = false;
-    let prevented = null;
-    doc.addEventListener('click', (e) => { if (e.target === btn) prevented = e.defaultPrevented; });
-    click(window, btn);
-    await new Promise(r => setTimeout(r, 30));
-    assert(box.classList.contains('is-open') && btn.getAttribute('aria-expanded') === 'true' && prevented === false,
-        'Assay: a press opens it, at once and for good, even before its module has arrived');
-    window.mks.loaded.interactives = true;
-    click(window, btn);
-    assert(!box.classList.contains('is-open') && btn.getAttribute('aria-expanded') === 'false', 'Assay: a second press folds it');
-
-    // "grade your job description" in the play index lands on it open.
-    const link = doc.querySelector('.play-index a[href="#assay"]');
-    click(window, link);
-    await new Promise(r => setTimeout(r, 30));
-    assert(!!link && box.classList.contains('is-open') && btn.getAttribute('aria-expanded') === 'true',
-        'Assay: the play index\'s "grade your job description" opens it as it lands');
-    // Nothing about it moves: the reveal is a display change, so reduced
-    // motion and low-energy mode see the same box at once. The chevron's
-    // turn is a transition, which the reduced-motion rule already stops.
-    const folding = (css.match(/[^{}]*\{[^{}]*\}/g) || []).filter(r => /assay-body|\.assay\.is-(open|folding)/.test(r.split('{')[0]));
-    assert(folding.length >= 2 && folding.every(r => !/transition|animation/.test(r.split('{')[1])) && /html\.js \.assay\.is-folding:not\(\.is-open\) \.assay-body \{ display: none; \}/.test(css),
-        `Assay: opening it is a display change, with nothing to wait for or animate but its chevron (${folding.length} rules)`);
+    // "grade your job description" in the play index goes to The Brief.
+    assert(!!bare.querySelector('.play-index a[href="brief.html"]') && !bare.querySelector('a[href="#assay"]'),
+        'Contact: the play index\'s "grade your job description" goes to brief.html');
 }
 
 // ===================================================================
@@ -204,16 +162,37 @@ const profile = JSON.parse(read('content/profile.json'));
         /164 water points delivered in Sierra Leone, itemised/.test(text(about)),
         'About: the 164 water points are itemised there (100 + 50 + 14), under the paragraph that claims them');
 
-    // The field notes live in About now: all three, whole, each a press away.
+    // The field notes live in About: a short link to each of the newest
+    // three, and each note whole on a page of its own, one press away (they
+    // were three folds of the whole notes here until Phase 5.1).
     const notes = bare.getElementById('notes');
-    const each = notes ? Array.from(notes.querySelectorAll('details.fieldnote')) : [];
-    assert(!!notes && notes.closest('#about') === about && each.length === 3, `Notes: the three Field Notes are in About (${each.length})`);
-    assert(each.every(d => !d.open && d.querySelector('summary h3') && d.querySelector('.fieldnote-tag') && d.querySelectorAll('.fieldnote-body p').length === 2),
-        'Notes: each is its tag and title until opened (a <details>: keyboard and no-JS for free), with both its paragraphs inside');
+    const each = notes ? Array.from(notes.querySelectorAll('.fieldnote')) : [];
+    const sources = require('../scripts/lib/content.js').loadAll().notes;
+    assert(!!notes && notes.closest('#about') === about && each.length === Math.min(3, sources.length) && sources.length >= 3,
+        `Notes: a link to each of the newest three field notes is in About (${each.length} of ${sources.length})`);
+    assert(!notes.querySelector('details') && !/fieldnote-body/.test(html), 'Notes: no note is folded into the homepage any more; each is a page');
+    each.forEach((card) => {
+        const a = card.querySelector('h3 a[href^="notes/"]');
+        const note = a && sources.find(n => a.getAttribute('href') === `notes/${n.slug}.html`);
+        const time = card.querySelector('.fieldnote-tag time');
+        assert(!!note && text(a) === note.title && time && time.getAttribute('datetime') === note.date &&
+            text(card.querySelector('.fieldnote-tag')).includes(note.tag) && text(card.querySelector('.fieldnote-line')) === note.summary,
+            `Notes: "${note ? note.title : '?'}" is its number, tag and date, its title (the link) and its one line`);
+        if (!note) return;
+        // One press away, whole: every paragraph of the note is on its page.
+        const page = new JSDOM(read(`notes/${note.slug}.html`)).window.document;
+        const body = text(page.getElementById('note'));
+        const missing = note.text.split('\n').filter(line => !body.includes(line.replace(/\s+/g, ' ').trim()));
+        assert(missing.length === 0, `Notes: "${note.title}" is whole on notes/${note.slug}.html (${missing.length} paragraph(s) missing)`);
+    });
     assert(/short dispatches from the intersection of mud, models and megawatts/i.test(text(notes)), 'Notes: their one line of introduction came with them');
-    const pointer = notes.querySelector('a[href="#ecoprompt"]');
-    assert(!!pointer && /further down/.test(text(pointer.parentElement)) && !/widget above/.test(text(notes)),
-        'Notes: the third points down the page to the chart it means (it said "the widget above", which it no longer is)');
+    // The third note pointed down the homepage to the chart it means ("the
+    // widget above", then "further down"); on its own page it says where.
+    const third = sources.find(n => n.number === 3);
+    const thirdPage = new JSDOM(read(`notes/${third.slug}.html`)).window.document;
+    const pointer = thirdPage.querySelector('#note a[href="../index.html#ecoprompt"]');
+    assert(!!pointer && /on the homepage/.test(text(pointer.parentElement)) && !/further down|widget above/.test(text(thirdPage.getElementById('note'))),
+        'Notes: the third points to the chart it means, on the homepage, from its own page');
 }
 
 // ===================================================================
@@ -227,7 +206,7 @@ const profile = JSON.parse(read('content/profile.json'));
     const kept = projects.caseStudies.filter(c => text(cs.querySelector(`#${c.id} .cs-card-sub`)) === c.subtitle.replace(/\s+/g, ' ').trim()).length;
     assert(kept === projects.caseStudies.length, `Projects: every subtitle is on its case study, one click away (${kept} of ${projects.caseStudies.length})`);
     assert(cards.every(c => c.querySelector('.project-tags > .project-lenses') && c.querySelector('.project-tags > .project-tech span')),
-        'Projects: each card keeps its lenses and its tools (the Assay reads them), on one run of small type');
+        'Projects: each card keeps its lenses and its tools (The Brief reads them), on one run of small type');
     const intro = bare.querySelector('#projects .section-description');
     const lensIds = JSON.parse(read('content/lenses.json')).lenses.map(l => l.id);
     const lensLinks = intro ? Array.from(intro.querySelectorAll('a[href^="case-studies.html?lens="]')).map(a => a.getAttribute('href').split('=')[1]) : [];
@@ -244,7 +223,7 @@ const profile = JSON.parse(read('content/profile.json'));
     const skillText = text(skills);
     const education = bare.getElementById('education');
     assert(!!education && education.closest('#skills') === skills && education.tagName !== 'SECTION',
-        'Skills & Education: one section; #education is a part of it, still an address for the Assay\'s links');
+        'Skills & Education: one section; #education is a part of it, still an address for The Brief\'s links');
     assert(/Skills & Education/.test(text(skills.querySelector('.section-title'))), 'Skills & Education: the heading says both');
 
     const expertise = ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Life Cycle Assessment', 'Climate Risk Assessment',
@@ -262,22 +241,24 @@ const profile = JSON.parse(read('content/profile.json'));
             assert(outside.length > 0 && !re.test(skillText), `Skills: ${what} is not repeated here, and is still in ${outside.join(', ')}`);
         });
 
-    // The Assay reads a named tool's evidence from the page, these lists and
-    // the certificates' lines included, so it has to know where they are.
-    const { window } = run('dark', { before: (w) => { w.console.log = () => {}; } });
-    const A = window.mks.assay;
-    const now = new Date(2026, 8, 27);
-    const found = (a, label) => (a.met || []).concat(a.matched || []).find(m => m.label === label);
-    const lca = found(A.analyse('Sustainability Analyst. You will run a life cycle assessment of our products, build the GHG inventory, assess climate risk and report to stakeholders across the business.', { now }), 'Life Cycle Assessment');
+    // The Brief reads a named tool's evidence from the homepage, these lists
+    // and the certificates' lines included, so the build has to know where
+    // they are (scripts/build-content.js, BRIEF_SOURCES).
+    const { briefToolEvidence } = require('../scripts/build-content.js');
+    const tools = JSON.parse(read('content/brief.json')).tools;
+    const ev = briefToolEvidence(tools, bare);
+    const lca = (ev['Life Cycle Assessment'] || [])[0];
     // ...and names a heading the reader can find there: it said "Skills &
     // Expertise" after the section became Skills & Education.
     const heading = text(skills.querySelector('h2'));
-    assert(!!lca && lca.ev[0].t === `Listed under ${heading}` && lca.ev[0].href === '#skills',
-        `Skills: the Assay finds Life Cycle Assessment in the expertise list, under the section's own heading, "${heading}" (${lca ? lca.ev[0].t : 'not found'})`);
+    assert(!!lca && lca.t === `Listed under ${heading}` && lca.href === 'index.html#skills',
+        `Skills: the Brief finds Life Cycle Assessment in the expertise list, under the section's own heading, "${heading}" (${lca ? lca.t : 'not found'})`);
     const alone = new JSDOM(`<main>${education.outerHTML}</main>`).window.document;
-    const excel = found(A.analyse('Sustainability Data Analyst. You will build dashboards in Excel from our emissions data, run statistical analysis, and report to stakeholders on climate risk every quarter.', { now, doc: alone }), 'Excel');
-    assert(!!excel && /^Covered in Data Analytics Training: SQL, Python, Excel, Tableau/.test(excel.ev[0].t),
-        `Education: the Assay reads a certificate's line, and names the certificate (${excel ? excel.ev[0].t : 'not found'})`);
+    const excel = (briefToolEvidence(tools, alone).Excel || [])[0];
+    assert(!!excel && /^Covered in Data Analytics Training: SQL, Python, Excel, Tableau/.test(excel.t) && excel.href === 'index.html#education',
+        `Education: the Brief reads a certificate's line, and names the certificate (${excel ? excel.t : 'not found'})`);
+    const page = JSON.parse(new JSDOM(read('brief.html')).window.document.getElementById('briefData').textContent);
+    assert(JSON.stringify(page.toolEvidence) === JSON.stringify(ev), 'Skills: brief.html carries where the homepage shows each tool, as the homepage shows it now');
 
     // Every certificate keeps its name, issuer, date and what it covered;
     // every degree its dates, institution and every line it had.
@@ -324,19 +305,18 @@ const profile = JSON.parse(read('content/profile.json'));
 
     // Every sentence of the contact script, and where the section says it.
     // Checking for one retired sentence let another outlive its source: the
-    // Assay's lede lost "doing this in a few kilobytes … is the whole point
-    // of my work" and the script went on saying it. A sentence with no entry
+    // Assay's lede (the Brief's line now) lost "doing this in a few
+    // kilobytes … is the whole point of my work" and the script went on
+    // saying it. A sentence with no entry
     // here fails, and so does one whose words the section no longer has.
     const section = text(bare.getElementById('contact'));
     const SAID = [
         [/^I'm open to roles and consulting in sustainability, climate risk, E\.S\.G\. and sustainable A\.I\. — in Amsterdam and the E\.U\., and remote-friendly\.$/,
             ['Open to roles & consulting in sustainability, climate risk, ESG and sustainable AI', 'Amsterdam / EU, remote-friendly']],
         [/^I usually reply within a couple of days\.$/, ['I usually reply within a couple of days.']],
-        [/^And if you're still deciding, there's a tool below the form\.$/, ['Still deciding?']],
-        [/^Open it, paste in a job description, and it grades how well my record fits the role, mapping each requirement to the evidence that backs it, and listing the ones this site can't show\.$/,
-            ['Paste a job description', 'grades the fit', 'maps each requirement to the evidence that backs it', 'lists the ones this site has no evidence for']],
-        [/^It runs entirely in your browser\.$/, ['entirely in your browser']],
-        [/^The text never leaves this page, and no A\.I\. model is downloaded to do it\.$/, ['the text never leaves this page', 'no AI model is downloaded to do it']]
+        [/^And if you're hiring, paste your job ad into The Brief, on a page of its own: an honest fit, gaps included, and a one-page dossier to forward\.$/,
+            ['Hiring?', 'Paste your job ad into The Brief', 'an honest fit, gaps included, and a one-page dossier to forward']],
+        [/^It runs in your browser, and the ad is never sent\.$/, ['It runs in your browser', 'the ad is never sent']]
     ];
     sentences(byId.contact.text).forEach((sentence) => {
         const entry = SAID.find(([re]) => re.test(sentence));

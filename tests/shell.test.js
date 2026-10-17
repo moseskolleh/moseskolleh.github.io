@@ -46,19 +46,26 @@ const profile = JSON.parse(read('content/profile.json'));
 
 // Every page at the root but the homepage, read from the directory so a new
 // page is held to the shell the day it exists.
-const PAGES = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'index.html').sort();
+// The field notes, in notes/, are held to it too, their links read from
+// their own folder.
+const PAGES = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'index.html').sort()
+    .concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).sort().map(f => `notes/${f}`));
 // The pages built on carbon-ai.css, which can carry the theme switch.
-const THEMED = PAGES.filter(p => /<link[^>]+href="carbon-ai\.css"/.test(read(p)));
+const THEMED = PAGES.filter(p => /<link[^>]+href="(?:\.\.\/)?carbon-ai\.css"/.test(read(p)));
 
 // Where a link goes, as a repository path and fragment: 404.html's links are
 // root-absolute (/sustaintheworld/#contact is index.html#contact).
 const BASE = new URL(profile.links.site).pathname;
+// A field note's are relative to notes/, so "../index.html" is index.html.
+let here = '';
 const where = (href) => {
     let h = href || '';
     if (h.startsWith(BASE)) h = h.slice(BASE.length);
+    else if (here && !/^(?:[a-z]+:|#)/.test(h)) h = path.posix.normalize(path.posix.join(here, h));
     if (h === '' || h.startsWith('#')) h = 'index.html' + h;
     return h;
 };
+const onPage = (page) => { here = path.posix.dirname(page) === '.' ? '' : path.posix.dirname(page); };
 
 const NAV = [
     ['Home', 'index.html'],
@@ -68,13 +75,15 @@ const NAV = [
     ['Contact', 'index.html#contact']
 ];
 
-assert(PAGES.length >= 6 && ['carbon-ai.html', 'case-studies.html', 'research.html', 'stats.html'].every(p => THEMED.includes(p)),
-    `Pages: every page but the homepage is checked (${PAGES.join(', ')}), four of them on carbon-ai.css`);
+assert(PAGES.length >= 9 && ['carbon-ai.html', 'case-studies.html', 'research.html', 'stats.html'].every(p => THEMED.includes(p)) &&
+    PAGES.filter(p => p.startsWith('notes/')).length >= 3 && PAGES.filter(p => p.startsWith('notes/')).every(p => THEMED.includes(p)),
+    `Pages: every page but the homepage is checked (${PAGES.join(', ')}), the field notes and four more on carbon-ai.css`);
 
 // ===================================================================
 // The nav: the same five places on every page, the current one marked
 // ===================================================================
 PAGES.forEach((page) => {
+    onPage(page);
     const doc = new JSDOM(read(page)).window.document;
     const navs = doc.querySelectorAll('nav[aria-label="Main"]');
     assert(navs.length === 1, `${page}: one nav named Main (${navs.length})`);
@@ -103,6 +112,7 @@ PAGES.forEach((page) => {
 // The closing call to action: the address, a message and the CV
 // ===================================================================
 PAGES.forEach((page) => {
+    onPage(page);
     const doc = new JSDOM(read(page)).window.document;
     const main = doc.querySelector('main');
     if (!main) return assert(false, `${page}: has a <main>`);
@@ -111,8 +121,10 @@ PAGES.forEach((page) => {
         const cv = Array.from(el.querySelectorAll('a[download]')).map(a => where(a.getAttribute('href')));
         return hrefs.includes(`mailto:${profile.person.email}`) && hrefs.includes('index.html#contact') && cv.includes(profile.links.cv);
     };
-    // The smallest blocks that offer all three: one per page.
-    const blocks = Array.from(main.querySelectorAll('section, p')).filter(el => offers(el) && !Array.from(el.children).some(offers));
+    // The smallest blocks that offer all three: one per page. The Brief's
+    // dossier carries the same three for paper, where the call to action is
+    // not printed; on screen the call to action is still the one.
+    const blocks = Array.from(main.querySelectorAll('section, p')).filter(el => offers(el) && !Array.from(el.children).some(offers) && !el.closest('.bf-dossier'));
     assert(blocks.length === 1, `${page}: one call to action in <main> with profile.json's address, the contact form and the CV download (${blocks.length})`);
     const cta = blocks[0];
     if (!cta) return;
@@ -143,7 +155,7 @@ PAGES.forEach((page) => {
     const doc = new JSDOM(src).window.document;
     const head = src.slice(0, src.indexOf('</head>'));
     const toggle = doc.getElementById('themeToggle');
-    const themeTags = head.match(/<script\b[^>]*\bsrc="theme\.js"[^>]*>/g) || [];
+    const themeTags = head.match(/<script\b[^>]*\bsrc="(?:\.\.\/)?theme\.js"[^>]*>/g) || [];
     if (THEMED.includes(page)) {
         const nav = doc.querySelector('nav[aria-label="Main"]');
         assert(!!toggle && nav && nav.contains(toggle) && toggle.getAttribute('type') === 'button' && toggle.hidden,
@@ -469,13 +481,13 @@ const state = (doc) => {
             `Palette: the light page is the colour of the homepage's light browser bar, and theme.js sets that bar (${bar})`);
 
         // Text follows the theme only if it takes its colour from a token.
-        const literal = ['carbon-ai.css', 'content.css', 'stats.css']
+        const literal = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css', 'brief.css']
             .flatMap(f => (strip(read(f)).match(/(?<![-\w])color:(?!\s*var\()[^;]+/g) || []).map(d => `${f}: ${d}`));
         assert(literal.length === 0, `Palette: every text colour on these pages is a token (${literal.join('; ') || 'none fixed'})`);
         // A line drawn in white (or black) is there in one theme only: the
         // calculator's rows and the equivalence list lost their dividers on
         // the light page. A tinted line shows on both; a neutral one is a token.
-        const neutral = ['carbon-ai.css', 'content.css', 'stats.css']
+        const neutral = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css', 'brief.css']
             .flatMap(f => (strip(read(f)).match(/(?<![-\w])border[\w-]*:[^;]*(?:rgba?\(\s*(?:255\s*,\s*255\s*,\s*255|0\s*,\s*0\s*,\s*0)\b|#f{3}\b|#f{6}\b|#0{3}\b|#0{6}\b|\bwhite\b|\bblack\b)[^;]*/gi) || []).map(d => `${f}: ${d}`));
         assert(neutral.length === 0, `Palette: no line on these pages is a fixed white or black, which one theme cannot see (${neutral.join('; ') || 'none'})`);
         // Anatomy of a Prompt's accents: carbon-ai.html has no html.light-mode.

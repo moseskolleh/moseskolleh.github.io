@@ -214,10 +214,15 @@ const fieldText = plain(fieldReport);
     const missing = profile.pages.filter(p => !sitemap.includes(p.loc)).map(p => p.path);
     assert(missing.length === 0, `Sitemap: lists every page (missing: ${missing.join(', ') || 'none'})`);
 
+    // And every field note, each at its own address, dated the day it was published.
+    const notes = require('../scripts/lib/content.js').loadAll().notes;
+    const noteMissing = notes.filter(n => !sitemap.includes(`<loc>${profile.links.site}notes/${n.slug}.html</loc>\n    <lastmod>${n.date}</lastmod>`)).map(n => n.slug);
+    assert(notes.length >= 3 && noteMissing.length === 0, `Sitemap: lists every field note, with the day it was published as its lastmod (missing: ${noteMissing.join(', ') || 'none'})`);
+
     const locs = sitemap.match(/<loc>([^<]+)<\/loc>/g) || [];
-    const known = profile.pages.map(p => p.loc);
+    const known = profile.pages.map(p => p.loc).concat(notes.map(n => `${profile.links.site}notes/${n.slug}.html`));
     const extra = locs.map(l => l.replace(/<\/?loc>/g, '')).filter(l => !known.includes(l));
-    assert(extra.length === 0, `Sitemap: lists no page that is not in profile.json (${extra.join(', ') || 'none'})`);
+    assert(extra.length === 0, `Sitemap: lists no page that is not in profile.json or content/notes/ (${extra.join(', ') || 'none'})`);
 
     // Every page needs a lastmod, and none of them may claim a future date —
     // a sitemap that says a page changed tomorrow is one crawlers distrust.
@@ -371,19 +376,20 @@ const fieldText = plain(fieldReport);
 // The field report is "the same content" as text. It kept Power BI after
 // the homepage dropped it for want of evidence, so the Assay answered a
 // Power BI requirement "Not evidenced on this site" while this page listed
-// it. Every named tool the Assay knows is held to the Assay's own test:
+// it. Every named tool The Brief knows is held to the Brief's own test:
 // shown on the homepage, or not listed here (owner checklist E4).
 {
-    const { run } = require('./harness.js');
-    const { window } = run('dark', { before: (w) => { w.console.log = () => {}; } });
-    const A = window.mks.assay;
+    const { JSDOM } = require('jsdom');
+    const dom = new JSDOM(read('brief.html'), { runScripts: 'outside-only', url: 'https://example.com/brief.html' });
+    dom.window.eval(read('brief.js'));
+    const A = dom.window.mks.brief;
     const toolkit = plain((read('field-report.html').match(/<h2>Toolkit<\/h2>\s*<p>([\s\S]*?)<\/p>/) || [])[1] || '');
     const tools = A.RULES.tools.map(t => (typeof t === 'string' ? t : t.name));
     const a = A.analyse(`Requirements: ${toolkit}`, { now: new Date(2026, 8, 26) });
     const named = a.met.concat(a.gaps).map(x => x.label).filter(l => tools.includes(l));
     const unshown = a.gaps.map(g => g.label).filter(l => tools.includes(l));
     assert(named.length >= 6, `Tools: the field report's toolkit is found and read (${named.join(', ')})`);
-    assert(unshown.length === 0, `Tools: every tool the field report lists is one the homepage shows, so the Assay matches it (not shown: ${unshown.join(', ') || 'none'})`);
+    assert(unshown.length === 0, `Tools: every tool the field report lists is one the homepage shows, so the Brief matches it (not shown: ${unshown.join(', ') || 'none'})`);
 }
 
 // --- Figures: illustrative numbers say so --------------------------------
@@ -576,16 +582,19 @@ const fieldText = plain(fieldReport);
 // --- Power BI: a tool claimed only with its proof ------------------------
 // Nothing anywhere evidences Power BI, so it is named nowhere, unless the
 // homepage's toolkit lists it with a proof link (owner checklist E4). The
-// Assay's list of tools to detect in an ad is not a claim, and is not read.
+// Brief's list of tools to detect in an ad (content/brief.json) is not a
+// claim, and is not read.
 {
     const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json')).map(f => `content/${f}`), ['voice-scripts.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json') && f !== 'brief.json').map(f => `content/${f}`), ['voice-scripts.js']);
     const doc = new (require('jsdom').JSDOM)(index).window.document;
     const listed = Array.from(doc.querySelectorAll('#skills .toolkit-item')).filter(li => /power\s*bi/i.test(li.textContent));
     const proven = listed.every(li => li.querySelector('a.toolkit-proof[href^="http"], a.toolkit-proof[href^="case-studies.html#"]'));
+    // The rubric brief.html carries, as content/brief.json has it, is left out.
+    const shown = (f) => (f === 'brief.html' ? read(f).replace(/<script type="application\/json" id="briefData">[\s\S]*?<\/script>/, '') : read(f));
     const elsewhere = pages.filter(f => /power\s*bi/i.test(f === 'index.html'
         ? read(f).replace(/<li class="toolkit-item">[\s\S]*?<\/li>/g, li => (/power\s*bi/i.test(li) && proven ? '' : li))
-        : read(f)));
+        : shown(f)));
     assert(proven && elsewhere.length === 0, `Power BI: claimed nowhere without a proof link (${elsewhere.join(', ') || 'none'})`);
 }
 
@@ -644,7 +653,9 @@ const fieldText = plain(fieldReport);
 {
     const shipped = fs.readdirSync(ROOT).filter(f => /\.(html|js|css)$/.test(f))
         .concat(fs.readdirSync(path.join(ROOT, 'modules')).map(f => `modules/${f}`),
-            fs.readdirSync(path.join(ROOT, 'content')).map(f => `content/${f}`), ['README.md']);
+            fs.readdirSync(path.join(ROOT, 'content')).filter(f => /\.json$/.test(f)).map(f => `content/${f}`),
+            fs.readdirSync(path.join(ROOT, 'content', 'notes')).map(f => `content/notes/${f}`),
+            fs.readdirSync(path.join(ROOT, 'notes')).map(f => `notes/${f}`), ['README.md']);
     const old = shipped.filter(f => /AI,(?:\s|&nbsp;)+Weighed/i.test(read(f)));
     assert(old.length === 0, `One name: "AI, Weighed" is gone (${old.join(', ') || 'nowhere'})`);
 

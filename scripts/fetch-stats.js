@@ -243,13 +243,18 @@ function parseSource(text) {
  * data-analytics (a module writes some of its own controls, such as the
  * player's offer of the introduction), if it is an on-demand module (as
  * "module-" and its file name, the name the counter gives a module once it
- * has been fetched), if it is one of the Assay's grades (as "assay-" and the
+ * has been fetched), if it is one of The Brief's grades (as "brief-" and the
  * grade's class, the name it sends), or if a script tracks it by a literal
- * name.
+ * name ("brief-run", the fifth of the five numbers, among them).
  */
 function knownNames(root = ROOT) {
     const rootFiles = fs.readdirSync(root);
-    const pages = rootFiles.filter(f => f.endsWith('.html'));
+    // The field notes, each a page in notes/, send the name their data-page
+    // gives them ("note-" and the slug), not their file's, which a page at
+    // the root could share.
+    const notesDir = path.join(root, 'notes');
+    const notes = fs.existsSync(notesDir) ? fs.readdirSync(notesDir).filter(f => f.endsWith('.html')).map(f => `notes/${f}`) : [];
+    const pages = rootFiles.filter(f => f.endsWith('.html')).concat(notes);
     const modulesDir = path.join(root, 'modules');
     const modules = fs.existsSync(modulesDir) ? fs.readdirSync(modulesDir).filter(f => f.endsWith('.js')) : [];
     const scripts = rootFiles.filter(f => f.endsWith('.js')).map(f => path.join(root, f))
@@ -265,18 +270,24 @@ function knownNames(root = ROOT) {
     scripts.forEach((file) => {
         const js = fs.readFileSync(file, 'utf8');
         for (const m of js.matchAll(/\bdata-analytics="([a-z0-9-]{1,40})"/g)) features.add(m[1]);
-        // A whole literal only: track('assay-' + grade) names no feature.
+        // A whole literal only: track('brief-' + a.cls) names no feature.
         for (const m of js.matchAll(/\btrack\(\s*['"]([a-z0-9-]{1,40})['"]\s*\)/g)) features.add(m[1]);
     });
-    // The Assay composes its name from the grade's class, so read the classes.
-    const assay = path.join(modulesDir, 'interactives.js');
-    if (fs.existsSync(assay)) {
-        for (const m of fs.readFileSync(assay, 'utf8').matchAll(/\bcls = '([a-z0-9-]{1,33})'/g)) features.add(`assay-${m[1]}`);
+    // The Brief composes its name from the grade's class, so read the classes.
+    const brief = path.join(root, 'brief.js');
+    if (fs.existsSync(brief)) {
+        const classes = (fs.readFileSync(brief, 'utf8').match(/const GRADE_CLASS = \{([^}]*)\}/) || ['', ''])[1];
+        for (const m of classes.matchAll(/'([a-z0-9-]{1,33})'/g)) features.add(`brief-${m[1]}`);
     }
 
     const lenses = JSON.parse(fs.readFileSync(path.join(root, 'content', 'lenses.json'), 'utf8'));
+    const noteNames = notes.map(f => (fs.readFileSync(path.join(root, f), 'utf8').match(/<script[^>]*\bsrc="[^"]*count\.js"[^>]*\bdata-page="([a-z0-9-]{1,40})"/) || [])[1]).filter(Boolean);
     return {
-        pages: new Set(pages.map(f => f.replace(/\.html$/, ''))),
+        pages: new Set(pages.filter(f => !f.startsWith('notes/')).map(f => f.replace(/\.html$/, '')).concat(noteNames)),
+        // Published together, as one row: a month's notes are read by few,
+        // and one note's page views would mostly read "<5" (and hold a
+        // neighbour back with them). The daily totals keep each note's.
+        groups: new Map(noteNames.map(n => [n, NOTES_GROUP])),
         lenses: new Set(lenses.lenses.map(l => l.id)),
         ids,
         features
@@ -307,6 +318,12 @@ function normaliseDate(value) {
     return null;
 }
 
+// What the field notes are published as, every note together.
+const NOTES_GROUP = 'notes';
+
+/** A page as it is published: its own name, its group's, or "other" for a name the site does not use. */
+const pageKey = (known, key) => (known.pages.has(key) ? ((known.groups && known.groups.get(key)) || key) : 'other');
+
 /** @returns {{date,metric,key,count}|{skip:true}|{drop:string}} */
 function normaliseRow(raw, known, today) {
     if (!Array.isArray(raw) || raw.length < 4) return { drop: 'not four columns' };
@@ -331,13 +348,13 @@ function normaliseRow(raw, known, today) {
         case 'vp':
             return VIEWPORTS.includes(key) ? { date, metric, key, count } : { drop: 'unknown viewport class' };
         case 'page':
-            return { date, metric, key: known.pages.has(key) ? key : 'other', count };
+            return { date, metric, key: pageKey(known, key), count };
         case 'kb':
             // Summed KB, keyed by the page it was measured on. A row with no
             // page (the first counter kept one daily sum) still counts in the
             // totals; it just cannot be split by page.
             if (key === '') return { date, metric, key, count };
-            return { date, metric, key: known.pages.has(key) ? key : 'other', count };
+            return { date, metric, key: pageKey(known, key), count };
         case 'lens':
             // No lens is not a lens visit; those are the visits minus these.
             if (key === '') return { skip: true };
@@ -669,16 +686,29 @@ function sourceUrl(raw) {
 
 const inActions = process.env.GITHUB_ACTIONS === 'true';
 
+// A line in the run's summary as well as the log. A run that fetched
+// nothing still goes green, by design, and a green tick says nothing about
+// why: the summary does, on the run's own page, and so does the annotation.
+function summary(line) {
+    if (!process.env.GITHUB_STEP_SUMMARY) return;
+    try {
+        fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${line}\n\n`);
+    } catch (err) { /* the summary is a courtesy; the log has the same line */ }
+}
+
 function skip(why) {
     // A notice, not a failure: nothing is wrong, there is just nothing new.
-    console.log(`${inActions ? '::notice title=fetch-stats::' : '  fetch-stats: '}${why}`);
+    console.log(`${inActions ? '::notice title=Open counts: nothing fetched::' : '  fetch-stats: '}${why}`);
     console.log('  content/stats.json left as it is.');
+    summary(`**Open counts: nothing fetched this week.** ${why} content/stats.json is left as it is, so there is ` +
+        'nothing to commit, and the run stays green by design. The weekly "Site health" issue says what this waits on.');
     process.exitCode = 0;
 }
 
 function fail(why) {
     console.error(`${inActions ? '::error title=fetch-stats::' : '  fetch-stats: '}${why}`);
     console.error('  content/stats.json left as it is.');
+    summary(`**Open counts: the fetch failed.** ${why} content/stats.json is left as it is.`);
     process.exitCode = 1;
 }
 
@@ -751,6 +781,7 @@ async function main() {
     console.log(`  fetch-stats: ${rows.length} row(s) from ${host} (${parsed.format}), ` +
         `${stats.period.first} to ${stats.period.last} → ${path.relative(ROOT, OUT)}`);
     console.log('  Now run: npm run build:content');
+    summary(`**Open counts: fetched.** ${stats.weeks.length} whole week(s), ${stats.period.first} to ${stats.period.last}, written to content/stats.json.`);
 }
 
 if (require.main === module) {
@@ -772,6 +803,8 @@ module.exports = {
     parseCsv,
     parseSource,
     knownNames,
+    pageKey,
+    NOTES_GROUP,
     normaliseRow,
     cleanRows,
     transform,

@@ -77,7 +77,10 @@ const byId = new Map(CLAIMS.map(c => [c.id, c]));
 // page says of the counter's rules (30 counts a minute, nothing under 5)
 // is about the site itself, and is read like any page's, each rule marked
 // [data-rule] and held to the code that sets it.
-const PAGES = ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', '404.html', 'claims.html', 'stats.html'];
+// The field notes, each a page in notes/, are read like the rest: a figure
+// in a note is marked from the ledger as the generated pages mark theirs.
+const NOTE_PAGES = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).sort().map(f => `notes/${f}`);
+const PAGES = ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'brief.html', 'field-report.html', '404.html', 'claims.html', 'stats.html'].concat(NOTE_PAGES);
 const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.document]));
 
 // ===================================================================
@@ -200,13 +203,14 @@ PAGES.forEach((page) => {
 // Hosts a script fills in the browser. In the HTML as shipped each holds a
 // placeholder. What the script works out there, a grade, a footprint, a
 // guess at a curve, is a model output, not a claim. What it prints of its
-// own is not: the Assay's "164 water points" and the coach's tips were
+// own is not: the Brief's "164 water points" and the coach's tips were
 // typed into scripts, skipped here with the hosts, and nothing held them.
 // So each host names the script that fills it, and what that script
 // prints of its own is read from its source below (PRINTED) and held to
 // the ledger as the pages are.
 const RUNTIME = {
-    'index.html': { '#ydi': 'ydi', '#carbonBadgeText': 'badge', '#receiptBody': 'receipt', '#assayResult': 'assay' },
+    'index.html': { '#ydi': 'ydi', '#carbonBadgeText': 'badge', '#receiptBody': 'receipt' },
+    'brief.html': { '#briefResult': 'brief', '#briefMsg': 'brief' },
     'carbon-ai.html': Object.assign(Object.fromEntries(['.ca-out', '[id^="equiv"]', '#tipsList', '#chartBars', '.ca-hint', '#inputNotice',
         '#ledgerReviewed', '#ledgerTable', '#ledgerSources', 'select'].map(sel => [sel, 'coach'])), { '#anatomyDraw': 'anatomy' }),
     'case-studies.html': { '#drillResult': 'games', '#drillScore': 'games', '#floodNote': 'games', '#floodLevelLabel': 'games' }
@@ -454,9 +458,10 @@ const readAsWords = (list) => list.filter(t => /[A-Za-z]{2,}/.test(t) && /\s/.te
 const shownOf = (t) => (!/<[a-z]/i.test(t) ? t
     : [t.replace(/<[^>]*>/g, ' ')].concat([...t.matchAll(/\b(?:aria-label|title|alt)="([^"]*)"/g)].map(m => m[1])).join(' '));
 
-// The Assay's rules are data the page builds from, so they are read as the
-// page has them: the homepage booted with its scripts.
-const assay = run(null, { clock: true, before: (w) => { w.console.log = () => {}; } }).window.mks.assay;
+// The Brief's rubric is data the page builds from (content/brief.json),
+// and so is where the homepage shows each tool, which the build writes into
+// the page beside it: both are read as brief.html has them.
+const briefData = JSON.parse(docs['brief.html'].getElementById('briefData').textContent);
 
 /**
  * What each script prints of its own, read from its source: `texts` the
@@ -479,15 +484,18 @@ const PRINTED = {
     // per visit" that nothing held. It prints no figure of its own now.
     badge: { what: 'the footer\'s badge (script.js)', sure: /./,
         texts: [...read('script.js').matchAll(/badgeText\.textContent\s*=\s*(['"`][\s\S]*?['"`]);/g)].map(m => literals(m[1]).join(' ')) },
-    // The Assay grades an ad in the browser, but beside each area it matches
-    // it prints the record behind it, typed into its rules: "164 water
-    // points…", "a 70% aquifer strike rate", "54 global hazard information
-    // systems". Those, its gaps and the lines around them.
-    assay: { what: 'the Assay\'s evidence, gaps and messages (modules/interactives.js)', sure: /164 water points/,
-        texts: assay.RULES.strengths.flatMap(r => [r.label].concat(r.ev.map(e => e.t)))
-            .concat(assay.RULES.gaps.flatMap(g => [g.label, g.text]), assay.RULES.confirm.map(c => c.label),
-                assay.RULES.languages.map(l => l.confirm || ''),
-                literals(between(interactives, '// --- The page', '// YOU DRAW IT', 'modules/interactives.js'))) },
+    // The Brief grades an ad in the browser, but beside each area it matches
+    // it prints the record behind it, from its rubric: "164 water points…",
+    // "a 70% aquifer strike rate", "54 global hazard information systems";
+    // beside a tool, where the homepage shows it. Those, its gaps, its
+    // samples and the lines its script writes around them.
+    brief: { what: 'the Brief\'s evidence, gaps and messages (content/brief.json, brief.js)', sure: /164 water points/,
+        texts: briefData.rules.strengths.flatMap(r => [r.label].concat(r.ev.map(e => e.t)))
+            .concat(briefData.rules.gaps.flatMap(g => [g.label, g.text]), briefData.rules.confirm.map(c => c.label),
+                briefData.rules.languages.map(l => l.confirm || ''), Object.values(briefData.rules.grades),
+                briefData.rules.samples.flatMap(x => [x.label, x.text]),
+                Object.values(briefData.toolEvidence).flatMap(ev => ev.map(e => e.t)),
+                readAsWords(literals(read('brief.js')))) },
     // The receipt sums the visit's own bytes, and beside them the field
     // report's size, typed in.
     receipt: { what: 'the receipt\'s fixed lines (modules/interactives.js)', sure: /Text-only report/,
@@ -530,7 +538,7 @@ const PRINTED = {
 }
 
 // Proof that the hold bites, on the figures the review changed in a copy
-// of the Assay: 164 → 200 water points, 14 → 50 solar-powered, 54 → 10
+// of the Brief's rubric: 164 → 200 water points, 14 → 50 solar-powered, 54 → 10
 // hazard systems, and the receipt's 10 KB → 9 KB. Each is caught.
 {
     const drifted = ['200 water points in Sierra Leone: 100 wells rehabilitated, 50 boreholes built, 14 solar-powered',
@@ -663,7 +671,7 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
     }).map(li => li.id);
     assert(unvalued.length === 0, `claims.html: each entry opens with its figure, marked (${unvalued.join(', ') || 'all do'})`);
 
-    const { CLAIM_PAGES, marksIn } = require('../scripts/build-content.js');
+    const { CLAIM_PAGES, claimPages, marksIn } = require('../scripts/build-content.js');
     // Where the generator sends a reader, on a page written to test it: the
     // figure in sight wins over the same figure folded earlier in a field
     // note; a figure only in a [hidden] note is addressed inside it, named
@@ -731,6 +739,9 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
         }
     });
     assert(Object.keys(CLAIM_PAGES).every(p => PAGES.includes(p)), 'claims.html: reads the marks on every page this test scans');
+    const named = claimPages(data.notes);
+    assert(NOTE_PAGES.length >= 3 && NOTE_PAGES.every(p => /^Field note \d{2}$/.test(named[p] || '')),
+        `claims.html: reads every field note's marks too, each named by its number (${NOTE_PAGES.map(p => named[p]).join(', ')})`);
 
     // "Not on this list" names what the scan lets by. The core log's depths
     // and the flood game's steps were let by here and named nowhere there;
@@ -758,9 +769,9 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
     assert(!!home.querySelector('footer a[href="claims.html"]'), 'Homepage: the footer links the ledger too');
 
     // Every page with the shell's footer links it, the ledger itself marked as here.
-    const footed = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).filter(f => /<footer class="ca-foot">/.test(read(f)));
+    const footed = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).concat(NOTE_PAGES).filter(f => /<footer class="ca-foot">/.test(read(f)));
     const missing = footed.filter((f) => {
-        const a = new JSDOM(read(f)).window.document.querySelector('footer.ca-foot a[href="claims.html"]');
+        const a = new JSDOM(read(f)).window.document.querySelector(`footer.ca-foot a[href="${f.startsWith('notes/') ? '../' : ''}claims.html"]`);
         return !a || (f === 'claims.html') !== (a.getAttribute('aria-current') === 'page');
     });
     assert(footed.length >= 5 && missing.length === 0, `Shell: every footer links "Check my numbers", marked current on its own page (${footed.length} footers; wrong: ${missing.join(', ') || 'none'})`);

@@ -16,27 +16,27 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - **"Don't let it become a boat" flood scene**: a schematic Wupper cross-section on the [Wuppertal case study](case-studies.html#play-flood) — slide the river from a calm day to July 2021 and watch the margin under the Schwebebahn's hanging cars shrink. Both games load only when a reader scrolls near them, and without JavaScript each is a note that it needs JavaScript and one line of summary
 - **Field terminal**: press <code>`</code> anywhere (or the footer button) for a hidden green-on-black terminal — try `journey`, `drill`, `co2`, `voice`, `kushe`, `help`
 - **The spoken page**: one `Listen` control in the nav reads the section in view with the browser's own speech engine, which transfers **zero bytes**. The one recording on the site is Moses introducing himself in his own voice, offered once he has recorded it, fetched only on click and labelled with exactly what it transfers (see [Narration](#narration-the-spoken-page)). Nothing ever autoplays
-- **Carbon-aware by construction**: images ship as optimized WebP, the three typefaces are self-hosted subsets, and a first view costs about **276 KB over the wire, fonts included**, against a 288 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the narration player, the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model), counting network transfer only. A low-energy mode pauses all animation and honours `prefers-reduced-motion`
+- **Carbon-aware by construction**: images ship as optimized WebP, the three typefaces are self-hosted subsets, and a first view costs about **274 KB over the wire, fonts included**, against a 288 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the narration player, the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model), counting network transfer only. A low-energy mode pauses all animation and honours `prefers-reduced-motion`
 - **[Case studies](case-studies.html), evidence-first**: the homepage's six projects and a seventh, GAIA, an open method and tool for reporting an organisation's AI footprint on the lines of a sustainability report, each as **problem → method → artifact → result → findings**. Every result carries the basis it rests on and says plainly whether you can check it from outside; every artifact says whether it is public, available on request, or held by the client; every case study says what the work found or recommends, with its basis. The method is folded to one line until asked for. See [Content pipeline](#content-pipeline)
 - **Role-specific lenses**: `case-studies.html?lens=water`, `?lens=climate-risk`, `?lens=sustainable-ai`, `?lens=esg-csrd` — shareable views that reframe the portfolio for one kind of role. They **reorder and frame, they never filter**: every case study stays on the page in every view, because a view that hides inconvenient work is a CV that lies by omission. Without JavaScript the switcher steps aside and every case study shows in the default view
 - **No dead ends**: every page but the homepage shares one small nav (Home, Case studies, Research, CV, Contact, with the page you are on marked) and ends with a way to reach Moses: his address, the contact form and the CV. The pages built on `carbon-ai.css` have the homepage's light theme and its switch, and keep the reader's choice from page to page (`theme.js`, before the first paint); with nothing chosen they follow the system's setting, with or without JavaScript. The homepage follows it only with JavaScript: without, it stays dark, because following the system there would put a second copy of every light-theme rule in its first view. The text-only field report and the 404 page take the nav and the call to action as plain lines, and no script
 - **[Research outputs](research.html)**: theses, reports, datasets, code and tools, grouped by whether you can open them: public, on request, or held by the client. The public ones lead with Moses's own repositories on GitHub (a groundwater toolkit, the GAIA Green AI framework, a CMIP6 extremes pipeline, an A/B test in SQL and Python, the sustainable-AI prototypes and the maintained EcoPrompt Coach), each described only as far as the repository itself shows. No DOI, journal or conference is named anywhere, because none of this work has one — and a test fails the build if one ever appears without proof
-- **[Check my numbers](claims.html)**: every figure the site prints, in digits or in words, from the hero's 164 water points and the Wuppertal "team of six" to the first view's weight, with what it counts, the one basis it rests on and whether a reader can check it (public, with where; on request; or not checkable from outside). Each figure on a page is marked with its entry in `content/claims.json`, and `npm test` fails on a figure the ledger does not hold, on a page, in its labels and captions, or in what a script prints of its own (the field terminal, the Assay, the receipt, the narration player, the coach's tips). See [Every number has a basis](#every-number-has-a-basis-the-claims-ledger)
+- **[Check my numbers](claims.html)**: every figure the site prints, in digits or in words, from the hero's 164 water points and the Wuppertal "team of six" to the first view's weight, with what it counts, the one basis it rests on and whether a reader can check it (public, with where; on request; or not checkable from outside). Each figure on a page is marked with its entry in `content/claims.json`, and `npm test` fails on a figure the ledger does not hold, on a page, in its labels and captions, or in what a script prints of its own (the field terminal, The Brief, the receipt, the narration player, the coach's tips). See [Every number has a basis](#every-number-has-a-basis-the-claims-ledger)
 - **A CV printed from the same facts**: `npm run cv` prints `assets/Moses_Kolleh_Sesay_CV.pdf` from `content/` and the homepage's own words, so it says what the site says, and a test fails once it falls behind them. See [The CV](#the-cv)
 - **[Open counts](stats.html)**: what the site's own cookieless counter has counted, rebuilt weekly — the five numbers that say whether the site works, page views by page, lens and window width, referrers, features used and bytes per page view, in whole weeks. Every count under 5 reads `<5`, a figure that would let one be worked out by subtraction reads `held`, and the page prints the exact payload a page view sends. See [Open counts](#open-counts)
 - **Borehole core-log experience timeline**: career history logged the way a geologist logs a core — depth is time, every layer is a chapter. Each role is a short card (dates, role, organisation, one line), the rest a press away
 - **EcoPrompt Coach**: one name for one tool. The homepage's section 05 is its teaser, one chart: guess how the energy of one AI answer grows with model size, then see the published estimates. This site's edition of the coach (model × grid × tokens → energy, carbon, water, with an evidence ledger) and Anatomy of a Prompt are on [`carbon-ai.html`](carbon-ai.html), which says how old its figures are; the maintained version, with newer models (their figures extrapolated, as it says), is the [EcoPrompt Coach app](https://moseskolleh.github.io/promptcoach/) ([code](https://github.com/moseskolleh/promptcoach))
 - **Evidence-first skills**: no invented percentages — every tool's proof is public work that shows it, a repository on GitHub, or says there is none: machine learning, shown only by a certificate, links nowhere, and the GIS row links its case study, whose maps are on request. The 164 water points are itemized in About
-- **The Assay**: under the contact form, behind one button, paste a job ad and get an honest fit, graded in the browser; the ad itself is never sent (the page view's count carries the grade, see [The visit counter and privacy](#the-visit-counter-and-privacy)). It lists matched evidence with links, and gaps (languages, years of experience, named tools, consulting-firm or director-level experience, financial modelling, a PhD or a law degree), first when they cap the grade; right to work, visa, clearance, driving licence, relocation and the level of English are named as things to confirm with Moses, never guessed. General skills (stakeholders, data, delivery, international work, research) count towards a grade but never make one: an ad with nothing from his own field is "Different field" Its facts about him come from `content/profile.json`
-- **Field Notes**: short essays connecting boreholes, scenario storytelling and sustainable AI, under About
-- **Modern design**: dark theme with vibrant green accents, light mode (the reader's choice, shared by every page, or with none the system's, from the first paint), responsive layout, full SEO/social metadata (Open Graph, JSON-LD, sitemap)
-- **Seven sections**: journey, about (with the CV download and the field notes), experience, six project cards leading to the case studies, the EcoPrompt Coach's chart, skills and education, contact form
+- **[The Brief](brief.html)**: paste a job ad and get an honest fit and a one-page dossier, graded in your browser: no AI, and the ad itself is never sent (the page view's count carries only that the Brief was run and the grade it gave, see [The visit counter and privacy](#the-visit-counter-and-privacy)). It maps each requirement to the evidence that backs it, with links, and lists the gaps (languages, years of experience, named tools, consulting-firm or director-level experience, financial modelling, a PhD or a law degree), first when they cap the grade; right to work, visa, clearance, driving licence, relocation and the level of English are named as things to confirm with Moses, never guessed. General skills (stakeholders, data, delivery, international work, research) count towards a grade but never make one: an ad with nothing from his own field is "Different field". The dossier is the at-a-glance facts `content/profile.json` states (a null one left out), the case studies the ad matches, most relevant first, each with its dates and place, headline result and whether it can be checked, its public work and a link to it, and how to reach him: it selects and reorders, never rewrites, and prints as one A4 page with its address. That address (`brief.html?focus=…`) carries only ids from the rubric, never the ad, and rebuilds the same fit and dossier for whoever it is forwarded to; ids it does not know are dropped. Without JavaScript the page is the whole dossier, every case study in order. The rubric and its evidence are `content/brief.json`, held to the case studies and the claims ledger by the build; its facts about Moses come from `content/profile.json` alone. It grew out of the Assay that sat under the homepage's contact form, where one line now leads to it
+- **[Field Notes](notes/what-164-water-points-taught-me.html)**: short essays connecting boreholes, scenario storytelling and sustainable AI, each an article of its own in `notes/`, dated the day it was first published on this site, with an [Atom feed](feed.xml); About links the newest three. They are written in markdown in `content/notes/` (see [Field Notes and the feed](#field-notes-and-the-feed))
+- **Modern design**: dark theme with vibrant green accents, light mode (the reader's choice, shared by every page, or with none the system's, from the first paint), responsive layout, full SEO/social metadata (Open Graph, a sitemap, an Atom feed, and JSON-LD written from `content/`: see [Structured data](#structured-data))
+- **Seven sections**: journey, about (with the CV download and links to the field notes), experience, six project cards leading to the case studies, the EcoPrompt Coach's chart, skills and education, contact form
 
 ## Technologies Used
 
 - **HTML5**: Semantic markup for better SEO and accessibility
 - **CSS3**: Modern styling with CSS Grid, Flexbox, animations, and transitions
-- **JavaScript (Vanilla)**: no framework, no bundler. A 74 KB core (`script.js`, 24 KB gzipped) and five on-demand modules in `modules/`, each fetched the first time it is needed: the core fetches three on the homepage (the section-05 interactives with the Assay and the footer receipt, the narration player with its stylesheet, the field terminal), the case studies fetch the two games (`dossier.js` and `.css`) and `carbon-ai.html` fetches Anatomy of a Prompt (`anatomy.js` and `.css`), each as it comes near the screen
+- **JavaScript (Vanilla)**: no framework, no bundler. A 72 KB core (`script.js`, 24 KB gzipped) and five on-demand modules in `modules/`, each fetched the first time it is needed: the core fetches three on the homepage (the section-05 interactives with the footer receipt, the narration player with its stylesheet, the field terminal), the case studies fetch the two games (`dossier.js` and `.css`) and `carbon-ai.html` fetches Anatomy of a Prompt (`anatomy.js` and `.css`), each as it comes near the screen. The Brief's script (`brief.js`) is that page's own, loaded with it
 - **Icons**: an inline SVG symbol sprite, no icon font
 - **Fonts**: Inter, Space Grotesk and IBM Plex Mono, self-hosted as Latin subsets under the SIL Open Font License (see [Fonts](#fonts))
 - **GitHub Pages**: Free hosting for static websites
@@ -55,7 +55,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 
 ### 👤 About
 - Professional summary with the CV download, and the 164 water points itemised (100 wells rehabilitated, 50 boreholes drilled, 14 solar-powered)
-- The three Field Notes, each its title until opened
+- A link to each of the newest three Field Notes: its number, tag and date, its title and its one line, the note itself a page of its own (`notes/`)
 
 ### 💼 Experience
 - The borehole core-log timeline: depth is time, every layer a chapter, technology tags for each. Each layer's depths (10 m a year, its top where the role ended, its base where it began) are worked out by `npm run build:content` from the roles' dates in `content/profile.json`, measured from `meta.verifiedOn`, the day the record is logged as of; the head says when the log was logged
@@ -78,7 +78,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - Professional certifications (ESG Specialist, Google Data Analytics, etc.), each with its issuer, date and what it covered, written from `content/profile.json`; a certificate links its issuer's verification page as soon as its `verifyUrl` is filled in
 
 ### 📧 Contact
-- Direct contact details, social links and the contact form (Google Apps Script backend, honeypot, rate limits; works without JavaScript by posting to the same endpoint), with The Assay below the form as the optional step: its question and promise in view, its box behind a "Grade a job description" button
+- Direct contact details, social links and the contact form (Google Apps Script backend, honeypot, rate limits; works without JavaScript by posting to the same endpoint), with one line below the form leading to [The Brief](brief.html), the paste-a-job-ad fit check that sat there as the Assay
 
 ## Setup Instructions
 
@@ -252,8 +252,8 @@ npm run voice -- --clone path/to/sample # make a voice model (add --sections to 
 
 The API key is used only there, on your machine; it never reaches the browser.
 Fish Audio bills 1 credit per UTF-8 byte of text, so the cost is known before
-anything is sent: the eight sections are ~8,500 credits today (8,505 on
-2026-10-04), and the dry run
+anything is sent: the eight sections are ~8,300 credits today (8,345 on
+2026-10-17), and the dry run
 prints the exact figure. Scripts are hashed, so fixing one sentence re-renders
 one file. `scripts/lib/voice-signature.js` is
 the one definition of "has this track already been rendered?", shared by the
@@ -319,11 +319,12 @@ CI uses Node 22.
 | `npm run build:check` | every generated page still matches `content/` |
 | `npm run fonts:check` | the committed fonts still hash to their manifest and every stylesheet's `@font-face` block is current |
 | `npm run lint:html` | every page is valid HTML ([html-validate](https://html-validate.org/)'s recommended rules; the two relaxations are explained in `.htmlvalidate.cjs`) |
-| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the twenty-eight listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
+| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty-one listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
 | `npm run map:check` | the committed `journey-map.svg` still matches its generator |
 | `npm run budget` | the weights this README quotes, and that its budget tables still say what the script measures (see [Performance](#performance)) |
-| `npm run smoke` | every page in a real browser: no errors, no failed or off-origin requests, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; the Assay; the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
+| `npm run smoke` | every page in a real browser: no errors, no failed or off-origin requests, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; The Brief (a mismatched ad graded honestly, nothing sent and no word of the ad in any request or in its link, usable by keys, its shared link rebuilding the same fit and dossier, printed as one A4 page, nothing sideways at 320–430px); the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
 | `npm run mcp:verify` | the pinned MCP package still hashes to the reviewed tarball (needs network) |
+| `npm run health -- --dry-run` | the weekly health check, printed instead of posted: the live site against `main`, every link off the site, what has gone stale, and what still waits on Moses (needs network; see [Health checks and the quarterly review](#health-checks-and-the-quarterly-review)) |
 
 The suites, and the failure each one exists to prevent:
 
@@ -361,26 +362,31 @@ The suites, and the failure each one exists to prevent:
   11px or more inside the drawing, from a 320px phone to a desktop; nothing
   tells a reader to drag the grid, which is a dropdown.
 - **`sections.test.js`** — the shorter homepage, and its one rule: no fact
-  leaves the site. Seven sections numbered 01 to 07, the Field Notes inside
-  About and Education inside Skills (`#notes` and `#education` still
-  addresses), and no call-to-action band between them; experience as short
+  leaves the site. Seven sections numbered 01 to 07, the Field Notes' links
+  inside About (each note whole on its own page, one press away) and
+  Education inside Skills (`#notes` and `#education` still addresses), and no call-to-action band between them; experience as short
   cards at every width, each More button a real button named for its role,
-  every card whole without JavaScript and in print; the contact form before
-  the Assay, whose question and promise stay in view while its box opens from
-  one "Grade a job description" button (at once, before its module arrives,
-  and from the play index's link); every area, framework, degree,
+  every card whole without JavaScript and in print; the contact form, then
+  one line to The Brief (the Assay's box, rules and code gone with it, and
+  the play index's link going there too); every area, framework, degree,
   certificate, field note and project subtitle still on the page or its case
   study, and each figure taken out of About or Skills still shown with the
   role it belongs to; and the narration matching the merged sections.
-- **`assay.test.js`** — the paste-a-job-ad fit check: an ad asking for fluent
-  Dutch, 5+ years at a Big Four firm and SAP gets every one of those as a gap
-  and not the top grade; ads that do fit still grade well, with evidence
-  links that resolve; HR, ERP, marketing and IT ads are "Different field",
-  however many general skills they share; an employer's own history, its
-  team's languages, the language to apply in, or a Dutch ministry is not a
-  requirement; English is listed to confirm, not
+- **`brief.test.js`** — The Brief, the paste-a-job-ad fit check that was the
+  Assay: an ad asking for fluent Dutch, 5+ years at a Big Four firm and SAP
+  gets every one of those as a gap and "Marginal match"; ads that do fit
+  still grade well, with evidence links that resolve; HR, ERP, marketing and
+  IT ads are "Different field", however many general skills they share; an
+  employer's own history, its team's languages, the language to apply in, or
+  a Dutch ministry is not a requirement; English is listed to confirm, not
   graded; a scrap of text is not graded; and no gap line states a number,
-  role or degree that `content/profile.json` does not hold.
+  role or degree that `content/profile.json` does not hold. The validator
+  refuses a rubric whose evidence links nowhere, misses a case study it
+  links to, or prints a figure the ledger does not hold; the dossier is
+  `content/`'s words, every case study without JavaScript; the shared link
+  carries only the rubric's ids, never the ad, ignores ids it does not know,
+  and rebuilds the same grade, gaps and dossier; and the visit's count says
+  only that the Brief was run and its grade.
 - **`voice.test.js`** — the Fish Audio generator renders nothing and plans no
   spend unless asked with `--sections`; the chunk assembler is a clean no-op on
   an empty map; the retired stock-voice tracks stay gone; and Moses's recorded
@@ -420,7 +426,7 @@ The suites, and the failure each one exists to prevent:
   magnitude"); every host the scan skips names the script that fills it,
   and what that script prints of its own is read from its source and held
   to the ledger (the field terminal, whose drill's depths are a made-up log
-  that says so, the Assay's evidence, the receipt, You Draw It, the coach
+  that says so, the Brief's evidence, the receipt, You Draw It, the coach
   and its tips, Anatomy of a Prompt, the games, the narration player), and
   the footer's badge prints no fixed figure; every copy of the grams per MB
   is the ledger's; the hosts hold no figure of their own in the HTML; the
@@ -504,7 +510,31 @@ The suites, and the failure each one exists to prevent:
   off-site address any shipped script may name is the Apps Script deployment
   the contact form posts to (the visit counter adds `?action=count`); nothing
   may use `navigator.sendBeacon`, which cannot leave cookies out; and every
-  page loads `count.js` once, deferred.
+  page loads `count.js` once, deferred. The field notes are read from their
+  folder, `notes/`, so a link that climbs out of it wrongly fails too.
+- **`notes.test.js`** — the field notes, their feed and the structured data
+  (see [Field Notes and the feed](#field-notes-and-the-feed) and
+  [Structured data](#structured-data)): the markdown reader refuses what is
+  outside its subset (raw HTML, code, an image, a quotation, a table, an
+  underscore, an indented line, a lazy continuation) and front matter YAML
+  would read another way, each with its line; the validator refuses a note
+  with no title, a date that is not a day or is still to come, a slug the
+  counter cannot name, a tie to a case study or lens that does not exist, or
+  a figure the claims ledger does not hold; the three first notes are dated
+  2026-07-06 and their one lines are their own words; each note's page is
+  dated, says the date is when it was first published here, links itself,
+  its case study, the older and newer note and the feed, and carries an
+  Article; `feed.xml` is well-formed Atom, newest first, `updated` the newest
+  note's date, every id a tag URI that never carries the site's address;
+  and every JSON-LD block on every page parses and says nothing `content/`
+  does not.
+- **`og.test.js`** — the preview cards (see [Preview images](#preview-images)):
+  every page with an `og:image`, each field note's included, shows its own
+  card there and in `twitter:image`, and the photo they all shared is gone;
+  each card is a 1200×630 PNG within its size cap; and `assets/og/og.hash`
+  fails it once a card's words (a note retitled, a page's `og:title`, the
+  role in `profile.json`) have moved on without a new render, or a card was
+  replaced by hand.
 - **`apps-script.test.js`** — the contact form's backend
   (`google-apps-script/Code.gs`), run in a VM with stand-ins for Google's
   services: both ways in (the JSON post and the JavaScript-free form post,
@@ -517,9 +547,14 @@ The suites, and the failure each one exists to prevent:
   minute not at all, so counts never keep a message waiting), `?test=1`
   stays off the public tab, `?action=stats` serves the rows to the right
   token and to nobody else, and each contact message is counted unless the
-  site says the browser asked not to be tracked. It cannot tell you
-  the live deployment is configured; `docs/owner-checklist.md` says how to
-  check.
+  site says the browser asked not to be tracked. And the health check's
+  end: `CODE_VERSION` is the file's own hash, `?action=health` refuses a
+  POST without `HEALTH_TOKEN` (and every POST while it is unset) before
+  reading it, and with it sends one message down the form's own path,
+  validated, limited and locked as a visitor's is, to a `Health` tab,
+  emailing nobody and counting nothing. It cannot tell you the live
+  deployment is configured; the weekly health check asks it, and
+  `docs/owner-checklist.md` says how to check by hand.
 - **`count.test.js`** — the visit counter's payload, field by field: the page
   (404 names itself), the lens the visit arrived with, the deepest part of
   `<main>` reached (one IntersectionObserver, no scroll handler), features
@@ -583,6 +618,22 @@ The suites, and the failure each one exists to prevent:
   one side, the open counts page held drawn full, and tables whose rows are
   as wide as their headers; and, measured with `--root` as the workflow
   measures main, a ceiling the branch moved, added or dropped.
+- **`health.test.js`** — the weekly health check and the quarterly review,
+  against fixtures with no network: a page Pages has not rebuilt in the
+  hour since `main` moved is "not rebuilt yet", and one still stale days
+  later is broken; a 404 or an unresolvable host is broken, LinkedIn's 999
+  and a 429 are "not checkable from here" and say why, and HEAD is retried
+  as GET before anything is called broken; a stale `verifiedOn`, a null
+  `confirmedOn`, an available-from date that has passed and an AI factor
+  set more than a quarter old wait on Moses; each answer Code.gs has given
+  in its life is told apart, and no test message is posted to a deployment
+  without the health check; the token in `HEALTH_URL` is never printed; the
+  owner checklist's items, ticked and not, are read from the file, and
+  each check finds its own; the issue is opened once, edited in place and
+  closed when nothing is broken or waiting; the quarterly review opens one
+  issue a quarter, and the plan's Phase 7 table says what
+  `docs/review-checklist.md` says; and both workflows ask for no more than
+  they need.
 - **`cpu.test.js`** — the page's keys go through one listener, so one Escape
   closes one layer (terminal, then player, then menu) and the
   backtick follows one rule for "typing"; one `mks.motionOK()` answers for
@@ -604,6 +655,79 @@ games and Anatomy of a Prompt are booted with their own pages
 tests timing passes `clock: true` and moves time with `await clock.tick(ms)`
 instead of sleeping, so a 1.7-second timeout costs nothing to test.
 
+## Health checks and the quarterly review
+
+The tests above run on every pull request. What they cannot see is the live
+site and the switches only Moses can throw: the open-counts Action ran
+green twice in October 2026 and committed nothing, because its secret was
+never set, and nothing said so where anyone would look. Two scheduled
+workflows close that gap.
+
+**Site health** (`.github/workflows/health.yml`, Tuesdays 05:41 UTC, or by
+hand) runs `scripts/health.js` and keeps one issue, "Site health" (label
+`health`): opened while anything is broken or waiting, edited in place on
+later runs, and closed with a comment once nothing is. Each check is
+*broken*, *waiting on Moses*, *not checkable from here* or *passing*:
+
+- **The live site is `main`.** Every page in `sitemap.xml` answers 200 with
+  the bytes `main` holds. A page `main` changed in the last hour is "not
+  rebuilt yet"; one still stale after that is broken, and the issue names
+  the version Pages is serving. Since `main` passes smoke in CI, this is
+  smoke against the live site without running a browser there.
+- **Links off the site**, in every page and in `content/`, answer below 400
+  (HEAD, then GET, a second apart on one host). A host that refuses
+  anything but a signed-in browser (LinkedIn's 999; the list is `REFUSERS`
+  in the script) is listed as not checkable, never as broken.
+- **What goes stale.** `meta.verifiedOn` more than a quarter old,
+  `meta.confirmedOn` still null, an at-a-glance fact the owner checklist's
+  table names still unstated or an `availableFrom` that has passed,
+  `REVIEWED_ON` in `ai-carbon-data.js` more than a quarter old, and a CV
+  printed before `content/` last changed (`assets/cv.hash`).
+- **The owner's switches.** The contact form's deployment (the address in
+  `script.js`) runs the repository's `Code.gs`: `GET ?action=health` answers
+  with its `CODE_VERSION`, and older scripts are told apart by what they
+  answer instead. The form end to end, once `HEALTH_URL` is set. The open
+  counts' secret is set (the workflow passes only "true" or "false"), and
+  `content/stats.json` holds a week, written within the last nine days.
+- **`npm audit`** at high or critical. Every dependency here is a dev
+  dependency: none ships to a visitor.
+- **The owner checklist's open items**, counted from
+  `docs/owner-checklist.md`, the ones the checks wait on named first. They
+  are listed, but they do not keep the issue open by themselves.
+
+The job stays green once it has written the issue; the issue is the signal.
+Locally, `npm run health -- --dry-run` prints the report and posts nothing.
+
+**The contact form, end to end.** Once the current `Code.gs` is published,
+give the Apps Script a second token, `HEALTH_TOKEN` (any long random
+string, not `STATS_TOKEN`), and make the web app URL with
+`?action=health&token=<that string>` a repository secret, `HEALTH_URL`.
+Each week the check then asks the deployment for its version, and only if
+it has the health check sends one test message down the form's own path:
+the same validation, limits, escaping and lock as a visitor's, written to a
+`Health` tab, emailing nobody and adding nothing to the public counts. The
+reply says whether `OWNER_EMAIL` and `TURNSTILE_SECRET` are set, the two
+settings that break the form for real visitors without breaking the test.
+Without the token, or while it is unset, `?action=health` refuses a POST
+before reading it. `testHealth()` in the Apps Script editor does the same
+without the token. Until `HEALTH_URL` is set, the check waits on Moses. If
+`Code.gs` changes, `CODE_VERSION` has to change with it:
+`npm run health -- --code-version` prints the new one, and
+`tests/apps-script.test.js` fails until it is in.
+
+**Quarterly review** (`.github/workflows/review.yml`) opens "Quarterly
+review — YYYY Qn" (label `review`) on the first Monday of January, April,
+July and October, carrying the monthly, quarterly and yearly checklist of
+the plan's Phase 7 with links to `stats.html`, the owner checklist and the
+latest health issue, and never a second one for the same quarter. The
+checklist's words are in [docs/review-checklist.md](docs/review-checklist.md)
+and only there; `tests/health.test.js` fails if the plan's table says
+anything else. `node scripts/review.js --dry-run` prints the issue.
+
+GitHub turns off scheduled workflows in a public repository after 60 days
+without activity in it. The Actions tab then shows each one as disabled,
+and one press turns it back on.
+
 ## Content pipeline
 
 The site's facts used to live in six places at once — `index.html`, its JSON-LD
@@ -614,10 +738,11 @@ Everything derived now comes from `content/`:
 
 | Source | Feeds |
 |---|---|
-| `content/profile.json` | JSON-LD, `sitemap.xml`, the homepage's at-a-glance strip, its certificates and its core log's depths, the Assay's facts block in `modules/interactives.js`, the shared shell's call to action on every page but the homepage, the CV, the facts `content.test.js` holds every page to |
+| `content/profile.json` | the homepage's JSON-LD (the Person, with the certificates as `hasCredential`, and the WebSite), `sitemap.xml`, the homepage's at-a-glance strip, its certificates and its core log's depths, the facts and the dossier's at-a-glance strip on `brief.html`, the shared shell's call to action on every page but the homepage, the CV, the facts `content.test.js` holds every page to |
 | `content/projects.json` | `case-studies.html` (with each case study's photos, game and findings), the homepage's six project cards (every case study not marked `homepageCard: false`), and each case study's headline result on the CV |
 | `content/lenses.json` | the role-specific views (`water`, `climate-risk`, `sustainable-ai`, `esg-csrd`) |
-| `content/research.json` | `research.html`, the CV's public work |
+| `content/research.json` | `research.html`, the CV's public work, and `carbon-ai.html`'s JSON-LD (the coach as a SoftwareApplication) |
+| `content/notes/*.md` | a page per note, `notes/<slug>.html`; `feed.xml`; the homepage's links to the newest three; their entries in `sitemap.xml`; and each note's Article in its JSON-LD (and, by `npm run og`, its preview card) |
 | `content/testimonials.json` | the homepage's testimonials, once there is one |
 | `content/claims.json` | `claims.html` ("Check my numbers"), and the `data-claim` mark on every figure a generated page prints from `content/` |
 | `content/narration.json` | `voice-scripts.js` |
@@ -633,14 +758,154 @@ editorial pages, and templating over their hand-tuned markup to remove
 duplication a test already catches would trade a small problem for a large one.
 The exceptions are regions the generator writes between markers: in
 `index.html` the JSON-LD block, the at-a-glance strip, the six project
-cards, the certificates and the testimonials, and in place, each core-log
-layer's depths and the date in the log's head.
+cards, the field notes' links, the certificates and the testimonials, and in
+place, each core-log layer's depths and the date in the log's head.
 `content.test.js` holds them to `content/` instead. `carbon-ai.html` and
 `404.html` are hand-authored too, bar the shared shell: the generator writes
 the nav and the call to action into them and the field report, between
 `<!-- SHELL-NAV -->` and `<!-- SHELL-CTA -->` markers (and `theme.js` into
-`carbon-ai.html`'s head, and its footer between `<!-- SHELL-FOOT -->`
-markers), and `build:check` fails if a page's copy drifts.
+`carbon-ai.html`'s head, its footer between `<!-- SHELL-FOOT -->` markers,
+and its structured data between `<!-- JSON-LD -->` markers), and
+`build:check` fails if a page's copy drifts.
+
+### Field Notes and the feed
+
+Each note is a markdown file in `content/notes/`, named for its slug, with a
+short front-matter block:
+
+```markdown
+---
+number: 1
+title: What 164 water points taught me about data
+slug: what-164-water-points-taught-me
+date: 2026-07-06
+tag: Water
+summary: Geophysics taught me that data only matters when someone stakes something on it.
+caseStudy: groundwater
+---
+
+In the Freetown Complex, a wrong guess isn't a bad cell in a spreadsheet — …
+```
+
+`number` is its place in the series ("Note 01"); `date` the day it was first
+published on this site; `tag` the topic the homepage shows; `summary` one
+line of plain text, the homepage's line under the title, the page's
+description and the feed's summary; and `caseStudy` or `lens` (one of the
+two) the case study or role view it belongs with. `npm run build:content`
+turns each into `notes/<slug>.html`: the shared shell, the light theme, the
+visit counter, the date in a `<time>` with the words "first published on
+this site", a permalink, its tag, a link to its case study or view, the
+older and the newer note, an `Article` in its JSON-LD, a canonical address
+and Open Graph tags for an article. A note's page sits a folder down, so
+everything it loads and links climbs back with `../`, and it names itself to
+the counter as `note-` and its slug (`data-page`), which no page at the root
+can be called. The homepage links the newest three; from there the older and
+newer links reach every note, and `feed.xml` and `sitemap.xml` list them all.
+A note's page whose source is deleted is removed by the next build.
+
+The markdown is a small subset, read by `scripts/lib/notes.js` with no
+dependency: paragraphs, `*emphasis*`, `**strong**`, `[links](url)`, `##` and
+`###` headings, and lists marked `- ` or `1. `, one line to an item. Anything
+else (raw HTML, code, an image, a quotation, a table, an underscore, an
+indented or nested line, a line run on from a list item) fails the build with
+its line, rather than being printed wrong. A link is written from the site's
+root (`index.html#ecoprompt`); the build makes it climb from `notes/`, and
+the validator holds it to a file in the repository or a trusted host. The
+front matter is plain YAML, one `key: value` to a line, because GitHub Pages'
+Jekyll reads every markdown file's front matter: a value YAML would read
+another way (one opening with a quote or a bracket, or holding `: ` or ` #`)
+is refused, so a note cannot break the deploy. Jekyll also renders each
+markdown file it finds, so until the deploy stops publishing `content/`
+(docs/plan.md, Phase 6.1) a plain copy of each note is at
+`/content/notes/<slug>.html` too; the canonical address is the page in
+`notes/`. The validator (`checkNotes` in `scripts/lib/content.js`) refuses a
+note with no title, a date that is not a day or is still to come, a slug
+of more than 35 characters (with `note-` before it, the name has to keep to
+the counter's 40), a file not named for its slug, a tie to a case study or lens
+that does not exist, a reused number, a later number on an earlier date, or a
+figure the claims ledger does not hold as written. A figure it does hold is
+marked from the ledger, as on every generated page, and
+`tests/claims.test.js` scans the notes' pages with the rest.
+
+The three notes the homepage carried as folds are the first three articles,
+word for word, with one change: the third pointed "further down" the
+homepage to its chart, and on a page of its own says "on the homepage". None
+had a date or a summary. Each is dated 2026-07-06, the day it first went on
+the site (`git log -S` on its text finds commit `916a7c7`, merged to `main`
+that day), and each one line is a line of the note itself.
+
+`feed.xml` is Atom (RFC 4287), linked from the homepage and every note: every
+note, newest first, whole, its links absolute. It is deterministic like
+every generated file, with no build time in it: `updated` is the newest
+note's date. Its id and each entry's are tag URIs (RFC 4151),
+`tag:moseskolleh.github.io,2026:sustaintheworld/notes/<slug>`: a feed reader
+takes an entry whose id has changed for a new one, and the site's address is
+due to change (a domain of its own, Phase 5.5), so the ids never carry it.
+Their authority and date are fixed for good, and `tests/notes.test.js` pins
+them; the links carry the address.
+
+The notes share one byte budget and one length budget, `notesWire` and
+`notes/*.html` in `scripts/check-budget.js`, each held by the heaviest and
+the longest note, so a new note needs no ceiling of its own, only to fit
+under the one there is. The three today are short (about a hundred words
+each), so a longer note will need its ceiling raised, which is a decision
+to make on purpose rather than a test to work around.
+
+### Preview images
+
+```bash
+npm run og      # draw assets/og/<page>.png for every page with an og:image, and write assets/og/og.hash
+```
+
+A link shared on LinkedIn or X unfurls into a preview. One drilling photo,
+with no name on it, used to be the preview of every page. `scripts/build-og.js`
+now draws a card per page and per field note, with the Chromium the smoke
+test uses: the page's or the note's title, a line saying what it is (a
+note's number, tag and date; another page's address), and who it is by,
+Moses's name and role, in the site's colours and fonts, inline, so nothing
+is fetched. The words are read, never written there: a note's from
+`content/notes/`, the homepage's from the roles in `profile.json`, every
+other page's from its own `og:title`. Each card is named as the visit
+counter names its page (`assets/og/case-studies.png`,
+`assets/og/note-<slug>.png`), and each page's `og:image` and
+`twitter:image` (and a note's Article) point at its own.
+
+The cards are 1200×630, the size LinkedIn, Facebook and X's large card
+ask for, drawn at one pixel to one pixel. A card is flat colour and
+anti-aliased text, a few hundred colours, so `scripts/lib/png.js` saves it
+as an indexed PNG (one byte a pixel and a palette, with Node's zlib and
+nothing else; where it needs to, it rounds each channel to a step of 4, too
+fine to see on a text's edge): 12 to 21 KB a card, where Chromium's own PNG
+was 36 to 55 KB and the photo they replace 122 KB. Each is held under 32 KB
+(`OG_MAX_BYTES`), room for a title of three lines: every image in the
+repository counts against one budget, every note adds a card, and a preview
+is fetched once, by whoever unfurls the link. The ten cards take about
+160 KB of it; the photo's removal paid for most of that, and the budget has
+room for about five more notes' cards before something has to give. `assets/og/og.hash`, like `assets/cv.hash`,
+records a hash of every card's words and of each image, so
+`tests/og.test.js` fails when a title changes without a new render: after
+`npm run build:content` changes a title, or a new note arrives, run
+`npm run og` and commit the images with the hash. Chromium is only needed
+to draw them; the test reads the committed files.
+
+### Structured data
+
+Every JSON-LD block is written by `npm run build:content`, from `content/`
+alone:
+
+| Page | Block | From |
+|---|---|---|
+| `index.html` | `Person`: name, role, employer, address, degrees (`alumniOf`), certificates (`hasCredential`, each with its issuer and year, and its verification page once `verifyUrl` is set), `knowsAbout`, `sameAs` | `content/profile.json` |
+| `index.html` | `WebSite`, its author the Person by `@id` | `content/profile.json` |
+| `notes/*.html` | `Article`: headline, one line, date, tag, author | `content/notes/*.md` |
+| `carbon-ai.html` | `SoftwareApplication`: this site's edition of the EcoPrompt Coach, as `content/research.json` names and describes it; it `mentions` the maintained tool by its repository, never claiming to be it or built on it | `content/research.json` |
+
+`knowsLanguage` is written once `profile.json` states his languages, which it
+does not yet; `sameAs` lists the profiles `profile.json` holds (GitHub and
+LinkedIn) and no other. `tests/notes.test.js` parses every block on every
+page and fails on any value `content/` does not hold, bar the few that are
+schema.org's own vocabulary (a credential's category). `404.html`, which
+search engines are told not to index, has a title and a description.
 
 ### The rules the content model enforces
 
@@ -756,7 +1021,7 @@ by name, must hold no figure in the HTML, and their inputs are entries
 where the pages print them. What the scripts filling those hosts print of
 their own is not skipped: each host names its script, whose strings are
 read from the source and held to the ledger the same way, the field
-terminal's lines (`modules/terminal.js`), the Assay's evidence lines, the
+terminal's lines (`modules/terminal.js`), the Brief's evidence lines, the
 receipt's field-report size, You Draw It's words and the coach's tips
 among them, and the narration player's note on its weight. A testimonial's
 or a certificate's figure is marked like any other, and the build refuses
@@ -798,6 +1063,10 @@ Mondays early UTC, or by hand) fetches the counter's daily totals, suppresses
 them, rebuilds the page, runs `npm test` and commits the two files if they
 changed. The raw daily rows never enter the repository.
 
+The field notes' page views are published as one row, `notes`, every note
+together: one note's would mostly read `<5`, and hold a neighbour back with
+it. The daily totals keep each note's under its own name.
+
 What is published is whole weeks only, Monday to Sunday: last week, all time
 from the first full week to last Sunday, and one line per week. The days
 before the first Monday and the week still running are in no figure, so no
@@ -825,7 +1094,9 @@ check, and the Action fails on that rather than mistake it for an empty
 week. The `Daily` sheet published as CSV also works as the source, but a
 published tab is readable by anyone who has its link, which `stats.html`
 says is not the case. Until the secret is set, the Action says so and
-commits nothing, and the page says counting has not started. The steps, and
+commits nothing, and the page says counting has not started; the run stays
+green, but leaves a notice and a line in its summary saying why, and the
+weekly health issue lists the open counts as waiting. The steps, and
 how to check each, are items S1 and S2 in
 [docs/owner-checklist.md](docs/owner-checklist.md). To run it locally:
 
@@ -878,10 +1149,10 @@ same page view. This is the whole of one, exactly as `count.js` sends it:
 | Key | What it holds |
 |---|---|
 | `v` | `1`, the version of this format |
-| `page` | the page's file name without `.html` (`index`, `case-studies`, `research`, `claims`, `carbon-ai`, `field-report`, `stats`), or `404` |
+| `page` | the page's file name without `.html` (`index`, `case-studies`, `research`, `claims`, `carbon-ai`, `field-report`, `stats`), or the name a page gives itself with `data-page`: `404`, and a field note's `note-` and its slug |
 | `lens` | the `?lens=` the page view arrived with, or `""` |
 | `deepest` | the id of the furthest top-level part of `<main>` that came on screen: on the homepage one of its seven sections, from `journey` to `contact`; `csGrid` on the case studies; `""` on the pages that have no such part |
-| `features` | up to 20 distinct names of things used: the site's `data-analytics` hooks (37 today, such as `cv-download-hero` and `receipt-open`), `cv-download` once for a view that used any CV link (the CV-downloads figure counts page views), `cv-download-terminal` when the field terminal's `cv` command fetches the CV, `module-<name>` for each on-demand module fetched, `contact-form-submit`, and the Assay's grade (`assay-high`, `assay-workable`, `assay-marginal`) |
+| `features` | up to 20 distinct names of things used: the site's `data-analytics` hooks (41 today, such as `cv-download-hero` and `receipt-open`), `cv-download` once for a view that used any CV link (the CV-downloads figure counts page views), `cv-download-terminal` when the field terminal's `cv` command fetches the CV, `module-<name>` for each on-demand module fetched, `contact-form-submit`, and from The Brief `brief-run` (the fifth of the five numbers), the grade it gave (`brief-high`, `brief-workable`, `brief-marginal`) and `brief-shared` for a shared link opened |
 | `ref` | the referring site's host only (`www.linkedin.com`); `""` if there was none, or it was this site |
 | `vp` | the browser window's width as a class: `s` under 600 px, `m` under 1024 px, `l` wider |
 | `kb` | whole KB this page view transferred, from the browser's Resource Timing API, so a cached revisit counts as the near-zero it is |
@@ -892,8 +1163,9 @@ same page view. This is the whole of one, exactly as `count.js` sends it:
   cannot be tied to each other, or to a person. Every published figure is a
   count of page views, not of people.
 - No `Referer` header and no full referring address, only its host.
-- Nothing typed into the page. The Assay's grade is counted; the job ad
-  pasted into it never leaves the page.
+- Nothing typed into the page. That The Brief was run, and the grade it
+  gave, are counted; the job ad pasted into it never leaves the page, and
+  nor does it go into the link the page leaves.
 - No IP address, browser, device or operating system, and no screen or
   window size beyond the three classes. Apps Script does not give the script the
   sender's address or headers, so there is nothing to store even by mistake.
@@ -972,12 +1244,13 @@ To change the color scheme, edit the CSS variables in `style.css`:
 ```
 
 ### Content
-- Update personal facts in `content/profile.json` (they feed the JSON-LD, the at-a-glance strip, the Assay and every other page's call to action) and projects in `content/projects.json`, then run `npm run build:content`; `npm test` names any hand-authored page that still disagrees
+- Update personal facts in `content/profile.json` (they feed the JSON-LD, the at-a-glance strip, The Brief and every other page's call to action) and projects in `content/projects.json`, then run `npm run build:content`; `npm test` names any hand-authored page that still disagrees
 - Modify the rest of a section's content directly in the HTML
 - Add or remove projects, experiences, and skills as needed
 
 ### Images
 - All published images live in `assets/img/` as WebP; keep new ones under ~200 KB (e.g. `npx sharp-cli -i photo.jpg -o assets/img/photo.webp resize 900`)
+- The link previews in `assets/og/` are drawn, not photographed: `npm run og` (see [Preview images](#preview-images))
 - Hero backgrounds use the `-hero.webp` variants (1600 px wide)
 - The journey map is generated, not drawn: edit `scripts/generate-journey-map.js` and re-run it to change stops
 
@@ -1015,10 +1288,10 @@ did.
 <!-- BUDGET-TABLE:START — generated by scripts/check-budget.js (npm run budget -- --readme). Do not edit by hand. -->
 | Budget | Measured | Ceiling |
 |---|---|---|
-| First view of the homepage, over the wire (fonts included) | ~276 KB | 288 KB |
-| Everything a full visit adds on demand (modules, scripts, map) | ~72 KB | 72 KB |
+| First view of the homepage, over the wire (fonts included) | ~274 KB | 288 KB |
+| Everything a full visit adds on demand (modules, scripts, map) | ~58 KB | 72 KB |
 | Largest single image | ~200 KB | 210 KB |
-| Every image in the repository | ~3.36 MB | 3.5 MB |
+| Every image in the repository | ~3.41 MB | 3.5 MB |
 | Recorded narration: Moses's introduction (sized for his 60–90 s take) | 0 KB | 800 KB |
 | Text-only field report, the HTML file (the size the footer quotes) | ~10 KB | 11 KB |
 | Text-only field report, over the wire (with its visit counter) | ~6 KB | 8 KB |
@@ -1026,7 +1299,9 @@ did.
 | Open counts page, over the wire (fonts included; sized for a full page) | ~97 KB | 103 KB |
 | Research outputs page, over the wire (fonts included) | ~97 KB | 99 KB |
 | Check my numbers (`claims.html`), over the wire (fonts included) | ~99 KB | 101 KB |
+| Each field note (`notes/*.html`), over the wire (fonts included; the heaviest) | ~89 KB | 94 KB |
 | EcoPrompt Coach (`carbon-ai.html`), over the wire (fonts included) | ~111 KB | 111 KB |
+| The Brief (`brief.html`), over the wire (fonts and its script included) | ~107 KB | 113 KB |
 <!-- BUDGET-TABLE:END -->
 
 **What the estimate used to miss.** An earlier version of this table said
@@ -1060,7 +1335,7 @@ few data files features read, is fetched the moment it is first needed:
 <!-- MODULE-TABLE:START — generated by scripts/check-budget.js (npm run budget -- --readme). Do not edit by hand. -->
 | Module | Loads when | Gzipped |
 |---|---|---|
-| `modules/interactives.js` (+ `ai-carbon-data.js`) | section 05, the Assay or the footer receipt comes within a screen of the viewport, or a deep link lands there | ~31 KB |
+| `modules/interactives.js` (+ `ai-carbon-data.js`) | section 05 or the footer receipt comes within a screen of the viewport, or a deep link lands there | ~17 KB |
 | `modules/dispatch.js` (+ `dispatch.css`, `voice-scripts.js`) | the first press of Listen, or `voice` in the terminal | ~15 KB |
 | `modules/dossier.js` (+ `dossier.css`) | on `case-studies.html`, a game's host comes within a screen of view (the page's own loader, not `script.js`) | ~9 KB |
 | `modules/terminal.js` | the backtick key or the footer button | ~5 KB |
@@ -1106,10 +1381,12 @@ weekly Action will commit).
 | `case-studies.html` | 11.85 screens | 19.78 screens |
 | `carbon-ai.html` | 7.07 screens | 13.38 screens |
 | `claims.html` | 7.54 screens | 13.53 screens |
+| `brief.html` | 2.63 screens | 3.74 screens |
 | `research.html` | 5.86 screens | 8.99 screens |
 | `stats.html` | 10.97 screens | 16.25 screens |
 | `field-report.html` | 4.4 screens | 7.44 screens |
 | `404.html` | 1.05 screens | 1.05 screens |
+| `notes/*.html` | 1.4 screens | 2.06 screens |
 <!-- LENGTH-TABLE:END -->
 
 ```bash
@@ -1198,10 +1475,11 @@ aspirational:
 - No duplicate `id`s, no focusable element inside an `aria-hidden` container
 
 `npm run smoke` adds axe-core in a real browser: every page at 1440×900 and
-390×844 in both themes, the homepage again with the Assay's verdict, the
-carbon receipt, the player, the terminal and the phone menu open, and with
-its script blocked, and the case studies with both games played, a row of
-photos open and the lightbox open. Any violation fails, contrast included —
+390×844 in both themes, the homepage again with the carbon receipt, the
+player, the terminal and the phone menu open, and with its script blocked,
+the case studies with both games played, a row of photos open and the
+lightbox open, and The Brief with its verdict on an ad, as a shared link
+rebuilds it, and with its scripts blocked. Any violation fails, contrast included —
 but axe fails only what it can decide, and text over an image or a gradient
 it leaves for a person to review.
 

@@ -128,7 +128,8 @@ const countScrolls = (window) => {
     // The observer's first report comes a frame after the jump and was
     // skipped as "only the current size". When section 05's module grew the
     // page inside that frame, the one report that carried the growth was
-    // thrown away, and a shared /#assay link stopped 250-440px short.
+    // thrown away, and a shared link to the Assay, then in section 07,
+    // stopped 250-440px short.
     {
         const observers = [];
         let bodyHeight = 20000;
@@ -227,7 +228,7 @@ const countScrolls = (window) => {
         const band = observers.filter(o => o.els.length).pop();
         const watched = (sel) => !!band && Array.from(doc.querySelectorAll(sel)).every(el => band.els.includes(el));
         const CONTROLS = ['.hero-availability', '.hero-cta a', '.contact-form input', '.contact-form textarea', '.btn-submit',
-            '.corelog-more', '.project-link', '#ydiReveal', '.assay-sample', '.assay-open', 'a.toolkit-proof', '.carbon-badge', '.receipt-btn', '.eco-mode-toggle', '.terminal-toggle'];
+            '.corelog-more', '.project-link', '#ydiReveal', '.brief-line a', 'a.toolkit-proof', '.carbon-badge', '.receipt-btn', '.eco-mode-toggle', '.terminal-toggle'];
         const missing = CONTROLS.filter(sel => !doc.querySelector(sel) || !watched(sel));
         assert(!!band && missing.length === 0, `Back to top: it watches every control it could sit on, from the hero to the footer (not watched: ${missing.join(', ') || 'none'})`);
         assert(!!band && !band.els.some(el => el.classList.contains('footer') || el.classList.contains('contact-form')),
@@ -255,12 +256,20 @@ const countScrolls = (window) => {
     // --- An address into a fold opens it ---
     // claims.html's "Where" links send a reader to figures the homepage
     // keeps out of sight until asked: the badge's method note ([hidden],
-    // opened by its "?"), a role's depth behind its More, a field note's
-    // closed fold. A link to the method note landed at the top of the page,
-    // and one to a role on a card that did not show the figure. Each opens
-    // before the landing now, by the control a reader would press.
+    // opened by its "?"), a role's depth behind its More, a closed fold (the
+    // field notes were three, until each became a page of its own; the
+    // probe stands in for the next). A link to the method note landed at the
+    // top of the page, and one to a role on a card that did not show the
+    // figure. Each opens before the landing now, by the control a reader
+    // would press.
     {
-        const { window, clock } = run('dark', { clock: true, before: (w) => { w.document.querySelector('details.fieldnote').id = 'noteProbe'; } });
+        const probe = (w) => {
+            const fold = w.document.createElement('details');
+            fold.id = 'noteProbe';
+            fold.innerHTML = '<summary>A fold</summary><p>What it holds.</p>';
+            w.document.getElementById('notes').appendChild(fold);
+        };
+        const { window, clock } = run('dark', { clock: true, before: probe });
         const doc = window.document;
         const scrolled = countScrolls(window);
         const method = doc.getElementById('carbonMethod');
@@ -280,7 +289,7 @@ const countScrolls = (window) => {
         const note = doc.getElementById('noteProbe');
         window.location.hash = '#noteProbe';
         await clock.tick(400);
-        assert(note.open, 'Folds: an address into a field note opens its fold');
+        assert(note.open, 'Folds: an address into a closed <details> opens it');
     }
 
     {
@@ -291,8 +300,8 @@ const countScrolls = (window) => {
         const home = page('index.html');
         const stale = moved.filter(([id]) => new RegExp(`\\bid="${id}"`).test(home)).map(([id]) => id);
         const dead = moved.filter(([, to]) => { const [rel, id] = to.split('#'); return !new RegExp(`\\bid="${id}"`).test(page(rel)); }).map(([, to]) => to);
-        assert(moved.length >= 4 && moved.some(([id]) => id === 'strikeWidget') && moved.some(([id]) => id === 'anatomy'),
-            `Moved: the old addresses of the games and Anatomy of a Prompt are forwarded (${moved.map(([id]) => `#${id}`).join(', ') || 'none'})`);
+        assert(moved.length >= 5 && moved.some(([id]) => id === 'strikeWidget') && moved.some(([id]) => id === 'anatomy') && moved.some(([id, to]) => id === 'assay' && to === 'brief.html#grade'),
+            `Moved: the old addresses of the games, Anatomy of a Prompt and the Assay (to The Brief's box) are forwarded (${moved.map(([id]) => `#${id}`).join(', ') || 'none'})`);
         assert(stale.length === 0, `Moved: none of them is an id on the homepage again, which a forward would hide (${stale.join(', ') || 'none'})`);
         assert(dead.length === 0, `Moved: each goes to an id its page has (missing: ${dead.join(', ') || 'none'})`);
     }
