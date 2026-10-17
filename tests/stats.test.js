@@ -133,8 +133,12 @@ const known = fetchStats.knownNames();
     const unnamed = Array.from(known.pages).filter(k => !PAGE_NAMES[k]);
     assert(known.pages.has('claims') && unnamed.length === 0, `Known: every page the counter knows has a name on stats.html (${unnamed.join(', ') || `${known.pages.size} named`})`);
 }
-const cleaned = fetchStats.cleanRows(fixtureRows(), known, TODAY);
-const stats = fetchStats.transform(cleaned.rows, { today: TODAY, known });
+// The fixture's totals are from before the site had The Brief, so its
+// "brief-run" is not among the names they are read with; the Brief live is
+// checked from the same rows below.
+const beforeBrief = Object.assign({}, known, { features: new Set(Array.from(known.features).filter(f => f !== 'brief-run')) });
+const cleaned = fetchStats.cleanRows(fixtureRows(), beforeBrief, TODAY);
+const stats = fetchStats.transform(cleaned.rows, { today: TODAY, known: beforeBrief });
 
 // Every string anywhere in a value, and every count-shaped value.
 function walk(value, visit, where = '') {
@@ -223,12 +227,13 @@ function walk(value, visit, where = '') {
     // The counter names a module fetched on demand "module-<name>"; the bare
     // name is not something it sends, so it is not a name the page may show.
     assert(!known.features.has('dossier'), 'Known: a module is known by the name the counter sends, not its bare file name');
-    // Hooks a module writes into the page, and the Assay's grades, which it
-    // sends as "assay-<class>": each was counted as "other" until the names
-    // were read from the modules as well as the pages.
-    ['listen', 'listen-intro', 'assay-copy', 'assay-contact', 'assay-high', 'assay-workable', 'assay-marginal']
+    // Hooks a script writes into the page, and the Brief's grades, which it
+    // sends as "brief-<class>": the Assay's were counted as "other" until the
+    // names were read from the scripts as well as the pages.
+    ['listen', 'listen-intro', 'brief-copy', 'brief-contact', 'brief-run', 'brief-shared', 'brief-high', 'brief-workable', 'brief-marginal']
         .forEach((f) => assert(known.features.has(f), `Known: feature "${f}"`));
-    assert(!known.features.has('assay-'), 'Known: the start of a composed name (track(\'assay-\' + grade)) is not a feature');
+    assert(!known.features.has('brief-') && !known.features.has('assay-high'), 'Known: the start of a composed name (track(\'brief-\' + a.cls)) is not a feature, nor is a grade the site no longer gives');
+    assert(known.pages.has('brief'), 'Known: page "brief"');
     ['water', 'climate-risk', 'sustainable-ai'].forEach(l => assert(known.lenses.has(l), `Known: lens "${l}"`));
     assert(known.ids.has('contact') && known.ids.has('groundwater'), 'Known: section ids from the homepage and the case studies');
 
@@ -263,8 +268,9 @@ function walk(value, visit, where = '') {
     assert(w.contactShare === 0.25 && a.contactShare === 0.25, `Five: a quarter of homepage views reached Contact (${w.contactShare}, ${a.contactShare})`);
     assert(w.briefUses === null && a.briefUses === null && stats.briefLive === false, 'Five: Brief uses are null while the site has no Brief');
 
-    // ...and once it has one.
-    const withBrief = Object.assign({}, known, { features: new Set(Array.from(known.features).concat('brief-run')) });
+    // ...and once it has one, as it has now.
+    const withBrief = known;
+    assert(withBrief.features.has('brief-run'), 'Five: the site names "brief-run", so Brief uses are counted');
     const briefRows = fetchStats.cleanRows(fixtureRows().concat([['2026-09-29', 'feature', 'brief-run', 6], ['2026-09-14', 'feature', 'brief-run', 2]]), withBrief, TODAY).rows;
     const live = fetchStats.transform(briefRows, { today: TODAY, known: withBrief });
     // 8 all time and 6 last week would give away the 2 before last week, a
@@ -463,8 +469,8 @@ function walk(value, visit, where = '') {
     const csv = ['date,metric,key,count'].concat(fixtureRows().map(r => r.map(esc).join(','))).join('\n');
     const fromCsv = fetchStats.parseSource(csv);
     const fromJson = fetchStats.parseSource(JSON.stringify({ v: 1, rows: fixtureRows() }));
-    const a = fetchStats.transform(fetchStats.cleanRows(fromCsv.rows, known, TODAY).rows, { today: TODAY, known });
-    const b = fetchStats.transform(fetchStats.cleanRows(fromJson.rows, known, TODAY).rows, { today: TODAY, known });
+    const a = fetchStats.transform(fetchStats.cleanRows(fromCsv.rows, beforeBrief, TODAY).rows, { today: TODAY, known: beforeBrief });
+    const b = fetchStats.transform(fetchStats.cleanRows(fromJson.rows, beforeBrief, TODAY).rows, { today: TODAY, known: beforeBrief });
     assert(JSON.stringify(a) === JSON.stringify(b) && JSON.stringify(b) === JSON.stringify(stats),
         'Source: CSV and JSON of the same rows give identical totals');
 }
@@ -583,7 +589,7 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
     assert(/a lone <5 would be the total less the rest, so the smallest figure beside it is held back as well/.test(text),
         'Privacy: says a figure is held back where subtraction would give a small one away');
     assert(/Every figure covers whole weeks/.test(text) && /No count for a single day is ever published/.test(text), 'Privacy: whole weeks, and no single day');
-    assert(/grade it gave\. Never the ad itself/.test(text), 'Privacy: says the Assay\'s grade is among the features, and the ad never is');
+    assert(/The Brief graded a job ad, the grade it gave\. Never the ad itself/.test(text), 'Privacy: says the Brief\'s grade is among the features, and the ad never is');
     assert(/window/.test(doc.querySelector('.st-fields').textContent) && !/Screen width/.test(text), 'Privacy: vp is the window\'s width, not the screen\'s');
     assert(/Google Sheet in my own Google account/.test(text) && /a key that the scheduled job keeps as a secret/.test(text),
         'Privacy: says where the raw daily totals live, and that only the weekly job can read them');
@@ -624,6 +630,10 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
     assert(JSON.stringify(values[0]) === JSON.stringify(['<5', '6']), `Counting: contact reads <5 last week, 6 in all (${values[0]})`);
     assert(JSON.stringify(values[3]) === JSON.stringify(['25%', '25%']), `Counting: the Contact share reads as a percentage (${values[3]})`);
     assert(/not live yet/.test(cards[4].textContent), 'Counting: Brief uses say "not live yet" until there is a Brief');
+    const live = page(fetchStats.transform(fetchStats.cleanRows(fixtureRows().concat([['2026-09-29', 'feature', 'brief-run', 9]]), known, TODAY).rows, { today: TODAY, known }));
+    const briefCard = live.querySelectorAll('.st-five .st-card')[4];
+    assert(!/not live yet|not built yet/.test(briefCard.textContent) && briefCard.querySelectorAll('.st-values dd').length === 2 && !!briefCard.querySelector('a[href="brief.html"]'),
+        `Counting: with the Brief live, its card gives last week and all time, and links the Brief (${Array.from(briefCard.querySelectorAll('.st-values dd')).map(d => d.textContent).join(', ')})`);
     assert(/a proxy/.test(cards[2].textContent) && /at most/.test(cards[2].textContent), 'Counting: the lens figure is labelled a proxy, and an upper bound');
     assert(/Week of 28 Sep – 4 Oct 2026/.test(cards[0].textContent), 'Counting: the week is named by its dates');
 

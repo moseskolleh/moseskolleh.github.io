@@ -207,7 +207,7 @@ const mksLoadWarn = (err) => {
 // The parts of the page owned by modules/interactives.js. A deep link or an
 // in-page anchor into one of these loads the module before the page scrolls
 // there, so a shared /#ydi lands on a working widget rather than an empty box.
-const INTERACTIVE_HOSTS = '#ecoprompt, #ydi, #assay, #receiptPanel, #receiptBtn';
+const INTERACTIVE_HOSTS = '#ecoprompt, #ydi, #receiptPanel, #receiptBtn';
 const mksLoadFor = (target) => {
     if (!target || typeof target.closest !== 'function') return;
     if (target.closest(INTERACTIVE_HOSTS)) mksLoad('interactives').catch(mksLoadWarn);
@@ -353,8 +353,7 @@ const navMenu = document.getElementById('navMenu');
 // Open what hides a deep-link target (claims.html links into each): a
 // [hidden] block by its control (aria-controls), so /#receiptPanel shows
 // the receipt and the method note opens; a closed <details>; a role behind
-// More. The receipt fills as it opens, so the landing waits for it. The
-// Assay the same; it grows below its own top, so there is nothing to wait for.
+// More. The receipt fills as it opens, so the landing waits for it.
 const revealTarget = (target) => {
     if (!target || !target.closest) return false;
     let expanded = false;
@@ -366,9 +365,6 @@ const revealTarget = (target) => {
     const card = target.closest('.timeline-content:not(.is-open)');
     const more = card && card.querySelector('.corelog-more');
     if (more) more.click();
-    const assay = target.closest('#assay');
-    const shut = assay && assay.querySelector('.assay-open[aria-expanded="false"]');
-    if (shut) shut.click();
     return expanded;
 };
 
@@ -468,15 +464,17 @@ inPageLinks.forEach((anchor, index) => {
     });
 });
 
-// Links already shared to what Phase 2 moved off this page (the games,
-// Anatomy of a Prompt) opened it at its top, with no sign of what they
-// were for. They go on to where it is now, with the site that linked to
-// them as ?via=: count.js would otherwise take this page for the referrer.
+// Links already shared to what moved off this page (the games, Anatomy of
+// a Prompt, and the Assay, which grew into The Brief) opened it at its top,
+// with no sign of what they were for. They go on to where it is now, with
+// the site that linked to them as ?via=: count.js would otherwise take
+// this page for the referrer.
 const MOVED = new Map([
     ['anatomy', 'carbon-ai.html#anatomy'],
     ['boreholeGame', 'case-studies.html#play-borehole'],
     ['strikeWidget', 'case-studies.html#play-borehole'],
-    ['floodSim', 'case-studies.html#play-flood']
+    ['floodSim', 'case-studies.html#play-flood'],
+    ['assay', 'brief.html#grade']
 ]);
 const forwardMoved = () => {
     const id = location.hash.slice(1), to = MOVED.get(id);
@@ -658,8 +656,8 @@ const navSpies = navLinks.map((link) => {
         resizeTimer = setTimeout(relayout, 150);
     }, { passive: true });
     window.addEventListener('load', relayout);
-    // A module that has filled in its part of the page, or the Assay's
-    // result, announces it: new controls for back to top to keep clear of.
+    // A module that has filled in its part of the page announces it: new
+    // controls for back to top to keep clear of.
     document.addEventListener('mks:layout', relayout);
     // A section that changes height moves every offset below it: a module
     // filling it in, or one drawn for the first time (content-visibility sizes it
@@ -1217,7 +1215,7 @@ document.querySelectorAll('.current-year').forEach(el => {
 // ===================================
 // INTERACTIVES — the trigger
 // ===================================
-// You Draw It in section 05, The Assay and The Receipt
+// You Draw It in section 05 and The Receipt
 // (modules/interactives.js, with ai-carbon-data.js behind them) load when
 // any of their homes comes within about a screen of the viewport, so they
 // are drawn by the time the visitor arrives — and on the first press of one
@@ -1244,13 +1242,11 @@ document.querySelectorAll('.current-year').forEach(el => {
     // Presses waiting for the module. A second press on the same button
     // while it is on its way is the same request: replaying both opened the
     // receipt and closed it again.
-    // The Assay's own open button is this file's, not the module's: it asks
-    // for the module itself, and a replay would close it again.
     const waiting = new Set();
     document.addEventListener('click', (e) => {
         if (mks.loaded.interactives) return;
         const btn = e.target && e.target.closest ? e.target.closest('button') : null;
-        if (!btn || !btn.closest(INTERACTIVE_HOSTS) || btn.classList.contains('assay-open')) return;
+        if (!btn || !btn.closest(INTERACTIVE_HOSTS)) return;
         e.preventDefault();
         if (waiting.has(btn)) return;
         waiting.add(btn);
@@ -1299,34 +1295,6 @@ document.querySelectorAll('.current-year').forEach(el => {
         });
         card.appendChild(btn);
     });
-})();
-
-// ===================================
-// THE ASSAY — one button under the form
-// ===================================
-// Open, the Assay was 470px of a desktop and 660 of a phone under the
-// contact form, for the few who want it. Its question and its promise
-// stay in view; the box to paste into, the samples and the verdict open
-// from a button that says what it does. Made here, like the experience
-// cards' More: without this script the Assay is not shown at all (it
-// cannot run), and style.css folds the box only once the button exists.
-(() => {
-    const assay = document.getElementById('assay');
-    const body = document.getElementById('assayBody');
-    const head = assay && assay.querySelector('.assay-head');
-    if (!body || !head) return;
-    head.insertAdjacentHTML('afterend', '<button type="button" class="btn btn-secondary btn-small assay-open" data-analytics="assay-open" ' +
-        `aria-controls="${body.id}" aria-expanded="false">Grade a job description ` +
-        '<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"></use></svg></button>');
-    const btn = head.nextElementSibling;
-    btn.addEventListener('click', () => {
-        const open = !assay.classList.contains('is-open');
-        assay.classList.toggle('is-open', open);
-        btn.setAttribute('aria-expanded', String(open));
-        if (open) mksLoad('interactives').catch(mksLoadWarn);
-        document.dispatchEvent(new CustomEvent('mks:layout'));
-    });
-    assay.classList.add('is-folding');
 })();
 
 // ===================================

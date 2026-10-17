@@ -111,8 +111,10 @@ PAGES.forEach((page) => {
         const cv = Array.from(el.querySelectorAll('a[download]')).map(a => where(a.getAttribute('href')));
         return hrefs.includes(`mailto:${profile.person.email}`) && hrefs.includes('index.html#contact') && cv.includes(profile.links.cv);
     };
-    // The smallest blocks that offer all three: one per page.
-    const blocks = Array.from(main.querySelectorAll('section, p')).filter(el => offers(el) && !Array.from(el.children).some(offers));
+    // The smallest blocks that offer all three: one per page. The Brief's
+    // dossier carries the same three for paper, where the call to action is
+    // not printed; on screen the call to action is still the one.
+    const blocks = Array.from(main.querySelectorAll('section, p')).filter(el => offers(el) && !Array.from(el.children).some(offers) && !el.closest('.bf-dossier'));
     assert(blocks.length === 1, `${page}: one call to action in <main> with profile.json's address, the contact form and the CV download (${blocks.length})`);
     const cta = blocks[0];
     if (!cta) return;
@@ -469,13 +471,13 @@ const state = (doc) => {
             `Palette: the light page is the colour of the homepage's light browser bar, and theme.js sets that bar (${bar})`);
 
         // Text follows the theme only if it takes its colour from a token.
-        const literal = ['carbon-ai.css', 'content.css', 'stats.css']
+        const literal = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css', 'brief.css']
             .flatMap(f => (strip(read(f)).match(/(?<![-\w])color:(?!\s*var\()[^;]+/g) || []).map(d => `${f}: ${d}`));
         assert(literal.length === 0, `Palette: every text colour on these pages is a token (${literal.join('; ') || 'none fixed'})`);
         // A line drawn in white (or black) is there in one theme only: the
         // calculator's rows and the equivalence list lost their dividers on
         // the light page. A tinted line shows on both; a neutral one is a token.
-        const neutral = ['carbon-ai.css', 'content.css', 'stats.css']
+        const neutral = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css', 'brief.css']
             .flatMap(f => (strip(read(f)).match(/(?<![-\w])border[\w-]*:[^;]*(?:rgba?\(\s*(?:255\s*,\s*255\s*,\s*255|0\s*,\s*0\s*,\s*0)\b|#f{3}\b|#f{6}\b|#0{3}\b|#0{6}\b|\bwhite\b|\bblack\b)[^;]*/gi) || []).map(d => `${f}: ${d}`));
         assert(neutral.length === 0, `Palette: no line on these pages is a fixed white or black, which one theme cannot see (${neutral.join('; ') || 'none'})`);
         // Anatomy of a Prompt's accents: carbon-ai.html has no html.light-mode.

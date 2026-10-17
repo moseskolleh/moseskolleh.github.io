@@ -52,7 +52,7 @@
         {
             id: "contact",
             label: "the contact section",
-            text: "I'm open to roles and consulting in sustainability, climate risk, E.S.G. and sustainable A.I. — in Amsterdam and the E.U., and remote-friendly. I usually reply within a couple of days. And if you're still deciding, there's a tool below the form. Open it, paste in a job description, and it grades how well my record fits the role, mapping each requirement to the evidence that backs it, and listing the ones this site can't show. It runs entirely in your browser. The text never leaves this page, and no A.I. model is downloaded to do it."
+            text: "I'm open to roles and consulting in sustainability, climate risk, E.S.G. and sustainable A.I. — in Amsterdam and the E.U., and remote-friendly. I usually reply within a couple of days. And if you're hiring, paste your job ad into The Brief, on a page of its own: an honest fit, gaps included, and a one-page dossier to forward. It runs in your browser, and the ad is never sent."
         }
     ];
 

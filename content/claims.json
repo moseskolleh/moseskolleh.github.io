@@ -16,7 +16,7 @@
     "section number, a standard's name, \"one\", a count of what the page",
     "shows in full and the like, a size said in words (\"a fifth\", \"twice\")",
     "that nothing holds, a figure a script prints of its own (the field",
-    "terminal, the Assay, the receipt, the coach's tips) that is not here, and",
+    "terminal, The Brief, the receipt, the coach's tips) that is not here, and",
     "a number the narration says aloud that no entry backs.",
     "",
     "FIELDS (scripts/lib/content.js refuses anything else)",
@@ -25,7 +25,7 @@
     "value      the figure as the site writes it: \"164\", \"70%\", \"2–8×\"",
     "unit       what it counts or measures, as claims.html says it after the",
     "           value; no other figure in it",
-    "forms      optional; other ways the generated pages write it (\"~276\",",
+    "forms      optional; other ways the generated pages write it (\"~274\",",
     "           or in words with what it counts: \"team of six\"); a form in",
     "           words is marked on its number alone",
     "spoken     optional; how the narration says it, in words, with what",
@@ -94,7 +94,7 @@
       "id": "strike-rate",
       "value": "70%",
       "unit": "aquifer strike rate on the boreholes sited with the resistivity survey",
-      "forms": ["7/10"],
+      "forms": ["7/10", "7 times out of 10"],
       "basis": { "result": "groundwater" },
       "spoken": ["seventy percent", "seventy per cent", "seven holes in ten", "seven times out of ten"]
     },
@@ -208,9 +208,9 @@
     },
     {
       "id": "first-view",
-      "value": "276",
+      "value": "274",
       "unit": "KB over the wire: the homepage's first view, fonts included",
-      "forms": ["~276"],
+      "forms": ["~274"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
       "check": "https://github.com/moseskolleh/sustaintheworld#performance"

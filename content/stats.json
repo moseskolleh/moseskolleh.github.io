@@ -18,7 +18,7 @@
   "suppressBelow": 5,
   "period": null,
   "week": null,
-  "briefLive": false,
+  "briefLive": true,
   "headline": null,
   "breakdown": null,
   "bytes": null,
