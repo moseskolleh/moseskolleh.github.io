@@ -293,6 +293,8 @@ function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead
         ? `\n    <script>document.documentElement.classList.add('js')</script>`
         : '';
     const sheets = ['carbon-ai.css'].concat(styles, contentCss ? ['content.css'] : []);
+    // Its own preview card (npm run og, scripts/build-og.js), named as the counter names the page.
+    const card = `${SITE}assets/og/${pageName || current.replace(/\.html$/, '')}.png`;
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -310,14 +312,14 @@ function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead
     <meta property="og:title" content="${esc(title)}">
     <meta property="og:description" content="${esc(description)}">
     <meta property="og:url" content="${esc(canonical)}">
-    <meta property="og:image" content="${SITE}assets/img/og-image.jpg">
+    <meta property="og:image" content="${card}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">${published ? `
     <meta property="article:published_time" content="${esc(published)}">` : ''}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${esc(title)}">
     <meta name="twitter:description" content="${esc(description)}">
-    <meta name="twitter:image" content="${SITE}assets/img/og-image.jpg">${head ? `\n${indentBlock(head, '    ')}` : ''}
+    <meta name="twitter:image" content="${card}">${head ? `\n${indentBlock(head, '    ')}` : ''}
     <!-- The three typefaces are self-hosted (assets/fonts/, built by scripts/build-fonts.js):
          no request leaves this origin, and the bytes are counted in the budget. -->
     <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/space-grotesk-latin.woff2" crossorigin>
@@ -1828,7 +1830,7 @@ function renderNote(data, note) {
         articleSection: note.tag,
         url: canonical,
         mainEntityOfPage: canonical,
-        image: `${SITE}assets/img/og-image.jpg`,
+        image: `${SITE}assets/og/${content.notePage(note.slug)}.png`,
         author: { '@type': 'Person', '@id': personId(profile), name: profile.person.name, url: profile.links.site },
         isPartOf: { '@type': 'WebSite', '@id': websiteId(profile), url: profile.links.site }
     };

@@ -319,7 +319,7 @@ CI uses Node 22.
 | `npm run build:check` | every generated page still matches `content/` |
 | `npm run fonts:check` | the committed fonts still hash to their manifest and every stylesheet's `@font-face` block is current |
 | `npm run lint:html` | every page is valid HTML ([html-validate](https://html-validate.org/)'s recommended rules; the two relaxations are explained in `.htmlvalidate.cjs`) |
-| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the twenty-nine listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
+| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
 | `npm run map:check` | the committed `journey-map.svg` still matches its generator |
 | `npm run budget` | the weights this README quotes, and that its budget tables still say what the script measures (see [Performance](#performance)) |
 | `npm run smoke` | every page in a real browser: no errors, no failed or off-origin requests, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; the Assay; the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
@@ -522,6 +522,13 @@ The suites, and the failure each one exists to prevent:
   note's date, every id a tag URI that never carries the site's address;
   and every JSON-LD block on every page parses and says nothing `content/`
   does not.
+- **`og.test.js`** — the preview cards (see [Preview images](#preview-images)):
+  every page with an `og:image`, each field note's included, shows its own
+  card there and in `twitter:image`, and the photo they all shared is gone;
+  each card is a 1200×630 PNG within its size cap; and `assets/og/og.hash`
+  fails it once a card's words (a note retitled, a page's `og:title`, the
+  role in `profile.json`) have moved on without a new render, or a card was
+  replaced by hand.
 - **`apps-script.test.js`** — the contact form's backend
   (`google-apps-script/Code.gs`), run in a VM with stand-ins for Google's
   services: both ways in (the JSON post and the JavaScript-free form post,
@@ -635,7 +642,7 @@ Everything derived now comes from `content/`:
 | `content/projects.json` | `case-studies.html` (with each case study's photos, game and findings), the homepage's six project cards (every case study not marked `homepageCard: false`), and each case study's headline result on the CV |
 | `content/lenses.json` | the role-specific views (`water`, `climate-risk`, `sustainable-ai`, `esg-csrd`) |
 | `content/research.json` | `research.html`, the CV's public work, and `carbon-ai.html`'s JSON-LD (the coach as a SoftwareApplication) |
-| `content/notes/*.md` | a page per note, `notes/<slug>.html`; `feed.xml`; the homepage's links to the newest three; their entries in `sitemap.xml`; and each note's Article in its JSON-LD |
+| `content/notes/*.md` | a page per note, `notes/<slug>.html`; `feed.xml`; the homepage's links to the newest three; their entries in `sitemap.xml`; and each note's Article in its JSON-LD (and, by `npm run og`, its preview card) |
 | `content/testimonials.json` | the homepage's testimonials, once there is one |
 | `content/claims.json` | `claims.html` ("Check my numbers"), and the `data-claim` mark on every figure a generated page prints from `content/` |
 | `content/narration.json` | `voice-scripts.js` |
@@ -743,6 +750,43 @@ the longest note, so a new note needs no ceiling of its own, only to fit
 under the one there is. The three today are short (about a hundred words
 each), so a longer note will need its ceiling raised, which is a decision
 to make on purpose rather than a test to work around.
+
+### Preview images
+
+```bash
+npm run og      # draw assets/og/<page>.png for every page with an og:image, and write assets/og/og.hash
+```
+
+A link shared on LinkedIn or X unfurls into a preview. One drilling photo,
+with no name on it, used to be the preview of every page. `scripts/build-og.js`
+now draws a card per page and per field note, with the Chromium the smoke
+test uses: the page's or the note's title, a line saying what it is (a
+note's number, tag and date; another page's address), and who it is by,
+Moses's name and role, in the site's colours and fonts, inline, so nothing
+is fetched. The words are read, never written there: a note's from
+`content/notes/`, the homepage's from the roles in `profile.json`, every
+other page's from its own `og:title`. Each card is named as the visit
+counter names its page (`assets/og/case-studies.png`,
+`assets/og/note-<slug>.png`), and each page's `og:image` and
+`twitter:image` (and a note's Article) point at its own.
+
+The cards are 1200×630, the size LinkedIn, Facebook and X's large card
+ask for, drawn at one pixel to one pixel. A card is flat colour and
+anti-aliased text, a few hundred colours, so `scripts/lib/png.js` saves it
+as an indexed PNG (one byte a pixel and a palette, with Node's zlib and
+nothing else; where it needs to, it rounds each channel to a step of 4, too
+fine to see on a text's edge): 12 to 21 KB a card, where Chromium's own PNG
+was 36 to 55 KB and the photo they replace 122 KB. Each is held under 32 KB
+(`OG_MAX_BYTES`), room for a title of three lines: every image in the
+repository counts against one budget, every note adds a card, and a preview
+is fetched once, by whoever unfurls the link. The ten cards take about
+160 KB of it; the photo's removal paid for most of that, and the budget has
+room for about five more notes' cards before something has to give. `assets/og/og.hash`, like `assets/cv.hash`,
+records a hash of every card's words and of each image, so
+`tests/og.test.js` fails when a title changes without a new render: after
+`npm run build:content` changes a title, or a new note arrives, run
+`npm run og` and commit the images with the hash. Chromium is only needed
+to draw them; the test reads the committed files.
 
 ### Structured data
 
@@ -1103,6 +1147,7 @@ To change the color scheme, edit the CSS variables in `style.css`:
 
 ### Images
 - All published images live in `assets/img/` as WebP; keep new ones under ~200 KB (e.g. `npx sharp-cli -i photo.jpg -o assets/img/photo.webp resize 900`)
+- The link previews in `assets/og/` are drawn, not photographed: `npm run og` (see [Preview images](#preview-images))
 - Hero backgrounds use the `-hero.webp` variants (1600 px wide)
 - The journey map is generated, not drawn: edit `scripts/generate-journey-map.js` and re-run it to change stops
 
@@ -1143,7 +1188,7 @@ did.
 | First view of the homepage, over the wire (fonts included) | ~276 KB | 288 KB |
 | Everything a full visit adds on demand (modules, scripts, map) | ~72 KB | 72 KB |
 | Largest single image | ~200 KB | 210 KB |
-| Every image in the repository | ~3.36 MB | 3.5 MB |
+| Every image in the repository | ~3.40 MB | 3.5 MB |
 | Recorded narration: Moses's introduction (sized for his 60–90 s take) | 0 KB | 800 KB |
 | Text-only field report, the HTML file (the size the footer quotes) | ~10 KB | 11 KB |
 | Text-only field report, over the wire (with its visit counter) | ~6 KB | 8 KB |
