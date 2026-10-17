@@ -669,16 +669,29 @@ function sourceUrl(raw) {
 
 const inActions = process.env.GITHUB_ACTIONS === 'true';
 
+// A line in the run's summary as well as the log. A run that fetched
+// nothing still goes green, by design, and a green tick says nothing about
+// why: the summary does, on the run's own page, and so does the annotation.
+function summary(line) {
+    if (!process.env.GITHUB_STEP_SUMMARY) return;
+    try {
+        fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${line}\n\n`);
+    } catch (err) { /* the summary is a courtesy; the log has the same line */ }
+}
+
 function skip(why) {
     // A notice, not a failure: nothing is wrong, there is just nothing new.
-    console.log(`${inActions ? '::notice title=fetch-stats::' : '  fetch-stats: '}${why}`);
+    console.log(`${inActions ? '::notice title=Open counts: nothing fetched::' : '  fetch-stats: '}${why}`);
     console.log('  content/stats.json left as it is.');
+    summary(`**Open counts: nothing fetched this week.** ${why} content/stats.json is left as it is, so there is ` +
+        'nothing to commit, and the run stays green by design. The weekly "Site health" issue says what this waits on.');
     process.exitCode = 0;
 }
 
 function fail(why) {
     console.error(`${inActions ? '::error title=fetch-stats::' : '  fetch-stats: '}${why}`);
     console.error('  content/stats.json left as it is.');
+    summary(`**Open counts: the fetch failed.** ${why} content/stats.json is left as it is.`);
     process.exitCode = 1;
 }
 
@@ -751,6 +764,7 @@ async function main() {
     console.log(`  fetch-stats: ${rows.length} row(s) from ${host} (${parsed.format}), ` +
         `${stats.period.first} to ${stats.period.last} → ${path.relative(ROOT, OUT)}`);
     console.log('  Now run: npm run build:content');
+    summary(`**Open counts: fetched.** ${stats.weeks.length} whole week(s), ${stats.period.first} to ${stats.period.last}, written to content/stats.json.`);
 }
 
 if (require.main === module) {

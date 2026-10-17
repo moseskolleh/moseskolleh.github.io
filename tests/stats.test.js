@@ -816,6 +816,17 @@ function run(env) {
         let r = await run({ STATS_OUT: out });
         assert(r.code === 0 && untouched() && /STATS_SOURCE_URL is not set/.test(r.out), 'Script: with no STATS_SOURCE_URL it exits 0, says why, and writes nothing');
 
+        // In the weekly Action, green must not be silent: the October 2026
+        // runs "succeeded" with nothing set and said so in the log alone.
+        const summaryFile = path.join(tmp, 'summary.md');
+        reset();
+        r = await run({ STATS_OUT: out, GITHUB_ACTIONS: 'true', GITHUB_STEP_SUMMARY: summaryFile });
+        const said = fs.existsSync(summaryFile) ? fs.readFileSync(summaryFile, 'utf8') : '';
+        assert(r.code === 0 && /^::notice title=Open counts: nothing fetched::STATS_SOURCE_URL is not set/m.test(r.out),
+            'Script: in the Action, a run with no source leaves a notice annotation on the run, and stays green');
+        assert(/Open counts: nothing fetched this week/.test(said) && /STATS_SOURCE_URL is not set/.test(said) && /Site health/.test(said),
+            `Script: ...and a line in the job summary saying why, and where the waiting is listed (${said.trim().slice(0, 60) || 'no summary'})`);
+
         reset();
         r = await run({ STATS_OUT: out, STATS_SOURCE_URL: 'http://127.0.0.1:9/nothing-listens-here' });
         assert(r.code === 0 && untouched() && /could not reach/.test(r.out), 'Script: when the source cannot be reached it exits 0 and writes nothing');

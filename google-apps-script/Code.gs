@@ -7,6 +7,9 @@
  * page view and adds it to daily totals, and GET ?action=stats&token=...
  * serves those totals as JSON for the weekly build of stats.html, to that
  * build alone. See "The visit counter" below and README.md for the payload.
+ * And it answers the repository's weekly health check: POST ?action=health
+ * sends one test message down the contact form's own path, to a "Health"
+ * tab, emailing nobody (see "The health check" below).
  *
  * This endpoint is PUBLIC (anyone can POST to it), so everything below is
  * written on the assumption that the payload is hostile. Four things this
@@ -49,11 +52,28 @@
  *                       nobody at all while it is unset. Any long random
  *                       string; the weekly build keeps the same one in the
  *                       repository secret STATS_SOURCE_URL.
+ *     HEALTH_TOKEN      optional. Lets the weekly health check send its test
+ *                       message: POST ?action=health answers only a request
+ *                       whose &token= matches it, and nobody while it is
+ *                       unset. A different long random string from
+ *                       STATS_TOKEN; the repository keeps it in the secret
+ *                       HEALTH_URL.
  */
 
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
+
+// Which version of this file a deployment runs. The repository cannot see
+// the deployment, only what it answers, and a script edited here but never
+// published is a silent failure: the JavaScript-free form path was fixed
+// here in September 2026, and nothing could say whether the live script
+// had the fix. GET ?action=health answers with this, and the weekly health
+// check compares it with the repository's copy. It is the first 12 hex
+// digits of the SHA-256 of this file with the quotes below left empty;
+// tests/apps-script.test.js fails until it matches, and
+// `npm run health -- --code-version` prints the value to put here.
+var CODE_VERSION = 'ce82ff070651';
 
 var DEFAULT_SHEET_NAME = 'Responses';
 var HEADERS = ['Timestamp', 'Name', 'Email', 'Subject', 'Message', 'Source'];
@@ -88,7 +108,8 @@ function getConfig() {
     sheetName: props.getProperty('SHEET_NAME') || DEFAULT_SHEET_NAME,
     ownerEmail: props.getProperty('OWNER_EMAIL'),
     turnstileSecret: props.getProperty('TURNSTILE_SECRET'),
-    statsToken: props.getProperty('STATS_TOKEN')
+    statsToken: props.getProperty('STATS_TOKEN'),
+    healthToken: props.getProperty('HEALTH_TOKEN')
   };
 }
 
@@ -580,6 +601,80 @@ function statsResponse(e, config) {
 }
 
 // ---------------------------------------------------------------------------
+// The health check
+// ---------------------------------------------------------------------------
+//
+// The repository's weekly health check (scripts/health.js, run by
+// .github/workflows/health.yml) cannot open this project, its Script
+// Properties or its sheet. It can only ask the web app, two ways:
+//
+//   GET ?action=health   which version of this file the deployment runs
+//                        (CODE_VERSION), and nothing else. Anyone may ask:
+//                        the file is public, and so is its hash.
+//
+//   POST ?action=health&token=<HEALTH_TOKEN>
+//                        one test message, down the path a visitor's takes
+//                        (handleSubmission): the same validation, the same
+//                        per-submitter and global limits, the same escaping,
+//                        written under the same lock. It differs in three
+//                        things only. Its row goes to a "Health" tab, not the
+//                        Responses tab. It sends no email and adds nothing to
+//                        the public contact count. And it skips the Turnstile
+//                        challenge, which only a person in a browser can
+//                        pass; the token stands in for it. The reply says
+//                        whether OWNER_EMAIL is set (or nobody hears of a real
+//                        message) and whether TURNSTILE_SECRET is (the site
+//                        loads no Turnstile widget, so with it set every real
+//                        message is refused), and never anything else about
+//                        the configuration.
+//
+// Without the right token, or while HEALTH_TOKEN is unset, the POST is
+// refused before its body is read, so a stranger cannot use it to write to
+// the sheet without the limits a real message meets, or at all.
+
+var HEALTH_SHEET = 'Health';
+
+function healthVersionResponse() {
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'ok',
+    version: CODE_VERSION,
+    message: 'The health check is sent as a POST, with a token.'
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleHealth(e, config) {
+  var params = (e && e.parameter) || {};
+  if (!config.healthToken || !sameSecret(params.token, config.healthToken)) {
+    return jsonResponse('refused', 'The health check is run by the site\'s weekly build, with a token.');
+  }
+  var data;
+  try {
+    data = JSON.parse(e && e.postData ? String(e.postData.contents || '') : '');
+  } catch (parseError) {
+    return jsonResponse('error', 'Could not read the submission.');
+  }
+  if (!data || typeof data !== 'object') {
+    return jsonResponse('error', 'Could not read the submission.');
+  }
+  var result = handleSubmission(data, config, { health: true });
+  return ContentService.createTextOutput(JSON.stringify({
+    status: result.status,
+    message: result.message,
+    version: CODE_VERSION,
+    ownerEmail: !!config.ownerEmail,
+    turnstile: !!config.turnstileSecret
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/** The same configuration, writing to another tab of the same spreadsheet. */
+function withSheet(config, sheetName) {
+  var copy = {};
+  for (var key in config) copy[key] = config[key];
+  copy.sheetName = sheetName;
+  return copy;
+}
+
+// ---------------------------------------------------------------------------
 // HTTP
 // ---------------------------------------------------------------------------
 
@@ -599,11 +694,15 @@ function emptyResponse() {
  * Handles GET requests — a health check that reveals nothing about the
  * spreadsheet behind it. The previous version printed the spreadsheet's name
  * to anyone who loaded the URL. ?action=stats serves the daily visit totals,
- * and only with the right &token= (see statsResponse).
+ * and only with the right &token= (see statsResponse); ?action=health says
+ * which version of this file is deployed (see "The health check").
  */
 function doGet(e) {
   if (e && e.parameter && e.parameter.action === 'stats') {
     return statsResponse(e, getConfig());
+  }
+  if (e && e.parameter && e.parameter.action === 'health') {
+    return healthVersionResponse();
   }
   return ContentService.createTextOutput(JSON.stringify({
     status: 'ok',
@@ -621,6 +720,11 @@ function doPost(e) {
   // away before anything below reads the body as a contact message.
   if (e && e.parameter && e.parameter.action === 'count') {
     return handleCount(e, config);
+  }
+  // So is the weekly health check, which a deployment without the token
+  // refuses before reading a word of it.
+  if (e && e.parameter && e.parameter.action === 'health') {
+    return handleHealth(e, config);
   }
 
   try {
@@ -686,8 +790,13 @@ function htmlResponse(status, message) {
  * return the JSON TextOutput itself, which has no .status or .message, so
  * every JavaScript-free submission was answered "Something went wrong" and
  * "undefined" — including the ones that had just been recorded.
+ *
+ * mode.health is the weekly health check (handleHealth, which has already
+ * checked its token): the same path, but its row goes to the Health tab,
+ * no Turnstile challenge is asked for, and nothing is counted or emailed.
  */
-function handleSubmission(data, config) {
+function handleSubmission(data, config, mode) {
+  var health = !!(mode && mode.health);
   var reply = function (status, message) {
     return { status: status, message: message };
   };
@@ -711,7 +820,7 @@ function handleSubmission(data, config) {
       return reply('error', 'Please provide a valid email address.');
     }
 
-    var challengeError = verifyTurnstile(data.turnstileToken, config.turnstileSecret);
+    var challengeError = health ? null : verifyTurnstile(data.turnstileToken, config.turnstileSecret);
     if (challengeError) {
       return reply('error', challengeError);
     }
@@ -725,7 +834,7 @@ function handleSubmission(data, config) {
     // else — it is no more trustworthy than the message body.
     var source = String(data.source || '').trim().slice(0, 100);
 
-    appendSubmission(config, [
+    appendSubmission(health ? withSheet(config, HEALTH_SHEET) : config, [
       new Date(),
       sanitizeForSheet(name),
       sanitizeForSheet(email),
@@ -733,6 +842,12 @@ function handleSubmission(data, config) {
       sanitizeForSheet(message),
       sanitizeForSheet(source)
     ]);
+
+    // The health check stops here: recorded, as a real message would be,
+    // and neither counted nor emailed.
+    if (health) {
+      return reply('success', 'Response recorded successfully!');
+    }
 
     // One more on today's contact total. The message is already safe in the
     // sheet, so a count that fails must not fail the submission. The site's
@@ -889,6 +1004,27 @@ function testCounter() {
     ? 'Counter OK: ' + rows.length + ' DailyTest rows for today, e.g. ' + JSON.stringify(rows[0])
     : 'Nothing was recorded. Check the execution log.');
   return rows;
+}
+
+/**
+ * Sends one test message down the contact form's path into the Health tab,
+ * as the weekly health check does over HTTP, without needing its token:
+ * nothing is emailed and nothing is counted. The health check itself POSTs
+ * to ?action=health&token=<HEALTH_TOKEN>.
+ */
+function testHealth() {
+  var config = getConfig();
+  var result = handleSubmission({
+    name: 'Site health check',
+    email: 'health-check@example.com',
+    subject: 'testHealth()',
+    message: 'A test message from the Apps Script editor. Nobody is emailed.',
+    source: 'testHealth()'
+  }, config, { health: true });
+  Logger.log(result.status + ': ' + result.message +
+    (config.ownerEmail ? '' : ' (OWNER_EMAIL is not set: nobody would hear of a real message)') +
+    (config.turnstileSecret ? ' (TURNSTILE_SECRET is set: every real message would be refused)' : ''));
+  return result;
 }
 
 /**

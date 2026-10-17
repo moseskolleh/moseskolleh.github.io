@@ -1,0 +1,44 @@
+name: Quarterly review
+
+# Opens "Quarterly review — YYYY Qn" (label review) at the start of each
+# quarter, carrying docs/review-checklist.md: the monthly, quarterly and
+# yearly rhythm of docs/plan.md, Phase 7, with links to the open counts,
+# the owner checklist and the latest health issue. scripts/review.js writes
+# it, and opens nothing if the quarter's issue exists already, open or
+# closed.
+
+on:
+  schedule:
+    # Mondays at 06:23 UTC in January, April, July and October. Cron cannot
+    # say "the first Monday" (a day of the month and a day of the week
+    # together match either, not both), so this runs on every Monday of
+    # those months: the first opens the quarter's issue, and the rest find
+    # it and stop, or open it a week late if the first run failed.
+    - cron: '23 6 * 1,4,7,10 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: quarterly-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Open this quarter's review
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/review.js

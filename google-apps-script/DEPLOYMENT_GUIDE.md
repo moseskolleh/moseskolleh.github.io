@@ -53,6 +53,7 @@ once, in the project itself:
 | `SHEET_NAME` | no | Tab to write to. Defaults to `Responses`, and is created (with its header row) if missing |
 | `TURNSTILE_SECRET` | no | Cloudflare Turnstile secret key. When present, every submission must carry a valid token |
 | `STATS_TOKEN` | for the counts | Any long random string. `GET ?action=stats` serves the unsuppressed daily visit totals only to a request with `&token=` equal to it, and to nobody while it is unset. The weekly build of `stats.html` keeps the same string in the repository secret `STATS_SOURCE_URL` |
+| `HEALTH_TOKEN` | for the health check | Another long random string, not `STATS_TOKEN`. `POST ?action=health` sends one test message down the form's own path, to a `Health` tab, emailing nobody, only for a request with `&token=` equal to it, and for nobody while it is unset. The weekly health check keeps the web app URL with `?action=health&token=<it>` in the repository secret `HEALTH_URL` |
 
 4. Click **Save script properties**
 5. Choose `testConfiguration` in the function menu and click **Run** — it
@@ -207,6 +208,13 @@ counter: redeploy as a new version.
   for the weekly build of `stats.html`, and only with the `STATS_TOKEN`
   token: the rows are not suppressed. On failure the reply has no `rows`,
   so a build stops rather than publish zeros
+- **The weekly health check**: `GET ?action=health` returns the file's
+  `CODE_VERSION`, so the repository can tell whether this deployment runs
+  its current `Code.gs`; `POST ?action=health&token=<HEALTH_TOKEN>` sends
+  one test message through the same validation, limits and lock as a
+  visitor's, to a `Health` tab, with no email and no count, and says
+  whether `OWNER_EMAIL` and `TURNSTILE_SECRET` are set. `testHealth` does
+  the same from the editor
 
 ---
 

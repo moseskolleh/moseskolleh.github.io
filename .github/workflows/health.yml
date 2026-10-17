@@ -1,0 +1,62 @@
+name: Site health
+
+# Once a week, what no pull request can check: that the live site is what
+# main holds, that every link off the site still answers, that nothing has
+# gone stale, and which of the switches only the owner can throw are still
+# off (the contact form's deployment, its end-to-end test, the open counts'
+# source). scripts/health.js runs the checks and keeps one issue, "Site
+# health" (label health): opened while anything is broken or waiting,
+# edited in place on later runs, closed with a comment once nothing is.
+# The report is in the job summary as well.
+#
+# The job stays green when it has written the issue: the issue is the
+# signal, and a job that went red every week while a switch waits on the
+# owner would be one people learn to ignore. It goes red only if the checks
+# could not run or the issue could not be written.
+#
+# Two secrets reach the script, and neither is printed:
+#   - STATS_SOURCE_URL only as "true" or "false", whether it is set;
+#   - HEALTH_URL itself, the Apps Script web app with ?action=health&token=
+#     and the script's HEALTH_TOKEN, which the end-to-end check posts one
+#     test message to (written to a Health tab, emailed to nobody). Until
+#     it is set, that check reports it is waiting on the owner.
+
+on:
+  schedule:
+    # Tuesdays, 05:41 UTC: the day after the open counts (Mondays 04:17),
+    # so their commit has been published by the time the live site is
+    # compared with main. Off the hour, when scheduled runs queue the longest.
+    - cron: '41 5 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: site-health
+  cancel-in-progress: false
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Some history, so a page Pages has not rebuilt yet can be told from
+      # one it never will: the live bytes are matched against main's recent
+      # versions of each page. Nothing here pushes.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check the site and update the health issue
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          STATS_SOURCE_SET: ${{ (secrets.STATS_SOURCE_URL || vars.STATS_SOURCE_URL) != '' }}
+          HEALTH_URL: ${{ secrets.HEALTH_URL }}
+        run: node scripts/health.js

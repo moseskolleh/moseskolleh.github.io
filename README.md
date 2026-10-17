@@ -319,11 +319,12 @@ CI uses Node 22.
 | `npm run build:check` | every generated page still matches `content/` |
 | `npm run fonts:check` | the committed fonts still hash to their manifest and every stylesheet's `@font-face` block is current |
 | `npm run lint:html` | every page is valid HTML ([html-validate](https://html-validate.org/)'s recommended rules; the two relaxations are explained in `.htmlvalidate.cjs`) |
-| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the twenty-eight listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
+| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the twenty-nine listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
 | `npm run map:check` | the committed `journey-map.svg` still matches its generator |
 | `npm run budget` | the weights this README quotes, and that its budget tables still say what the script measures (see [Performance](#performance)) |
 | `npm run smoke` | every page in a real browser: no errors, no failed or off-origin requests, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; the Assay; the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
 | `npm run mcp:verify` | the pinned MCP package still hashes to the reviewed tarball (needs network) |
+| `npm run health -- --dry-run` | the weekly health check, printed instead of posted: the live site against `main`, every link off the site, what has gone stale, and what still waits on Moses (needs network; see [Health checks and the quarterly review](#health-checks-and-the-quarterly-review)) |
 
 The suites, and the failure each one exists to prevent:
 
@@ -517,9 +518,14 @@ The suites, and the failure each one exists to prevent:
   minute not at all, so counts never keep a message waiting), `?test=1`
   stays off the public tab, `?action=stats` serves the rows to the right
   token and to nobody else, and each contact message is counted unless the
-  site says the browser asked not to be tracked. It cannot tell you
-  the live deployment is configured; `docs/owner-checklist.md` says how to
-  check.
+  site says the browser asked not to be tracked. And the health check's
+  end: `CODE_VERSION` is the file's own hash, `?action=health` refuses a
+  POST without `HEALTH_TOKEN` (and every POST while it is unset) before
+  reading it, and with it sends one message down the form's own path,
+  validated, limited and locked as a visitor's is, to a `Health` tab,
+  emailing nobody and counting nothing. It cannot tell you the live
+  deployment is configured; the weekly health check asks it, and
+  `docs/owner-checklist.md` says how to check by hand.
 - **`count.test.js`** — the visit counter's payload, field by field: the page
   (404 names itself), the lens the visit arrived with, the deepest part of
   `<main>` reached (one IntersectionObserver, no scroll handler), features
@@ -583,6 +589,22 @@ The suites, and the failure each one exists to prevent:
   one side, the open counts page held drawn full, and tables whose rows are
   as wide as their headers; and, measured with `--root` as the workflow
   measures main, a ceiling the branch moved, added or dropped.
+- **`health.test.js`** — the weekly health check and the quarterly review,
+  against fixtures with no network: a page Pages has not rebuilt in the
+  hour since `main` moved is "not rebuilt yet", and one still stale days
+  later is broken; a 404 or an unresolvable host is broken, LinkedIn's 999
+  and a 429 are "not checkable from here" and say why, and HEAD is retried
+  as GET before anything is called broken; a stale `verifiedOn`, a null
+  `confirmedOn`, an available-from date that has passed and an AI factor
+  set more than a quarter old wait on Moses; each answer Code.gs has given
+  in its life is told apart, and no test message is posted to a deployment
+  without the health check; the token in `HEALTH_URL` is never printed; the
+  owner checklist's items, ticked and not, are read from the file, and
+  each check finds its own; the issue is opened once, edited in place and
+  closed when nothing is broken or waiting; the quarterly review opens one
+  issue a quarter, and the plan's Phase 7 table says what
+  `docs/review-checklist.md` says; and both workflows ask for no more than
+  they need.
 - **`cpu.test.js`** — the page's keys go through one listener, so one Escape
   closes one layer (terminal, then player, then menu) and the
   backtick follows one rule for "typing"; one `mks.motionOK()` answers for
@@ -603,6 +625,79 @@ games and Anatomy of a Prompt are booted with their own pages
 (`widgets.test.js`, `carbon.test.js`). A suite that
 tests timing passes `clock: true` and moves time with `await clock.tick(ms)`
 instead of sleeping, so a 1.7-second timeout costs nothing to test.
+
+## Health checks and the quarterly review
+
+The tests above run on every pull request. What they cannot see is the live
+site and the switches only Moses can throw: the open-counts Action ran
+green twice in October 2026 and committed nothing, because its secret was
+never set, and nothing said so where anyone would look. Two scheduled
+workflows close that gap.
+
+**Site health** (`.github/workflows/health.yml`, Tuesdays 05:41 UTC, or by
+hand) runs `scripts/health.js` and keeps one issue, "Site health" (label
+`health`): opened while anything is broken or waiting, edited in place on
+later runs, and closed with a comment once nothing is. Each check is
+*broken*, *waiting on Moses*, *not checkable from here* or *passing*:
+
+- **The live site is `main`.** Every page in `sitemap.xml` answers 200 with
+  the bytes `main` holds. A page `main` changed in the last hour is "not
+  rebuilt yet"; one still stale after that is broken, and the issue names
+  the version Pages is serving. Since `main` passes smoke in CI, this is
+  smoke against the live site without running a browser there.
+- **Links off the site**, in every page and in `content/`, answer below 400
+  (HEAD, then GET, a second apart on one host). A host that refuses
+  anything but a signed-in browser (LinkedIn's 999; the list is `REFUSERS`
+  in the script) is listed as not checkable, never as broken.
+- **What goes stale.** `meta.verifiedOn` more than a quarter old,
+  `meta.confirmedOn` still null, an at-a-glance fact the owner checklist's
+  table names still unstated or an `availableFrom` that has passed,
+  `REVIEWED_ON` in `ai-carbon-data.js` more than a quarter old, and a CV
+  printed before `content/` last changed (`assets/cv.hash`).
+- **The owner's switches.** The contact form's deployment (the address in
+  `script.js`) runs the repository's `Code.gs`: `GET ?action=health` answers
+  with its `CODE_VERSION`, and older scripts are told apart by what they
+  answer instead. The form end to end, once `HEALTH_URL` is set. The open
+  counts' secret is set (the workflow passes only "true" or "false"), and
+  `content/stats.json` holds a week, written within the last nine days.
+- **`npm audit`** at high or critical. Every dependency here is a dev
+  dependency: none ships to a visitor.
+- **The owner checklist's open items**, counted from
+  `docs/owner-checklist.md`, the ones the checks wait on named first. They
+  are listed, but they do not keep the issue open by themselves.
+
+The job stays green once it has written the issue; the issue is the signal.
+Locally, `npm run health -- --dry-run` prints the report and posts nothing.
+
+**The contact form, end to end.** Once the current `Code.gs` is published,
+give the Apps Script a second token, `HEALTH_TOKEN` (any long random
+string, not `STATS_TOKEN`), and make the web app URL with
+`?action=health&token=<that string>` a repository secret, `HEALTH_URL`.
+Each week the check then asks the deployment for its version, and only if
+it has the health check sends one test message down the form's own path:
+the same validation, limits, escaping and lock as a visitor's, written to a
+`Health` tab, emailing nobody and adding nothing to the public counts. The
+reply says whether `OWNER_EMAIL` and `TURNSTILE_SECRET` are set, the two
+settings that break the form for real visitors without breaking the test.
+Without the token, or while it is unset, `?action=health` refuses a POST
+before reading it. `testHealth()` in the Apps Script editor does the same
+without the token. Until `HEALTH_URL` is set, the check waits on Moses. If
+`Code.gs` changes, `CODE_VERSION` has to change with it:
+`npm run health -- --code-version` prints the new one, and
+`tests/apps-script.test.js` fails until it is in.
+
+**Quarterly review** (`.github/workflows/review.yml`) opens "Quarterly
+review — YYYY Qn" (label `review`) on the first Monday of January, April,
+July and October, carrying the monthly, quarterly and yearly checklist of
+the plan's Phase 7 with links to `stats.html`, the owner checklist and the
+latest health issue, and never a second one for the same quarter. The
+checklist's words are in [docs/review-checklist.md](docs/review-checklist.md)
+and only there; `tests/health.test.js` fails if the plan's table says
+anything else. `node scripts/review.js --dry-run` prints the issue.
+
+GitHub turns off scheduled workflows in a public repository after 60 days
+without activity in it. The Actions tab then shows each one as disabled,
+and one press turns it back on.
 
 ## Content pipeline
 
@@ -825,7 +920,9 @@ check, and the Action fails on that rather than mistake it for an empty
 week. The `Daily` sheet published as CSV also works as the source, but a
 published tab is readable by anyone who has its link, which `stats.html`
 says is not the case. Until the secret is set, the Action says so and
-commits nothing, and the page says counting has not started. The steps, and
+commits nothing, and the page says counting has not started; the run stays
+green, but leaves a notice and a line in its summary saying why, and the
+weekly health issue lists the open counts as waiting. The steps, and
 how to check each, are items S1 and S2 in
 [docs/owner-checklist.md](docs/owner-checklist.md). To run it locally:
 
