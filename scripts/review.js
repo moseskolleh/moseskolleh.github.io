@@ -90,7 +90,10 @@ function reviewBody({ now, checklist, repo, site, latestHealth }) {
 async function openReview(gh, { now, checklist, site }) {
     const name = title(now);
     await gh.ensureLabel(LABEL.name, LABEL.color, LABEL.description);
-    const existing = (await gh.listIssues({ state: 'all', labels: LABEL.name })).find(i => i.title === name);
+    // By label first; and among the bot's own, in case the label was taken
+    // off this quarter's issue (a second one would open otherwise).
+    const existing = (await gh.listIssues({ state: 'all', labels: LABEL.name })).find(i => i.title === name)
+        || (await gh.listIssues({ state: 'all', creator: 'github-actions[bot]' })).find(i => i.title === name);
     if (existing) return { action: 'exists', number: existing.number, title: name };
 
     const healthIssues = await gh.listIssues({ state: 'all', labels: health.LABEL.name, sort: 'created', direction: 'desc' });

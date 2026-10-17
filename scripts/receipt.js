@@ -26,7 +26,7 @@
 
 const fs = require('fs');
 const { GRAMS_PER_MB, grams } = require('./lib/voice-signature.js');
-const { couldLowerTo, heldLength, fmtCeiling, keyFor } = require('./check-budget.js');
+const { couldLowerTo, heldLength, fmtCeiling, keyFor, lengthHeld } = require('./check-budget.js');
 
 const KB = 1024;
 const MB = 1024 * 1024;
@@ -58,6 +58,13 @@ const change = (from, to, format) => (from === null || to === null ? '—' : sig
 function lengthOf(lengthFile, budget, page, vp) {
     const m = lengthFile && lengthFile.pages && lengthFile.pages[page] ? lengthFile.pages[page][vp] : null;
     if (m && typeof m.screens === 'number') return m;
+    // A budget over a pattern (every note) holds the longest page it
+    // matches: read that from the measurements, as check-budget.js does, or
+    // main's side, measured without --lengths, showed no figure at all.
+    if (page.includes('*') && lengthFile && lengthFile.pages) {
+        const held = lengthHeld(lengthFile, page, vp);
+        if (held !== null) return { screens: held };
+    }
     const b = budget && budget.length && budget.length[page] ? budget.length[page][vp] : null;
     return b && typeof b.measured === 'number' ? { screens: b.measured } : null;
 }

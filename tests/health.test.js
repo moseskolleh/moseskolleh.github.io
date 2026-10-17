@@ -370,8 +370,13 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         const post = n.calls.find(x => x.method === 'POST');
         assert(n.calls[0].method === 'GET' && n.calls[0].url === probeUrl && !n.calls[0].url.includes(TOKEN),
             'Contact: it asks for the version first, without the token');
-        assert(post && post.url === HEALTH_URL && JSON.stringify(JSON.parse(post.body)) === JSON.stringify(health.HEALTH_MESSAGE),
+        const sent = post && JSON.parse(post.body);
+        assert(post && post.url === HEALTH_URL && JSON.stringify({ ...sent, email: health.HEALTH_MESSAGE.email }) === JSON.stringify(health.HEALTH_MESSAGE),
             'Contact: then posts the test message, with the token, to ?action=health');
+        assert(sent && /^health-check\+[a-z0-9]{1,24}@example\.com$/.test(sent.email) && sent.email !== health.HEALTH_MESSAGE.email,
+            `Contact: ...from an address of its own each run, so the form's per-address limit cannot be spent ahead of it (${sent && sent.email})`);
+        assert(health.healthSender('Run 42!') === 'health-check+Run42@example.com' && health.healthSender('') === 'health-check+run@example.com',
+            'Contact: the run\'s sender keeps only letters and digits of its tag');
         ({ r: c, n } = await e2e(ok, json({ status: 'ok', message: 'Contact form endpoint is active. Send submissions as POST.' })));
         assert(c.status === 'waiting' && n.calls.every(x => x.method === 'GET') && c.items.join() === 'C2',
             'Contact: a deployment without the health check gets no POST (it would take the test for a real message and email it), and waits on C2');
@@ -500,6 +505,8 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
                 Object.assign(i, body);
                 return reply(200, i);
             }
+            const enable = /^\/repos\/o\/r\/actions\/workflows\/([\w.-]+)\/enable$/.exec(u.pathname);
+            if (enable && method === 'PUT') return reply(204);
             if (one && method === 'POST' && one[2]) {
                 issues.find(x => x.number === Number(one[1])).comments.push(body.body);
                 return reply(201, {});
@@ -540,8 +547,42 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         w = fakeGitHub([{ number: 7, title: 'Site health', body: `${health.MARKER}\nold`, labels: [] },
             { number: 8, title: 'Site health', body: 'A person\'s own issue with the same title', labels: [{ name: 'health' }], user: { login: 'moseskolleh' } }]);
         done = await health.syncIssue(w.gh, { results: failing, body: body(failing), now: NOW });
-        assert(done.action === 'updated' && done.number === 7 && w.issues.length === 2 && w.issues[1].body.startsWith('A person'),
+        assert(/^updated/.test(done.action) && done.number === 7 && w.issues.length === 2 && w.issues[1].body.startsWith('A person'),
             'Issue: an issue that lost its label is found by its marker; a person\'s issue with the same title is left alone');
+
+        // Edits notify nobody: a check that breaks while the issue is open is
+        // said in a comment naming the owner; the same week again is quiet.
+        const waitingOnly = [sample[1], sample[3]].filter(r => r.status !== 'fail');
+        w = fakeGitHub();
+        await health.syncIssue(w.gh, { results: waitingOnly.length ? waitingOnly : [sample[1]], body: body(waitingOnly.length ? waitingOnly : [sample[1]]), now: NOW });
+        const issue = w.issues[0];
+        done = await health.syncIssue(w.gh, { results: failing, body: body(failing), now: NOW });
+        const brokenTitles = failing.filter(r => r.status === 'fail').map(r => r.title);
+        assert(done.action === 'updated and commented' && issue.comments.length === 1 && /^@o newly broken this week: /.test(issue.comments[0]) && brokenTitles.every(t => issue.comments[0].includes(t)),
+            `Issue: a check broken since last week is said in a comment that names the owner (${issue.comments[0]})`);
+        done = await health.syncIssue(w.gh, { results: failing, body: body(failing), now: NOW });
+        assert(done.action === 'updated' && issue.comments.length === 1, 'Issue: a week like the one before edits the issue and comments nothing');
+        const fixedIds = failing.filter(r => r.status === 'fail').map(r => r.id);
+        done = await health.syncIssue(w.gh, { results: [sample[1]], body: body([sample[1]]), now: NOW });
+        assert(done.action === 'updated and commented' && issue.comments.length === 2 && /^No longer broken: /.test(issue.comments[1]) && !/@o/.test(issue.comments[1]) && fixedIds.every(id => issue.comments[1].includes(id)),
+            `Issue: a check fixed since last week is said too, without calling anyone (${issue.comments[1]})`);
+        assert(JSON.stringify(health.brokenBefore(body(failing))) === JSON.stringify(fixedIds) && health.brokenBefore('no marker').length === 0,
+            'Issue: the body records which checks were broken, for the next run to compare');
+
+        // The schedules kept alive: each run enables all three again.
+        w = fakeGitHub();
+        const refused = await health.keepAlive(w.gh);
+        const puts = w.calls.filter(c => c.method === 'PUT').map(c => c.path);
+        assert(refused.length === 0 && puts.join() === health.SCHEDULED.map(f => `/repos/o/r/actions/workflows/${f}/enable`).join() && health.SCHEDULED.join() === 'health.yml,review.yml,stats.yml',
+            `Schedules: each run enables the health, review and open-counts workflows again, which GitHub counts as activity (${puts.join(', ')})`);
+        const refusing = github.client({ fetch: async () => ({ status: 403, text: async () => '{"message":"Resource not accessible by integration"}' }), token: 't', repo: 'o/r' });
+        const logged = [];
+        const log = console.log;
+        console.log = (m) => logged.push(String(m));
+        let gone;
+        try { gone = await health.keepAlive(refusing); } finally { console.log = log; }
+        assert(gone.length === 3 && /::warning title=Site health::Could not keep these schedules alive: health\.yml \(403\)/.test(logged.join('\n')),
+            'Schedules: a refusal is a warning on the run, not a failure');
 
         let threw = '';
         try { await github.client({ fetch: async () => ({ status: 403, text: async () => '{"message":"Resource not accessible by integration"}' }), token: 't', repo: 'o/r' }).listIssues({}); } catch (e) { threw = e.message; }
@@ -596,6 +637,10 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         assert(done.action === 'exists', 'Review: a quarter whose issue was closed early does not get a second one');
         done = await review.openReview(w.gh, { now: new Date('2027-01-04T06:23:00Z'), checklist: checklistMd, site: SITE });
         assert(done.action === 'opened' && w.issues.some(i => i.title === 'Quarterly review — 2027 Q1'), 'Review: the next quarter gets its own');
+        w.issues.find(i => i.title === 'Quarterly review — 2027 Q1').labels = [];
+        done = await review.openReview(w.gh, { now: new Date('2027-01-11T06:23:00Z'), checklist: checklistMd, site: SITE });
+        assert(done.action === 'exists' && w.issues.filter(i => i.title === 'Quarterly review — 2027 Q1').length === 1,
+            'Review: a quarter\'s issue that lost its label is still found, among the bot\'s own, and not opened twice');
     }
 
     // =====================================================================
@@ -617,9 +662,9 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         assert(pkg.scripts.health === 'node scripts/health.js', 'CLI: npm run health runs it');
 
         const workflow = (name) => read(`.github/workflows/${name}`);
-        const shared = (yml, name) => {
-            assert(/\npermissions:\n {2}contents: read\n {2}issues: write\n(?![ \t]+\w)/.test(yml) && (yml.match(/permissions:/g) || []).length === 1,
-                `${name}: asks for contents: read and issues: write, and nothing else`);
+        const shared = (yml, name, more = '') => {
+            assert(new RegExp(`\\npermissions:\\n {2}contents: read\\n {2}issues: write\\n${more}(?![ \\t]+\\w)`).test(yml) && (yml.match(/permissions:/g) || []).length === 1,
+                `${name}: asks for contents: read and issues: write${more ? ', and actions: write to keep the schedules alive' : ''}, and nothing else`);
             const uses = (yml.match(/uses: \S+/g) || []).map(u => u.slice(6));
             assert(uses.length === 2 && uses.join() === 'actions/checkout@v4,actions/setup-node@v4', `${name}: no action but checkout and setup-node, pinned at v4 (${uses.join(', ')})`);
             assert(/node-version: 22/.test(yml) && /- run: npm ci/.test(yml) && /persist-credentials: false/.test(yml) && /workflow_dispatch:/.test(yml),
@@ -627,7 +672,8 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
             assert(/GITHUB_TOKEN: \$\{\{ github\.token \}\}/.test(yml) && (yml.match(/github\.token/g) || []).length === 1, `${name}: the token reaches the one step that posts`);
         };
         const h = workflow('health.yml');
-        shared(h, 'Health workflow');
+        shared(h, 'Health workflow', ' {2}actions: write\\n');
+        assert(/ref: \$\{\{ github\.event\.repository\.default_branch \}\}/.test(h), 'Health workflow: checks out main, whichever branch a manual run starts from');
         const cron = (h.match(/- cron: '([^']+)'/) || [])[1] || '';
         const statsCron = (workflow('stats.yml').match(/- cron: '([^']+)'/) || [])[1];
         assert(/^([1-9]|[1-5]\d) \d+ \* \* [0-6]$/.test(cron) && cron !== statsCron && cron.split(' ')[4] !== statsCron.split(' ')[4],
