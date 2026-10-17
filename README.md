@@ -696,14 +696,21 @@ later runs, and closed with a comment once nothing is. Each check is
   are listed, but they do not keep the issue open by themselves.
 
 The job stays green once it has written the issue; the issue is the signal.
-Locally, `npm run health -- --dry-run` prints the report and posts nothing.
+GitHub notifies nobody when an issue is edited, and this one can stay open
+for months while a switch waits on Moses, so a week in which a check breaks
+that was not broken the week before (or one is fixed) also adds a comment,
+naming the repository's owner, who is notified of it. A week like the one
+before edits the issue quietly. Locally, `npm run health -- --dry-run`
+prints the report and posts nothing.
 
 **The contact form, end to end.** Once the current `Code.gs` is published,
 give the Apps Script a second token, `HEALTH_TOKEN` (any long random
 string, not `STATS_TOKEN`), and make the web app URL with
 `?action=health&token=<that string>` a repository secret, `HEALTH_URL`.
 Each week the check then asks the deployment for its version, and only if
-it has the health check sends one test message down the form's own path:
+it has the health check sends one test message (from an address of its own
+each week, so nobody can spend the form's per-address limit ahead of it)
+down the form's own path:
 the same validation, limits, escaping and lock as a visitor's, written to a
 `Health` tab, emailing nobody and adding nothing to the public counts. The
 reply says whether `OWNER_EMAIL` and `TURNSTILE_SECRET` are set, the two
@@ -725,8 +732,12 @@ and only there; `tests/health.test.js` fails if the plan's table says
 anything else. `node scripts/review.js --dry-run` prints the issue.
 
 GitHub turns off scheduled workflows in a public repository after 60 days
-without activity in it. The Actions tab then shows each one as disabled,
-and one press turns it back on.
+without activity in it, and says so to nobody. So each week the health run
+enables its own schedule, the quarterly review's and the open counts' again
+through the API (with the workflow's `actions: write`), which counts as
+activity: the way the keepalive-workflow action keeps schedules running,
+without dummy commits. If that is ever refused, the run leaves a warning;
+the Actions tab shows a disabled workflow, and one press turns it back on.
 
 ## Content pipeline
 

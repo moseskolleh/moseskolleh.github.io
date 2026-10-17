@@ -1807,7 +1807,8 @@ const blocksHtml = (blocks, opts) => blocks.map(b => (b.items
     : `<${b.type}>${runsHtml(b.runs, opts)}</${b.type}>`)).join('\n');
 
 /** A <script type="application/ld+json"> block, indented as the homepage's is. Entities are not escaped: it is raw text. */
-const ldScript = (ld) => `<script type="application/ld+json">\n${JSON.stringify(ld, null, 4)}\n</script>`;
+// "<" is written as \u003c, so no string in content/ can close the block early.
+const ldScript = (ld) => `<script type="application/ld+json">\n${JSON.stringify(ld, null, 4).replace(/</g, '\\u003c')}\n</script>`;
 
 /** The notes in series order: oldest first, by date and then by number. */
 const inSeries = (notes) => notes.slice().sort((a, b) => (a.date === b.date ? a.number - b.number : a.date < b.date ? -1 : 1));

@@ -79,6 +79,10 @@ function client({ fetch, token, repo, api = API }) {
         },
         async comment(number, body) {
             return (await request('POST', `${issues}/${number}/comments`, { body })).json;
+        },
+        /** Enables a workflow by its file name; enabling an enabled one is allowed. */
+        async enableWorkflow(file) {
+            await request('PUT', `/repos/${repo}/actions/workflows/${encodeURIComponent(file)}/enable`);
         }
     };
 }

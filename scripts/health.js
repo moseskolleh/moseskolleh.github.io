@@ -86,7 +86,10 @@ const REFUSERS = {
 };
 
 // The test message the contact form's path is sent. example.com is reserved
-// for examples, and nothing is mailed anyway.
+// for examples, and nothing is mailed anyway. Each run sends it from an
+// address of its own (healthSender), because the form limits messages per
+// address and this one is public: anyone could spend its allowance just
+// before a run and have the check report the form broken.
 const HEALTH_MESSAGE = {
     name: 'Site health check',
     email: 'health-check@example.com',
@@ -94,6 +97,7 @@ const HEALTH_MESSAGE = {
     message: 'A test message from the weekly health check (.github/workflows/health.yml). It goes to the Health tab, and nobody is emailed.',
     source: 'health check'
 };
+const healthSender = (tag) => HEALTH_MESSAGE.email.replace('@', `+${String(tag).replace(/[^a-z0-9]/gi, '').slice(0, 24) || 'run'}@`);
 
 // Each check names the owner-checklist items it waits on by something the
 // item says (its title, or where its answer goes), not by number, so the
@@ -588,7 +592,7 @@ async function checkContact(ctx) {
         post.searchParams.set('action', 'health');
         const res = await request(ctx, post.href, 'POST', {
             headers: { 'content-type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(HEALTH_MESSAGE)
+            body: JSON.stringify({ ...HEALTH_MESSAGE, email: healthSender(ctx.runTag || ctx.now.getTime().toString(36)) })
         });
         const text = await res.text();
         try { reply = JSON.parse(text); } catch (e) { reply = null; }
@@ -731,14 +735,28 @@ function render(results, { checklist, now, sha, repo, runUrl }) {
         sections.forEach(s => out.push(`- ${s}: ${rest.filter(i => i.section === s).map(i => i.id).join(', ')}`));
     }
     out.push('', `_Written by ${blob('scripts/health.js')} each Tuesday (${blob('.github/workflows/health.yml')}), and edited in place._`);
+    // Which checks were broken, for the next run to compare (syncIssue).
+    out.push('', `<!-- health:broken=${brokenIds(results).join(',')} -->`);
     return `${out.join('\n')}\n`;
 }
+
+const brokenIds = (results) => results.filter(r => r.status === 'fail').map(r => r.id);
+const brokenBefore = (body) => {
+    const m = /<!-- health:broken=([\w,-]*) -->/.exec(body || '');
+    return m ? m[1].split(',').filter(Boolean) : [];
+};
 
 /**
  * Keeps one open issue: opened while anything fails or waits, edited in
  * place on later runs, and closed with a comment once nothing does. It is
  * found by the marker on its first line, among the issues labelled health,
  * and among the bot's own if the label was ever taken off.
+ *
+ * GitHub tells nobody when an issue is edited, and this one can stay open
+ * for months while a switch waits on Moses. So a run that finds a check
+ * broken that was not broken last week (or fixed one that was) says so in
+ * a comment that names the repository's owner, who is then notified; a
+ * week like the one before edits the issue quietly.
  */
 async function syncIssue(gh, { results, body, now }) {
     await gh.ensureLabel(LABEL.name, LABEL.color, LABEL.description);
@@ -748,8 +766,20 @@ async function syncIssue(gh, { results, body, now }) {
 
     if (needsIssue(results)) {
         if (open) {
+            const before = brokenBefore(open.body);
+            const now = brokenIds(results);
+            const titled = (ids) => ids.map(id => (results.find(r => r.id === id) || { title: id }).title).join('; ');
+            const newly = now.filter(id => !before.includes(id));
+            const fixed = before.filter(id => !now.includes(id));
             await gh.updateIssue(open.number, { title: TITLE, body });
-            return { action: 'updated', number: open.number };
+            if (newly.length || fixed.length) {
+                const lines = [];
+                if (newly.length) lines.push(`@${gh.repo.split('/')[0]} newly broken this week: ${titled(newly)}.`);
+                if (fixed.length) lines.push(`No longer broken: ${titled(fixed)}.`);
+                lines.push('', 'The issue above has the details.');
+                await gh.comment(open.number, lines.join('\n'));
+            }
+            return { action: newly.length || fixed.length ? 'updated and commented' : 'updated', number: open.number };
         }
         const made = await gh.createIssue({ title: TITLE, body, labels: [LABEL.name] });
         return { action: 'opened', number: made.number };
@@ -759,6 +789,24 @@ async function syncIssue(gh, { results, body, now }) {
     await gh.comment(open.number, `Nothing is broken or waiting as of ${isoDay(now)}, so this closes. The next run that finds something opens a new issue.`);
     await gh.updateIssue(open.number, { state: 'closed', state_reason: 'completed' });
     return { action: 'closed', number: open.number };
+}
+
+// GitHub turns off a public repository's scheduled workflows after 60 days
+// without activity in it, and says so to nobody; this repository's
+// commits come in waves, and the open counts commit only once counting is
+// on. So each week this run enables its own schedule and the other two
+// again, through the API, which counts as activity (it is how the
+// keepalive-workflow action keeps schedules running, without dummy
+// commits). It needs the workflow's `actions: write`; without it, or if
+// GitHub refuses, the run says so and carries on.
+const SCHEDULED = ['health.yml', 'review.yml', 'stats.yml'];
+async function keepAlive(gh, files = SCHEDULED) {
+    const refused = [];
+    for (const file of files) {
+        try { await gh.enableWorkflow(file); } catch (err) { refused.push(`${file} (${err.status || why(err)})`); }
+    }
+    if (refused.length) console.log(`::warning title=Site health::Could not keep these schedules alive: ${refused.join(', ')}. GitHub turns a schedule off after 60 days without activity in the repository.`);
+    return refused;
 }
 
 // ------------------------------------------------------------------
@@ -852,6 +900,7 @@ async function main(argv = process.argv.slice(2), env = process.env) {
 
     const gh = github.client({ fetch: globalThis.fetch, token: env.GITHUB_TOKEN, repo: env.GITHUB_REPOSITORY, api: env.GITHUB_API_URL || github.API });
     const done = await syncIssue(gh, { results, body, now: ctx.now });
+    await keepAlive(gh);
     const broken = results.filter(r => r.status === 'fail').length;
     const waiting = results.filter(r => r.status === 'waiting').length;
     const where = done.number ? ` (#${done.number})` : '';
@@ -876,5 +925,5 @@ module.exports = {
     codeVersion, declaredVersion, parseChecklist, itemsFor, sitemapPages, readAnswer,
     checkLive, checkLinks, checkProfile, checkAtAGlance, checkAiData, checkCv,
     checkDeployment, checkContact, checkStatsSource, checkStatsData, checkAudit,
-    CHECKS, runChecks, needsIssue, render, syncIssue, defaultContext, main
+    CHECKS, runChecks, needsIssue, render, syncIssue, brokenBefore, healthSender, SCHEDULED, keepAlive, defaultContext, main
 };
