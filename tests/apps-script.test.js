@@ -338,6 +338,25 @@ const snapshot = (w) => JSON.stringify(Array.from(w.sheets.entries()).map(([n, s
     assert(cell(w, 'visits', '', 'Daily', '2026-09-27') === 1, 'Counter: a new day starts its own totals at 1');
 }
 
+// --- A field note's page view -------------------------------------------
+// A note lives in notes/ and names itself "note-" and its slug (data-page,
+// count.js), at most 40 characters, as the validator holds its slug to.
+// It is kept under its own name, page and KB alike; one longer is not v1.
+{
+    const w = world();
+    const content = require('../scripts/lib/content.js');
+    const notes = content.loadAll().notes;
+    assert(notes.length >= 3 && notes.every(n => w.ctx.isBeaconV1({ ...beacon, page: content.notePage(n.slug) })),
+        `Counter: every field note's page name is one schema v1 accepts (${notes.map(n => content.notePage(n.slug)).join(', ')})`);
+    const longest = content.notePage('a'.repeat(40 - content.notePage('').length));
+    const before = snapshot(w);
+    postCount(w, { ...beacon, page: `${longest}a` });
+    assert(snapshot(w) === before, 'Counter: a page name over 40 characters changes nothing');
+    postCount(w, { ...beacon, page: longest, deepest: 'note', features: ['notes-to-note'], ref: '', kb: 90 });
+    assert(cell(w, 'page', longest) === 1 && cell(w, 'kb', longest) === 90 && cell(w, 'deepest', 'note') === 1 && cell(w, 'feature', 'notes-to-note') === 1,
+        'Counter: a field note\'s page view is kept under its own name, with its KB, its furthest part and its features');
+}
+
 // --- Today's block is found however long the history above it -----------
 {
     const w = world();

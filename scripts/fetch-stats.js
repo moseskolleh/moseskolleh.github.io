@@ -249,7 +249,12 @@ function parseSource(text) {
  */
 function knownNames(root = ROOT) {
     const rootFiles = fs.readdirSync(root);
-    const pages = rootFiles.filter(f => f.endsWith('.html'));
+    // The field notes, each a page in notes/, send the name their data-page
+    // gives them ("note-" and the slug), not their file's, which a page at
+    // the root could share.
+    const notesDir = path.join(root, 'notes');
+    const notes = fs.existsSync(notesDir) ? fs.readdirSync(notesDir).filter(f => f.endsWith('.html')).map(f => `notes/${f}`) : [];
+    const pages = rootFiles.filter(f => f.endsWith('.html')).concat(notes);
     const modulesDir = path.join(root, 'modules');
     const modules = fs.existsSync(modulesDir) ? fs.readdirSync(modulesDir).filter(f => f.endsWith('.js')) : [];
     const scripts = rootFiles.filter(f => f.endsWith('.js')).map(f => path.join(root, f))
@@ -275,8 +280,13 @@ function knownNames(root = ROOT) {
     }
 
     const lenses = JSON.parse(fs.readFileSync(path.join(root, 'content', 'lenses.json'), 'utf8'));
+    const noteNames = notes.map(f => (fs.readFileSync(path.join(root, f), 'utf8').match(/<script[^>]*\bsrc="[^"]*count\.js"[^>]*\bdata-page="([a-z0-9-]{1,40})"/) || [])[1]).filter(Boolean);
     return {
-        pages: new Set(pages.map(f => f.replace(/\.html$/, ''))),
+        pages: new Set(pages.filter(f => !f.startsWith('notes/')).map(f => f.replace(/\.html$/, '')).concat(noteNames)),
+        // Published together, as one row: a month's notes are read by few,
+        // and one note's page views would mostly read "<5" (and hold a
+        // neighbour back with them). The daily totals keep each note's.
+        groups: new Map(noteNames.map(n => [n, NOTES_GROUP])),
         lenses: new Set(lenses.lenses.map(l => l.id)),
         ids,
         features
@@ -307,6 +317,12 @@ function normaliseDate(value) {
     return null;
 }
 
+// What the field notes are published as, every note together.
+const NOTES_GROUP = 'notes';
+
+/** A page as it is published: its own name, its group's, or "other" for a name the site does not use. */
+const pageKey = (known, key) => (known.pages.has(key) ? ((known.groups && known.groups.get(key)) || key) : 'other');
+
 /** @returns {{date,metric,key,count}|{skip:true}|{drop:string}} */
 function normaliseRow(raw, known, today) {
     if (!Array.isArray(raw) || raw.length < 4) return { drop: 'not four columns' };
@@ -331,13 +347,13 @@ function normaliseRow(raw, known, today) {
         case 'vp':
             return VIEWPORTS.includes(key) ? { date, metric, key, count } : { drop: 'unknown viewport class' };
         case 'page':
-            return { date, metric, key: known.pages.has(key) ? key : 'other', count };
+            return { date, metric, key: pageKey(known, key), count };
         case 'kb':
             // Summed KB, keyed by the page it was measured on. A row with no
             // page (the first counter kept one daily sum) still counts in the
             // totals; it just cannot be split by page.
             if (key === '') return { date, metric, key, count };
-            return { date, metric, key: known.pages.has(key) ? key : 'other', count };
+            return { date, metric, key: pageKey(known, key), count };
         case 'lens':
             // No lens is not a lens visit; those are the visits minus these.
             if (key === '') return { skip: true };
@@ -786,6 +802,8 @@ module.exports = {
     parseCsv,
     parseSource,
     knownNames,
+    pageKey,
+    NOTES_GROUP,
     normaliseRow,
     cleanRows,
     transform,

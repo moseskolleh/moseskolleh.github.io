@@ -204,16 +204,37 @@ const profile = JSON.parse(read('content/profile.json'));
         /164 water points delivered in Sierra Leone, itemised/.test(text(about)),
         'About: the 164 water points are itemised there (100 + 50 + 14), under the paragraph that claims them');
 
-    // The field notes live in About now: all three, whole, each a press away.
+    // The field notes live in About: a short link to each of the newest
+    // three, and each note whole on a page of its own, one press away (they
+    // were three folds of the whole notes here until Phase 5.1).
     const notes = bare.getElementById('notes');
-    const each = notes ? Array.from(notes.querySelectorAll('details.fieldnote')) : [];
-    assert(!!notes && notes.closest('#about') === about && each.length === 3, `Notes: the three Field Notes are in About (${each.length})`);
-    assert(each.every(d => !d.open && d.querySelector('summary h3') && d.querySelector('.fieldnote-tag') && d.querySelectorAll('.fieldnote-body p').length === 2),
-        'Notes: each is its tag and title until opened (a <details>: keyboard and no-JS for free), with both its paragraphs inside');
+    const each = notes ? Array.from(notes.querySelectorAll('.fieldnote')) : [];
+    const sources = require('../scripts/lib/content.js').loadAll().notes;
+    assert(!!notes && notes.closest('#about') === about && each.length === Math.min(3, sources.length) && sources.length >= 3,
+        `Notes: a link to each of the newest three field notes is in About (${each.length} of ${sources.length})`);
+    assert(!notes.querySelector('details') && !/fieldnote-body/.test(html), 'Notes: no note is folded into the homepage any more; each is a page');
+    each.forEach((card) => {
+        const a = card.querySelector('h3 a[href^="notes/"]');
+        const note = a && sources.find(n => a.getAttribute('href') === `notes/${n.slug}.html`);
+        const time = card.querySelector('.fieldnote-tag time');
+        assert(!!note && text(a) === note.title && time && time.getAttribute('datetime') === note.date &&
+            text(card.querySelector('.fieldnote-tag')).includes(note.tag) && text(card.querySelector('.fieldnote-line')) === note.summary,
+            `Notes: "${note ? note.title : '?'}" is its number, tag and date, its title (the link) and its one line`);
+        if (!note) return;
+        // One press away, whole: every paragraph of the note is on its page.
+        const page = new JSDOM(read(`notes/${note.slug}.html`)).window.document;
+        const body = text(page.getElementById('note'));
+        const missing = note.text.split('\n').filter(line => !body.includes(line.replace(/\s+/g, ' ').trim()));
+        assert(missing.length === 0, `Notes: "${note.title}" is whole on notes/${note.slug}.html (${missing.length} paragraph(s) missing)`);
+    });
     assert(/short dispatches from the intersection of mud, models and megawatts/i.test(text(notes)), 'Notes: their one line of introduction came with them');
-    const pointer = notes.querySelector('a[href="#ecoprompt"]');
-    assert(!!pointer && /further down/.test(text(pointer.parentElement)) && !/widget above/.test(text(notes)),
-        'Notes: the third points down the page to the chart it means (it said "the widget above", which it no longer is)');
+    // The third note pointed down the homepage to the chart it means ("the
+    // widget above", then "further down"); on its own page it says where.
+    const third = sources.find(n => n.number === 3);
+    const thirdPage = new JSDOM(read(`notes/${third.slug}.html`)).window.document;
+    const pointer = thirdPage.querySelector('#note a[href="../index.html#ecoprompt"]');
+    assert(!!pointer && /on the homepage/.test(text(pointer.parentElement)) && !/further down|widget above/.test(text(thirdPage.getElementById('note'))),
+        'Notes: the third points to the chart it means, on the homepage, from its own page');
 }
 
 // ===================================================================

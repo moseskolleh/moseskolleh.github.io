@@ -112,7 +112,8 @@ const clockChecks = (async () => {
 {
     const budget = require('../scripts/check-budget.js');
     const entries = Object.entries(budget.PAGE_BUDGETS);
-    const missingPage = entries.filter(([rel]) => !fs.existsSync(path.join(ROOT, rel)));
+    // A pattern (the field notes') names every page it matches, and at least one.
+    const missingPage = entries.filter(([rel]) => (rel.includes('*') ? !budget.sitePages().some(p => budget.covers(rel, p)) : !fs.existsSync(path.join(ROOT, rel))));
     const missingBudget = entries.filter(([, key]) => !budget.BUDGETS[key]);
     assert(missingPage.length === 0, `Budget map: every page it names exists (missing: ${missingPage.map(e => e[0]).join(', ') || 'none'})`);
     assert(missingBudget.length === 0, `Budget map: every page is held by a real budget (unknown: ${missingBudget.map(e => e[1]).join(', ') || 'none'})`);

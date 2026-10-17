@@ -157,6 +157,42 @@ function load(options = {}) {
     const odd = load({ url: `${SITE}%E2%9C%93.html` });
     odd.leave();
     assert(odd.calls.length === 0, 'page: a name the server would refuse is not sent at all');
+
+    // A field note lives in notes/, and its last path segment could be a
+    // root page's name ("research.html" is a page; so could a note be), so
+    // it names itself: "note-" and its slug, which no root page is called.
+    // That name is held to one rule at all three ends: the validator's
+    // NOTE_PAGE (scripts/lib/content.js), count.js's, and Code.gs's
+    // BEACON_NAME, which accepts nothing else.
+    const content = require('../scripts/lib/content.js');
+    const notes = content.loadAll().notes;
+    notes.forEach((n) => {
+        const tag = read(`notes/${n.slug}.html`).match(/<script[^>]*src="\.\.\/count\.js"[^>]*>/);
+        const dataPage = tag && (tag[0].match(/data-page="([^"]+)"/) || [])[1];
+        const p = load({ url: `${SITE}notes/${n.slug}.html`, dataPage });
+        p.leave();
+        const body = p.payload();
+        assert(dataPage === content.notePage(n.slug) && body && body.page === dataPage && serverAccepts(body),
+            `page: notes/${n.slug}.html counts as "${dataPage}", and the server accepts it`);
+    });
+    const ruleOf = (src, re) => (src.match(re) || [])[1];
+    const rules = [
+        ruleOf(COUNT, /const ok = \(s\) => typeof s === 'string' && \/(\^\[a-z0-9-\]\{1,40\}\$)\/\.test\(s\)/),
+        ruleOf(read('google-apps-script/Code.gs'), /var BEACON_NAME = \/(.+?)\/;/),
+        content.NOTE_PAGE.source
+    ];
+    assert(rules.every(r => r === '^[a-z0-9-]{1,40}$'), `page: one page-name rule at all three ends (${rules.join(' · ')})`);
+    // The longest slug the validator lets through still names a page the
+    // server takes; one character more is refused before it is published.
+    const longest = 'a'.repeat(40 - content.notePage('').length);
+    const atLimit = load({ url: `${SITE}notes/${longest}.html`, dataPage: content.notePage(longest) });
+    atLimit.leave();
+    const tooLong = load({ url: `${SITE}notes/${longest}a.html`, dataPage: content.notePage(`${longest}a`) });
+    tooLong.leave();
+    const refused = content.checkNotes([Object.assign({}, notes[0], { slug: `${longest}a`, file: `${longest}a.md`, problems: [] })],
+        { projects: content.load('projects'), lenses: content.load('lenses') });
+    assert(atLimit.calls.length === 1 && serverAccepts(atLimit.payload()) && tooLong.calls.length === 0 && refused.some(p => /slug/.test(p)),
+        `page: a slug of ${longest.length} characters is counted; one longer is refused by the validator, and count.js would not send it`);
 }
 
 // --- lens ------------------------------------------------------------------
@@ -450,7 +486,9 @@ function load(options = {}) {
 // hook, or its clicks are missing from the CV-downloads figure and from the
 // features table. The text-only field report's two once had none.
 {
-    const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && /<script[^>]*src="(?:\/sustaintheworld\/)?count\.js"/.test(read(f)));
+    const notePages = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`);
+    const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).concat(notePages)
+        .filter(f => /<script[^>]*src="(?:\/sustaintheworld\/|\.\.\/)?count\.js"/.test(read(f)));
     const bare = [];
     pages.forEach((rel) => {
         const doc = new JSDOM(read(rel)).window.document;
@@ -461,7 +499,7 @@ function load(options = {}) {
             if (!a.hasAttribute('data-analytics')) bare.push(`${rel}: email link "${a.textContent.trim()}"`);
         });
     });
-    assert(pages.includes('field-report.html') && bare.length === 0,
+    assert(pages.includes('field-report.html') && notePages.every(p => pages.includes(p)) && bare.length === 0,
         `Hooks: every CV link is a cv-download-* hook and every email link a hook, on every counted page (${bare.join('; ') || 'all hooked'})`);
     // The terminal's `cv` command fetches the CV without a link on the page.
     const { run } = require('./harness.js');
@@ -490,6 +528,7 @@ function load(options = {}) {
 // module is read, so a hook added anywhere is held to the same rule.
 {
     const sources = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
+        .concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`))
         .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`), ['script.js']);
     const names = [];
     sources.forEach((rel) => {

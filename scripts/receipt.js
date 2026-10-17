@@ -26,7 +26,7 @@
 
 const fs = require('fs');
 const { GRAMS_PER_MB, grams } = require('./lib/voice-signature.js');
-const { couldLowerTo, heldLength, fmtCeiling } = require('./check-budget.js');
+const { couldLowerTo, heldLength, fmtCeiling, keyFor } = require('./check-budget.js');
 
 const KB = 1024;
 const MB = 1024 * 1024;
@@ -90,7 +90,11 @@ function receipt({ base = null, head, baseLength = null, headLength = null, base
     });
     const pages = union(Object.keys(head.length || {}), Object.keys((headLength && headLength.pages) || {}), Object.keys((baseLength && baseLength.pages) || {}));
     const vps = union(Object.keys(head.viewports || {}), ...pages.map(p => Object.keys(((headLength && headLength.pages) || {})[p] || {})));
-    const ceilingOf = (page, vp, side = head) => (side.length && side.length[page] && side.length[page][vp] ? side.length[page][vp].ceiling : null);
+    // A page's own ceiling, or the one its pattern's budget holds it to (the field notes share one).
+    const ceilingOf = (page, vp, side = head) => {
+        const key = side.length ? keyFor(page, Object.keys(side.length)) : null;
+        return key && side.length[key][vp] ? side.length[key][vp].ceiling : null;
+    };
     pages.forEach(page => vps.forEach((vp) => {
         const m = lengthOf(headLength, head, page, vp);
         const c = ceilingOf(page, vp);

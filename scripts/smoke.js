@@ -115,10 +115,13 @@ const BROWSER = (() => {
 const CHROMIUM = BROWSER === 'chromium';
 const PORT = 8123 + Math.floor(Math.random() * 1000);
 
-// Every page at the root, the homepage first. Read from the directory so a
-// new page is covered the day it exists, not the day someone lists it.
-const PAGES = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-    .sort((a, b) => (b === 'index.html') - (a === 'index.html') || a.localeCompare(b));
+// Every page, the homepage first and the field notes (notes/) last. Read
+// from the directories (check-budget.js, sitePages) so a new page or note is
+// covered the day it exists, not the day someone lists it.
+const PAGES = require('./check-budget.js').sitePages(ROOT);
+// The name a page's visit count goes under: its file's, or a field note's
+// "note-" and its slug (data-page), which no page at the root can be called.
+const pageNameOf = (rel) => (rel.startsWith('notes/') ? `note-${rel.slice(6, -5)}` : rel.replace(/\.html$/, ''));
 
 // The one request allowed to leave this origin: the visit counter's POST to
 // the contact form's Apps Script deployment, with ?action=count, and only
@@ -301,7 +304,7 @@ async function visit(context, page, rel, origin) {
         if (rel === 'carbon-ai.html') await exerciseCarbonTool(page, r);
         if (rel === 'case-studies.html') await exerciseCaseStudyGames(page, r);
 
-        if (SCREENS) await page.screenshot({ path: path.join(ROOT, '.smoke', (CHROMIUM ? '' : `${BROWSER}-`) + rel.replace('.html', '.png')) });
+        if (SCREENS) await page.screenshot({ path: path.join(ROOT, '.smoke', (CHROMIUM ? '' : `${BROWSER}-`) + rel.replace(/\//g, '-').replace('.html', '.png')) });
         await page.close();
     }
 
@@ -315,16 +318,21 @@ async function visit(context, page, rel, origin) {
     // top. (A flat 2% did that job for the homepage, but on a 90 KB page it
     // left room for barely one more request.) The pages come from
     // check-budget.js, so a page that gains a budget there is measured here.
+    // A budget for a pattern (the field notes') holds every page it matches,
+    // each against the heaviest one's estimate.
     if (!CHROMIUM) ok(`first-view weights: not measured in ${BROWSER} (no DevTools protocol) — the Chromium run checks them`);
-    else Object.entries(budget.PAGE_BUDGETS).forEach(([rel, key]) => {
-        const r = results[rel];
-        const estimate = estimates[key];
-        if (!r) return bad(`${rel}: has a budget in check-budget.js but is not a page here`);
-        if (r.arrivalBytes <= estimate + 300 * r.arrival.length) {
-            ok(`${rel}: measured first view ${fmt(r.arrivalBytes)} is within the budget's estimate of ${fmt(estimate)}`);
-        } else {
-            bad(`${rel}: measured first view ${fmt(r.arrivalBytes)} exceeds the budget's estimate of ${fmt(estimate)} — check-budget.js is missing something the page fetches on load`);
-        }
+    else Object.entries(budget.PAGE_BUDGETS).forEach(([pattern, key]) => {
+        const pages = PAGES.filter(rel => budget.covers(pattern, rel));
+        if (!pages.length) return bad(`${pattern}: has a budget in check-budget.js but is not a page here`);
+        pages.forEach((rel) => {
+            const r = results[rel];
+            const estimate = estimates[key];
+            if (r.arrivalBytes <= estimate + 300 * r.arrival.length) {
+                ok(`${rel}: measured first view ${fmt(r.arrivalBytes)} is within the budget's estimate of ${fmt(estimate)}`);
+            } else {
+                bad(`${rel}: measured first view ${fmt(r.arrivalBytes)} exceeds the budget's estimate of ${fmt(estimate)} — check-budget.js is missing something the page fetches on load`);
+            }
+        });
     });
 
     await checkLengths(browser, origin);
@@ -520,7 +528,7 @@ async function checkLengths(browser, origin) {
     fs.writeFileSync(file, JSON.stringify(measured, null, 2) + '\n');
 
     PAGES.forEach((rel) => {
-        const ceilings = budget.LENGTH[rel];
+        const ceilings = budget.LENGTH[budget.keyFor(rel, Object.keys(budget.LENGTH))];
         if (!ceilings) return bad(`${rel}: has no length budget — give it one in LENGTH, scripts/check-budget.js`);
         sizes.forEach(([vp]) => {
             const m = pages[rel][vp];
@@ -536,8 +544,8 @@ async function checkLengths(browser, origin) {
             else bad(`${rel} at ${vp}: ${shown}, over its ceiling of ${two(ceilings[vp])} — shorten the page; a ceiling only moves down${where}`);
         });
     });
-    Object.keys(budget.LENGTH).filter(rel => !PAGES.includes(rel))
-        .forEach(rel => bad(`${rel}: has a length budget in check-budget.js but is not a page here`));
+    Object.keys(budget.LENGTH).filter(key => !PAGES.some(rel => budget.covers(key, rel)))
+        .forEach(key => bad(`${key}: has a length budget in check-budget.js but is not a page here`));
     budget.hints(budget.budgetJson({}, measured)).forEach(h => ok(h));
     const where = path.relative(process.cwd(), file);
     ok(`lengths written to ${where.startsWith('..') ? file : where}`);
@@ -1914,7 +1922,8 @@ async function checkClaimMarks(browser, origin) {
     const value = new Map(ledger.map(c => [c.id, c.value]));
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await context.newPage();
-    for (const rel of ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', 'claims.html']) {
+    // And every field note: a note need not hold a figure, but one it holds is marked.
+    for (const rel of ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', 'claims.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
         await page.goto(`${origin}/${rel}`, { waitUntil: 'load' });
         if (rel === 'index.html') {
             await page.waitForFunction(() => !document.querySelector('.hero-stat-number[aria-hidden]')
@@ -1922,7 +1931,8 @@ async function checkClaimMarks(browser, origin) {
         }
         const marks = await page.evaluate(() => [...document.querySelectorAll('[data-claim]')].map(el => [el.getAttribute('data-claim'), el.textContent.trim()]));
         const wrong = marks.filter(([id, shown]) => !value.has(id) || !figures.agrees(value.get(id), shown)).map(([id, shown]) => `${id} "${shown}"`);
-        if (!marks.length) bad(`${rel}: no figure is marked with its ledger entry`);
+        if (!marks.length && rel.startsWith('notes/')) ok(`${rel}: holds no figure to mark`);
+        else if (!marks.length) bad(`${rel}: no figure is marked with its ledger entry`);
         else if (wrong.length) bad(`${rel}: once its scripts have run, ${wrong.length} marked figure(s) disagree with the ledger: ${wrong.join(', ')}`);
         else ok(`${rel}: once its scripts have run, all ${marks.length} marked figures say what the ledger says`);
         // A mark is an element, so in a flex or grid row it becomes an item
@@ -2066,7 +2076,7 @@ async function printPalette(browser, origin) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
     await context.addInitScript(() => { try { localStorage.setItem('theme', 'dark'); } catch (e) { /* the system's dark stands */ } });
     const page = await context.newPage();
-    for (const rel of ['index.html', 'case-studies.html', 'claims.html', 'carbon-ai.html', 'research.html', 'stats.html', 'field-report.html']) {
+    for (const rel of ['index.html', 'case-studies.html', 'claims.html', 'carbon-ai.html', 'research.html', 'stats.html', 'field-report.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
         await page.goto(`${origin}/${rel}`, { waitUntil: 'load' });
         await page.emulateMedia({ media: 'print', colorScheme: 'dark' });
         // Switching media here starts the colour transitions a card has on
@@ -3128,19 +3138,16 @@ async function axeHomepageStates(page, view, note, attempt) {
         await page.evaluate(() => { document.activeElement.blur(); scrollTo(0, 0); });
     });
 
-    // The field notes, open. Note 03's link had no colour of its own: the
-    // browser's blue, 1.85:1 on the dark card, and off the palette in the
-    // light theme. axe never saw it while every note was shut, and its
-    // contrast rule cannot see the second, so any link with words still in
-    // a browser's default colours fails here too.
-    await attempt(`${rel}: axe with the field notes open`, async () => {
-        await page.evaluate(() => document.querySelectorAll('details.fieldnote').forEach((d) => { d.open = true; }));
-        await page.waitForTimeout(100);
-        note(rel, 'the field notes open', view, await axeRun(page, '.fieldnotes'));
+    // The field notes' links. A note's link once had no colour of its own
+    // (the browser's blue, 1.85:1 on the dark card, when the notes were
+    // folds on this page), and axe's contrast rule cannot see one off the
+    // palette in the light theme, so any link with words still in a
+    // browser's default colours fails here too.
+    await attempt(`${rel}: axe on the field notes' links`, async () => {
+        note(rel, 'the field notes', view, await axeRun(page, '.fieldnotes'));
         const plain = await page.evaluate(() => Array.from(document.querySelectorAll('a[href]'))
             .filter(a => a.getClientRects().length && a.textContent.trim() && ['rgb(0, 0, 238)', 'rgb(85, 26, 139)'].includes(getComputedStyle(a).color))
             .map(a => a.textContent.trim().slice(0, 30)));
-        await page.evaluate(() => document.querySelectorAll('details.fieldnote').forEach((d) => { d.open = false; }));
         if (plain.length) throw new Error(`links in the browser's default colours: ${plain.join(', ')}`);
     });
 
@@ -3811,8 +3818,9 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         const gas = vm.createContext({});
         vm.runInContext(fs.readFileSync(path.join(ROOT, 'google-apps-script', 'Code.gs'), 'utf8'), gas);
         await context.route('**/sustaintheworld/no/such/page', (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') }));
-        const everyPage = PAGES.filter(rel => rel !== '404.html').map(rel => [rel, rel.replace(/\.html$/, '')])
-            .concat([['sustaintheworld/no/such/page', '404']]);
+        await context.route('**/sustaintheworld/notes/no-such-note.html', (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') }));
+        const everyPage = PAGES.filter(rel => rel !== '404.html').map(rel => [rel, pageNameOf(rel)])
+            .concat([['sustaintheworld/no/such/page', '404'], ['sustaintheworld/notes/no-such-note.html', '404']]);
         const wrong = [];
         for (const [rel, name] of everyPage) {
             const p = await context.newPage();

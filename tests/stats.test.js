@@ -130,8 +130,21 @@ const known = fetchStats.knownNames();
 // Every page a count can name has a name to print: claims.html counted as
 // "claims", and stats.html printed the bare key beside "EcoPrompt Coach".
 {
-    const unnamed = Array.from(known.pages).filter(k => !PAGE_NAMES[k]);
+    // As published: a field note under its group, every note together.
+    const unnamed = Array.from(known.pages).filter(k => !PAGE_NAMES[fetchStats.pageKey(known, k)]);
     assert(known.pages.has('claims') && unnamed.length === 0, `Known: every page the counter knows has a name on stats.html (${unnamed.join(', ') || `${known.pages.size} named`})`);
+
+    // The field notes, which live in notes/ and name themselves (data-page),
+    // are known by those names, and published as one row: a name like one
+    // but no note's is "other", as any name the site does not use.
+    const notes = Array.from(known.pages).filter(k => /^note-/.test(k));
+    const files = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html'));
+    assert(notes.length === files.length && files.every(f => known.pages.has(`note-${f.replace(/\.html$/, '')}`)),
+        `Known: every field note's page by the name it sends, "note-" and its slug (${notes.join(', ')})`);
+    assert(notes.every(k => fetchStats.pageKey(known, k) === fetchStats.NOTES_GROUP) && fetchStats.pageKey(known, 'note-not-a-note') === 'other' &&
+        fetchStats.pageKey(known, 'research') === 'research', 'Known: the notes are published together, as "notes"; a note name the site has not is "other"');
+    const rows = fetchStats.cleanRows(notes.map(k => ['2026-09-10', 'page', k, 2]).concat(notes.map(k => ['2026-09-10', 'kb', k, 180])), known, TODAY).rows;
+    assert(rows.length === notes.length * 2 && rows.every(r => r.key === 'notes'), 'Known: a note\'s page views and its kilobytes are both kept under "notes"');
 }
 const cleaned = fetchStats.cleanRows(fixtureRows(), known, TODAY);
 const stats = fetchStats.transform(cleaned.rows, { today: TODAY, known });

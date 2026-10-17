@@ -878,6 +878,130 @@ function checkQuotedFigures({ testimonials, certifications }, claims) {
 }
 
 // ------------------------------------------------------------------
+// content/notes/*.md — the Field Notes, one article each
+//
+// A note is published as notes/<slug>.html, in the feed and in the
+// sitemap, and the newest three are linked from the homepage. What it
+// must say before any of that (scripts/lib/notes.js reads the file):
+//
+//   number     its place in the series ("Note 01"), a whole number, never
+//              reused, and no lower than an earlier-dated note's
+//   title      plain text: it is the page's <h1> and the feed's title
+//   slug       its file's name and its address, and "note-" and the slug
+//              is the name the visit counter sends for it, so the slug
+//              keeps to the counter's page-name rule (NOTE_PAGE)
+//   date       the day it was first published on this site, a real day
+//              and not one still to come
+//   tag        the topic the homepage shows ("Water", "Scenarios")
+//   summary    one line, plain text: the homepage's line under the title,
+//              the page's description and the feed's summary
+//   caseStudy  or lens, one of the two: the case study or role view it is
+//              tied to, which has to exist, and which the note links
+//
+// A figure in a note is held to the claims ledger like any other: one the
+// ledger does not hold as written is refused here, by name.
+// ------------------------------------------------------------------
+const NOTES_DIR = path.join(CONTENT_DIR, 'notes');
+const NOTE_KEYS = ['number', 'title', 'slug', 'date', 'tag', 'summary', 'caseStudy', 'lens'];
+const NOTE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// The counter's page-name rule: count.js sends a page only under a name
+// that passes it, and Code.gs (BEACON_NAME) accepts nothing else.
+// tests/count.test.js holds the three to one rule.
+const NOTE_PAGE = /^[a-z0-9-]{1,40}$/;
+const notePage = (slug) => `note-${slug}`;
+const NOTE_LIMITS = { title: 90, tag: 24, summary: 160 };
+// Markdown in a field that is printed as plain text would show as its source.
+const NOTE_PLAIN = /[*_`[\]<>\\]/;
+
+/** Every note file, read and parsed, in file-name order. Problems are kept with each, for checkNotes. */
+function loadNotes(dir = NOTES_DIR) {
+    const notesLib = require('./notes.js');
+    if (!fs.existsSync(dir)) return [];
+    return fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort().map((file) => {
+        const split = notesLib.splitNote(fs.readFileSync(path.join(dir, file), 'utf8'));
+        const md = notesLib.parseMarkdown(split.body, split.bodyLine);
+        const m = split.meta;
+        return {
+            file,
+            number: /^[1-9]\d*$/.test(m.number || '') ? Number(m.number) : m.number,
+            title: m.title,
+            slug: m.slug,
+            date: m.date,
+            tag: m.tag,
+            summary: m.summary,
+            caseStudy: m.caseStudy,
+            lens: m.lens,
+            keys: Object.keys(m),
+            blocks: md.blocks,
+            text: notesLib.plainText(md.blocks),
+            links: notesLib.linksIn(md.blocks),
+            problems: split.problems.concat(md.problems)
+        };
+    });
+}
+
+/** The notes newest first: by date, then by number. */
+const notesNewestFirst = (notes) => notes.slice().sort((a, b) => (a.date === b.date ? b.number - a.number : a.date < b.date ? 1 : -1));
+
+function checkNotes(notes, { projects, lenses, claims }) {
+    const problems = [];
+    const seen = { slug: new Map(), number: new Map(), title: new Map() };
+    // A calendar day, as for confirmedOn: the latest day anywhere on Earth is UTC+14.
+    const latest = new Date(Date.now() + 14 * 3600e3).toISOString().slice(0, 10);
+    notes.forEach((n) => {
+        const at = `content/notes/${n.file}`;
+        n.problems.forEach(p => problems.push(`${at}: ${p}`));
+        n.keys.filter(k => !NOTE_KEYS.includes(k)).forEach(k => problems.push(`${at}: unknown front-matter key "${k}" (${NOTE_KEYS.join(', ')})`));
+
+        if (!Number.isInteger(n.number)) problems.push(`${at}: number must be a whole number from 1, its place in the series (got ${JSON.stringify(n.number)})`);
+        ['title', 'tag', 'summary'].forEach((k) => {
+            const v = n[k];
+            if (typeof v !== 'string' || !v.trim() || PLACEHOLDER.test(v)) problems.push(`${at}: no ${k}`);
+            else if (v.length > NOTE_LIMITS[k]) problems.push(`${at}: the ${k} is ${v.length} characters; at most ${NOTE_LIMITS[k]}`);
+            else if (NOTE_PLAIN.test(v)) problems.push(`${at}: the ${k} is printed as plain text, so it holds no markdown or HTML`);
+        });
+
+        if (typeof n.slug !== 'string' || !NOTE_SLUG.test(n.slug) || !NOTE_PAGE.test(notePage(n.slug))) {
+            problems.push(`${at}: the slug must be lower-case words joined by hyphens, at most ${40 - notePage('').length} characters, so the visit counter can name the page "${notePage('…')}" (got ${JSON.stringify(n.slug)})`);
+        } else if (n.file !== `${n.slug}.md`) {
+            problems.push(`${at}: the file is named for its slug, ${n.slug}.md`);
+        }
+
+        if (!realDay(String(n.date))) problems.push(`${at}: date must be a day, as YYYY-MM-DD (got ${JSON.stringify(n.date)})`);
+        else if (n.date > latest) problems.push(`${at}: date ${n.date} is still to come; a note is dated the day it was first published on this site`);
+
+        const ties = ['caseStudy', 'lens'].filter(k => n[k] !== undefined);
+        if (ties.length !== 1) problems.push(`${at}: ties to one case study or one lens (caseStudy or lens, not ${ties.length ? 'both' : 'neither'})`);
+        else if (n.caseStudy !== undefined && !projects.caseStudies.some(cs => cs.id === n.caseStudy)) problems.push(`${at}: there is no case study "${n.caseStudy}"`);
+        else if (n.lens !== undefined && !lenses.lenses.some(l => l.id === n.lens)) problems.push(`${at}: there is no lens "${n.lens}"`);
+
+        if (!n.blocks.length) problems.push(`${at}: the note is empty`);
+        n.links.forEach((l) => {
+            const bad = urlProblem(l.href);
+            if (bad) problems.push(`${at}: the link "${l.text}" ${bad}`);
+        });
+
+        if (claims) {
+            [['title', n.title], ['summary', n.summary], ['tag', n.tag], ['note', n.text]].forEach(([where, text]) => {
+                if (typeof text === 'string') figures.unheld(text, claims).forEach((f) => problems.push(`${at}: "${f}" in its ${where} is a figure the claims ledger does not hold as written; add it to content/claims.json (an entry, or a form of one)`));
+            });
+        }
+
+        Object.keys(seen).forEach((k) => {
+            if (n[k] === undefined) return;
+            if (seen[k].has(n[k])) problems.push(`${at}: the same ${k} as ${seen[k].get(n[k])}`);
+            seen[k].set(n[k], n.file);
+        });
+    });
+    // The numbers go up with the dates: a later note is never numbered below an earlier one.
+    const dated = notes.filter(n => Number.isInteger(n.number) && realDay(String(n.date))).sort((a, b) => a.number - b.number);
+    dated.slice(1).forEach((n, i) => {
+        if (n.date < dated[i].date) problems.push(`content/notes/${n.file}: note ${n.number} is dated before note ${dated[i].number}`);
+    });
+    return problems;
+}
+
+// ------------------------------------------------------------------
 // content/claims.json — the claims ledger
 //
 // Every number the site prints, with its basis. The page side (each
@@ -1131,6 +1255,7 @@ function loadAll() {
     const stats = load('stats');
     const testimonials = load('testimonials');
     const claims = load('claims');
+    const notes = loadNotes();
 
     const problems = checkStats(stats);
     problems.push(...checkClaims(claims, { profile, projects, factors: loadFactors() }));
@@ -1276,11 +1401,14 @@ function loadAll() {
     problems.push(...checkTestimonials(testimonials));
     problems.push(...checkQuotedFigures({ testimonials, certifications: profile.certifications }, claims.claims));
 
+    // --- the field notes -----------------------------------------------
+    problems.push(...checkNotes(notes, { projects, lenses, claims: claims.claims }));
+
     if (problems.length) {
         throw new Error(`content failed validation:\n  - ${problems.join('\n  - ')}`);
     }
 
-    return { profile, projects, research, lenses, narration, stats, testimonials, claims, lensIds };
+    return { profile, projects, research, lenses, narration, stats, testimonials, claims, notes: notesNewestFirst(notes), lensIds };
 }
 
 /**
@@ -1332,6 +1460,12 @@ module.exports = {
     TESTIMONIAL_LIMITS,
     checkTestimonials,
     checkQuotedFigures,
+    NOTES_DIR,
+    NOTE_PAGE,
+    notePage,
+    loadNotes,
+    notesNewestFirst,
+    checkNotes,
     CHECKABLE,
     BASIS_KINDS,
     checkClaims,

@@ -46,19 +46,26 @@ const profile = JSON.parse(read('content/profile.json'));
 
 // Every page at the root but the homepage, read from the directory so a new
 // page is held to the shell the day it exists.
-const PAGES = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'index.html').sort();
+// The field notes, in notes/, are held to it too, their links read from
+// their own folder.
+const PAGES = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'index.html').sort()
+    .concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).sort().map(f => `notes/${f}`));
 // The pages built on carbon-ai.css, which can carry the theme switch.
-const THEMED = PAGES.filter(p => /<link[^>]+href="carbon-ai\.css"/.test(read(p)));
+const THEMED = PAGES.filter(p => /<link[^>]+href="(?:\.\.\/)?carbon-ai\.css"/.test(read(p)));
 
 // Where a link goes, as a repository path and fragment: 404.html's links are
 // root-absolute (/sustaintheworld/#contact is index.html#contact).
 const BASE = new URL(profile.links.site).pathname;
+// A field note's are relative to notes/, so "../index.html" is index.html.
+let here = '';
 const where = (href) => {
     let h = href || '';
     if (h.startsWith(BASE)) h = h.slice(BASE.length);
+    else if (here && !/^(?:[a-z]+:|#)/.test(h)) h = path.posix.normalize(path.posix.join(here, h));
     if (h === '' || h.startsWith('#')) h = 'index.html' + h;
     return h;
 };
+const onPage = (page) => { here = path.posix.dirname(page) === '.' ? '' : path.posix.dirname(page); };
 
 const NAV = [
     ['Home', 'index.html'],
@@ -68,13 +75,15 @@ const NAV = [
     ['Contact', 'index.html#contact']
 ];
 
-assert(PAGES.length >= 6 && ['carbon-ai.html', 'case-studies.html', 'research.html', 'stats.html'].every(p => THEMED.includes(p)),
-    `Pages: every page but the homepage is checked (${PAGES.join(', ')}), four of them on carbon-ai.css`);
+assert(PAGES.length >= 9 && ['carbon-ai.html', 'case-studies.html', 'research.html', 'stats.html'].every(p => THEMED.includes(p)) &&
+    PAGES.filter(p => p.startsWith('notes/')).length >= 3 && PAGES.filter(p => p.startsWith('notes/')).every(p => THEMED.includes(p)),
+    `Pages: every page but the homepage is checked (${PAGES.join(', ')}), the field notes and four more on carbon-ai.css`);
 
 // ===================================================================
 // The nav: the same five places on every page, the current one marked
 // ===================================================================
 PAGES.forEach((page) => {
+    onPage(page);
     const doc = new JSDOM(read(page)).window.document;
     const navs = doc.querySelectorAll('nav[aria-label="Main"]');
     assert(navs.length === 1, `${page}: one nav named Main (${navs.length})`);
@@ -103,6 +112,7 @@ PAGES.forEach((page) => {
 // The closing call to action: the address, a message and the CV
 // ===================================================================
 PAGES.forEach((page) => {
+    onPage(page);
     const doc = new JSDOM(read(page)).window.document;
     const main = doc.querySelector('main');
     if (!main) return assert(false, `${page}: has a <main>`);
@@ -143,7 +153,7 @@ PAGES.forEach((page) => {
     const doc = new JSDOM(src).window.document;
     const head = src.slice(0, src.indexOf('</head>'));
     const toggle = doc.getElementById('themeToggle');
-    const themeTags = head.match(/<script\b[^>]*\bsrc="theme\.js"[^>]*>/g) || [];
+    const themeTags = head.match(/<script\b[^>]*\bsrc="(?:\.\.\/)?theme\.js"[^>]*>/g) || [];
     if (THEMED.includes(page)) {
         const nav = doc.querySelector('nav[aria-label="Main"]');
         assert(!!toggle && nav && nav.contains(toggle) && toggle.getAttribute('type') === 'button' && toggle.hidden,
