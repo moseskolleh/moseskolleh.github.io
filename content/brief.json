@@ -4,7 +4,7 @@
     "",
     "A recruiter pastes a job ad; the page maps each requirement to the work on this site",
     "that backs it, lists the gaps as plainly as the matches, lists what only Moses can",
-    "confirm, and selects the case studies that match into a one-page dossier. It is",
+    "confirm, and selects the case studies that match into a dossier to print or forward. It is",
     "deterministic matching in the browser over this file and content/profile.json: no AI,",
     "and the ad never leaves the page. These were the Assay's rules (modules/interactives.js),",
     "moved here unchanged in what they match and say, so the validator can hold them to the",

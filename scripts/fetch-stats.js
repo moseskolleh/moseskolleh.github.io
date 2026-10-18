@@ -444,7 +444,10 @@ const CV = 'cv-download';
  *                 kept per field, not per visit, so lens and section cannot be
  *                 joined. This is the closest honest proxy — an upper bound —
  *                 and stats.html labels it as one.
- *   briefUses     the brief-run feature; null until the site has a Brief
+ *   briefUses     the brief-run feature, which the Brief sends for an ad
+ *                 someone pasted in and graded, never for a sample ad
+ *                 (brief-sample) or a result come back to by Back or a
+ *                 reload; null until the site has a Brief
  *
  * (The fifth, the share of homepage views that reached #contact, is made
  * once suppression is done: see transform.) `row(name)` hands back the

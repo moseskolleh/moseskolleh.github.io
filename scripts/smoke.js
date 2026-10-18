@@ -55,8 +55,10 @@
 //   - a Brief that grades a mismatched ad well, sends anything, or lets a
 //     word of the ad into a request or its link; that keys alone cannot
 //     use; whose shared link does not rebuild the same fit and dossier;
-//     whose dossier prints to more than one A4 page; or that scrolls
-//     sideways on a phone
+//     that takes the reader's own result, reloaded or come back to, for a
+//     link someone sent; whose dossier prints to more than one A4 page for
+//     a sample or an ordinary ad, or without the contact line and its
+//     address on the first; or that scrolls sideways on a phone
 //   - an experience card that is not short, or whose More sits on its text;
 //     a core-log layer whose depths wrap or run onto the core
 //   - a case-study game fetched before a reader nears it, that will not
@@ -572,6 +574,29 @@ const BRIEF_AD = [
     'Quote reference ZEBRA-4471 to Quetzalcoatl Recruitment.'
 ].join('\n');
 const BRIEF_MARKS = /zebra|4471|quetzalcoatl/i;
+// Ads to print, as long as ordinary ones run: an ESG reporting ad of nine
+// requirements (eighteen rows, five case studies), which printed on two
+// pages, and the tests' ad with every rule in it (twenty-two rows). And one
+// longer than any page holds (twenty-nine rows, every case study), which
+// may run on, but not with the contact line or the address off its first.
+const BRIEF_PRINTED = {
+    'the ESG reporting ad': ['ESG Reporting Analyst', 'Requirements:', '- 3+ years of experience in ESG reporting (CSRD, ESRS, GRI)',
+        '- Experience with Workiva or Sphera', '- Strong Python, SQL, Power BI and Excel skills', '- GHG accounting across Scope 1, 2 and 3',
+        '- Experience with SAP', '- Fluent Dutch and English', '- Right to work in the Netherlands', '- Life Cycle Assessment (LCA)',
+        '- Climate risk scenario analysis, GIS'].join('\n'),
+    'the ad with every rule': ['Head of ESG — Director level. Minimum of 7 years of relevant experience.',
+        'Native German speaker, business-level French, B2 Spanish.', 'Experience with Workiva, Enablon and Salesforce Net Zero Cloud.',
+        'Background in management consulting; Deloitte or KPMG alumni welcome.',
+        'Financial modelling and valuation skills. PhD in economics required. Law degree an advantage.',
+        'You must hold the right to work in the EU; no visa sponsorship. Security clearance and a driving licence required. Willing to relocate.',
+        'CSRD, GHG accounting, climate risk and stakeholder engagement.'].join('\n')
+};
+const BRIEF_LONG = ['Sustainability Data Lead', 'Requirements:', '- 5+ years of experience in ESG reporting (CSRD, ESRS, GRI, TCFD)',
+    '- 3+ years hands-on with Workiva, Enablon or Sphera', '- Strong Python, SQL, Power BI and Excel skills; R a plus',
+    '- GHG accounting across Scope 1, 2 and 3; SBTi target setting', '- Experience with SAP and Salesforce Net Zero Cloud',
+    '- Fluent Dutch and English; German or French an advantage', '- Big Four experience preferred',
+    '- Right to work in the Netherlands; no visa sponsorship', '- Life Cycle Assessment (LCA) with SimaPro or openLCA',
+    '- Climate risk scenario analysis and TNFD, water quality, groundwater, GIS mapping, sustainable AI'].join('\n');
 
 async function exerciseBrief(page, r) {
     const sent = [];
@@ -666,24 +691,54 @@ async function exerciseBriefPage(browser, origin) {
     else bad(`the shared link rebuilt ${JSON.stringify(rebuilt)} from ${JSON.stringify(here)}${box ? ', with text in the box' : ''}`);
     await other.close();
 
-    // On paper: one A4 page, the dossier and its address, none of the
-    // screen's furniture. page.pdf is headless Chromium's.
+    // The reader's own result, come back to by a reload or by Back from a
+    // case study, is theirs: it said "The ad itself was not shared" beside
+    // the ad in the box. With the ad given back to the box it is graded from
+    // it again; without, rebuilt from the address, said as such.
+    const said = () => page.evaluate(() => ({
+        blurb: (document.querySelector('#briefResult .bf-grade p') || {}).textContent || '',
+        box: document.getElementById('briefAd').value
+    }));
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForTimeout(200);
+    const reloaded = await said();
+    await page.fill('#briefAd', BRIEF_AD);
+    await page.click('#briefRun');
+    await page.click('#briefCases > li:not([hidden]) h4 a');
+    await page.waitForLoadState('load');
+    await page.goBack({ waitUntil: 'load' });
+    await page.waitForTimeout(300);
+    const back = await said();
+    const own = (r) => r.blurb && !/shared|sender/i.test(r.blurb) && (r.box ? !/^Rebuilt/.test(r.blurb) : /^Rebuilt from this page's address/.test(r.blurb));
+    if (own(reloaded) && own(back)) ok(`the reader's own result, reloaded and come back to by Back, is not taken for a shared link (${[reloaded, back].map(r => (r.box ? 'graded from the ad in the box' : 'rebuilt from the address')).join('; ')})`);
+    else bad(`the reader's own result came back as "${reloaded.blurb.slice(0, 60)}…" on a reload and "${back.blurb.slice(0, 60)}…" on Back`);
+
+    // On paper: the dossier and the address that rebuilds it, none of the
+    // screen's furniture; the contact line and the address on the first
+    // page, whatever the ad; and one A4 page for the samples and ordinary
+    // ads. page.pdf is headless Chromium's.
     if (!CHROMIUM) ok(`the dossier printed: not printed in ${BROWSER} (page.pdf is headless Chromium's) — the Chromium run counts its pages`);
     else {
         const { pdfText } = require('./lib/pdf-text.js');
-        for (const sample of ['esg', 'climate', 'water', null]) {
+        const email = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'profile.json'), 'utf8')).person.email;
+        const alnum = (s) => s.replace(/[^A-Za-z0-9]/g, '');
+        const ads = [['esg'], ['climate'], ['water'], [null, 'the Dutch / Big Four / SAP ad', BRIEF_AD]]
+            .concat(Object.entries(BRIEF_PRINTED).map(([what, ad]) => [null, what, ad]), [[null, 'an ad longer than a page holds', BRIEF_LONG, true]]);
+        for (const [sample, name, ad, long] of ads) {
             await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
             if (sample) await page.click(`.bf-sample[data-sample="${sample}"]`);
-            else { await page.fill('#briefAd', BRIEF_AD); await page.click('#briefRun'); }
+            else { await page.fill('#briefAd', ad); await page.click('#briefRun'); }
             await page.waitForTimeout(200);
             const url = page.url();
             const printed = pdfText(await page.pdf({ format: 'A4' }));
             const text = printed.pages.join(' ').replace(/\s+/g, ' ');
-            const alnum = (s) => s.replace(/[^A-Za-z0-9]/g, '');
-            const what = sample ? `the ${sample} sample` : 'the Dutch / Big Four / SAP ad';
+            const first = alnum(printed.pages[0] || '');
+            const what = sample ? `the ${sample} sample` : name;
             const furniture = ['Paste a job ad', 'Grade this ad', 'Get in touch', 'Copy link', 'Back to top'].filter(w => text.includes(w));
-            if (printed.pages.length === 1 && alnum(text).includes(alnum(url.split('://')[1])) && !furniture.length) ok(`printed, ${what} is one A4 page: the dossier and the address that rebuilds it`);
-            else bad(`printed, ${what} is ${printed.pages.length} page(s)${alnum(text).includes(alnum(url.split('://')[1])) ? '' : ', without its address'}${furniture.length ? `, with ${furniture.join(', ')}` : ''}`);
+            const missing = [[email, 'the contact line'], [url.split('://')[1], 'the address']].filter(([t]) => !first.includes(alnum(t))).map(([, w]) => w);
+            if ((long || printed.pages.length === 1) && !missing.length && !furniture.length) {
+                ok(`printed, ${what} is ${printed.pages.length === 1 ? 'one A4 page' : `${printed.pages.length} A4 pages`}: the dossier, with the contact line and the address that rebuilds it on the first`);
+            } else bad(`printed, ${what} is ${printed.pages.length} page(s)${missing.length ? `, without ${missing.join(' or ')} on the first` : ''}${furniture.length ? `, with ${furniture.join(', ')}` : ''}`);
         }
     }
 
@@ -1858,6 +1913,23 @@ async function exerciseNavigation(browser, origin) {
     await bare.goto(`${origin}/index.html`, { waitUntil: 'load' });
     if (await bare.isVisible('#themeToggle')) bad('theme switch: shows with JavaScript off, where it cannot work');
     else ok('theme switch: absent with JavaScript off');
+    // Nor can script.js send /#assay on to The Brief: it lands on the line
+    // that leads there, by an id inside <noscript>, built only then.
+    await bare.goto(`${origin}/index.html#assay`, { waitUntil: 'load' });
+    // style.css scrolls smoothly, and only once the page has laid out, so
+    // the jump takes a moment: a second at least, then until it stops.
+    for (let i = 0, was = -1, y = 0; i < 40 && (i < 5 || y !== was); i++) {
+        was = y;
+        await bare.waitForTimeout(200);
+        y = await bare.evaluate(() => scrollY);
+    }
+    const assay = await bare.evaluate(() => {
+        const line = document.querySelector('#contact .brief-line');
+        const r = line ? line.getBoundingClientRect() : null;
+        return { at: location.pathname, inLine: !!(document.getElementById('assay') && document.getElementById('assay').closest('.brief-line')), seen: !!r && r.top >= 0 && r.bottom <= innerHeight };
+    });
+    if (assay.at.endsWith('/index.html') && assay.inLine && assay.seen) ok('/#assay with JavaScript off: lands on the homepage\'s line to The Brief');
+    else bad(`/#assay with JavaScript off: ${JSON.stringify(assay)}`);
     await noScript.close();
 
     // Back to top on a 390x844 phone: not before one full screen, and never
@@ -3958,6 +4030,33 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
             ok(`brief.html: one count, saying the Brief was run and the grade it gave (${body.features.join(', ')}), and no request carries a word of the ad`);
         } else bad(`brief.html: ${got.length} count(s) ${got.map(s => s.body).join(' | ')}; requests with the ad: ${carried.join(', ') || 'none'}`);
         await p.close();   // its count has gone, so closing cannot send another
+    }
+
+    // A sample is counted as a sample, not a use and not a grade; and the
+    // reader's own result, reloaded, is not a shared link opened. One press
+    // of the WASH sample sent brief-run and brief-high, and its reload
+    // brief-shared.
+    {
+        const p = await context.newPage();
+        p.on('pageerror', (e) => errors.push(e.message));
+        const features = (from) => sent.slice(from).map((s) => { try { return JSON.parse(s.body).features.join('+'); } catch (e) { return '?'; } });
+        const before = sent.length;
+        await p.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+        await p.click('.bf-sample[data-sample="water"]');
+        await p.waitForTimeout(200);
+        await leave(p);
+        await settle(p, before + 1);
+        const sample = features(before);
+        const mid = sent.length;
+        await p.reload({ waitUntil: 'load' });
+        await p.waitForTimeout(200);
+        await leave(p);
+        await settle(p, mid + 1);
+        const reloaded = features(mid);
+        if (JSON.stringify(sample) === '["brief-sample"]' && reloaded.length === 1 && !/brief-(?:run|shared|high)/.test(reloaded[0])) {
+            ok(`brief.html: a sample is counted as brief-sample alone, and its reload as no shared link (${sample[0]}; "${reloaded[0]}")`);
+        } else bad(`brief.html: a sample counted ${JSON.stringify(sample)}, and its reload ${JSON.stringify(reloaded)}`);
+        await p.close();
     }
 
     // An old homepage address, shared on LinkedIn, goes on to where its

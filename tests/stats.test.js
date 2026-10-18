@@ -602,7 +602,7 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
     assert(/a lone <5 would be the total less the rest, so the smallest figure beside it is held back as well/.test(text),
         'Privacy: says a figure is held back where subtraction would give a small one away');
     assert(/Every figure covers whole weeks/.test(text) && /No count for a single day is ever published/.test(text), 'Privacy: whole weeks, and no single day');
-    assert(/The Brief graded a job ad, the grade it gave\. Never the ad itself/.test(text), 'Privacy: says the Brief\'s grade is among the features, and the ad never is');
+    assert(/The Brief graded a job ad someone pasted in, the grade it gave\. Never the ad itself/.test(text), 'Privacy: says the Brief\'s grade is among the features, and the ad never is');
     assert(/window/.test(doc.querySelector('.st-fields').textContent) && !/Screen width/.test(text), 'Privacy: vp is the window\'s width, not the screen\'s');
     assert(/Google Sheet in my own Google account/.test(text) && /a key that the scheduled job keeps as a secret/.test(text),
         'Privacy: says where the raw daily totals live, and that only the weekly job can read them');
