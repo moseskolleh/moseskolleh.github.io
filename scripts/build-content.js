@@ -69,7 +69,7 @@ const ROOT = content.ROOT;
 const CHECK = process.argv.slice(2).includes('--check');
 
 const GENERATED_BY = 'scripts/build-content.js';
-const SITE = 'https://moseskolleh.github.io/sustaintheworld/';
+const SITE = 'https://moseskolleh.github.io/';
 
 // ------------------------------------------------------------------
 // Helpers

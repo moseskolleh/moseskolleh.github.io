@@ -279,7 +279,7 @@ const fieldText = plain(fieldReport);
     // repositories were the point of Phase 3, and it named none of them.
     const repos = [...new Set(fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'field-report.html')
         .flatMap(f => [...read(f).matchAll(/https:\/\/github\.com\/moseskolleh\/([\w.-]+?)(?=["/#?])/g)].map(m => m[1])))]
-        .filter(r => r !== 'sustaintheworld');   // this site's own source, linked as a record of it
+        .filter(r => r !== 'moseskolleh.github.io');   // this site's own source, linked as a record of it
     const evidence = (fieldReport.split(/<h2>Evidence<\/h2>/)[1] || '').split('<h2')[0];
     const unnamed = repos.filter(r => !evidence.includes(r));
     assert(repos.length >= 6 && unnamed.length === 0 && /href="https:\/\/github\.com\/moseskolleh"/.test(evidence),
@@ -507,7 +507,7 @@ const fieldText = plain(fieldReport);
     const stray = [];
     shipped.forEach(([f, src]) => (src.match(/github\.com\/moseskolleh\/[\w.-]+/gi) || []).forEach((m) => {
         const repo = m.split('/')[2].replace(/\.git$|\.$/, '');
-        if (!names.includes(repo) && repo !== 'sustaintheworld') stray.push(`${f}: ${m}`);
+        if (!names.includes(repo) && repo !== 'moseskolleh.github.io') stray.push(`${f}: ${m}`);
     }));
     assert(stray.length === 0, `Repos: every repository link names one of the six as GitHub spells it (stray: ${stray.join(', ') || 'none'})`);
 

@@ -38,7 +38,7 @@ function assert(cond, msg) {
 const KEYS = ['v', 'page', 'lens', 'deepest', 'features', 'ref', 'vp', 'kb'];
 const GAS = (SCRIPT.match(/const GOOGLE_APPS_SCRIPT_URL = '([^']+)'/) || [])[1];
 const ENDPOINT = `${GAS}?action=count`;
-const SITE = 'https://moseskolleh.github.io/sustaintheworld/';
+const SITE = 'https://moseskolleh.github.io/';
 
 // The server's schema check, straight from Code.gs: it defines functions and
 // constants at the top level and calls no Apps Script service until asked.
@@ -304,19 +304,19 @@ function load(options = {}) {
         return { ref: p.payload().ref, sent: p.calls.length, at: p.window.location.pathname + p.window.location.search + p.window.location.hash };
     };
     const fwd = via('carbon-ai.html?via=www.linkedin.com#anatomy', SITE + '#anatomy');
-    assert(fwd.ref === 'www.linkedin.com' && fwd.at === '/sustaintheworld/carbon-ai.html#anatomy',
+    assert(fwd.ref === 'www.linkedin.com' && fwd.at === '/carbon-ai.html#anatomy',
         `ref: forwarded from the homepage, the site that linked to it is counted, and ?via= leaves the address (${JSON.stringify(fwd)})`);
     const lensKept = via('case-studies.html?lens=water&via=www.linkedin.com#play-borehole', SITE);
-    assert(lensKept.ref === 'www.linkedin.com' && lensKept.at === '/sustaintheworld/case-studies.html?lens=water#play-borehole',
+    assert(lensKept.ref === 'www.linkedin.com' && lensKept.at === '/case-studies.html?lens=water#play-borehole',
         `ref: the rest of the query stays (${JSON.stringify(lensKept)})`);
     const elsewhere = via('carbon-ai.html?via=made-up.example', 'https://www.reddit.com/r/x');
     const typed = via('carbon-ai.html?via=made-up.example', undefined);
-    assert(elsewhere.ref === 'www.reddit.com' && typed.ref === '' && typed.at === '/sustaintheworld/carbon-ai.html',
+    assert(elsewhere.ref === 'www.reddit.com' && typed.ref === '' && typed.at === '/carbon-ai.html',
         `ref: ?via= is not believed from another site, or with no referrer at all (${elsewhere.ref}, "${typed.ref}")`);
     const junk = via('carbon-ai.html?via=not%20a%20host%2Fpath', SITE);
     assert(junk.ref === '', `ref: a ?via= that is not a host name is dropped ("${junk.ref}")`);
     const quietFwd = via('carbon-ai.html?via=www.linkedin.com#anatomy', SITE, { gpc: true });
-    assert(quietFwd.sent === 0 && quietFwd.at === '/sustaintheworld/carbon-ai.html#anatomy',
+    assert(quietFwd.sent === 0 && quietFwd.at === '/carbon-ai.html#anatomy',
         `ref: under Global Privacy Control nothing is sent, and ?via= still leaves the address (${JSON.stringify(quietFwd)})`);
     const fwdSrc = (SCRIPT.match(/const forwardMoved = \(\) => \{[\s\S]*?\n\};/) || [''])[0];
     assert(/new URL\(document\.referrer\)\.host/.test(fwdSrc) && /\?via=\$\{encodeURIComponent\(via\)\}#/.test(fwdSrc) && /via !== location\.host/.test(fwdSrc),
@@ -488,7 +488,7 @@ function load(options = {}) {
 {
     const notePages = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`);
     const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).concat(notePages)
-        .filter(f => /<script[^>]*src="(?:\/sustaintheworld\/|\.\.\/)?count\.js"/.test(read(f)));
+        .filter(f => /<script[^>]*src="(?:\/|\.\.\/)?count\.js"/.test(read(f)));
     const bare = [];
     pages.forEach((rel) => {
         const doc = new JSDOM(read(rel)).window.document;

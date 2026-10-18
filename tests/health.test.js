@@ -37,7 +37,7 @@ function assert(cond, msg) {
 
 const NOW = new Date('2026-10-20T05:41:00Z');           // a Tuesday, as the workflow runs
 const HOUR = 3600e3;
-const SITE = 'https://moseskolleh.github.io/sustaintheworld/';
+const SITE = 'https://moseskolleh.github.io/';
 const GAS = (read('script.js').match(/const GOOGLE_APPS_SCRIPT_URL = '([^']+)'/) || [])[1];
 const VERSION = health.declaredVersion(read('google-apps-script/Code.gs'));
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -446,7 +446,7 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         { id: 'd', title: 'Fine thing', status: 'pass', summary: 'It works.', details: [], items: ['S7'] }
     ];
     {
-        const body = health.render(sample, { checklist, now: NOW, sha: 'c5ce9612c381', repo: 'moseskolleh/sustaintheworld', runUrl: 'https://github.com/x/actions/runs/1' });
+        const body = health.render(sample, { checklist, now: NOW, sha: 'c5ce9612c381', repo: 'moseskolleh/moseskolleh.github.io', runUrl: 'https://github.com/x/actions/runs/1' });
         assert(body.startsWith(`${health.MARKER}\n`), 'Report: the marker the issue is found by comes first');
         const order = ['### Broken', '### Waiting on Moses', '### Not checkable from here', '### Passing', '### Open owner items'].map(h => body.indexOf(h));
         assert(order.every((n, i) => n > -1 && (i === 0 || n > order[i - 1])), 'Report: broken, then waiting, then not checkable, then passing, then the owner items');
@@ -455,7 +455,7 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         assert(/- \*\*Broken thing\.\*\* It broke\.\n {2}- first\n {2}- second/.test(body) && /It waits\. Owner checklist: C2, S2\./.test(body),
             'Report: each check a line, its details below it, its items in the checklist\'s order');
         const open = checklist.items.filter(i => !i.done).length;
-        assert(body.includes(`${open} of ${checklist.items.length} items in [docs/owner-checklist.md](https://github.com/moseskolleh/sustaintheworld/blob/main/docs/owner-checklist.md) are open`),
+        assert(body.includes(`${open} of ${checklist.items.length} items in [docs/owner-checklist.md](https://github.com/moseskolleh/moseskolleh.github.io/blob/main/docs/owner-checklist.md) are open`),
             `Report: the open owner items are counted from the file (${open} of ${checklist.items.length})`);
         const first = body.split('The checks above wait on these:')[1].split('And the rest')[0];
         assert(/\*\*C2\.\*\* Redeploy the Apps Script/.test(first) && /\*\*S2\.\*\*/.test(first) && !/S7/.test(first),

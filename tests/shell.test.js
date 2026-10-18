@@ -54,7 +54,7 @@ const PAGES = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'ind
 const THEMED = PAGES.filter(p => /<link[^>]+href="(?:\.\.\/)?carbon-ai\.css"/.test(read(p)));
 
 // Where a link goes, as a repository path and fragment: 404.html's links are
-// root-absolute (/sustaintheworld/#contact is index.html#contact).
+// root-absolute (/#contact is index.html#contact).
 const BASE = new URL(profile.links.site).pathname;
 // A field note's are relative to notes/, so "../index.html" is index.html.
 let here = '';

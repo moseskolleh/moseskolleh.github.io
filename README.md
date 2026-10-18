@@ -7,7 +7,7 @@
 
 Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Climate Analyst specializing in ESG analysis, climate resilience, and data-driven environmental solutions.
 
-**Live Website:** [https://moseskolleh.github.io/sustaintheworld/](https://moseskolleh.github.io)
+**Live Website:** [https://moseskolleh.github.io/](https://moseskolleh.github.io/) (until October 2026 at `/sustaintheworld/`; an old address goes on to the same page, see `404.html`)
 
 ## Features
 
@@ -86,8 +86,8 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/moseskolleh/sustaintheworld.git
-   cd sustaintheworld
+   git clone https://github.com/moseskolleh/moseskolleh.github.io.git
+   cd moseskolleh.github.io
    ```
 
 2. **Open in browser**
@@ -131,7 +131,7 @@ To deploy or update:
    - Click Save
 
 3. **Access your live site**
-   - Your site will be available at: `https://[username].github.io/sustaintheworld/`
+   - Your site will be available at: `https://[username].github.io/` (a repository named `[username].github.io` is served at the root; under any other name, at `/[repository]/`, and `404.html`'s root-absolute links would need that prefix)
 
 ## Narration (the spoken page)
 
@@ -1466,7 +1466,7 @@ transferred. It does not compute a Lighthouse score, and none is claimed. To
 check for yourself:
 
 ```bash
-npx lighthouse https://moseskolleh.github.io/sustaintheworld/ --view
+npx lighthouse https://moseskolleh.github.io/ --view
 ```
 
 - **Optimizations**:

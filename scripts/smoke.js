@@ -164,9 +164,8 @@ const TYPES = {
 };
 const server = http.createServer((req, res) => {
     let p = decodeURIComponent(req.url.split('?')[0]);
-    // GitHub Pages serves the site under /sustaintheworld/, and 404.html
-    // links with that base path because it can be served from any URL.
-    p = p.replace(/^\/sustaintheworld(?=\/|$)/, '');
+    // GitHub Pages serves the site at the root of moseskolleh.github.io
+    // (it was under /sustaintheworld/ until October 2026).
     if (p === '' || p.endsWith('/')) p += 'index.html';
     if (!p.startsWith('/')) p = '/' + p;
     const file = path.join(ROOT, p);
@@ -4076,10 +4075,12 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         const vm = require('vm');
         const gas = vm.createContext({});
         vm.runInContext(fs.readFileSync(path.join(ROOT, 'google-apps-script', 'Code.gs'), 'utf8'), gas);
-        await context.route('**/sustaintheworld/no/such/page', (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') }));
-        await context.route('**/sustaintheworld/notes/no-such-note.html', (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') }));
+        const notFound = (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') });
+        await context.route('**/no/such/page', notFound);
+        await context.route('**/notes/no-such-note.html', notFound);
+        await context.route('**/sustaintheworld/**', notFound);
         const everyPage = PAGES.filter(rel => rel !== '404.html').map(rel => [rel, pageNameOf(rel)])
-            .concat([['sustaintheworld/no/such/page', '404'], ['sustaintheworld/notes/no-such-note.html', '404']]);
+            .concat([['no/such/page', '404'], ['notes/no-such-note.html', '404']]);
         const wrong = [];
         for (const [rel, name] of everyPage) {
             const p = await context.newPage();
@@ -4097,6 +4098,32 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         }
         if (wrong.length) wrong.forEach(w => bad(`the count from ${w}`));
         else ok(`every page counts itself once, by name, with the documented keys, and the server accepts each: ${everyPage.map(([, n]) => n).join(', ')}`);
+
+        // An address from before the site moved to the root (the CV, a
+        // LinkedIn post) is answered by 404.html, which goes on to the same
+        // page here: query and fragment kept, the linking site passed on,
+        // one count for the page it lands on and none for a missing page.
+        {
+            const p = await context.newPage();
+            p.on('pageerror', (e) => errors.push(e.message));
+            const before = sent.length;
+            await p.goto(`${origin}/sustaintheworld/case-studies.html?lens=water#play-borehole`, { referer: 'https://www.linkedin.com/', waitUntil: 'load' });
+            await p.waitForURL(`${origin}/case-studies.html?lens=water#play-borehole`, { timeout: 5000 }).catch(() => null);
+            const at = p.url();
+            await leave(p);
+            await settle(p, before + 1);
+            const got = sent.slice(before).map((s) => { try { return JSON.parse(s.body); } catch (e) { return s.body; } });
+            if (at === `${origin}/case-studies.html?lens=water#play-borehole` && got.length === 1 && got[0].page === 'case-studies' && got[0].ref === 'www.linkedin.com') {
+                ok('an address from before the move (/sustaintheworld/…) goes on to the same page at the root, its query and fragment kept, counted once there with LinkedIn as the referrer, not as a missing page');
+            } else {
+                bad(`the old address: landed at ${at}; counts ${JSON.stringify(got)}`);
+            }
+            await p.goto(`${origin}/sustaintheworld`, { waitUntil: 'load' });
+            await p.waitForURL(`${origin}/`, { timeout: 5000 }).catch(() => null);
+            if (p.url() === `${origin}/`) ok('the old address of the homepage itself goes on to the root');
+            else bad(`/sustaintheworld landed at ${p.url()}`);
+            await p.close();
+        }
     }
 
     // The Brief: the count says it was run and the grade it gave, and no

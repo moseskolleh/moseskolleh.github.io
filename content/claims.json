@@ -213,7 +213,7 @@
       "forms": ["~274"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/sustaintheworld#performance"
+      "check": "https://github.com/moseskolleh/moseskolleh.github.io#performance"
     },
     {
       "id": "field-report-kb",
@@ -237,11 +237,11 @@
       "unit": "MB of images the homepage loaded on arrival before its redesign",
       "basis": {
         "source": "This site's own history: the homepage and its photos at the last commit before they were converted to WebP",
-        "url": "https://github.com/moseskolleh/sustaintheworld/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc",
+        "url": "https://github.com/moseskolleh/moseskolleh.github.io/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc",
         "note": "The hero photos and the profile photo, all fetched on arrival, summed from the files at that commit."
       },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/sustaintheworld/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc"
+      "check": "https://github.com/moseskolleh/moseskolleh.github.io/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc"
     },
     {
       "id": "web-carbon",

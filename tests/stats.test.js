@@ -718,9 +718,9 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
     // Every page counts its visits, so every page leads to what that sends:
     // the field report from its note on the counter, the 404 page from its
     // links (it can be served at any address, so its links are absolute).
-    const counted = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && /<script[^>]*src="(?:\/sustaintheworld\/)?count\.js"/.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+    const counted = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && /<script[^>]*src="\/?count\.js"/.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
     const unlinked = counted.filter(f => !new JSDOM(fs.readFileSync(path.join(ROOT, f), 'utf8')).window.document
-        .querySelector('a[href="stats.html"], a[href="/sustaintheworld/stats.html"]'));
+        .querySelector('a[href="stats.html"], a[href="/stats.html"]'));
     assert(counted.length >= 7 && unlinked.length === 0, `Links: every page that counts its visits links to the open counts (${unlinked.join(', ') || `all ${counted.length}`})`);
     const homeFoot = new JSDOM(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).window.document.querySelector('footer a[href="stats.html"]').textContent;
     assert(/what this site counts, and what it never collects/.test(homeFoot), 'Footer: the homepage link reads as two things, what is counted and what never is');

@@ -120,8 +120,8 @@ This is the recommended path and the only one where every part works.
 ### Step 1 — get the code and dependencies
 
 ```bash
-git clone https://github.com/moseskolleh/sustaintheworld.git
-cd sustaintheworld
+git clone https://github.com/moseskolleh/moseskolleh.github.io.git
+cd moseskolleh.github.io
 npm install
 ```
 

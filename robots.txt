@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://moseskolleh.github.io/sustaintheworld/sitemap.xml
+Sitemap: https://moseskolleh.github.io/sitemap.xml

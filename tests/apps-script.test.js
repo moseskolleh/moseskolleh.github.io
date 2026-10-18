@@ -230,7 +230,7 @@ const postForm = (w, data) => w.ctx.doPost({ postData: { type: 'application/x-ww
 
     const rejected = postForm(world(), { ...valid, message: '' }).getContent();
     assert(/Something went wrong/.test(rejected) && /required/.test(rejected), 'Form path: a rejection says what was wrong');
-    assert(/href="https:\/\/moseskolleh\.github\.io\/sustaintheworld\/#contact"/.test(rejected), 'Form path: the page links back to the form');
+    assert(/href="https:\/\/moseskolleh\.github\.io\/#contact"/.test(rejected), 'Form path: the page links back to the form');
 
     const hostile = postForm(world(), { ...valid, message: '<script>alert(1)</script>', email: 'x' }).getContent();
     assert(!/<script>alert/.test(hostile), 'Form path: nothing the visitor sent is echoed unescaped');

@@ -73,7 +73,7 @@
 // digits of the SHA-256 of this file with the quotes below left empty;
 // tests/apps-script.test.js fails until it matches, and
 // `npm run health -- --code-version` prints the value to put here.
-var CODE_VERSION = 'ce82ff070651';
+var CODE_VERSION = '46641050c576';
 
 var DEFAULT_SHEET_NAME = 'Responses';
 var HEADERS = ['Timestamp', 'Name', 'Email', 'Subject', 'Message', 'Source'];
@@ -779,7 +779,7 @@ function htmlResponse(status, message) {
     '<style>body{font-family:system-ui,sans-serif;max-width:36rem;margin:4rem auto;padding:0 1.5rem;line-height:1.6}</style>' +
     '</head><body><h1>' + (ok ? 'Thank you' : 'Something went wrong') + '</h1>' +
     '<p>' + esc(message) + '</p>' +
-    '<p><a href="https://moseskolleh.github.io/sustaintheworld/#contact">Back to the portfolio</a></p>' +
+    '<p><a href="https://moseskolleh.github.io/#contact">Back to the portfolio</a></p>' +
     '</body></html>';
   return HtmlService.createHtmlOutput(html);
 }

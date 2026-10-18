@@ -50,7 +50,7 @@ const OG_DIR = path.join(ROOT, 'assets', 'og');
 const HASH_FILE = path.join(OG_DIR, 'og.hash');
 const SIZE = { width: 1200, height: 630 };
 const OG_MAX_BYTES = 32 * 1024;
-const SITE = 'https://moseskolleh.github.io/sustaintheworld/';
+const SITE = 'https://moseskolleh.github.io/';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const esc = (s) => String(s == null ? '' : s)

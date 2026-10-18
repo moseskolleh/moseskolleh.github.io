@@ -120,7 +120,7 @@ https://script.google.com/macros/s/AKfycbzgyqRUmu0d2UFjb0WxbYyoDbO8F9jVnlvIQnNAf
 
 - [ ] **C3. Send one real message from the live site, and see it arrive.**
   - *With JavaScript (the normal path):* open
-    <https://moseskolleh.github.io/sustaintheworld/#contact>, fill in the form
+    <https://moseskolleh.github.io/#contact>, fill in the form
     with an address you can read other than `OWNER_EMAIL`, a subject such as
     "Live test 2026-09-26", and a short message. Press **Send Message**. The
     page should say "Thank you for your message! It has been sent".
@@ -289,7 +289,7 @@ README under "The visit counter and privacy".
   - *Where:* the page is generated; its text is in `scripts/build-content.js`
     (`renderStats` and the functions around it). Edit there, then run
     `npm run build:content` and `npm test`.
-  - *Check:* <https://moseskolleh.github.io/sustaintheworld/stats.html>,
+  - *Check:* <https://moseskolleh.github.io/stats.html>,
     once live, reads the way you would say it.
 
 - [ ] **S6. After four full weeks of counting, record the baseline for the
