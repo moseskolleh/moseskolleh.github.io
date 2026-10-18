@@ -217,7 +217,7 @@
     },
     {
       "id": "field-report-kb",
-      "value": "10",
+      "value": "11",
       "unit": "KB: the text-only field report, as saved",
       "basis": { "budget": "fieldReport", "note": "The file as saved, uncompressed: the size a reader can check by saving the page." },
       "checkable": "public",

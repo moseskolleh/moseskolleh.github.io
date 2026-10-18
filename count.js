@@ -9,7 +9,6 @@
         if (ok(name) && features.length < 20 && !features.includes(name)) features.push(name);
     };
 
-    // 404.html names itself: it answers any missing address.
     const me = document.currentScript;
     const page = (me && me.dataset.page) ||
         location.pathname.split('/').pop().replace(/\.html?$/, '').toLowerCase() || 'index';
@@ -31,7 +30,6 @@
     if (ref === location.host) ref = via || '';
     if (ref === location.host || !/^[a-z0-9.-]{1,253}(:\d{1,5})?$/.test(ref)) ref = '';
 
-    // One observer, no scroll handler: a part reports once, when first seen.
     const parts = [].filter.call(document.querySelectorAll('main > [id]'), (el) => /^[\w-]{1,40}$/.test(el.id));
     let deepest = -1;
     const io = window.IntersectionObserver && new IntersectionObserver((entries) => entries.forEach((e) => {
@@ -41,7 +39,6 @@
     }));
     if (io) parts.forEach((el) => io.observe(el));
 
-    // "cv-download": this view used a CV link, whichever.
     document.addEventListener('click', (e) => {
         const el = e.target.closest && e.target.closest('[data-analytics]');
         const name = el && el.getAttribute('data-analytics');

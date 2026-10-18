@@ -272,7 +272,9 @@ PAGES.forEach((page) => {
 // to that: the only absolute addresses any of them may contain are that
 // deployment, that deployment with ?action=count, and the SVG namespace
 // (a name, never fetched). `npm run smoke` checks the same at runtime and
-// fails on any request to anywhere else.
+// fails on any request to anywhere else, and every page's
+// Content-Security-Policy allows that deployment (and the host it redirects
+// to) and nowhere else: tests/csp.test.js holds the two to each other.
 {
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const js = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');

@@ -45,6 +45,29 @@ function rules(css) {
     return out;
 }
 
+// A page's <head> mark when one of its scripts fails to load: the mark's
+// own script, run in a page of its own, then an error dispatched at a
+// script with the attributes given, as a browser dispatches one (it does
+// not bubble; the mark listens in the capture phase). True if the mark is
+// still on. It used to be an onerror="" on each script, which a
+// Content-Security-Policy refuses to run (see tests/csp.test.js).
+function markAfterError(page, attrs) {
+    const { JSDOM } = require('jsdom');
+    const src = read(page);
+    const head = src.slice(0, src.indexOf('</head>'));
+    const code = (head.match(/<script>([^<]*classList\.add\('js'\)[^<]*)<\/script>/) || [])[1] || '';
+    const w = new JSDOM('<!DOCTYPE html><html><head></head><body></body></html>', { runScripts: 'outside-only' }).window;
+    w.eval(code);
+    const script = w.document.createElement('script');
+    Object.entries(attrs).forEach(([name, value]) => script.setAttribute(name, value));
+    w.document.body.appendChild(script);
+    script.dispatchEvent(new w.Event('error'));
+    const on = w.document.documentElement.classList.contains('js');
+    w.close();
+    return on;
+}
+const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/\s([\w-]+)(?:=["']([^"']*)["'])?/g)].map(m => [m[1], m[2] || '']));
+
 // ===================================================================
 // <head> marks the page before first paint, and can take the mark back
 // ===================================================================
@@ -60,7 +83,10 @@ function rules(css) {
         'Head: a failsafe takes the mark off again if script.js never reports ready');
 
     const tag = (html.match(/<script\b[^>]*\bsrc=["']script\.js["'][^>]*>/) || [''])[0];
-    assert(/onerror=["'][^"']*classList\.remove\('js'\)/.test(tag), 'Head: a script.js that fails to load drops the mark at once (onerror)');
+    assert(/\sdata-js\b/.test(tag) && !/\sonerror=/.test(tag) && !markAfterError('index.html', attrsOf(tag)),
+        'Head: a script.js that fails to load drops the mark at once (marked data-js, which the mark listens for)');
+    assert(markAfterError('index.html', { src: 'count.js', defer: '' }) && markAfterError('index.html', { src: 'modules/terminal.js' }),
+        'Head: the counter or a module failing to load leaves the mark on: neither is what html.js waits for');
 
     const js = read('script.js');
     assert(/\bmks\.ready\s*=\s*true/.test(js), 'script.js: reports ready (mks.ready), so the failsafe can stand down');
@@ -171,7 +197,7 @@ function rules(css) {
 ['carbon-ai.html', 'case-studies.html'].forEach((page) => {
     const src = read(page);
     const head = src.slice(0, src.indexOf('</head>'));
-    assert(/<script>document\.documentElement\.classList\.add\('js'\)<\/script>/.test(head), `${page}: marks html.js in <head>`);
+    assert(/<script>document\.documentElement\.classList\.add\('js'\)[;<]/.test(head), `${page}: marks html.js in <head>`);
 });
 {
     const src = read('carbon-ai.html');
@@ -181,8 +207,15 @@ function rules(css) {
     // counter and the shell's theme.js are not the calculator's scripts: a
     // blocker that stops either must not take the calculator down with it.
     const tags = (src.match(/<script\b[^>]*\bsrc=[^>]*>/g) || []).filter(t => !/\bsrc=["'](count|theme)\.js["']/.test(t));
-    assert(tags.length === 2 && tags.every(t => /onerror=["'][^"']*classList\.remove\('js'\)/.test(t)),
-        `carbon-ai.html: each script that fails to load brings the note back (onerror on ${tags.filter(t => /onerror/.test(t)).length} of ${tags.length})`);
+    const back = tags.filter(t => !/\sonerror=/.test(t) && !markAfterError('carbon-ai.html', attrsOf(t)));
+    assert(tags.length === 2 && back.length === 2,
+        `carbon-ai.html: each script that fails to load brings the note back (${back.length} of ${tags.length})`);
+    assert(markAfterError('carbon-ai.html', { src: 'count.js', defer: '' }) && markAfterError('carbon-ai.html', { src: 'theme.js' }),
+        'carbon-ai.html: the counter or theme.js failing to load leaves the calculator be');
+    // The Brief's own script is the generated pages' case of the same.
+    const brief = (read('brief.html').match(/<script\b[^>]*\bsrc=["']brief\.js["'][^>]*>/) || [''])[0];
+    assert(!!brief && !markAfterError('brief.html', attrsOf(brief)) && markAfterError('brief.html', { src: 'count.js', defer: '' }),
+        'brief.html: brief.js failing to load takes the mark off; the counter failing does not');
     assert(/class="nojs-note"/.test(html), 'index.html: a note stands in for the section-05 calculators without JavaScript');
     // Without JavaScript the note sat flush on the coach's button, and both
     // led to the same page: two ways on, back to back. And the footnote
