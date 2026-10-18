@@ -525,8 +525,19 @@
     // the reader's own result, "shared" for a link that arrived. A reload or
     // Back finds the mark; a link someone sent arrives without one. So the
     // reader's own result is never taken for a shared link, and a shared
-    // link is counted as it arrives, not again on every reload.
-    const markOf = () => { try { return (history.state && history.state.brief) || ''; } catch (e) { return ''; } };
+    // link is counted as it arrives, not again on every reload. The tab's
+    // sessionStorage keeps the same mark for the same address, for a reload
+    // that comes back without its history entry's state (Firefox, driven by
+    // Playwright, reloads so); it holds ids, never the ad.
+    const KEY = 'brief-mark';
+    const here = () => location.href.split('#')[0];
+    const markOf = () => {
+        try { if (history.state && history.state.brief) return history.state.brief; } catch (e) { /* none */ }
+        try {
+            const kept = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+            return kept && kept.at === here() ? kept.mark : '';
+        } catch (e) { return ''; }
+    };
     const setLink = (url, mark) => {
         link = url;
         if (linkEl) linkEl.textContent = url;
@@ -535,6 +546,7 @@
             const state = Object.assign({}, typeof history.state === 'object' ? history.state : null, { brief: mark || '' });
             history.replaceState(state, '', url + location.hash);
         } catch (e) { /* the link still works */ }
+        try { sessionStorage.setItem(KEY, JSON.stringify({ at: here(), mark: mark || '' })); } catch (e) { /* the history mark serves */ }
     };
 
     const row = (label, body, cls) => `<div class="bf-row${cls ? ' ' + cls : ''}"><div class="bf-req">${label}</div><div class="bf-ev">${body}</div></div>`;

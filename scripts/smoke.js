@@ -170,8 +170,10 @@ const server = http.createServer((req, res) => {
     if (!p.startsWith('/')) p = '/' + p;
     const file = path.join(ROOT, p);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-        res.writeHead(404, { 'content-type': 'text/plain' });
-        return res.end('not found');
+        // As Pages does: 404.html, with a 404, at any address with nothing
+        // there (an old /sustaintheworld/ one among them).
+        res.writeHead(404, { 'content-type': 'text/html; charset=utf-8' });
+        return res.end(fs.readFileSync(path.join(ROOT, '404.html')));
     }
     const ext = path.extname(file).toLowerCase();
     const type = TYPES[ext] || 'application/octet-stream';
@@ -1590,8 +1592,16 @@ const LABEL_MIN_PX = 11;
 
 async function exerciseJourneyAndChart(browser, origin) {
     console.log('  index.html — the journey map on a phone, its names, You Draw It\'s labels');
+    // Firefox scrolls a wheel smoothly whatever the reader's motion setting,
+    // so the page waits for the wheel's scroll to come to rest as well: a
+    // stop met while it still ran was met short, and the wheel then carried
+    // the page past it (320x700, stop 0, once pages got lighter).
     const mapReady = (page) => page.mouse.wheel(0, 300)
         .then(() => page.waitForFunction(() => document.querySelector('#journeyMapFrame svg'), null, { timeout: 5000 }))
+        .then(() => page.waitForFunction(() => new Promise((res) => {
+            const y = scrollY;
+            setTimeout(() => res(scrollY === y), 150);
+        }), null, { timeout: 5000 }))
         .catch(() => null);
 
     for (const [width, height] of [[390, 844], [320, 700]]) {
@@ -4140,9 +4150,8 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         const notFound = (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') });
         await context.route('**/no/such/page', notFound);
         await context.route('**/notes/no-such-note.html', notFound);
-        // Pages answers /sustaintheworld, with or without anything after it,
-        // with 404.html now that nothing is there.
-        await context.route((url) => /^\/sustaintheworld(?:\/|$)/.test(url.pathname), notFound);
+        // The old addresses are answered by the server, as Pages answers
+        // them: in Firefox, a page a route fulfils has no document.referrer.
         const everyPage = PAGES.filter(rel => rel !== '404.html').map(rel => [rel, pageNameOf(rel)])
             .concat([['no/such/page', '404'], ['notes/no-such-note.html', '404']]);
         const wrong = [];
