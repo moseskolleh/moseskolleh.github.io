@@ -25,7 +25,7 @@
     "value      the figure as the site writes it: \"164\", \"70%\", \"2–8×\"",
     "unit       what it counts or measures, as claims.html says it after the",
     "           value; no other figure in it",
-    "forms      optional; other ways the generated pages write it (\"~274\",",
+    "forms      optional; other ways the generated pages write it (\"~258\",",
     "           or in words with what it counts: \"team of six\"); a form in",
     "           words is marked on its number alone",
     "spoken     optional; how the narration says it, in words, with what",
@@ -208,16 +208,16 @@
     },
     {
       "id": "first-view",
-      "value": "274",
-      "unit": "KB over the wire: the homepage's first view, fonts included",
-      "forms": ["~274"],
+      "value": "259",
+      "unit": "KB over the wire: the homepage's first view on a desktop, fonts included",
+      "forms": ["~259"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/sustaintheworld#performance"
+      "check": "https://github.com/moseskolleh/moseskolleh.github.io#performance"
     },
     {
       "id": "field-report-kb",
-      "value": "10",
+      "value": "11",
       "unit": "KB: the text-only field report, as saved",
       "basis": { "budget": "fieldReport", "note": "The file as saved, uncompressed: the size a reader can check by saving the page." },
       "checkable": "public",
@@ -237,11 +237,11 @@
       "unit": "MB of images the homepage loaded on arrival before its redesign",
       "basis": {
         "source": "This site's own history: the homepage and its photos at the last commit before they were converted to WebP",
-        "url": "https://github.com/moseskolleh/sustaintheworld/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc",
+        "url": "https://github.com/moseskolleh/moseskolleh.github.io/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc",
         "note": "The hero photos and the profile photo, all fetched on arrival, summed from the files at that commit."
       },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/sustaintheworld/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc"
+      "check": "https://github.com/moseskolleh/moseskolleh.github.io/tree/3d7ab78becfe366975e2e6eadafa244d41b420dc"
     },
     {
       "id": "web-carbon",

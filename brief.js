@@ -1,5 +1,5 @@
 // ===================================================================
-// THE BRIEF — paste a job ad, get an honest fit and a one-page dossier
+// THE BRIEF — paste a job ad, get an honest fit and a dossier to forward
 // ===================================================================
 // brief.html's own script, and nobody else's: the homepage's Assay grew
 // into this page (docs/plan.md, Phase 4.1). Deterministic matching over a
@@ -19,8 +19,9 @@
 // studies' order, which is what a reader without JavaScript gets. A grade
 // selects and reorders it: it never writes a line of its own about Moses.
 // The address it leaves (?focus=) carries the ids of what matched and what
-// did not, from the rubric, and rebuilds the same fit and dossier for
-// whoever it is sent to. Never a word of the ad.
+// did not, from the rubric (with the years and the language levels the ad
+// asked for), and rebuilds the same fit and dossier for whoever it is sent
+// to. Never a word of the ad.
 // ===================================================================
 (() => {
     const mks = (window.mks = window.mks || {});
@@ -143,6 +144,18 @@
     };
 
     const GRADE_CLASS = { high: 'high', workable: 'workable', marginal: 'marginal', field: 'marginal' };
+
+    // The grade, from the areas matched, the hard gaps and the share of the
+    // ad's requirement lines the site answers: nothing from this site's own
+    // field is a different field, a hard gap caps it, and the top grade
+    // needs broad coverage. A shared link, which cannot carry the share,
+    // asks with it at its best: the highest grade its ids allow.
+    const gradeOf = (matched, hard, share) => {
+        const domain = matched.filter(m => !m.general).length;
+        const fits = (bar) => matched.length >= bar.areas && domain >= bar.domain && share >= bar.coverage;
+        return !domain ? 'field' : !hard && fits(RULES.high) ? 'high'
+            : hard <= RULES.workable.hardGaps && fits(RULES.workable) ? 'workable' : 'marginal';
+    };
 
     /**
      * The whole assessment, as data. Pure: `opts.facts`, `opts.now` and
@@ -270,24 +283,18 @@
 
         const hard = gaps.filter(g => g.hard);
         const areas = matched.length;
-        const domain = matched.filter(m => !m.general).length;
-        const share = asked ? answered / asked : 0;
         const lines = `${answered} of ${plural(asked, 'requirement line')}`;
-        const fits = (bar) => areas >= bar.areas && domain >= bar.domain && share >= bar.coverage;
-        let gradeId, blurb;
-        if (!domain) {
-            gradeId = 'field';
+        const gradeId = gradeOf(matched, hard.length, asked ? answered / asked : 0);
+        let blurb;
+        if (gradeId === 'field') {
             blurb = (areas || met.length ? 'Only general skills match: nothing' : 'Nothing') +
                 ' here maps to the environmental, climate or sustainability work on this site. Most likely a different field.';
-        } else if (!hard.length && fits(RULES.high)) {
-            gradeId = 'high';
+        } else if (gradeId === 'high') {
             blurb = `${plural(areas, 'area')} of this ad map to delivered work on this site, answering ${lines}, with no hard gaps.`;
-        } else if (hard.length <= RULES.workable.hardGaps && fits(RULES.workable)) {
-            gradeId = 'workable';
+        } else if (gradeId === 'workable') {
             blurb = `${plural(areas, 'area')} map to delivered work, answering ${lines}` +
                 (hard.length ? ', but one requirement is not evidenced here; it is listed first.' : '.');
         } else {
-            gradeId = 'marginal';
             blurb = hard.length > 1
                 ? `The work overlaps in ${plural(areas, 'area')}, but ${hard.length} hard requirements are not evidenced on this site. Read the gaps first.`
                 : (areas >= RULES.workable.areas
@@ -313,68 +320,150 @@
     // language is its id, a language at a level "dutch.c1", years "years.5",
     // anything else a gap rule's or a confirm's id. Anything unknown is
     // dropped, so a link that outlives a rename shows less, never more.
-    function focusOf(a) {
-        if (!a || a.status !== 'graded') return '';
-        return (a.gradeId ? [a.gradeId] : []).concat(a.matched.map(s => s.id), a.met.map(m => 'met:' + m.token),
-            a.gaps.map(g => (g.hard ? 'gap:' : 'soft:') + g.token), a.confirmIds.map(id => 'ask:' + id)).join(',');
-    }
+    //
+    // A link holds at most MAX_IDS, written and read alike. An ad that gives
+    // more (it takes one listing every tool and language there is) keeps its
+    // grade, its gaps and what to confirm, and leaves out what matched, the
+    // tools before the areas; "more.7" at the end says seven rows did not fit.
+    const MAX_IDS = 80;
 
+    /** The ids a result's link carries, and how many rows it leaves out. */
+    function linkIds(a) {
+        if (!a || a.status !== 'graded') return { ids: [], left: 0 };
+        const parts = {
+            grade: a.gradeId ? [a.gradeId] : [],
+            areas: a.matched.map(s => s.id),
+            met: a.met.map(m => 'met:' + m.token),
+            hard: a.gaps.filter(g => g.hard).map(g => 'gap:' + g.token),
+            soft: a.gaps.filter(g => !g.hard).map(g => 'soft:' + g.token),
+            ask: a.confirmIds.map(id => 'ask:' + id)
+        };
+        const order = ['grade', 'areas', 'met', 'hard', 'soft', 'ask'];
+        let left = a.left || 0;
+        const count = () => order.reduce((n, k) => n + parts[k].length, 0) + (left ? 1 : 0);
+        // Over the limit, the least telling go first, from the end of each:
+        // the tools that matched, then the areas, and only then (an ad no
+        // one writes) a gap or a thing to confirm.
+        for (const k of ['met', 'areas', 'ask', 'soft', 'hard']) {
+            while (count() > MAX_IDS && parts[k].length) { parts[k].pop(); left++; }
+        }
+        return { ids: order.reduce((all, k) => all.concat(parts[k]), []).concat(left ? ['more.' + left] : []), left };
+    }
+    const focusOf = (a) => linkIds(a).ids.join(',');
+
+    /**
+     * A link's ids back into a fit. Each named requirement is said as the
+     * site says it today (a link sent before the site showed a tool shows
+     * it met now, and one sent before it stopped, a hard gap), and once,
+     * however many ids name it: met where the site shows it, whatever the
+     * link says (a gap there would say "not evidenced", which is false),
+     * else a gap, hard if any id has it so. The grade is the link's, but
+     * never above what its own ids allow by analyse()'s rules (a hard gap
+     * caps it, two end it at Marginal, nothing from this site's field makes
+     * it a Different field): only the ad's coverage, which a link cannot
+     * carry, is taken on trust. `opts.own` words it for the reader's own
+     * result, rebuilt after a reload with the ad gone from the box.
+     */
     function fromFocus(focus, opts) {
         const o = opts || {};
         const facts = o.facts || FACTS;
         const site = said(facts, o.now || new Date(), o.toolEvidence);
         const degrees = listJoin(facts.degrees || []) || 'not listed';
         const byId = (list, id) => list.find(x => x.id === id);
-        let gradeId = null;
+        const stated = (lang) => (facts.languages || []).find(l => hit(String(l.language), lang.syn));
+        let linked = null;
+        let left = 0;
+        const moved = new Set();
         const matched = [];
-        const met = [];
-        const gaps = [];
+        const rows = new Map();
         const confirm = [];
         const confirmIds = [];
-        const seen = {};
-        String(focus || '').split(',').slice(0, 80).forEach((raw) => {
-            const token = raw.trim().toLowerCase();
-            if (!/^(?:(?:met|gap|soft|ask):)?[a-z0-9-]{1,40}(?:\.[a-z0-9]{1,8})?$/.test(token) || seen[token]) return;
-            seen[token] = true;
+        const ask = (label, id) => { if (!confirm.includes(label)) { confirm.push(label); confirmIds.push(id); } return true; };
+        // One id, read for what it names: false if this page does not know it.
+        const read = (token) => {
+            if (!/^(?:(?:met|gap|soft|ask):)?[a-z0-9-]{1,40}(?:\.[a-z0-9]{1,8})?$/.test(token)) return false;
             const [kind, item] = token.includes(':') ? token.split(':') : ['', token];
             const [id, param] = item.split('.');
             if (!kind) {
-                if (param) return;
-                if (RULES.grades[id] && !gradeId) gradeId = id;
+                if (id === 'more' && /^[1-9]\d{0,2}$/.test(param || '')) { left = left || +param; return true; }
+                if (param) return false;
+                if (RULES.grades[id] && !linked) linked = id;
                 const s = byId(RULES.strengths, id);
                 if (s && !matched.includes(s)) matched.push(s);
-                return;
+                return !!(RULES.grades[id] || s);
             }
-            if (kind === 'ask') {
-                const c = byId(RULES.confirm, id);
-                const lang = byId(LANGUAGES, id);
-                const label = c ? c.label : lang && lang.confirm;
-                if (label && !param && !confirm.includes(label)) { confirm.push(label); confirmIds.push(id); }
-                return;
-            }
-            // A named requirement, said as the site says it today: a link
-            // sent before the site showed a tool shows it met now.
-            let found = null;
-            const tool = byId(TOOLS, id);
+            const c = kind === 'ask' && !param && byId(RULES.confirm, id);
+            if (c) return ask(c.label, id);
+            // A language whose level the site does not state (English, today)
+            // is one to confirm, however the link has it; once it is stated,
+            // it is graded like any other, as analyse() grades it.
             const lang = byId(LANGUAGES, id);
+            const confirmable = lang && lang.confirm && !(kind === 'ask' && param);
+            if (confirmable && !stated(lang)) {
+                if (kind !== 'ask') moved.add(id);
+                return ask(lang.confirm, id);
+            }
+            if (kind === 'ask' && !confirmable) return;
+            // What the id names, so that two spellings of one thing
+            // ("years.5", "years.05") are one row.
+            let key = null;
+            let found = null;
+            let spelt = item;
+            const tool = byId(TOOLS, id);
             const rule = byId(RULES.gaps, id);
-            if (id === 'years' && /^\d{1,2}$/.test(param || '') && +param > 0) found = site.years(+param);
-            else if (tool && !param) found = site.tool(tool);
-            else if (lang && !lang.confirm) {
+            if (id === 'years' && /^\d{1,2}$/.test(param || '') && +param > 0) {
+                key = 'years:' + +param; spelt = 'years.' + +param; found = site.years(+param);
+            } else if (tool && !param) {
+                key = 'tool:' + tool.name; found = site.tool(tool);
+            } else if (lang) {
                 const want = param ? RULES.levels.find(l => l.id === param) : null;
                 if (param && !want) return;
-                found = site.lang(lang, want);
-            } else if (rule && !param) found = { label: rule.label, ev: null, note: rule.text.replace('{degrees}', degrees) };
+                key = `lang:${lang.name}:${want ? want.level : ''}`; found = site.lang(lang, want);
+            } else if (rule && !param) {
+                key = 'gap:' + rule.label; found = { label: rule.label, ev: null, note: rule.text.replace('{degrees}', degrees) };
+            }
             if (!found) return;
-            if (found.ev) met.push({ label: found.label, ev: found.ev, token: item });
-            else gaps.push({ label: found.label, text: found.note, hard: kind !== 'soft', token: item });
+            const row = rows.get(key) || { label: found.label, ev: found.ev || null, text: found.note, hard: false, token: spelt, kinds: [] };
+            row.kinds.push(kind);
+            row.hard = row.hard || kind !== 'soft';
+            rows.set(key, row);
+            return true;
+        };
+        let unknown = 0;
+        String(focus || '').split(',').slice(0, MAX_IDS).forEach((raw) => {
+            const token = raw.trim().toLowerCase();
+            if (token && !read(token)) unknown++;
         });
-        if (!gradeId && !matched.length && !met.length && !gaps.length && !confirm.length) return null;
+        const all = Array.from(rows.values());
+        const met = all.filter(r => r.ev).map(r => ({ label: r.label, ev: r.ev, token: r.token }));
+        const gaps = all.filter(r => !r.ev).map(r => ({ label: r.label, text: r.text, hard: r.hard, token: r.token }));
+        if (!linked && !matched.length && !met.length && !gaps.length && !confirm.length) return null;
+        // What the site reads otherwise than the link has it: a match then
+        // that it does not show now, or the other way about, or a language
+        // gone from to-confirm to graded or back.
+        const changed = moved.size + all.filter(r => r.kinds.some(k => k === 'ask' || (k === 'met') !== !!r.ev)).length;
         const hard = gaps.filter(g => g.hard);
+
+        // A grade above the highest the ids allow is brought down to it, and
+        // "Different field" beside areas of this field, which the ids rule
+        // out, becomes the lowest grade they allow.
+        const most = gradeOf(matched, hard.length, 1);
+        const RANK = ['field', 'marginal', 'workable', 'high'];
+        const gradeId = !linked ? null : most === 'field' ? 'field' : linked === 'field' ? 'marginal'
+            : RANK.indexOf(linked) > RANK.indexOf(most) ? most : linked;
+
+        const parts = [`${o.own ? 'Rebuilt from this page\'s address' : 'Shared from The Brief'}: ${linked ? 'the grade, ' : ''}what matched and the gaps` +
+            (!o.own && gradeId === linked && !changed && !left && !unknown ? ', as the sender saw them.' : '.')];
+        if (gradeId !== linked) parts.push(`The link says "${RULES.grades[linked]}", but what it lists does not allow that grade by the rules the Brief grades with, so it shows the closest grade they allow.`);
+        if (changed) parts.push(`${plural(changed, 'requirement')} ${changed === 1 ? 'is' : 'are'} shown as this site reads ${changed === 1 ? 'it' : 'them'} today, not as the link has ${changed === 1 ? 'it' : 'them'}.`);
+        if (left) parts.push(`The link could not carry the whole fit: ${plural(left, 'row')} of it ${left === 1 ? 'is' : 'are'} not here.`);
+        // A link that outlived a rename, or was edited by hand.
+        if (unknown) parts.push(`${plural(unknown, 'id')} in the link ${unknown === 1 ? 'is' : 'are'} not on this page's list, and left out.`);
+        parts.push(o.own ? 'The ad is no longer in the box, so how much of it the site answers is not shown.'
+            : 'The ad itself was not shared, so how much of it the site answers is not shown.');
         return {
-            status: 'shared', gradeId, grade: gradeId ? RULES.grades[gradeId] : null, cls: gradeId ? GRADE_CLASS[gradeId] : 'shared',
-            blurb: 'Shared from The Brief: the grade, what matched and the gaps, as the sender saw them. The ad itself was not shared, so how much of it the site answers is not shown.',
-            matched, met, confirm, confirmIds, hard, gaps: hard.concat(gaps.filter(g => !g.hard))
+            status: 'shared', linked, gradeId, grade: gradeId ? RULES.grades[gradeId] : null, cls: gradeId ? GRADE_CLASS[gradeId] : 'shared',
+            blurb: parts.join(' '), matched, met, confirm, confirmIds, hard, gaps: hard.concat(gaps.filter(g => !g.hard)), changed, left
         };
     }
 
@@ -392,7 +481,7 @@
         return Array.from(rank).sort((a, b) => b[1].score - a[1].score || a[1].at[0] - b[1].at[0] || a[1].at[1] - b[1].at[1]).map(([id]) => id);
     }
 
-    Object.assign(mks.brief, { analyse, focusOf, fromFocus, selectCases, RULES, FACTS });
+    Object.assign(mks.brief, { analyse, focusOf, linkIds, fromFocus, selectCases, MAX_IDS, RULES, FACTS });
 
     // --- The page -------------------------------------------------------------
     const $ = (id) => document.getElementById(id);
@@ -404,6 +493,7 @@
     const msg = $('briefMsg');
     const shareBar = $('briefShare');
     const linkEl = $('briefLink');
+    const leftEl = $('briefLeft');
     const list = $('briefCases');
     const selectedEl = $('briefSelected');
     const addressEl = $('briefAddress');
@@ -431,11 +521,32 @@
                 : 'No case study maps to this ad. All of them are on the case studies page.';
         }
     };
-    const setLink = (url) => {
+    // The address a result leaves is marked in its history entry: "own" for
+    // the reader's own result, "shared" for a link that arrived. A reload or
+    // Back finds the mark; a link someone sent arrives without one. So the
+    // reader's own result is never taken for a shared link, and a shared
+    // link is counted as it arrives, not again on every reload. The tab's
+    // sessionStorage keeps the same mark for the same address, for a reload
+    // that comes back without its history entry's state (Firefox, driven by
+    // Playwright, reloads so); it holds ids, never the ad.
+    const KEY = 'brief-mark';
+    const here = () => location.href.split('#')[0];
+    const markOf = () => {
+        try { if (history.state && history.state.brief) return history.state.brief; } catch (e) { /* none */ }
+        try {
+            const kept = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+            return kept && kept.at === here() ? kept.mark : '';
+        } catch (e) { return ''; }
+    };
+    const setLink = (url, mark) => {
         link = url;
         if (linkEl) linkEl.textContent = url;
         if (addressEl) addressEl.textContent = url;
-        try { history.replaceState(history.state, '', url); } catch (e) { /* the link still works */ }
+        try {
+            const state = Object.assign({}, typeof history.state === 'object' ? history.state : null, { brief: mark || '' });
+            history.replaceState(state, '', url + location.hash);
+        } catch (e) { /* the link still works */ }
+        try { sessionStorage.setItem(KEY, JSON.stringify({ at: here(), mark: mark || '' })); } catch (e) { /* the history mark serves */ }
     };
 
     const row = (label, body, cls) => `<div class="bf-row${cls ? ' ' + cls : ''}"><div class="bf-req">${label}</div><div class="bf-ev">${body}</div></div>`;
@@ -445,7 +556,8 @@
         ? `<a href="${escHtml(e.href)}"${e.part ? ' class="bf-part"' : ''}>${escHtml(e.t)}</a>`
         : `<span>${escHtml(e.t)}</span>`)).join('');
 
-    const render = (a) => {
+    // `left`: the rows of this fit its link cannot carry.
+    const render = (a, left) => {
         const found = a.met.concat(a.matched);
         const matchHtml = block('bf-matches', 'What you asked for → what backs it',
             found.map(m => row(escHtml(m.label), evidence(m.ev))));
@@ -467,12 +579,20 @@
         result.innerHTML = html;
         fit.hidden = false;
         if (shareBar) shareBar.hidden = false;
+        if (leftEl) {
+            leftEl.hidden = !left;
+            leftEl.textContent = left ? `This fit has more rows than one link can carry: the link leaves out ${plural(left, 'row')}, what matched before any gap.` : '';
+        }
         showCases(selectCases(a.matched));
     };
     // What a screen reader hears: a line, not the whole fit.
     const say = (line) => { if (msg) msg.textContent = line; };
 
-    const grade = () => {
+    // `how` it came to be graded: "run", someone pressed Grade, which is
+    // all the count records as a use of the Brief; "sample", a sample ad
+    // (count.js counts the press as brief-sample); "restore", the ad the
+    // browser put back in the box on Back or a reload, already counted.
+    const grade = (how) => {
         const a = analyse(input.value);
         if (a.status !== 'graded') {
             say(a.status === 'empty'
@@ -485,19 +605,22 @@
             showCases(null);
             return null;
         }
-        setLink(`${base}?focus=${focusOf(a)}`);
-        render(a);
+        const out = linkIds(a);
+        setLink(`${base}?focus=${out.ids.join(',')}`, 'own');
+        render(a, out.left);
         say(`Graded: ${a.grade}. The fit and the dossier are below.`);
         if (clearBtn) clearBtn.hidden = false;
         // count.js records that the Brief was run, and the grade it gave
         // (never the ad); with count.js blocked there is no mks.track, and
         // nothing to record them in.
-        track('brief-run');
-        track('brief-' + a.cls);
+        if (how === 'run') {
+            track('brief-run');
+            track('brief-' + a.cls);
+        }
         return a;
     };
 
-    if (runBtn && input) runBtn.addEventListener('click', grade);
+    if (runBtn && input) runBtn.addEventListener('click', () => grade('run'));
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             input.value = '';
@@ -517,48 +640,70 @@
         b.addEventListener('click', () => {
             const sample = RULES.samples.find(s => s.id === b.getAttribute('data-sample'));
             input.value = sample ? sample.text : '';
-            grade();
+            grade('sample');
             const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (fit.scrollIntoView) fit.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
         });
     });
 
-    // Copy link: the button says it worked, then puts back its own words.
+    // Copy link: the button says it worked, then puts back its own words,
+    // and a status line says it to a screen reader, which does not read a
+    // button's new label out. The old way, for a browser without the
+    // clipboard API, borrows the focus for a moment and hands it back.
     const copyBtn = $('briefCopy');
+    const copiedEl = $('briefCopied');
     if (copyBtn) {
         const words = copyBtn.innerHTML;
         let timer;
-        const flash = (msg) => {
+        const flash = (ok) => {
             clearTimeout(timer);
-            copyBtn.textContent = msg;
-            timer = setTimeout(() => { copyBtn.innerHTML = words; }, 1700);
+            copyBtn.textContent = ok ? 'Copied ✓' : 'Copy failed';
+            // Emptied first, so a second copy is announced again.
+            if (copiedEl) { copiedEl.textContent = ''; setTimeout(() => { copiedEl.textContent = ok ? 'Link copied' : 'Copy failed'; }, 50); }
+            timer = setTimeout(() => { copyBtn.innerHTML = words; if (copiedEl) copiedEl.textContent = ''; }, 1700);
         };
         copyBtn.addEventListener('click', async () => {
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(link);
-                    return flash('Copied ✓');
+                    return flash(true);
                 }
             } catch (e) { /* fall through to the old way */ }
+            let ok = false;
+            const ta = document.createElement('textarea');
             try {
-                const ta = document.createElement('textarea');
-                ta.value = link; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                ta.value = link; ta.readOnly = true; ta.style.position = 'fixed'; ta.style.opacity = '0';
                 document.body.appendChild(ta); ta.focus(); ta.select();
-                document.execCommand('copy'); ta.remove();
-                flash('Copied ✓');
-            } catch (e) { flash('Copy failed'); }
+                ok = document.execCommand('copy') !== false;
+            } catch (e) { /* not copied */ }
+            ta.remove();
+            copyBtn.focus();
+            flash(ok);
         });
     }
     const printBtn = $('briefPrint');
     if (printBtn) printBtn.addEventListener('click', () => window.print());
 
-    // A shared link: the same fit and dossier, rebuilt from its ids.
+    // An address with ids: a link someone sent, or the reader's own result
+    // come back to by a reload or Back, rebuilt from them either way.
     const focus = new URLSearchParams(location.search).get('focus');
-    const shared = focus ? fromFocus(focus) : null;
-    if (shared) {
-        setLink(`${base}?focus=${focusOf(Object.assign({}, shared, { status: 'graded' }))}`);
-        render(shared);
+    const mark = markOf();
+    const shown = focus ? fromFocus(focus, { own: mark === 'own' }) : null;
+    if (shown) {
+        setLink(`${base}?focus=${focusOf(Object.assign({}, shown, { status: 'graded' }))}`, mark || 'shared');
+        render(shown, shown.left);
         if (clearBtn) clearBtn.hidden = false;
-        track('brief-shared');
+        if (!mark) track('brief-shared');
     }
+    // The reader's own: where the browser gave the box its ad back, the fit
+    // is graded from the ad again, uncounted, and says nothing of sharing.
+    // Some browsers fill the box only after this script has run.
+    let refilled = false;
+    const refill = () => {
+        if (refilled || mark !== 'own' || !input || analyse(input.value).status !== 'graded') return;
+        refilled = true;
+        grade('restore');
+    };
+    refill();
+    window.addEventListener('pageshow', refill);
 })();

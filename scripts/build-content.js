@@ -20,7 +20,7 @@
 //                       below 5, and exactly what it sends (content/stats.json,
 //                       which scripts/fetch-stats.js writes once a week)
 //   brief.html          The Brief: paste a job ad, get an honest fit and
-//                       a one-page dossier, graded in the browser by
+//                       a dossier to forward, graded in the browser by
 //                       brief.js over content/brief.json, the facts in
 //                       content/profile.json and where the homepage shows
 //                       each named tool; the dossier is the case studies,
@@ -61,6 +61,7 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const crypto = require('crypto');
 const content = require('./lib/content.js');
 const figures = require('./lib/claims.js');
 
@@ -68,7 +69,7 @@ const ROOT = content.ROOT;
 const CHECK = process.argv.slice(2).includes('--check');
 
 const GENERATED_BY = 'scripts/build-content.js';
-const SITE = 'https://moseskolleh.github.io/sustaintheworld/';
+const SITE = 'https://moseskolleh.github.io/';
 
 // ------------------------------------------------------------------
 // Helpers
@@ -102,7 +103,10 @@ const markOnly = (s) => cutFigures(s).map(([text, id]) => (id ? `<span data-clai
 
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-/** Pulls named <symbol> definitions out of the sprite index.html already ships. */
+/**
+ * Pulls named <symbol> definitions out of the sprite index.html already ships.
+ * No xmlns: the HTML parser puts an <svg> in its namespace without one.
+ */
 function sprite(ids) {
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     const symbols = ids.map((id) => {
@@ -110,7 +114,7 @@ function sprite(ids) {
         if (!m) throw new Error(`icon #${id} is not in the index.html sprite`);
         return m[0];
     });
-    return `<svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">${symbols.join('')}</svg>`;
+    return `<svg class="icon-sprite" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">${symbols.join('')}</svg>`;
 }
 
 const STATUS_LABEL = {
@@ -240,11 +244,13 @@ ${links.map(l => `        <li><a ${linkAttrs(l, current)}>${l.label}</a></li>`).
  * The closing call to action, the last thing in <main>: the three ways to
  * reach Moses. The full flavour opens with who he is open to hearing from,
  * in the words the homepage's hero uses, and ends with a link back to the
- * top (to <body>, so the next Tab starts again from the skip link). The
- * plain one is the three ways in a line: on the field report every byte
- * counts towards the size the homepage quotes.
+ * top (to <body>, so the next Tab starts again from the skip link). Beside
+ * it, The Brief, for whoever is hiring (`brief`; not on The Brief itself):
+ * that line had the room, so no page is longer for it. The plain one is
+ * the three ways in a line: on the field report every byte counts towards
+ * the size the homepage quotes.
  */
-function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta, root = '' } = {}) {
+function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta, root = '', brief = true } = {}) {
     const mail = `<a href="mailto:${esc(facts.email)}" data-analytics="${hooks.email}">${esc(facts.email)}</a>`;
     if (plain) {
         return `<p>Email ${mail}, <a href="${esc(shellHref('index.html#contact', base))}" data-analytics="${hooks.contact}">send a message</a> or download <a href="${esc(shellHref(facts.cv, base))}" download data-analytics="${hooks.cv}">my CV</a>.</p>`;
@@ -257,7 +263,7 @@ function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta, ro
         <a class="ca-btn" href="${esc(root + facts.cv)}" download data-analytics="${hooks.cv}">Download CV</a>
     </p>
 </section>
-<p class="ca-top"><a href="#top">Back to top</a></p>`;
+<p class="ca-top"><a href="#top">Back to top</a>${brief ? ` &middot; <a href="${root}brief.html">Hiring? Paste your job ad</a>` : ''}</p>`;
 }
 
 /**
@@ -279,6 +285,123 @@ const THEME_SCRIPT = '<script src="theme.js"></script>';
 /** Every line of a block indented; blank lines stay empty. */
 const indentBlock = (block, indent) => block.split('\n').map(l => (l ? indent + l : l)).join('\n');
 
+// ------------------------------------------------------------------
+// The security meta: a Content-Security-Policy and a referrer policy
+//
+// The Brief renders parts of a stranger's paste back into its page; a
+// policy is the defence behind its escaping, and every page carries one.
+// GitHub Pages cannot send headers, so it is a <meta>, right after the
+// charset: a policy given in a meta holds only what comes after it. A meta
+// cannot set frame-ancestors (nor report-uri or sandbox), so this does not
+// stop another site framing a page. Generated pages get it from pageShell,
+// the four hand-authored ones between CSP markers (fillRegion), and
+// tests/csp.test.js holds every page to it.
+//
+//   default-src 'self'   every file the site loads is its own: scripts,
+//                        stylesheets, fonts, images, the narration's audio,
+//                        the on-demand modules, assets/timezones.json, the
+//                        journey map
+//   script-src           'self', and each inline script on the page by the
+//                        sha256 of its exact text, worked out here from the
+//                        page as written; never 'unsafe-inline', 'unsafe-eval'
+//                        or 'unsafe-hashes'. A data block (JSON-LD, The
+//                        Brief's application/json) is never run, so it needs
+//                        no hash. No element has an on…="" attribute, which
+//                        nothing short of 'unsafe-hashes' would run (a
+//                        handler a script sets, el.onload = …, is not one):
+//                        a script whose failure takes the html.js mark off
+//                        is marked data-js, and the mark's script listens.
+//   style-src            'self' 'unsafe-inline'. The style attributes stay
+//                        (the 164's bars take their widths as --w, the hero's
+//                        first slide its photo, carbon-ai.js's bars theirs,
+//                        the icon sprite its hiding), and the field report
+//                        and the 404 page each keep one <style>, so each is
+//                        one file. CSS runs no script, and whatever a style
+//                        could fetch (an image or a font, by url()) is held
+//                        to this origin by default-src and img-src, so an
+//                        injected style can send nothing anywhere.
+//   img-src              'self' and data:, style.css's two contour patterns
+//   connect-src          'self', the Apps Script deployment (script.js's
+//                        copy: the counter's fetch and the contact form's)
+//                        and script.googleusercontent.com, where Apps Script
+//                        answers with a 302: each hop of a redirect is
+//                        checked against connect-src
+//   form-action          'self', and on the page whose form posts to the
+//                        deployment without JavaScript (the homepage) the
+//                        same two places, the redirect's hop checked again
+//                        (in Chromium). Nowhere else, and that host for these
+//                        two only: tests/html.test.js names the same two
+//                        places as the only ones off the site.
+//   base-uri, object-src 'none': nothing on the site uses either.
+//
+// Cloudflare Turnstile, which script.js reads if the contact form has it,
+// is not on the site: adding it would put its host in script-src and
+// frame-src, against the rule that nothing is loaded from elsewhere.
+//
+// The referrer policy is strict-origin-when-cross-origin. count.js keeps
+// the host of the page that linked here, and believes the homepage's ?via=
+// only from this site (document.referrer's host), so a move between its own
+// pages has to carry one; no-referrer would count every visit an old
+// address forwards as direct. Off the site only the origin goes, never a
+// path or a query (so never The Brief's ?focus=): enough for the places
+// Moses links to (his repositories' traffic page, the maintained coach) to
+// show this site sent the visit, which is the measuring the site is for.
+// It is most browsers' default, written down for those whose default sends
+// the whole address. The counter's own request sends none
+// (referrerPolicy: 'no-referrer').
+// ------------------------------------------------------------------
+const DEPLOYMENT = (() => {
+    const m = fs.readFileSync(path.join(ROOT, 'script.js'), 'utf8')
+        .match(/const GOOGLE_APPS_SCRIPT_URL = '(https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec)'/);
+    if (!m) throw new Error('script.js does not name its Apps Script deployment in the expected form');
+    return m[1];
+})();
+const OFF_SITE = [DEPLOYMENT, 'https://script.googleusercontent.com'];
+const REFERRER = 'strict-origin-when-cross-origin';
+
+/** The text of every inline script a browser would run: no src, and no type or a JavaScript one. Comments are passed over. */
+function inlineScripts(html) {
+    const out = [];
+    const re = /<!--[\s\S]*?-->|<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
+    let m;
+    while ((m = re.exec(html))) {
+        if (m[0].startsWith('<!--') || /\ssrc=/i.test(m[1])) continue;
+        const type = (m[1].match(/\stype=["']?([^"'\s>]+)/i) || [])[1];
+        if (!type || /^(text|application)\/(java|ecma)script$|^module$/i.test(type)) out.push(m[2]);
+    }
+    return out;
+}
+
+const scriptHash = (code) => `'sha256-${crypto.createHash('sha256').update(code, 'utf8').digest('base64')}'`;
+
+/** The page's policy: the same on every page bar the hashes of its own inline scripts, and where its form posts. */
+function securityPolicy(html) {
+    const posts = (html.match(/<form\b[^>]*>/gi) || []).some(f => f.includes(`action="${DEPLOYMENT}"`));
+    return [
+        "default-src 'self'",
+        ["script-src 'self'", ...new Set(inlineScripts(html).map(scriptHash))].join(' '),
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data:",
+        ["connect-src 'self'", ...OFF_SITE].join(' '),
+        ["form-action 'self'", ...(posts ? OFF_SITE : [])].join(' '),
+        "base-uri 'none'",
+        "object-src 'none'"
+    ].join(';');
+}
+
+// Where pageShell puts it, filled in once the rest of the page is written.
+const SECURITY_HERE = '<!-- SECURITY -->';
+const securityMeta = (html) => `<meta http-equiv="Content-Security-Policy" content="${securityPolicy(html)}">
+<meta name="referrer" content="${REFERRER}">`;
+
+// What the html.js mark's script says on a page with a script of its own
+// that fails to load: listened for on window (an element's load error does
+// not bubble, but the capture phase sees it), it takes the mark off again
+// for a script marked data-js, and for none other (the counter, the theme,
+// a module fetched later).
+const MARK = "document.documentElement.classList.add('js')";
+const MARK_FALLBACK = `${MARK};addEventListener('error',function(e){if(e.target.hasAttribute&&e.target.hasAttribute('data-js'))document.documentElement.classList.remove('js')},true)`;
+
 /**
  * A generated page, whole. Most of them sit at the site's root; a field note
  * sits in notes/, and `root` ("../") climbs back to it, so every stylesheet,
@@ -296,22 +419,28 @@ function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead
     // A page that runs a script says so before first paint (html.js), so its
     // stylesheet can offer the controls that script drives and hide them
     // when it cannot run; a script of its own that fails to arrive takes
-    // the mark off again. A page with no script has nothing to announce.
+    // the mark off again (data-js). A page with no script has nothing to announce.
     const jsMark = /<script\b/.test(bodyEnd) || scripts.length
-        ? `\n    <script>document.documentElement.classList.add('js')</script>`
+        ? `\n    <script>${scripts.length ? MARK_FALLBACK : MARK}</script>`
         : '';
     const sheets = ['carbon-ai.css'].concat(styles, contentCss ? ['content.css'] : []);
     // Its own preview card (npm run og, scripts/build-og.js), named as the
     // counter names the page: a page the nav does not list (The Brief) is
     // named by its own address.
     const card = `${SITE}assets/og/${pageName || (current || canonical.slice(SITE.length)).replace(/\.html$/, '')}.png`;
-    return `<!DOCTYPE html>
+    // Two notes that used to ride in every page's <head>, in words a reader
+    // downloaded each time: the three typefaces are self-hosted
+    // (assets/fonts/, scripts/build-fonts.js), preloaded below and counted in
+    // each page's budget; and X reads a card's title, description and image
+    // from the og: tags when there are no twitter: ones (only twitter:card
+    // has no og: twin), so the three copies went.
+    const page = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- GENERATED by ${GENERATED_BY} from content/: edit that and run npm run build:content -->
+    ${SECURITY_HERE}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">${jsMark}
-    <!-- GENERATED by ${GENERATED_BY} from content/ — do not edit by hand.
-         Edit the JSON under content/ and run: npm run build:content -->
     <title>${esc(title)}</title>
     <meta name="description" content="${esc(description)}">
     <meta name="author" content="Moses Kolleh Sesay">
@@ -326,19 +455,14 @@ function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">${published ? `
     <meta property="article:published_time" content="${esc(published)}">` : ''}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${esc(title)}">
-    <meta name="twitter:description" content="${esc(description)}">
-    <meta name="twitter:image" content="${card}">${head ? `\n${indentBlock(head, '    ')}` : ''}
-    <!-- The three typefaces are self-hosted (assets/fonts/, built by scripts/build-fonts.js):
-         no request leaves this origin, and the bytes are counted in the budget. -->
+    <meta name="twitter:card" content="summary_large_image">${head ? `\n${indentBlock(head, '    ')}` : ''}
     <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/space-grotesk-latin.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/inter-latin.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/ibm-plex-mono-latin-400.woff2" crossorigin>
     ${root ? THEME_SCRIPT.replace('src="', `src="${root}`) : THEME_SCRIPT}${sheets.map(href => `
     <link rel="stylesheet" href="${esc(root + href)}">`).join('')}
     <script defer src="${root}count.js"${pageName ? ` data-page="${esc(pageName)}"` : ''}></script>${scripts.map(src => `
-    <script defer src="${esc(root + src)}" onerror="document.documentElement.classList.remove('js')"></script>`).join('')}
+    <script defer src="${esc(root + src)}" data-js></script>`).join('')}
 </head>
 <body id="top">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -351,7 +475,7 @@ ${indentBlock(shellNav(facts, { current, icons, root }), '    ')}
         </header>
 ${main}
 
-${indentBlock(shellCta(facts, { root }), '        ')}
+${indentBlock(shellCta(facts, { root, brief: canonical !== `${SITE}brief.html` }), '        ')}
     </main>
     <footer class="ca-foot">
 ${indentBlock(shellFoot({ current, root }), '        ')}
@@ -360,11 +484,20 @@ ${bodyEnd}
 </body>
 </html>
 `.replace(/[ \t]+$/gm, '');   // an empty optional part leaves an indented blank line (lint:html)
+    // The policy last, from the page as written: it hashes the page's scripts.
+    return page.replace(SECURITY_HERE, () => indentBlock(securityMeta(page), '    ').trimStart());
 }
 
 // ------------------------------------------------------------------
 // case-studies.html
 // ------------------------------------------------------------------
+
+/**
+ * A field note by its number ("Note 03", as the homepage numbers them),
+ * for a case study's first line and its research outputs' (each has room
+ * there on a phone for that and no more), said to be a field note on hover.
+ */
+const noteLink = (n) => `<a href="${esc(notePath(n))}" title="Field note">${noteNumber(n)}</a>`;
 
 // The two interactives, each hosted by the case study it illustrates
 // (content/projects.json `widget`). They used to sit inside the homepage's
@@ -610,6 +743,9 @@ const LIGHTBOX_SCRIPT = `
 function renderCaseStudies(data) {
     const { projects, lenses } = data;
     const all = [lenses.default].concat(lenses.lenses);
+    // The field note a case study has (content/notes/*.md, caseStudy), the
+    // way back from its note's "The case study" line.
+    const noteOf = (cs) => (data.notes || []).find(n => n.caseStudy === cs.id);
 
     // The lens switcher. Real links, so every view is shareable; the script
     // below switches them in place. Without JavaScript a lens link would only
@@ -702,7 +838,7 @@ function renderCaseStudies(data) {
         return `
             <article class="cs-card" id="${esc(cs.id)}" data-lenses="${esc((cs.lenses || []).join(' '))}">
                 <header class="cs-card-head">
-                    <p class="cs-card-meta mono-label">${esc(cs.period)}${cs.location ? ` &middot; ${esc(cs.location)}` : ''}</p>
+                    <p class="cs-card-meta mono-label">${esc(cs.period)}${cs.location ? ` &middot; ${esc(cs.location)}` : ''}${noteOf(cs) ? ` &middot; ${noteLink(noteOf(cs))}` : ''}</p>
                     <h3>${prose(cs.title)}</h3>
                     <p class="cs-card-sub">${prose(cs.subtitle || '')}</p>
                     <p class="cs-card-org">${prose(cs.organization)}${cs.partner ? ` &middot; with ${prose(cs.partner)}` : ''}${cs.role ? ` &middot; ${prose(cs.role)}` : ''}</p>
@@ -920,6 +1056,10 @@ function renderResearch(data) {
         return lens ? `<a class="rs-link" href="case-studies.html?lens=${esc(lens)}">The ${esc(lensName[lens])} view &rarr;</a>` : '';
     };
     const note = (o) => [o.note && prose(o.note), o.heldBy && `Held by ${prose(o.heldBy)}.`, place(o)].filter(Boolean).join(' ');
+    // The field note on its case study, if it has one, at the end of the
+    // first line, as the case study's own header carries it: the end of
+    // the note's paragraph had no room on a phone for a second link.
+    const fieldNote = (o) => o.caseStudy && (data.notes || []).find(n => n.caseStudy === o.caseStudy);
 
     const entry = (o) => {
         const title = o.status === 'public' && o.url
@@ -931,7 +1071,8 @@ function renderResearch(data) {
                     <div class="rs-item-head">
                         <span class="rs-type mono-label">${esc(o.type)}</span>
                         <span class="rs-year mono-label">${esc(o.year)}</span>
-                        ${statusChip(o)}
+                        ${statusChip(o)}${fieldNote(o) ? `
+                        <span class="mono-label">${noteLink(fieldNote(o))}</span>` : ''}
                     </div>
                     <h3>${title}</h3>
                     ${o.venue ? `<p class="rs-venue">${prose(o.venue)}</p>` : ''}
@@ -1103,8 +1244,8 @@ function fiveNumbers(stats, under) {
         {
             key: 'briefUses',
             name: 'Brief uses',
-            def: 'Page views in which <a href="brief.html">The Brief</a> graded a job ad: it turns a pasted ad into an ' +
-                 'honest fit and a one-page dossier tailored to it.' +
+            def: 'Page views in which <a href="brief.html">The Brief</a> graded a job ad someone pasted in (its sample ads are not counted): ' +
+                 'it turns the ad into an honest fit and a dossier tailored to it.' +
                  (stats.briefLive ? '' : ' It is not built yet, so there is nothing to count; the figure appears here once it is.')
         }
     ];
@@ -1387,7 +1528,7 @@ ${table('Kilobytes transferred per page view', cols('Per page view'), [
                 <dt><code>features</code></dt>
                 <dd>
                     Up to ${rule('featuresMax')} names of things used on the page, such as a CV link or the carbon receipt, and, if
-                    The Brief graded a job ad, the grade it gave. Never the ad itself.
+                    The Brief graded a job ad someone pasted in, the grade it gave. Never the ad itself.
                 </dd>
                 <dt><code>ref</code></dt>
                 <dd>The host name of the site you came from; empty if there was none, or if it was this site. An old homepage address for something that has since moved sends you on to its new page with that host name, so the visit is not counted as direct.</dd>
@@ -2067,7 +2208,7 @@ const SPLIT_SENTENCES = String.raw`    // Sentence splitting, shared by the play
 //
 // A recruiter pastes a job ad and gets an honest fit (each requirement
 // mapped to the work that backs it, the gaps as plainly as the matches,
-// what only Moses can confirm) and a one-page dossier: the at-a-glance
+// what only Moses can confirm) and a dossier to print or forward: the at-a-glance
 // facts, the case studies that match and how to reach him. brief.js does
 // the grading in the browser, over what this writes into the page's
 // #briefData block: the rubric (content/brief.json), the facts it may
@@ -2174,7 +2315,7 @@ function renderBrief(data, pages) {
         <section class="bf-input" id="grade" aria-labelledby="gradeTitle">
             <h2 id="gradeTitle">Paste a job ad</h2>
             <label class="mono-label" for="briefAd">The ad, or its requirements</label>
-            <textarea id="briefAd" rows="7" placeholder="Paste the role&rsquo;s description or its requirements here&hellip;"></textarea>
+            <textarea id="briefAd" rows="7" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="Paste the role&rsquo;s description or its requirements here&hellip;"></textarea>
             <div class="bf-actions">
                 <button type="button" class="ca-btn ca-btn-primary" id="briefRun">Grade this ad</button>
                 <button type="button" class="ca-btn" id="briefClear" hidden>Clear</button>
@@ -2186,9 +2327,10 @@ function renderBrief(data, pages) {
         <p class="nojs-note">Grading an ad needs JavaScript, which is off here; it would run in your browser and send nothing. Below is the whole dossier: every case study, in the order the case studies page gives them.</p>
 
         <div class="bf-share" id="briefShare" hidden>
-            <p>This page&rsquo;s address now rebuilds this fit and this dossier for whoever you send it to. It carries only the names of what matched and what did not, from this page&rsquo;s own list: never a word of the ad.</p>
+            <p>This page&rsquo;s address now rebuilds this fit and this dossier for whoever you send it to. It carries ids from this page&rsquo;s own list (the grade, what matched, the gaps, what to confirm), the years of experience and the language levels the ad asked for, and, if the fit is too long for it, how many rows it leaves out: never a word of the ad.</p>
             <p class="bf-link"><code id="briefLink">${esc(SITE)}brief.html</code></p>
-            <p class="bf-share-go"><button type="button" class="ca-btn" id="briefCopy" data-analytics="brief-copy">Copy link</button> <button type="button" class="ca-btn" id="briefPrint" data-analytics="brief-print">Print the dossier</button></p>
+            <p id="briefLeft" hidden></p>
+            <p class="bf-share-go"><button type="button" class="ca-btn" id="briefCopy" data-analytics="brief-copy">Copy link</button> <button type="button" class="ca-btn" id="briefPrint" data-analytics="brief-print">Print the dossier</button><span class="sr-only" id="briefCopied" role="status"></span></p>
         </div>
 
         <section class="bf-dossier" id="dossier" aria-labelledby="dossierName">
@@ -2216,11 +2358,11 @@ function renderBrief(data, pages) {
     const json = JSON.stringify(briefData(data, pages['index.html'])).replace(/</g, '\\u003c');
     return pageShell({
         title: 'The Brief — Moses Kolleh Sesay',
-        description: 'Paste a job ad: an honest fit, each requirement mapped to the evidence that backs it or listed as a gap, and a one-page dossier of the case studies that match. It runs in your browser; the ad is never sent.',
+        description: 'Paste a job ad: an honest fit, each requirement mapped to the evidence that backs it or listed as a gap, and a dossier of the case studies that match, to print or forward. It runs in your browser; the ad is never sent.',
         canonical: `${SITE}brief.html`,
-        heroTag: 'PASTE A JOB AD &middot; AN HONEST FIT &middot; A ONE-PAGE DOSSIER',
+        heroTag: 'PASTE A JOB AD &middot; AN HONEST FIT &middot; A DOSSIER TO FORWARD',
         heroTitle: 'The <span class="ca-accent">Brief</span>',
-        heroLead: 'Paste a job ad and get an honest fit: each requirement mapped to the work that backs it, the gaps listed as plainly as the matches, and what only I can confirm. Then a one-page dossier of the case studies that match, to print or forward. It runs in your browser, with no AI, and the ad never leaves this page.',
+        heroLead: 'Paste a job ad and get an honest fit: each requirement mapped to the work that backs it, the gaps listed as plainly as the matches, and what only I can confirm. Then a dossier of the case studies that match, to print or forward: one A4 page for most ads. It runs in your browser, with no AI, and the ad never leaves this page.',
         main,
         bodyEnd: `    <script type="application/json" id="briefData">${json}</script>`,
         // content.css is the case studies' and the research page's; of it
@@ -2640,6 +2782,10 @@ function injectShell(data, page) {
     return html;
 }
 
+// The security meta on a hand-authored page, between its CSP markers, from
+// the page with every other region filled in: it hashes the page's scripts.
+const injectSecurity = (page, html) => fillRegion(html, page, 'CSP', securityMeta(html));
+
 // ------------------------------------------------------------------
 // Write or check
 // ------------------------------------------------------------------
@@ -2661,10 +2807,10 @@ function main() {
         ['stats.html', renderStats(data)],
         ['sitemap.xml', renderSitemap(data)],
         ['voice-scripts.js', renderVoiceScripts(data)],
-        ['index.html', injectHomeRegions(data, injectCorelog(data, injectProjectCards(data, injectAtAGlance(data, injectJsonLd(data)))))],
-        ['carbon-ai.html', injectShell(data, 'carbon-ai.html')],
-        ['field-report.html', injectShell(data, 'field-report.html')],
-        ['404.html', injectShell(data, '404.html')],
+        ['index.html', injectSecurity('index.html', injectHomeRegions(data, injectCorelog(data, injectProjectCards(data, injectAtAGlance(data, injectJsonLd(data))))))],
+        ['carbon-ai.html', injectSecurity('carbon-ai.html', injectShell(data, 'carbon-ai.html'))],
+        ['field-report.html', injectSecurity('field-report.html', injectShell(data, 'field-report.html'))],
+        ['404.html', injectSecurity('404.html', injectShell(data, '404.html'))],
         ...inSeries(data.notes).map(n => [notePath(n), renderNote(data, n)]),
         [FEED, renderFeed(data)]
     ];
@@ -2722,4 +2868,4 @@ if (require.main === module) main();
 module.exports = { renderStats, EXAMPLE_PAYLOAD, BASELINE_WEEKS, renderAtAGlance, glanceFacts, shellFacts, shellRegions, shellMarkers,
     corelogDepths, injectCorelog, renderCertificates, renderTestimonials, homeRegions, fillRegion, marksIn, CLAIM_PAGES, claimPages, PAGE_NAMES, useLedger,
     renderNote, renderFeed, renderHomeNotes, notePath, inSeries, TAG_ID, FEED, NOTES_ON_HOMEPAGE, personLd, websiteLd, softwareLd,
-    briefFacts, briefToolEvidence, briefMatcher, briefData };
+    briefFacts, briefToolEvidence, briefMatcher, briefData, inlineScripts, scriptHash, securityPolicy, OFF_SITE, REFERRER };

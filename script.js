@@ -119,12 +119,10 @@ mks.scrollMotion = scrollMotion;
 // ===================================
 // KEYBOARD — one listener
 // ===================================
-// Five document listeners, blind to each other, used to answer the keys:
-// one Escape closed the terminal and the menu behind it. A feature now
-// registers its keys with its layer's rank; the highest is asked first,
-// and true means the key is used, so one press closes one layer. A key a
-// control already used is left alone, and a widget's own keys (the games'
-// arrows, a dialog's Tab) stay on the widget.
+// A feature registers its keys with its layer's rank; the highest is asked
+// first, and true means the key is used, so one press closes one layer. A
+// key a control already used is left alone, and a widget's own keys (the
+// games' arrows, a dialog's Tab) stay on the widget.
 const KEY_RANK = Object.freeze({ terminal: 40, player: 20, menu: 10, page: 0 });
 const keyRoutes = {};
 mks.keyRank = KEY_RANK;
@@ -146,20 +144,14 @@ document.addEventListener('keydown', (e) => {
 // ===================================
 // ON-DEMAND MODULES
 // ===================================
-// Roughly two thirds of this site's JavaScript serves features most visits
-// never reach: the narration player, the field terminal, the interactives
-// in section 05 and the footer receipt. Each lives in modules/ and is
-// fetched the moment it is first needed: a "listen" press, the backtick
-// key, section 05 coming into range. What every visit pays for is what
-// every visit uses.
-//
-// Modules are classic scripts sharing the page's global scope. They declare
-// nothing at the top level (a second `const safeStorage` would be a
-// SyntaxError) and reach the core only through window.mks. Each marks
-// itself in mks.loaded when it has run, which is also how the jsdom
-// harness — which evaluates them directly — tells the loader they are here.
-// A module's own stylesheet is listed first, so it has arrived before the
-// script builds anything it styles.
+// What most visits never reach is fetched when first needed (the README's
+// table of modules says when). Modules are classic scripts sharing the
+// page's global scope. They declare nothing at the top level (a second
+// `const safeStorage` would be a SyntaxError) and reach the core only
+// through window.mks. Each marks itself in mks.loaded when it has run,
+// which is also how the jsdom harness — which evaluates them directly —
+// tells the loader they are here. A module's own stylesheet is listed
+// first, so it has arrived before the script builds anything it styles.
 const MODULES = {
     interactives: ['ai-carbon-data.js', 'modules/interactives.js'],
     terminal: ['modules/terminal.js'],
@@ -285,18 +277,16 @@ const initBackgroundSlideshow = () => {
     if (!slides.length) return;
     let currentSlide = 0;
 
-    // The first slide is fetched now; the rest only when the rotation is
-    // about to show them (150 KB each, for a picture eight seconds in: see
-    // check-budget.js on what the first view once paid for slide two), and
-    // only while it is running: hero on screen, tab visible, nobody having
-    // asked for calm.
+    // The first slide is drawn from the start; the rest only when the
+    // rotation is about to show them (up to 150 KB each, for a picture
+    // eight seconds in: see check-budget.js on what the first view once
+    // paid for slide two), and only while it is running: hero on screen,
+    // tab visible, nobody having asked for calm. Which file a slide draws,
+    // a phone's or a desktop's, AVIF or WebP, is style.css's to say
+    // (.hero-bg-N[data-loaded]), so the later slides follow the first's rule.
     const loadSlide = (index) => {
         const slide = slides[index];
-        if (!slide || slide.dataset.loaded) return;
-        const src = slide.getAttribute('data-bg');
-        if (!src) return;
-        slide.style.backgroundImage = `url('${src}')`;
-        slide.dataset.loaded = '1';
+        if (slide) slide.dataset.loaded = '1';
     };
     loadSlide(0);
 
@@ -645,8 +635,14 @@ const navSpies = navLinks.map((link) => {
         if (Math.abs(moved) >= 1) window.scrollBy({ top: moved, behavior: 'instant' });
     };
 
+    // A step of more than a screen (a jump, the End key) is drawn above in
+    // the frame it lands, not at rest, when the reader may be at work there
+    // (You Draw It's keys at 390px: the offset and progress bar moved 1,182px).
+    let lastY = scrollY;
     window.addEventListener('scroll', () => {
         onScroll();
+        if (Math.abs(scrollY - lastY) > innerHeight) drawAbove();
+        lastY = scrollY;
         clearTimeout(resting);
         resting = setTimeout(drawAbove, 150);
     }, { passive: true });

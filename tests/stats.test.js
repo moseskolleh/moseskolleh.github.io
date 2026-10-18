@@ -602,7 +602,7 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
     assert(/a lone <5 would be the total less the rest, so the smallest figure beside it is held back as well/.test(text),
         'Privacy: says a figure is held back where subtraction would give a small one away');
     assert(/Every figure covers whole weeks/.test(text) && /No count for a single day is ever published/.test(text), 'Privacy: whole weeks, and no single day');
-    assert(/The Brief graded a job ad, the grade it gave\. Never the ad itself/.test(text), 'Privacy: says the Brief\'s grade is among the features, and the ad never is');
+    assert(/The Brief graded a job ad someone pasted in, the grade it gave\. Never the ad itself/.test(text), 'Privacy: says the Brief\'s grade is among the features, and the ad never is');
     assert(/window/.test(doc.querySelector('.st-fields').textContent) && !/Screen width/.test(text), 'Privacy: vp is the window\'s width, not the screen\'s');
     assert(/Google Sheet in my own Google account/.test(text) && /a key that the scheduled job keeps as a secret/.test(text),
         'Privacy: says where the raw daily totals live, and that only the weekly job can read them');
@@ -718,9 +718,9 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
     // Every page counts its visits, so every page leads to what that sends:
     // the field report from its note on the counter, the 404 page from its
     // links (it can be served at any address, so its links are absolute).
-    const counted = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && /<script[^>]*src="(?:\/sustaintheworld\/)?count\.js"/.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+    const counted = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && /<script[^>]*src="\/?count\.js"/.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
     const unlinked = counted.filter(f => !new JSDOM(fs.readFileSync(path.join(ROOT, f), 'utf8')).window.document
-        .querySelector('a[href="stats.html"], a[href="/sustaintheworld/stats.html"]'));
+        .querySelector('a[href="stats.html"], a[href="/stats.html"]'));
     assert(counted.length >= 7 && unlinked.length === 0, `Links: every page that counts its visits links to the open counts (${unlinked.join(', ') || `all ${counted.length}`})`);
     const homeFoot = new JSDOM(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).window.document.querySelector('footer a[href="stats.html"]').textContent;
     assert(/what this site counts, and what it never collects/.test(homeFoot), 'Footer: the homepage link reads as two things, what is counted and what never is');

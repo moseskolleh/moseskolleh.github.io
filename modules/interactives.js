@@ -18,7 +18,7 @@
 // home.
 // ===================================
 window.mks.share = (() => {
-    const SITE = (location.hostname + location.pathname).replace(/\/+$/, '') || 'moseskolleh.github.io/sustaintheworld';
+    const SITE = (location.hostname + location.pathname).replace(/\/+$/, '') || 'moseskolleh.github.io';
     return {
         site: SITE,
         async image(canvas, filename, text) {
@@ -366,7 +366,7 @@ window.mks.share = (() => {
         ctx.fillStyle = '#7CFC00'; ctx.font = "600 15px 'Space Grotesk', system-ui, sans-serif";
         ctx.fillText('Moses Kolleh Sesay', padX, y);
         ctx.fillStyle = '#88a878'; ctx.font = "400 12px 'IBM Plex Mono', monospace";
-        ctx.fillText(window.mks.share ? window.mks.share.site : 'moseskolleh.github.io/sustaintheworld', padX, y + 18);
+        ctx.fillText(window.mks.share ? window.mks.share.site : 'moseskolleh.github.io', padX, y + 18);
     };
     if (shareBtn && cardCanvas) {
         shareBtn.addEventListener('click', () => {
@@ -428,7 +428,7 @@ window.mks.share = (() => {
     const MEDIAN_MB = carbon.medianPageMB;
     const bytesOf = carbon.bytesOf;
     const pageOrigin = location.origin;
-    const urlText = (location.hostname + location.pathname).replace(/\/+$/, '') || 'moseskolleh.github.io/sustaintheworld';
+    const urlText = (location.hostname + location.pathname).replace(/\/+$/, '') || 'moseskolleh.github.io';
     let lastReceiptG = 0;
 
     const classify = (r) => {
@@ -494,7 +494,7 @@ window.mks.share = (() => {
         if (totalMb < MEDIAN_MB) {
             lines.push({ t: 'c', s: `— you're ${Math.round((1 - totalMb / MEDIAN_MB) * 100)}% lighter —` });
         }
-        lines.push({ t: 'r', l: 'Text-only report', r: '10 KB' });
+        lines.push({ t: 'r', l: 'Text-only report', r: '11 KB' });
         if (unmeasured) {
             lines.push({ t: 'c', s: `* ${unmeasured} off-site request${unmeasured > 1 ? 's' : ''} not counted`, dim: true });
         }

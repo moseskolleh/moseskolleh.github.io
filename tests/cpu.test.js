@@ -410,6 +410,27 @@ const key = (window, k, target, init) => {
         window.close();
     }
     {
+        // A step of more than a screen (a jump, the End key) draws what it
+        // passed at once, in the frame it lands: drawn at rest instead, the
+        // sections took their real heights while a reader was already
+        // pressing You Draw It's keys, and the page's offset moved 1,182px
+        // under them (smoke at 390px, about one run in four).
+        const { window, parts, at, by, drawn } = restAt('skills');
+        let y = 0;
+        Object.defineProperty(window, 'scrollY', { configurable: true, get: () => y });
+        y = 300;
+        window.dispatchEvent(new window.Event('scroll'));
+        assert(!drawn().length, 'Drawn: a step of less than a screen waits for the page to rest');
+        y = 300 + 5 * window.innerHeight;
+        window.dispatchEvent(new window.Event('scroll'));
+        const expect = parts.slice(0, at).map(s => s.id);
+        assert(drawn().join() === expect.join() && by.join() === '700',
+            `Drawn: a step of more than a screen draws what it passed there and then, before the reader can act, and holds what is on screen (${drawn().join(', ')}; scrolled by ${by.join(', ') || 'nothing'})`);
+        await wait(250);
+        assert(by.length === 1, 'Drawn: and when the page rests there is nothing left to draw, so nothing moves under a reader already at work');
+        window.close();
+    }
+    {
         // At the very end only the footer is on screen, below every section.
         const { window, parts, by, drawn } = restAt('footer');
         window.dispatchEvent(new window.Event('scroll'));

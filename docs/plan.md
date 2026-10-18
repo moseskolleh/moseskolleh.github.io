@@ -558,17 +558,19 @@ rule makes that cheap.
 ## Progress
 
 What the plan's branch implements so far, step by step, as it stands on
-the branch of wave 5's pull request, checked against the code and the test
-runs on 2026-10-17 (`npm test`: 2,993 passing assertions in
-thirty-one suites, the figure the runner prints at the end; `npm run smoke`
-in Chromium: passed, and its length check measured every page within its
-ceiling). Waves 1 to 4 are on `main`: waves 1 and 2 by 2026-09-27 (pull
+the branch of wave 6's pull request, checked against the code and the test
+runs on 2026-10-18 (`npm test`: 3,282 passing assertions in
+thirty-four suites, the figure the runner prints at the end; `npm run
+smoke` in Chromium: passed, and its length check measured every page within
+its ceiling). Waves 1 to 5 are on `main`: waves 1 and 2 by 2026-09-27 (pull
 requests #48 and #49), wave 3 (Phase 2 and Phase 6 step 8) by 2026-10-03
-(#50), and wave 4 (Phase 3) on 2026-10-04 (#51), each after CI's Chromium
-and Firefox smoke jobs passed, with GitHub Pages rebuilt from `main` the
-same day. Wave 5 (Phase 4.1, Phase 5 steps 1, 3 and 4, Phase 6 step 9 and
-Phase 7) is built on `main` at `c5ce961`, in three lanes merged into one
-branch.
+(#50), wave 4 (Phase 3) on 2026-10-04 (#51), and wave 5 (Phase 4.1, Phase
+5 steps 1, 3 and 4, Phase 6 step 9 and Phase 7) on 2026-10-17 (#52, with
+its review's fixes to the health checks in #53), each after CI's Chromium
+and Firefox smoke jobs passed. Wave 6 (Phase 6 steps 2, 5 and 11, The
+Brief's review fixes, and the move to the root of
+`moseskolleh.github.io`) is built on `main` at `3e28feb`, in four lanes
+merged into one branch.
 ✓ done · ◐ partial, with the reason · ✗ waiting on Moses. Everything
 Moses has to supply is listed, with where it goes, in
 [owner-checklist.md](owner-checklist.md).
@@ -856,12 +858,13 @@ live, is done.
    the case studies where they are (smoke checks both), and the rig and
    You Draw It, both sliders, take a slider's keys: Home, End and the Page
    keys (and the rig's Up and Down) had scrolled the page away from them.
-   Smoke's check of You Draw It's keys at 390×844 is flaky: wave 4's lanes
-   saw it fail on some runs, at wave 4's base too, with the page moved
-   1,173px. No scroll is called; `#about` and `#experience`, above the
-   chart, shrink from a 2,088px stand-in height to their real ones while
-   the keys are pressed, which points at the sections drawn on demand
-   (Phase 6.3). Not fixed yet. Experience is short cards at every width,
+   Smoke's check of You Draw It's keys at 390×844 was flaky from wave 4 to
+   wave 5 (9 failures in 48 runs, the page moved 1,182px): a jump past
+   sections never drawn left them at their stand-in heights, and they were
+   drawn only once scrolling rested, 150 ms later, mid-keys. Since wave 6 a
+   single scroll step of more than a screen draws what it passed in the
+   frame it lands, and the check passed 100 runs in a row (and 40 at
+   320×700). Experience is short cards at every width,
    not only on a phone, each opened by a More button named for its role. The Assay sits
    below the contact form, its question and promise in view and its box
    behind one "Grade a job description" button. To reach the targets
@@ -1202,8 +1205,11 @@ have not begun (S1, S2); 4.3 is as wave 1 left it; 4.4 is not started.
    `content/brief.json` only (the grade, the matched strengths, the gaps,
    what to confirm), never the ad's words, so whoever it is forwarded to
    sees the same dossier and the same gaps; unknown ids are dropped.
-   Printed, the dossier is one A4 page (smoke prints the three samples and
-   the Dutch ad, one page each, in Chromium). Without JavaScript the page
+   Printed, the dossier is one A4 page for the samples and ordinary ads
+   (smoke prints the three samples, the Dutch ad, an ESG reporting ad of
+   eighteen rows and five case studies, and the ad with every rule, one
+   page each, in Chromium); a longer fit runs on, with the contact line and
+   the address that rebuilds it at the top of the first page (wave 6). Without JavaScript the page
    is the whole dossier and says the grading needs JavaScript. Smoke proves
    no request carries the ad, the count included; the count carries
    `brief-run` (the fifth of the five numbers), the grade as the Assay's
@@ -1213,16 +1219,24 @@ have not begun (S1, S2); 4.3 is as wave 1 left it; 4.4 is not started.
    `brief.html#grade`. The homepage went from 9.42 and 16.49 screens to
    9.27 and 16.22 (lane A's measure), its first view from 283,023 to
    281,063 bytes, and the on-demand total from 73,698 to 59,091 bytes.
-   `brief.html` is 109,614 bytes over the wire with its script, under a new
+   `brief.html` was 109,614 bytes over the wire with its script, under a new
    113 KB budget, and 2.50 and 3.56 screens as it loads, under 2.63 and
-   3.74. Not done: links in from the case studies and the shared call to
-   action, which have no room under their ceilings (130 bytes and 0.04
-   screens). ✗ Moses: which case studies each strength picks (B1), whether
+   3.74 (112,762 bytes and 3.59 screens on a phone since wave 6's fixes and
+   its policy). Wave 6 fixed what an independent review of it found: a
+   shared link never shows a grade its own ids rule out (hard gaps cap it;
+   no area of his field is "Different field"), and says when the grade was
+   brought down or rows were left out; English round-trips once stated;
+   a reader's own reload or Back is not counted as a shared link, nor a
+   sample as a use; one limit (80 ids) for writing and reading, gaps and
+   things to confirm kept first; one row per meaning; no spellcheck on the
+   ad box; a JavaScript-free `/#assay` lands on the line to it; Copy link
+   heard. Wave 6's room in the stylesheets bought the links in: "Hiring?
+   Paste your job ad" closes the shared call to action on every page. ✗ Moses: which case studies each strength picks (B1), whether
    the dossier shows his phone (B2), whether the grade is counted (S4), and
    F1–F3, which the dossier shows once stated.
 
-**Phase 5 — wave 5: steps 1, 3 and 4.** Steps 2, 5 and 6 wait on Moses
-(L2, L3, L4); 7 and 8 are not started.
+**Phase 5 — wave 5: steps 1, 3 and 4; step 5 in part in wave 6.** Steps 2
+and 6 wait on Moses (L2, L4); 7 and 8 are not started.
 
 1. ✓ **Field Notes are articles.** Their source is `content/notes/*.md`:
    a front-matter block (number, title, slug, date, tag, one-line summary,
@@ -1266,16 +1280,42 @@ have not begun (S1, S2); 4.3 is as wave 1 left it; 4.4 is not started.
    `404.html`. A test traces every JSON-LD fact to `content/`. ✗
    `knowsLanguage` waits on the languages (F1), and an X profile in
    `sameAs` on Moses (H2).
+5. ◐ **The address** (wave 6). Moses renamed the repository to
+   `moseskolleh.github.io` on 2026-10-17, so Pages serves the site at the
+   root of `https://moseskolleh.github.io/`, and the academicpages template
+   that stood there is gone. Every canonical address, og:url, preview
+   card, the structured data, the sitemap, `robots.txt`, the feed's links,
+   the CV and the form's reply page name the root; the feed's entry ids,
+   `tag:` URIs since wave 5, did not change. Old `/sustaintheworld/…`
+   addresses (the CV until now, LinkedIn posts, bookmarks) are answered by
+   `404.html`, which goes on to the same page at the root with its query
+   and fragment, passes the linking site on as `?via=`, and is not counted
+   as a missing page; smoke follows one. ✗ A custom domain, if wanted
+   (L3).
 
 **Phase 6 — steps 3, 6 and 7 in wave 2, step 8 in wave 3, step 9 in wave
-5.** Step 1 only as far as a `.nojekyll` (wave 5); 10 and 11 not started;
-2, 4 and 5 only as far as wave 3 went in passing.
+5, steps 2, 5 and 11 in wave 6.** Step 1 only as far as a `.nojekyll`
+(wave 5); 4 and 10 not started.
 
-2. ◐ **Images.** The dossier half is done, by the dossiers leaving: each of
+2. ✓ **Images.** The dossier half went with the dossiers (wave 3): each of
    the homepage's six project cards carries one lazy thumbnail (a 480px
    copy), and the case studies' 25 photos fetch nothing until their row is
-   opened. Not started: an 800px hero for phones, dropping
-   `fetchpriority=high`, AVIF.
+   opened. Wave 6: a phone gets an 800px AVIF of each hero slide, by media
+   query on the preload and in the stylesheet, so it never fetches the
+   large one; `fetchpriority="high"` is gone, since the largest paint was
+   text every time (the name at 1440×900, the description at 390×844, at
+   full speed and at slow 4G with 4× CPU); 34 of 36 photos were re-encoded
+   in place at an SSIM of 0.98 or more against the original, and AVIF kept
+   only where it was a tenth lighter again (the four phone heroes, the
+   fourth desktop hero, the portrait), each file's quality and score in
+   `assets/img/manifest.json`, by `npm run images`. Measured in smoke, the
+   homepage's first view went from 276 KB to 260 KB on a desktop and to
+   218 KB on a phone, which has a budget of its own now (227 KB); the
+   desktop's ceiling came down from 288 to 272 KB and the largest image's
+   from 210 to 189 KB, and every image in the repository weighs less than
+   before (3,577,067 → 3,552,800 bytes) with the copies in. Not done: AVIF
+   for the case-study photos and thumbnails, and phone-sized WebP copies
+   for browsers without AVIF, which the image budget had no room for.
 3. ✓ **CPU.** The homepage's sections below the hero (nine then, seven
    since wave 3) get `content-visibility: auto` once JavaScript runs, and only where the
    browser anchors scrolling (`@supports (overflow-anchor: auto)`): Safari
@@ -1297,9 +1337,19 @@ have not begun (S1, S2); 4.3 is as wave 1 left it; 4.4 is not started.
 4. Not started. Wave 3 took eleven unused symbols out of the homepage's
    sprite, and `tests/html.test.js` checks every icon a page draws resolves
    to a symbol on that page.
-5. Not started. Wave 3 took the `@font-face` blocks out of `content.css`
-   (the shell's pages load `carbon-ai.css`, which has them), so two
-   stylesheets carry them, not three.
+5. ✓ **CSS hygiene** (wave 6). Ten dead selectors, found by matching
+   every selector against every page that loads its sheet in Chromium
+   (scripts run, folds opened, both themes, three widths), five unused
+   tokens, sixteen duplicated rules and nineteen `transition: all` (each
+   now names what its states change; focus rings appear at once). Twenty
+   breakpoints written twenty-two ways are twelve named widths, which
+   `tests/css.test.js` holds, with the dead selectors, duplicates and
+   transitions; the plan's four would have moved layouts that break where
+   they do on purpose. No `fonts.css`: every page starts from one of two
+   stylesheets, so a third would add a request to every first view. The
+   room went on links wave 5 had no room for: The Brief from the shared
+   call to action, and each case study and research output to its Field
+   Note. Wave 3 had taken the `@font-face` blocks out of `content.css`.
 6. ◐ **JS hygiene.** ✓ One `keydown` handler on `document` routes every key
    by layer (terminal, player, menu, page; the lightbox layer left with the
    homepage's photos in wave 3), so one Escape closes one layer; the other page-wide listeners that hear keys only watch for
@@ -1394,7 +1444,28 @@ have not begun (S1, S2); 4.3 is as wave 1 left it; 4.4 is not started.
    its summary: it had run twice, green, and done nothing. Neither the live
    site nor the deployment could be reached from where this was built, so
    those two checks have not yet run against the real thing. ✗ Moses:
-   `HEALTH_TOKEN` and `HEALTH_URL` (H1).
+   `HEALTH_TOKEN` and `HEALTH_URL` (H1). After wave 5's review, a check
+   newly broken while the issue is open is said in a comment naming the
+   repository's owner (an edit notifies nobody), each run enables the three
+   scheduled workflows again so GitHub's 60-day rule cannot turn them off,
+   and the form's test is sent from an address of its own each week.
+11. ✓ **A Content-Security-Policy and a referrer policy** (wave 6), as a
+   meta tag first in every page's head, written by the build (between
+   markers on the hand-authored pages) and held by `build:check`: scripts
+   from this origin and inline ones by their SHA-256 alone (no
+   `'unsafe-inline'`, `'unsafe-eval'` or `'unsafe-hashes'`; the four
+   `onerror` attributes became one listener), styles from this origin and
+   inline, images from this origin and `data:`, and off the site only the
+   Apps Script deployment and `script.googleusercontent.com`, where it
+   redirects, the form's POST from the homepage alone; `base-uri` and
+   `object-src` none. A meta cannot set `frame-ancestors`. The referrer
+   policy is `strict-origin-when-cross-origin`: between the site's pages the
+   address `count.js` needs for `?via=`, off it the origin alone, never The
+   Brief's `?focus=`. `tests/csp.test.js` holds the hashes to the pages;
+   smoke checks that an inline script and an `on…=""` put into The Brief are
+   refused while its own run, and what the referrer carries. The field
+   report's quoted size became 11 KB (11,020 bytes): the policy did not fit
+   in the 125 bytes it had before rounding up.
 
 **Phase 7 — wave 5.** ✓ `.github/workflows/review.yml` opens "Quarterly
 review — YYYY Qn" on the first Monday of each quarter (it runs every Monday

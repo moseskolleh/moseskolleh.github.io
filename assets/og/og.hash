@@ -1,6 +1,6 @@
 # Written by npm run og (scripts/build-og.js). tests/og.test.js fails if any
 # line no longer matches: run npm run og again and commit the images with it.
-source ced799979fc278c6746b61dadb2e71c67d67a3692bf6e573e28d3693e9c3d5fb  every card's words, and scripts/build-og.js
+source 3bc12956d20530eb06ec5cf34c01e36155281a059ae91934dc4d434cdac1ff72  every card's words, and scripts/build-og.js
 png    e548c42430d35e32bc7748be1bb5afc1e430a2b892faf2b663e5cd7e56fb77d2  assets/og/brief.png
 png    e74a304db1d2da8d88a34f6ea468f1dd9c89de6f7aa1d2561e20d32b2b5cbc7e  assets/og/carbon-ai.png
 png    6a61a204549c4a8c9f81b1b4368b924e37f9b986f30fc19ef4bf54d4892dd6b0  assets/og/case-studies.png

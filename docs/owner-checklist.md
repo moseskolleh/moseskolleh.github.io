@@ -13,14 +13,16 @@ check it. A path such as `content/profile.json` → `experience[4].teamSize`
 means that file, then that field (lists count from 0). After editing anything
 in `content/`, run `npm run build:content` and then `npm test`.
 
-Last updated with wave 5 of the plan, 2026-10-17. Waves 1 to 4 are on
-`main` (pull requests #48 to #51, the last merged 2026-10-04): Phase 0, the
-narration steps of 2.5 and 4.3, Phase 1, Phase 2, Phase 3, and Phase 6
-steps 3, 6, 7 and 8. Wave 5 (The Brief, the notes as articles with a feed
-and preview cards, structured data, and the weekly health and quarterly
-review issues) is in its own pull request until it is merged. Its items are
-the group headed "wave 5" below (H1, H2, B1, B2, L5); it also changes C2's
-check, S4 and L2.
+Last updated with wave 6 of the plan, 2026-10-18. Waves 1 to 5 are on
+`main` (pull requests #48 to #53): Phase 0, the narration steps of 2.5 and
+4.3, Phase 1, Phase 2, Phase 3, The Brief, the notes as articles with a
+feed and preview cards, structured data, the weekly health and quarterly
+review issues, and Phase 6 steps 3, 6, 7 and 8. Wave 5's items are the
+group headed "wave 5" below (H1, H2, B1, B2, L5). Wave 6 (lighter images,
+a Content-Security-Policy, CSS hygiene, The Brief's review fixes, and the
+move to the root of `moseskolleh.github.io`, which you began by renaming
+the repository) is in its own pull request until it is merged; it adds
+nothing for you to supply, and half of L3 is done.
 
 **Start here.** Of the items below, these unlock the most, and take under
 an hour together. Everything else can wait for them.
@@ -120,7 +122,7 @@ https://script.google.com/macros/s/AKfycbzgyqRUmu0d2UFjb0WxbYyoDbO8F9jVnlvIQnNAf
 
 - [ ] **C3. Send one real message from the live site, and see it arrive.**
   - *With JavaScript (the normal path):* open
-    <https://moseskolleh.github.io/sustaintheworld/#contact>, fill in the form
+    <https://moseskolleh.github.io/#contact>, fill in the form
     with an address you can read other than `OWNER_EMAIL`, a subject such as
     "Live test 2026-09-26", and a short message. Press **Send Message**. The
     page should say "Thank you for your message! It has been sent".
@@ -289,7 +291,7 @@ README under "The visit counter and privacy".
   - *Where:* the page is generated; its text is in `scripts/build-content.js`
     (`renderStats` and the functions around it). Edit there, then run
     `npm run build:content` and `npm test`.
-  - *Check:* <https://moseskolleh.github.io/sustaintheworld/stats.html>,
+  - *Check:* <https://moseskolleh.github.io/stats.html>,
     once live, reads the way you would say it.
 
 - [ ] **S6. After four full weeks of counting, record the baseline for the
@@ -1085,8 +1087,18 @@ you, and one switch for the health check.
   raised on purpose, with something of the same weight taken out
   elsewhere. Once notes are dated, a long gap between them shows; a
   rhythm you can keep (one a quarter, say) beats one you cannot.
-- [ ] **L3. A custom domain, and a decision on `moseskolleh.github.io`**
-  (Phase 5.5). Buy the domain; decide whether the untouched academicpages
-  template at `moseskolleh.github.io` is unpublished or becomes a redirect.
+- [ ] **L3. A custom domain, if you want one** (Phase 5.5). The other half
+  of this item is done: you renamed the repository to
+  `moseskolleh.github.io` on 2026-10-17, so the site is the root of
+  `https://moseskolleh.github.io/` and the academicpages template is gone;
+  wave 6 moved every address on the site to the root, and old
+  `/sustaintheworld/…` links go on to the same page there. Update the
+  address on LinkedIn and anywhere else you gave it (the old one still
+  works, through the forward, but the new one is shorter and is what
+  search engines are now told). A custom domain (`moseskolleh.com` or
+  `.nl`) is still open: buy it, add a `CNAME` file and the domain in the
+  repository's Pages settings, then change `links.site` in
+  `content/profile.json` and run `npm run build:content`, `npm run og`
+  and `npm run cv`.
 - [ ] **L4. A native-speaker review of the Dutch pages** (Phase 5.6), once
   they exist.

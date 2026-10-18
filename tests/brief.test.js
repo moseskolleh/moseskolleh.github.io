@@ -1,5 +1,5 @@
 // Tests for The Brief (brief.html, brief.js): paste a job ad, get an honest
-// fit and a one-page dossier, and a link that rebuilds both.
+// fit and a dossier to print or forward, and a link that rebuilds both.
 //
 // It began as the Assay on the homepage, which counted keyword hits and
 // called three a "High-grade match". An ad asking for fluent Dutch, five
@@ -484,6 +484,8 @@ function resolves(href) {
         'Validator: a strength selects only case studies that exist');
     assert(check(b => { b.tools.push('Sap'); }).some(p => /id "sap" is tool "SAP"'s too/.test(p)),
         'Validator: two ids alike, which a shared link could not tell apart, are refused');
+    assert(check(b => { b.gaps[0].id = 'more'; }).some(p => /id "more" is the shared link's/.test(p)),
+        'Validator: "more", which a link uses for the rows it leaves out, is no rule\'s id');
     assert(check(b => { b.gaps[0].text = 'Not evidenced.'; }).some(p => /sends the reader to Moses/.test(p)),
         'Validator: a gap that does not send the reader to Moses is refused');
     assert(check(b => { b.gaps[0].re = '(unclosed'; }).some(p => /does not compile/.test(p)),
@@ -689,6 +691,9 @@ const shownOf = (d) => ({
     const noisy = boot(`${clean},unicorn,gap:unicorn,met:years.0,met:years.x,gap:dutch.z9,ask:the-moon,soft:,%3Cscript%3E,grade,high:x,${'a'.repeat(60)}`);
     assert(noisy.errors.length === 0 && JSON.stringify(shownOf(noisy.doc)) === JSON.stringify(shownOf(p.doc)) && noisy.window.location.search === clean,
         `Link: ids it does not know are ignored, and dropped from the link it passes on (${noisy.window.location.search === clean ? 'dropped' : noisy.window.location.search})`);
+    const noisySaid = text(noisy.doc.querySelector('#briefResult .bf-grade p'));
+    assert(/11 ids in the link are not on this page's list, and left out\./.test(noisySaid) && !/as the sender saw them/.test(noisySaid),
+        `Link: and it says so, rather than show what is left as the sender saw it (${noisySaid.slice(0, 120)}…)`);
     const none = boot('?focus=unicorn,gap:nothing');
     assert(none.doc.getElementById('briefFit').hidden && none.doc.querySelectorAll('#briefCases > li:not([hidden])').length === projects.caseStudies.length,
         'Link: one with nothing it knows shows the whole dossier and no fit, as a plain visit does');
@@ -706,6 +711,204 @@ const shownOf = (d) => ({
     const named = new Set(dutch.matched.flatMap(m => m.caseStudies));
     assert(picked.length === named.size && picked.every(id => named.has(id)) && picked[0] === 'sustainable-ai',
         `Dossier: a grade selects the case studies its matched areas name, the most relevant first (${picked.join(', ')})`);
+}
+
+// ===================================================================
+// A link shows no more than its own ids allow
+// ===================================================================
+// A link is a list anyone can edit, and it was believed: "?focus=high"
+// beside four hard gaps showed "High-grade match" and the "looks like a
+// fit" button, and "?focus=field" beside three areas of his own field
+// showed "Different field". The grade cannot be worked out again from the
+// ids alone (it also weighs how many of the ad's lines the site answers,
+// which no link carries), but every rule the ids can be held to holds.
+const gradeIdOf = (label) => Object.keys(brief.grades).find(id => brief.grades[id] === label);
+/** A link opened, as its reader sees it, with the count it sends. */
+const opened = (search, before) => {
+    const p = boot(search, before);
+    const seen = Object.assign(shownOf(p.doc), {
+        blurb: text(p.doc.querySelector('#briefResult .bf-grade p')),
+        button: !!p.doc.querySelector('#briefResult [data-analytics="brief-contact"]'),
+        search: decodeURIComponent(p.window.location.search),
+        p
+    });
+    p.window.dispatchEvent(new p.window.Event('pagehide'));
+    const count = p.sent.find(s => /action=count/.test(s.url));
+    seen.features = count ? JSON.parse(count.body).features : [];
+    return seen;
+};
+{
+    [
+        ['high,esg,ghg,water,gap:big-four,gap:phd,gap:sap,gap:financial-modelling', 'Marginal match', 'four hard gaps end a "High-grade match" at Marginal'],
+        ['high,esg,ghg,water,gap:sap', 'Workable match', 'one hard gap caps a "High-grade match" at Workable'],
+        ['high,esg,ghg', 'Workable match', 'two areas are too few for the top grade'],
+        ['high', 'Different field', '"High-grade match" with nothing matched is a different field'],
+        ['high,gap:big-four,gap:phd,gap:sap,gap:financial-modelling', 'Different field', '"High-grade match" with four gaps and no area of his field is a different field'],
+        ['workable,international,research', 'Different field', '"Workable match" on general areas alone is a different field'],
+        ['field,esg,ghg,water', 'Marginal match', '"Different field" beside three areas of his field is the lowest grade those areas allow']
+    ].forEach(([ids, grade, why]) => {
+        const s = opened('?focus=' + ids);
+        const fits = grade === 'High-grade match' || grade === 'Workable match';
+        assert(s.p.errors.length === 0 && s.grade === grade && s.button === fits && s.search.startsWith(`?focus=${gradeIdOf(grade)}`),
+            `Link held to its ids: ${why} (${s.grade}; the fit button ${s.button ? 'shown' : 'not shown'}; ${s.search})`);
+        assert(!/as the sender saw them/.test(s.blurb) && new RegExp(`The link says "${brief.grades[ids.split(',')[0]]}"`).test(s.blurb) && /closest grade/.test(s.blurb),
+            `Link held to its ids: and it says the grade is not the link's, not "as the sender saw them" (${s.blurb.slice(0, 90)}…)`);
+    });
+    // A grade the ids do allow is the link's, as the sender saw it.
+    const fair = opened('?focus=workable,esg,ghg,water,gap:sap');
+    assert(fair.grade === 'Workable match' && fair.button && /, as the sender saw them\./.test(fair.blurb) && !/closest grade/.test(fair.blurb),
+        `Link held to its ids: one its ids allow keeps its grade and says it is as the sender saw it (${fair.grade})`);
+
+    // Not tampered with: a tool the homepage showed when the link was sent,
+    // and has stopped showing, is a hard gap now, and the grade follows it.
+    const wash = analyse(ADS.wash + '\n- Python and Excel skills');
+    const tools = wash.met.filter(m => A.RULES.tools.some(t => (t.name || t) === m.label));
+    const later = A.fromFocus(A.focusOf(wash), { now: NOW, toolEvidence: {} });
+    assert(wash.cls === 'high' && tools.length >= 2 && tools.every(t => later.hard.some(g => g.label === t.label)) && later.grade === 'Marginal match' &&
+        new RegExp(`${tools.length} requirements are shown as this site reads them today`).test(later.blurb) && !/as the sender saw them/.test(later.blurb),
+        `Link held to its ids: tools the homepage stopped showing are hard gaps, the grade follows (${wash.grade} → ${later.grade}) and the summary says why`);
+
+    // Every link the Brief writes, read back today, is as the sender saw it.
+    const ours = [ADS.dutch, ADS.ai, ADS.wash, ADS.everything, ADS.ai + '\nNice to have:\n- Experience with Workiva\n- Dutch is a plus'].concat(brief.samples.map(s => s.text));
+    const off = ours.map(ad => [analyse(ad), ad]).map(([a]) => [a, A.fromFocus(A.focusOf(a), { now: NOW })]).filter(([a, s]) => s.grade !== a.grade || !/as the sender saw them/.test(s.blurb));
+    assert(off.length === 0, `Link held to its ids: every link the Brief writes keeps its grade and its "as the sender saw them" (${off.map(([a, s]) => `${a.grade} → ${s.grade}`).join('; ') || ours.length + ' ads'})`);
+}
+
+// ===================================================================
+// One thing, one row
+// ===================================================================
+// "?focus=marginal,met:python,gap:python,gap:sap,soft:sap,gap:years.5,
+// gap:years.05" showed Python twice, SAP as a hard and a soft gap, and
+// "5+ years" twice. Each id is read for what it names: met where the site
+// shows it (a gap there would say "not evidenced", which is false), else a
+// gap, hard if any id has it so; and the address passed on is the cleaned
+// list.
+{
+    const s = opened('?focus=marginal,esg,ghg,met:python,gap:python,gap:sap,soft:sap,gap:years.5,gap:years.05,ask:visa,ask:visa');
+    const all = s.gaps.concat(s.matches);
+    const once = (re) => all.filter(r => re.test(r)).length === 1;
+    assert(once(/^Python:/) && s.matches.some(r => /^Python:/.test(r)) && once(/^SAP:/) && s.gaps.some(r => r.startsWith('SAP: ')) && once(/^5\+ years/) && s.confirm.length === 1,
+        `Link, one row each: Python once and met, SAP once and hard, "5+ years" once, a fact to confirm once (gaps: ${s.gaps.map(r => r.split(':')[0]).join(', ')}; matches: ${s.matches.map(r => r.split(':')[0]).join(', ')})`);
+    assert(s.search === '?focus=marginal,esg,ghg,met:python,gap:sap,gap:years.5,ask:visa',
+        `Link, one row each: the address passed on carries the cleaned list (${s.search})`);
+    assert(!/as the sender saw them/.test(s.blurb) && /1 requirement is shown as this site reads it today/.test(s.blurb),
+        `Link, one row each: a link at odds with itself is not "as the sender saw them" (${s.blurb.slice(0, 120)}…)`);
+}
+
+// ===================================================================
+// English, once profile.json states it
+// ===================================================================
+// English is "to confirm" while the site states no level for it, and a
+// link carried it only that way: once profile.json states one, the link
+// dropped every English row, 970 of 5,558 ads in the reviewer's corpus.
+{
+    const facts = Object.assign({}, A.FACTS, { languages: [{ language: 'English', level: 'C2' }, { language: 'Dutch', level: 'B1' }] });
+    const ad = SAMPLE_WATER + ' Requirements: 3+ years of experience in WASH. Excellent English. Fluent Dutch required.';
+    const a = analyse(ad, { facts });
+    const s = A.fromFocus(A.focusOf(a), { now: NOW, facts });
+    const rows = (r) => JSON.stringify([r.grade, r.met.map(m => [m.label, m.ev]), r.gaps.map(g => [g.label, g.text, g.hard]), r.confirm]);
+    assert(a.met.some(m => /^English/.test(m.label)) && rows(a) === rows(s) && /as the sender saw them/.test(s.blurb),
+        `English: once stated, a link carries its row there and back (${s.met.map(m => m.label).join(', ')})`);
+    const asked = A.fromFocus('marginal,water,gis,ask:english', { now: NOW, facts });
+    assert(asked.met.some(m => m.label === 'English') && !asked.confirm.length && /shown as this site reads it today/.test(asked.blurb),
+        'English: a link from before it was stated, "to confirm", is graded now, and says so');
+    const unstated = A.fromFocus('marginal,water,gis,met:english.c1', { now: NOW });
+    assert(unstated.confirm.includes('Level of English') && !unstated.met.length && /shown as this site reads it today/.test(unstated.blurb),
+        'English: with no level stated, an English row is a fact to confirm again, and says so');
+}
+
+// ===================================================================
+// A link has a limit, and says when an ad gives more than it holds
+// ===================================================================
+// The reader stopped at 80 ids and the writer had no limit: an ad naming
+// every tool and language wrote 87, and the link lost five facts to
+// confirm and two gaps. One limit now, written and read alike; over it,
+// the matched tools go first, then the areas, and the link says how many
+// rows it left out.
+{
+    const lines = ['Senior Sustainability Lead. Requirements:',
+        '- ESG, CSRD, GHG accounting, climate risk, WASH, GIS, data analysis, sustainable AI, water quality, stakeholder engagement, project management, international work, research.'];
+    brief.tools.forEach(t => lines.push(`- Experience with ${t.name || t} required`));
+    brief.languages.map(l => l.name || l).filter(l => l !== 'English').forEach((l) => { lines.push(`- Fluent ${l} required`); lines.push(`- Basic ${l} required`); });
+    for (let y = 2; y <= 12; y++) lines.push(`- ${y}+ years of experience in area ${y}`);
+    lines.push('- Right to work, visa, security clearance, driving licence, relocation. PhD in economics required. Law degree required. Financial modelling required. Big Four experience required. Director level.');
+    const ad = lines.join('\n');
+    const a = analyse(ad);
+    const all = a.matched.length + a.met.length + a.gaps.length + a.confirm.length + 1;
+    const ids = A.focusOf(a).split(',');
+    const s = A.fromFocus(ids.join(','), { now: NOW });
+    assert(all > A.MAX_IDS && ids.length === A.MAX_IDS && /^more\.\d+$/.test(ids[ids.length - 1]) && +ids[ids.length - 1].split('.')[1] === all - A.MAX_IDS + 1,
+        `Limit: an ad giving ${all} ids writes a link of ${ids.length}, the last saying how many rows it leaves out (${ids[ids.length - 1]})`);
+    assert(JSON.stringify(s.gaps.map(g => [g.label, g.hard])) === JSON.stringify(a.gaps.map(g => [g.label, g.hard])) && JSON.stringify(s.confirm) === JSON.stringify(a.confirm) &&
+        s.grade === a.grade && s.matched.length === a.matched.length,
+        `Limit: the grade, every gap, every fact to confirm and every area survive it (${s.gaps.length} of ${a.gaps.length} gaps, ${s.confirm.length} of ${a.confirm.length} to confirm; ${s.met.length} of ${a.met.length} matched tools)`);
+    const many = A.fromFocus(['marginal'].concat(Array.from({ length: A.MAX_IDS + 10 }, (x, i) => `gap:years.${i + 1}`)).join(','), { now: NOW });
+    assert(many.met.length + many.gaps.length === A.MAX_IDS - 1, `Limit: the reader stops where the writer does, at ${A.MAX_IDS} ids (${many.met.length + many.gaps.length} rows and the grade)`);
+
+    const p = boot();
+    p.doc.getElementById('briefAd').value = ad;
+    p.doc.getElementById('briefRun').click();
+    const left = p.doc.getElementById('briefLeft');
+    assert(!!left && !left.hidden && new RegExp(`leaves out ${all - A.MAX_IDS + 1} rows`).test(text(left)), `Limit: the page says what the link leaves out ("${text(left)}")`);
+    const there = opened(p.window.location.search);
+    assert(/The link could not carry the whole fit/.test(there.blurb) && !/as the sender saw them/.test(there.blurb) && !(there.p.doc.getElementById('briefLeft') || { hidden: true }).hidden,
+        `Limit: and so does the page it is opened on (${there.blurb.slice(0, 140)}…)`);
+    const short = boot();
+    short.doc.getElementById('briefAd').value = ADS.dutch;
+    short.doc.getElementById('briefRun').click();
+    assert((short.doc.getElementById('briefLeft') || { hidden: true }).hidden, 'Limit: an ad that fits says nothing of it');
+}
+
+// ===================================================================
+// Your own result, come back to, is not a link someone sent
+// ===================================================================
+// A reload, or Back from a case study, opened the reader's own result as
+// a shared link: "The ad itself was not shared" beside the ad in the box,
+// and the visit counted as a shared link opened. The page marks the
+// history entry it writes its own address into, and a link someone sent
+// arrives without the mark.
+{
+    const p = boot();
+    p.doc.getElementById('briefAd').value = ADS.dutch;
+    p.doc.getElementById('briefRun').click();
+    const url = p.window.location.href;
+    assert(p.window.history.state && p.window.history.state.brief === 'own', `Own: grading marks the history entry as the reader's own (${JSON.stringify(p.window.history.state)})`);
+    const own = (w) => w.history.replaceState({ brief: 'own' }, '', url);
+
+    // Reloaded with the box empty: rebuilt from the ids, said as such.
+    const empty = opened(new URL(url).search, own);
+    assert(empty.grade === 'Marginal match' && /^Rebuilt from this page's address/.test(empty.blurb) && !/shared|sender/i.test(empty.blurb),
+        `Own: reloaded with the box empty, it is rebuilt from the address and says nothing of sharing (${empty.blurb.slice(0, 80)}…)`);
+    assert(!empty.features.includes('brief-shared') && !empty.features.includes('brief-run'), `Own: and it is counted neither as a shared link nor as a use (${empty.features.join(', ') || 'nothing'})`);
+
+    // Back, with the box given its ad again: graded from the ad, uncounted.
+    const back = opened(new URL(url).search, (w) => { own(w); w.document.getElementById('briefAd').value = ADS.dutch; });
+    assert(back.blurb === analyse(ADS.dutch).blurb && !back.features.some(f => /^brief-(?:run|shared|marginal)$/.test(f)),
+        `Own: come back to with the ad in the box, it is graded from the ad again, and counted as nothing new (${back.features.join(', ') || 'nothing'})`);
+
+    // A link someone sent is counted as it arrives, and not again on a reload.
+    const sent = opened(new URL(url).search);
+    const again = opened(new URL(url).search, (w) => w.history.replaceState({ brief: 'shared' }, '', url));
+    assert(sent.features.includes('brief-shared') && /^Shared from The Brief/.test(sent.blurb) && (sent.p.window.history.state || {}).brief === 'shared' &&
+        !again.features.includes('brief-shared') && /^Shared from The Brief/.test(again.blurb),
+        `Own: a link someone sent is counted once, as it arrives, not again on a reload (${sent.features.join(', ')} / ${again.features.join(', ') || 'nothing'})`);
+}
+
+// ===================================================================
+// The ad box, kept in the page
+// ===================================================================
+// Chrome's Enhanced Spell Check and Edge's Editor send what is typed in a
+// box to Google or Microsoft to check it; the page says the ad never
+// leaves it.
+{
+    const box = doc.getElementById('briefAd');
+    assert(box.getAttribute('spellcheck') === 'false' && box.getAttribute('autocorrect') === 'off' && box.getAttribute('autocapitalize') === 'off',
+        `The box: spellcheck, autocorrect and autocapitalize off, so no browser sends the ad to be checked (${['spellcheck', 'autocorrect', 'autocapitalize'].map(n => `${n}="${box.getAttribute(n)}"`).join(' ')})`);
+    // What the link carries, said exactly: years and a language level are
+    // the ad's own numbers, as "years.12" and "dutch.c1".
+    const said = text(doc.querySelector('#briefShare p'));
+    assert(/the years of experience and the language levels the ad asked for/.test(said) && /how many rows it leaves out/.test(said) && /never a word of the ad/.test(said) && !/only the names/.test(said),
+        `The link: the page says it carries ids, the years and language levels asked for and what it leaves out, and never a word of the ad ("${said.slice(0, 80)}…")`);
 }
 
 // ===================================================================
@@ -749,6 +952,19 @@ const shownOf = (d) => ({
     const sb = JSON.parse((shared.sent[0] || { body: '{}' }).body);
     assert((sb.features || []).includes('brief-shared') && !(sb.features || []).includes('brief-run'),
         `Count: a shared link opened is counted as one, not as a run of the Brief (${(sb.features || []).join(', ')})`);
+
+    // A sample is a press of its button, not a use: stats.html counts Brief
+    // uses as page views in which it graded an ad someone pasted in. One
+    // press of the WASH sample sent brief-run and brief-high with it.
+    const sample = boot();
+    sample.doc.querySelector('.bf-sample[data-sample="water"]').click();
+    sample.window.dispatchEvent(new sample.window.Event('pagehide'));
+    const sf = JSON.parse((sample.sent[0] || { body: '{}' }).body).features || [];
+    assert(sample.doc.querySelector('#briefResult .bf-grade-tag') && JSON.stringify(sf) === '["brief-sample"]',
+        `Count: a sample graded is counted as a sample and nothing else (${sf.join(', ')})`);
+    const stats = new JSDOM(read('stats.html')).window.document;
+    const def = Array.from(stats.querySelectorAll('.st-five .st-card')).map(text).find(t => /Brief uses/.test(t)) || '';
+    assert(/graded a job ad someone pasted in \(its sample ads are not counted\)/.test(def), `Count: stats.html defines Brief uses the same way ("${def.slice(0, 110)}…")`);
     // The label beside the button says what is true: the grade is counted,
     // the ad is not.
     const label = text(doc.querySelector('.bf-privacy'));
@@ -772,8 +988,27 @@ const shownOf = (d) => ({
     await new Promise(r => setTimeout(r, 20));
     assert(copied.length === 2 && copied.every(c => c === p.window.location.href) && !copied.some(c => /borehole/i.test(c)), `Copy link: copies the page's link, not the ad (${copied[0]})`);
     assert(/Copied/.test(btn.textContent), 'Copy link: the button confirms the copy');
+    await new Promise(r => setTimeout(r, 60));
+    const heard = p.doc.getElementById('briefCopied');
+    assert(!!heard && heard.getAttribute('role') === 'status' && heard.textContent === 'Link copied', `Copy link: a status line says so to a screen reader ("${heard && heard.textContent}")`);
     await new Promise(r => setTimeout(r, 1800));
     assert(btn.innerHTML === before, 'Copy link: the button gets its own words back, even after a second press');
+
+    // A browser without the clipboard API: the old way borrows the focus
+    // for a hidden box, and hands it back to the button, which kept a
+    // keyboard user's place; and a copy that fails says so.
+    for (const [works, said] of [[true, 'Link copied'], [false, 'Copy failed']]) {
+        const q = boot('', (w) => { w.document.execCommand = () => works; });
+        q.window.navigator.clipboard = undefined;
+        q.doc.getElementById('briefAd').value = ADS.wash;
+        q.doc.getElementById('briefRun').click();
+        const b = q.doc.getElementById('briefCopy');
+        b.focus();
+        b.click();
+        await new Promise(r => setTimeout(r, 80));
+        assert(q.doc.activeElement === b && (q.doc.getElementById('briefCopied') || {}).textContent === said && !q.doc.querySelector('body > textarea'),
+            `Copy link, the old way: focus back on the button, and "${said}" heard (${q.doc.activeElement.id || q.doc.activeElement.tagName}, "${(q.doc.getElementById('briefCopied') || {}).textContent}")`);
+    }
 
     // Clear: back to the whole dossier, the link back to the bare page.
     p.doc.getElementById('briefClear').click();

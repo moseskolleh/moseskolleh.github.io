@@ -36,13 +36,8 @@ const EQUIV = Object.keys(_AICD.EQUIVALENTS).reduce((acc, key) => {
 // paste a value, use the keyboard in a browser that does not enforce them,
 // or reach calculate() from the console or a test. Everything below is
 // therefore clamped HERE, at the calculation boundary, because that is the
-// only place every caller has to pass through.
-//
-// What went wrong without it: a negative queries/day produced negative
-// annual emissions, a negative PUE produced negative carbon per query
-// (physically impossible — PUE is facility energy over IT energy, so it
-// cannot be below 1), a NaN anywhere propagated silently through every
-// output, and zero tokens produced "cut carbon by NaN%".
+// only place every caller has to pass through (tests/carbon.test.js holds
+// it to negative, zero, NaN and absurd inputs).
 // ===================================================================
 
 // min/max are physical or practical bounds; fallback is what a missing or
@@ -292,10 +287,7 @@ if (typeof document !== 'undefined') {
         };
 
         // Option text is kept to about 30 characters: a closed select cannot
-        // wrap, and "Hyperscaler fleet average (~1.1 L/kWh — Google 2024)"
-        // was cut off at every width from a 320px phone to a 1440px desktop.
-        // The rest of what an option used to say goes in the hint beneath
-        // it, which can wrap, and now carries the range as well.
+        // wrap. The rest goes in the hint beneath it, with the range.
         const HINTS = [
             [modelSelect, MODELS, (m) => `${m.provider} · ${m.energyPer1kTokens_Wh} Wh per 1,000 tokens, plausible range ${m.range[0]}–${m.range[1]}`],
             [regionSelect, REGIONS, (r) => `${r.intensity} gCO₂e per kWh, annual average · hourly range ${r.range[0]}–${r.range[1]}`],
@@ -321,8 +313,7 @@ if (typeof document !== 'undefined') {
         wueSelect.value = 'avg';
 
         // Every number on the page goes through the shared formatter in
-        // ai-carbon-data.js, the same one Anatomy of a Prompt uses. The
-        // local one printed "9.46e-4 km" and "0.0 smartphone charges".
+        // ai-carbon-data.js, the same one Anatomy of a Prompt uses.
         // Measured outputs keep two significant figures down to a millionth,
         // so a small model on a clean grid still differs from a smaller one;
         // the everyday comparisons stop at their own precision and say "<".

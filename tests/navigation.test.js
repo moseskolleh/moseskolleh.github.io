@@ -297,8 +297,12 @@ const countScrolls = (window) => {
         const literal = (src.match(/const MOVED = new Map\((\[[\s\S]*?\])\);/) || [])[1];
         const moved = literal ? Function(`return ${literal}`)() : [];
         const page = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
-        const home = page('index.html');
+        // An id inside <noscript> is built only with scripts off, when
+        // nothing forwards: /#assay lands on the line to The Brief then.
+        const home = page('index.html').replace(/<noscript>[\s\S]*?<\/noscript>/g, '');
         const stale = moved.filter(([id]) => new RegExp(`\\bid="${id}"`).test(home)).map(([id]) => id);
+        assert(/<p class="brief-line"><noscript><span id="assay"><\/span><\/noscript>/.test(page('index.html')),
+            'Moved: without scripts, /#assay lands on the homepage\'s line to The Brief, by an id inside <noscript>');
         const dead = moved.filter(([, to]) => { const [rel, id] = to.split('#'); return !new RegExp(`\\bid="${id}"`).test(page(rel)); }).map(([, to]) => to);
         assert(moved.length >= 5 && moved.some(([id]) => id === 'strikeWidget') && moved.some(([id]) => id === 'anatomy') && moved.some(([id, to]) => id === 'assay' && to === 'brief.html#grade'),
             `Moved: the old addresses of the games, Anatomy of a Prompt and the Assay (to The Brief's box) are forwarded (${moved.map(([id]) => `#${id}`).join(', ') || 'none'})`);

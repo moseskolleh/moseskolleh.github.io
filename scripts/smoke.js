@@ -36,6 +36,12 @@
 //     under the other pages' nav bar; a theme switch or nav item off the
 //     bar; back to top over a control; an address shared for something
 //     that moved off the homepage that does not go on to it
+//   - a page without exactly one Content-Security-Policy, ahead of every
+//     script and stylesheet; anything on any page the policy refuses (a
+//     console error, in Firefox as well as Chromium); an inline script or an
+//     on…="" attribute put into The Brief that the policy lets run; a link
+//     off the site that sends a Referer, or one between the site's own
+//     pages that does not
 //   - a page whose theme does not follow the reader's choice (or, with none,
 //     the system's; the homepage from its first frame), or a page other
 //     than the homepage with no room on a 320px phone for its nav and its
@@ -55,8 +61,10 @@
 //   - a Brief that grades a mismatched ad well, sends anything, or lets a
 //     word of the ad into a request or its link; that keys alone cannot
 //     use; whose shared link does not rebuild the same fit and dossier;
-//     whose dossier prints to more than one A4 page; or that scrolls
-//     sideways on a phone
+//     that takes the reader's own result, reloaded or come back to, for a
+//     link someone sent; whose dossier prints to more than one A4 page for
+//     a sample or an ordinary ad, or without the contact line and its
+//     address on the first; or that scrolls sideways on a phone
 //   - an experience card that is not short, or whose More sits on its text;
 //     a core-log layer whose depths wrap or run onto the core
 //   - a case-study game fetched before a reader nears it, that will not
@@ -138,26 +146,34 @@ const COUNT_URL = (() => {
 })();
 const BEACON_KEYS = ['v', 'page', 'lens', 'deepest', 'features', 'ref', 'vp', 'kb'];
 
+// Chromium reports what a Content-Security-Policy refuses as a console
+// error; Firefox may say so only in its own console. Said again by the page,
+// as an error, a refusal fails visit() in either. Every context opened from
+// here on carries it (see the wrapper around browser.newContext).
+const REPORT_REFUSED = () => addEventListener('securitypolicyviolation', (e) =>
+    console.error(`Content-Security-Policy refused ${e.blockedURI || 'inline'} (${e.effectiveDirective})`));
+
 // ------------------------------------------------------------------
 // A static server that behaves like the host: gzip for text, nothing else.
 // ------------------------------------------------------------------
 const TYPES = {
     '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
     '.json': 'application/json', '.svg': 'image/svg+xml', '.xml': 'application/xml', '.txt': 'text/plain',
-    '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg',
+    '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg',
     '.woff2': 'font/woff2', '.pdf': 'application/pdf'
 };
 const server = http.createServer((req, res) => {
     let p = decodeURIComponent(req.url.split('?')[0]);
-    // GitHub Pages serves the site under /sustaintheworld/, and 404.html
-    // links with that base path because it can be served from any URL.
-    p = p.replace(/^\/sustaintheworld(?=\/|$)/, '');
+    // GitHub Pages serves the site at the root of moseskolleh.github.io
+    // (it was under /sustaintheworld/ until October 2026).
     if (p === '' || p.endsWith('/')) p += 'index.html';
     if (!p.startsWith('/')) p = '/' + p;
     const file = path.join(ROOT, p);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-        res.writeHead(404, { 'content-type': 'text/plain' });
-        return res.end('not found');
+        // As Pages does: 404.html, with a 404, at any address with nothing
+        // there (an old /sustaintheworld/ one among them).
+        res.writeHead(404, { 'content-type': 'text/html; charset=utf-8' });
+        return res.end(fs.readFileSync(path.join(ROOT, '404.html')));
     }
     const ext = path.extname(file).toLowerCase();
     const type = TYPES[ext] || 'application/octet-stream';
@@ -271,6 +287,7 @@ async function visit(context, page, rel, origin) {
     browser.newContext = async (options) => {
         const c = await openContext(options);
         await quietCounter(c);
+        await c.addInitScript(REPORT_REFUSED);
         return c;
     };
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
@@ -301,6 +318,15 @@ async function visit(context, page, rel, origin) {
         if (r.failed.length) r.failed.forEach(f => bad(`request failed: ${f}`)); else ok('every request succeeded');
         if (r.foreign.length) r.foreign.forEach(f => bad(`left the origin: ${f}`)); else ok('no request left this origin');
         if (r.measured) ok(`arrival: ${fmt(r.arrivalBytes)} over the wire in ${r.arrival.length} requests`);
+        // A policy given in a meta holds only what comes after it.
+        const csp = await page.evaluate(() => {
+            const metas = Array.from(document.querySelectorAll('meta[http-equiv]')).filter(m => /^content-security-policy$/i.test(m.httpEquiv));
+            const first = document.querySelector('script, style, link[rel~="stylesheet"]');
+            return { n: metas.length, head: !!metas[0] && metas[0].parentElement === document.head,
+                before: !!metas[0] && (!first || !!(metas[0].compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING)) };
+        });
+        if (csp.n === 1 && csp.head && csp.before) ok('one Content-Security-Policy, in <head>, before any script or stylesheet');
+        else bad(`${csp.n} Content-Security-Policy meta(s)${csp.head ? '' : ', not in <head>'}${csp.before ? '' : ', after a script or stylesheet it should govern'}`);
 
         if (rel === 'index.html') await exerciseHomepage(page, r, origin);
         if (rel === 'brief.html') await exerciseBrief(page, r);
@@ -314,6 +340,7 @@ async function visit(context, page, rel, origin) {
     await checkWithoutJs(browser, origin);
     await exerciseShell(browser, origin);
     await exerciseBriefPage(browser, origin);
+    await exerciseSecurity(browser, origin);
 
     // Each budgeted page's measured first view against the budget's
     // estimate. The estimate counts bodies; every response also carries a
@@ -338,6 +365,8 @@ async function visit(context, page, rel, origin) {
             }
         });
     });
+
+    await exerciseHeroPhotos(browser, origin, budget, estimates);
 
     await checkLengths(browser, origin);
 
@@ -396,6 +425,66 @@ async function visit(context, page, rel, origin) {
     if (failures) { console.log(`\n  ${failures} problem(s)\n`); process.exit(1); }
     console.log('\n  Smoke test passed\n');
 })().catch((e) => { console.error(e); server.close(); process.exit(1); });
+
+// ------------------------------------------------------------------
+// The hero's photo: one file, the window's size, AVIF where there is one
+// ------------------------------------------------------------------
+// A phone fetched the same 1600px photo as a desktop, about half of its
+// first view, to draw behind an overlay that lets at most 22% of it
+// through. Below 600px the homepage now preloads and draws an 800px copy,
+// and a browser that reads AVIF gets the AVIF copy (style.css, .hero-bg-1
+// to 4). Checked at the two sizes the budgets name: the first view fetches
+// one hero file, the one for that window, and weighs no more than
+// check-budget.js estimates for it; then the rotation runs, on Playwright's
+// clock so that three changes of slide do not take a real 24 s, and every
+// later slide's file is the same size and format as the first's.
+const HERO_FILE = /assets\/img\/([^/?]+-hero)(-800)?\.(webp|avif)$/;
+
+async function exerciseHeroPhotos(browser, origin, budget, estimates) {
+    console.log('  index.html — the hero\'s photos at each size');
+    const want = (name, phone) => `${name}${phone ? '-800' : ''}.${fs.existsSync(path.join(ROOT, 'assets', 'img', `${name}${phone ? '-800' : ''}.avif`)) ? 'avif' : 'webp'}`;
+    const sizes = [['1440x900', budget.PAGE_BUDGETS['index.html']], ['390x844', budget.PHONE_BUDGETS['index.html']]];
+    for (const [vp, key] of sizes) {
+        const { width, height } = budget.VIEWPORTS[vp];
+        const phone = width < 600;
+        const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
+        const fetched = [];
+        context.on('request', (q) => { const m = q.url().match(HERO_FILE); if (m) fetched.push(m[0].split('/').pop()); });
+
+        // The first view, as a visitor's browser fetches it.
+        const page = await context.newPage();
+        const r = await visit(context, page, 'index.html', origin);
+        const first = fetched.splice(0);
+        const firstWant = want('groundwater-mapping-1-hero', phone);
+        if (first.length === 1 && first[0] === firstWant) ok(`${vp}: the first view fetches one hero photo, ${firstWant}`);
+        else bad(`${vp}: the first view fetched ${first.join(', ') || 'no hero photo'}, not ${firstWant} alone`);
+        if (r.measured) {
+            const estimate = estimates[key];
+            if (r.arrivalBytes <= estimate + 300 * r.arrival.length) ok(`${vp}: measured first view ${fmt(r.arrivalBytes)} is within the budget's estimate of ${fmt(estimate)} (${key})`);
+            else bad(`${vp}: measured first view ${fmt(r.arrivalBytes)} exceeds the budget's estimate of ${fmt(estimate)} (${key}) — check-budget.js is missing something the page fetches on load`);
+        }
+        await page.close();
+
+        // The rotation: each later slide is fetched just before it shows.
+        const turn = await context.newPage();
+        await turn.clock.install();
+        await turn.goto(`${origin}/index.html`, { waitUntil: 'load' });
+        const slides = await turn.evaluate(() => document.querySelectorAll('.hero-bg-slide').length);
+        fetched.splice(0);   // the first slide's, again (or from the cache)
+        for (let i = 1; i < slides; i++) {
+            const had = fetched.length;
+            await turn.clock.runFor(8000);
+            for (let t = 0; t < 40 && fetched.length === had; t++) await turn.waitForTimeout(100);
+        }
+        const nameOf = (f) => f.match(/^(.+-hero)/)[1];
+        const names = new Set(fetched.map(nameOf).concat('groundwater-mapping-1-hero'));
+        const wrong = fetched.filter(f => f !== want(nameOf(f), phone));
+        if (fetched.length === slides - 1 && names.size === slides && !wrong.length) {
+            ok(`${vp}: the rotation fetched the other ${slides - 1} slides, each once, as it came to them: ${fetched.join(', ')}`);
+        } else bad(`${vp}: the rotation fetched ${fetched.join(', ') || 'nothing'} for the ${slides - 1} slides after the first${wrong.length ? ` (the wrong size or format: ${wrong.join(', ')})` : ''}`);
+        await context.close();
+    }
+}
 
 // Wait until the page has done its own deferred work: at least 1.6 s past
 // the load event (script.js's one post-load check runs at 1.5 s) and no
@@ -572,6 +661,29 @@ const BRIEF_AD = [
     'Quote reference ZEBRA-4471 to Quetzalcoatl Recruitment.'
 ].join('\n');
 const BRIEF_MARKS = /zebra|4471|quetzalcoatl/i;
+// Ads to print, as long as ordinary ones run: an ESG reporting ad of nine
+// requirements (eighteen rows, five case studies), which printed on two
+// pages, and the tests' ad with every rule in it (twenty-two rows). And one
+// longer than any page holds (twenty-nine rows, every case study), which
+// may run on, but not with the contact line or the address off its first.
+const BRIEF_PRINTED = {
+    'the ESG reporting ad': ['ESG Reporting Analyst', 'Requirements:', '- 3+ years of experience in ESG reporting (CSRD, ESRS, GRI)',
+        '- Experience with Workiva or Sphera', '- Strong Python, SQL, Power BI and Excel skills', '- GHG accounting across Scope 1, 2 and 3',
+        '- Experience with SAP', '- Fluent Dutch and English', '- Right to work in the Netherlands', '- Life Cycle Assessment (LCA)',
+        '- Climate risk scenario analysis, GIS'].join('\n'),
+    'the ad with every rule': ['Head of ESG — Director level. Minimum of 7 years of relevant experience.',
+        'Native German speaker, business-level French, B2 Spanish.', 'Experience with Workiva, Enablon and Salesforce Net Zero Cloud.',
+        'Background in management consulting; Deloitte or KPMG alumni welcome.',
+        'Financial modelling and valuation skills. PhD in economics required. Law degree an advantage.',
+        'You must hold the right to work in the EU; no visa sponsorship. Security clearance and a driving licence required. Willing to relocate.',
+        'CSRD, GHG accounting, climate risk and stakeholder engagement.'].join('\n')
+};
+const BRIEF_LONG = ['Sustainability Data Lead', 'Requirements:', '- 5+ years of experience in ESG reporting (CSRD, ESRS, GRI, TCFD)',
+    '- 3+ years hands-on with Workiva, Enablon or Sphera', '- Strong Python, SQL, Power BI and Excel skills; R a plus',
+    '- GHG accounting across Scope 1, 2 and 3; SBTi target setting', '- Experience with SAP and Salesforce Net Zero Cloud',
+    '- Fluent Dutch and English; German or French an advantage', '- Big Four experience preferred',
+    '- Right to work in the Netherlands; no visa sponsorship', '- Life Cycle Assessment (LCA) with SimaPro or openLCA',
+    '- Climate risk scenario analysis and TNFD, water quality, groundwater, GIS mapping, sustainable AI'].join('\n');
 
 async function exerciseBrief(page, r) {
     const sent = [];
@@ -666,24 +778,54 @@ async function exerciseBriefPage(browser, origin) {
     else bad(`the shared link rebuilt ${JSON.stringify(rebuilt)} from ${JSON.stringify(here)}${box ? ', with text in the box' : ''}`);
     await other.close();
 
-    // On paper: one A4 page, the dossier and its address, none of the
-    // screen's furniture. page.pdf is headless Chromium's.
+    // The reader's own result, come back to by a reload or by Back from a
+    // case study, is theirs: it said "The ad itself was not shared" beside
+    // the ad in the box. With the ad given back to the box it is graded from
+    // it again; without, rebuilt from the address, said as such.
+    const said = () => page.evaluate(() => ({
+        blurb: (document.querySelector('#briefResult .bf-grade p') || {}).textContent || '',
+        box: document.getElementById('briefAd').value
+    }));
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForTimeout(200);
+    const reloaded = await said();
+    await page.fill('#briefAd', BRIEF_AD);
+    await page.click('#briefRun');
+    await page.click('#briefCases > li:not([hidden]) h4 a');
+    await page.waitForLoadState('load');
+    await page.goBack({ waitUntil: 'load' });
+    await page.waitForTimeout(300);
+    const back = await said();
+    const own = (r) => r.blurb && !/shared|sender/i.test(r.blurb) && (r.box ? !/^Rebuilt/.test(r.blurb) : /^Rebuilt from this page's address/.test(r.blurb));
+    if (own(reloaded) && own(back)) ok(`the reader's own result, reloaded and come back to by Back, is not taken for a shared link (${[reloaded, back].map(r => (r.box ? 'graded from the ad in the box' : 'rebuilt from the address')).join('; ')})`);
+    else bad(`the reader's own result came back as "${reloaded.blurb.slice(0, 60)}…" on a reload and "${back.blurb.slice(0, 60)}…" on Back`);
+
+    // On paper: the dossier and the address that rebuilds it, none of the
+    // screen's furniture; the contact line and the address on the first
+    // page, whatever the ad; and one A4 page for the samples and ordinary
+    // ads. page.pdf is headless Chromium's.
     if (!CHROMIUM) ok(`the dossier printed: not printed in ${BROWSER} (page.pdf is headless Chromium's) — the Chromium run counts its pages`);
     else {
         const { pdfText } = require('./lib/pdf-text.js');
-        for (const sample of ['esg', 'climate', 'water', null]) {
+        const email = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'profile.json'), 'utf8')).person.email;
+        const alnum = (s) => s.replace(/[^A-Za-z0-9]/g, '');
+        const ads = [['esg'], ['climate'], ['water'], [null, 'the Dutch / Big Four / SAP ad', BRIEF_AD]]
+            .concat(Object.entries(BRIEF_PRINTED).map(([what, ad]) => [null, what, ad]), [[null, 'an ad longer than a page holds', BRIEF_LONG, true]]);
+        for (const [sample, name, ad, long] of ads) {
             await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
             if (sample) await page.click(`.bf-sample[data-sample="${sample}"]`);
-            else { await page.fill('#briefAd', BRIEF_AD); await page.click('#briefRun'); }
+            else { await page.fill('#briefAd', ad); await page.click('#briefRun'); }
             await page.waitForTimeout(200);
             const url = page.url();
             const printed = pdfText(await page.pdf({ format: 'A4' }));
             const text = printed.pages.join(' ').replace(/\s+/g, ' ');
-            const alnum = (s) => s.replace(/[^A-Za-z0-9]/g, '');
-            const what = sample ? `the ${sample} sample` : 'the Dutch / Big Four / SAP ad';
+            const first = alnum(printed.pages[0] || '');
+            const what = sample ? `the ${sample} sample` : name;
             const furniture = ['Paste a job ad', 'Grade this ad', 'Get in touch', 'Copy link', 'Back to top'].filter(w => text.includes(w));
-            if (printed.pages.length === 1 && alnum(text).includes(alnum(url.split('://')[1])) && !furniture.length) ok(`printed, ${what} is one A4 page: the dossier and the address that rebuilds it`);
-            else bad(`printed, ${what} is ${printed.pages.length} page(s)${alnum(text).includes(alnum(url.split('://')[1])) ? '' : ', without its address'}${furniture.length ? `, with ${furniture.join(', ')}` : ''}`);
+            const missing = [[email, 'the contact line'], [url.split('://')[1], 'the address']].filter(([t]) => !first.includes(alnum(t))).map(([, w]) => w);
+            if ((long || printed.pages.length === 1) && !missing.length && !furniture.length) {
+                ok(`printed, ${what} is ${printed.pages.length === 1 ? 'one A4 page' : `${printed.pages.length} A4 pages`}: the dossier, with the contact line and the address that rebuilds it on the first`);
+            } else bad(`printed, ${what} is ${printed.pages.length} page(s)${missing.length ? `, without ${missing.join(' or ')} on the first` : ''}${furniture.length ? `, with ${furniture.join(', ')}` : ''}`);
         }
     }
 
@@ -702,6 +844,73 @@ async function exerciseBriefPage(browser, origin) {
     if (wide.length) bad(`brief.html scrolls sideways at ${wide.join(', ')}`);
     else ok('brief.html at 320-430px: nothing scrolls sideways, before a grade or after');
     if (errors.length) errors.forEach(e => bad(`brief.html: uncaught ${e}`));
+    await context.close();
+}
+
+// ------------------------------------------------------------------
+// The policy, live; and the referrer policy
+// ------------------------------------------------------------------
+// The Brief renders parts of a stranger's paste back into its page. If a
+// bug ever let markup through, the Content-Security-Policy is what stops it
+// running. Shown on The Brief itself: served with an inline script and an
+// on…="" attribute in it, as a bug would put them there, and given the same
+// again by script once it has loaded. None may run, and each is refused,
+// while the page's own inline script (the html.js mark) and brief.js run as
+// ever: the policy is live and fits the page, not merely present. Then the
+// referrer policy: a move between the site's own pages carries the address
+// it came from (count.js needs its host to believe ?via=), and a link off
+// the site carries none.
+async function exerciseSecurity(browser, origin) {
+    console.log('  the Content-Security-Policy, live, and the referrer policy');
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+    await context.addInitScript(() => {
+        window.__refused = [];
+        addEventListener('securitypolicyviolation', (e) => window.__refused.push(e.effectiveDirective));
+    });
+    const INJECTED = '<script>window.__ran = "a script in the markup"</script>' +
+        '<img src="data:," alt="" onerror="window.__ran = \'a handler in the markup\'">';
+    const html = fs.readFileSync(path.join(ROOT, 'brief.html'), 'utf8').replace(/<main\b[^>]*>/, m => m + INJECTED);
+    await context.route(`${origin}/brief.html`, route => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: html }));
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+    const r = await page.evaluate(async () => {
+        const script = document.createElement('script');
+        script.textContent = 'window.__ran = "a script added later"';
+        document.body.appendChild(script);
+        const box = document.createElement('div');
+        box.innerHTML = '<img src="data:," alt="" onerror="window.__ran = \'a handler added later\'">';
+        document.body.appendChild(box);
+        await new Promise(res => setTimeout(res, 300));
+        return { ran: window.__ran || null, refused: window.__refused.slice(), marked: document.documentElement.classList.contains('js') };
+    });
+    await page.fill('#briefAd', BRIEF_AD);
+    await page.click('#briefRun');
+    await page.waitForTimeout(200);
+    const graded = (await briefShown(page)).grade;
+    const scripts = r.refused.filter(d => /^script-src/.test(d));
+    if (!r.ran && scripts.length === 4 && scripts.length === r.refused.length && r.marked && graded) {
+        ok(`an inline script and an on…="" attribute in The Brief, in its markup or added later, are refused, all ${scripts.length} (${[...new Set(scripts)].join(', ')}), while its own mark and brief.js run (graded "${graded}")`);
+    } else {
+        bad(`The Brief with markup injected: ${r.ran ? `${r.ran} ran` : 'nothing ran'}; refused ${r.refused.join(', ') || 'nothing'}; html.js ${r.marked}; graded "${graded}"`);
+    }
+    if (errors.length) errors.forEach(e => bad(`brief.html, injected: uncaught ${e}`));
+
+    // The referrer: off the site, the origin alone (no path, no query);
+    // between the site's own pages, the address. The off-site page is a stand-in, answered here.
+    let sent = null;
+    await context.route('https://linkedin.com/**', async (route) => {
+        sent = await route.request().allHeaders();
+        await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<!DOCTYPE html><title>stand-in</title>' });
+    });
+    await page.goto(`${origin}/field-report.html`, { waitUntil: 'load' });
+    await Promise.all([page.waitForURL(/linkedin\.com/, { timeout: 5000 }), page.click('a[href^="https://linkedin.com/"]')]).catch(() => null);
+    await page.goto(`${origin}/field-report.html`, { waitUntil: 'load' });
+    await Promise.all([page.waitForURL(/case-studies\.html/, { timeout: 5000 }), page.click('nav a[href="case-studies.html"]')]).catch(() => null);
+    const back = await page.evaluate(() => document.referrer);
+    if (sent && sent.referer === `${origin}/` && back === `${origin}/field-report.html`) ok('a link off the site sends its origin alone as the Referer; one to the next page of the site carries the address it left');
+    else bad(`the referrer policy: off the site ${sent ? `Referer "${sent.referer || ''}"` : 'not reached'}; on it, document.referrer "${back}"`);
     await context.close();
 }
 
@@ -1383,8 +1592,16 @@ const LABEL_MIN_PX = 11;
 
 async function exerciseJourneyAndChart(browser, origin) {
     console.log('  index.html — the journey map on a phone, its names, You Draw It\'s labels');
+    // Firefox scrolls a wheel smoothly whatever the reader's motion setting,
+    // so the page waits for the wheel's scroll to come to rest as well: a
+    // stop met while it still ran was met short, and the wheel then carried
+    // the page past it (320x700, stop 0, once pages got lighter).
     const mapReady = (page) => page.mouse.wheel(0, 300)
         .then(() => page.waitForFunction(() => document.querySelector('#journeyMapFrame svg'), null, { timeout: 5000 }))
+        .then(() => page.waitForFunction(() => new Promise((res) => {
+            const y = scrollY;
+            setTimeout(() => res(scrollY === y), 150);
+        }), null, { timeout: 5000 }))
         .catch(() => null);
 
     for (const [width, height] of [[390, 844], [320, 700]]) {
@@ -1858,6 +2075,23 @@ async function exerciseNavigation(browser, origin) {
     await bare.goto(`${origin}/index.html`, { waitUntil: 'load' });
     if (await bare.isVisible('#themeToggle')) bad('theme switch: shows with JavaScript off, where it cannot work');
     else ok('theme switch: absent with JavaScript off');
+    // Nor can script.js send /#assay on to The Brief: it lands on the line
+    // that leads there, by an id inside <noscript>, built only then.
+    await bare.goto(`${origin}/index.html#assay`, { waitUntil: 'load' });
+    // style.css scrolls smoothly, and only once the page has laid out, so
+    // the jump takes a moment: a second at least, then until it stops.
+    for (let i = 0, was = -1, y = 0; i < 40 && (i < 5 || y !== was); i++) {
+        was = y;
+        await bare.waitForTimeout(200);
+        y = await bare.evaluate(() => scrollY);
+    }
+    const assay = await bare.evaluate(() => {
+        const line = document.querySelector('#contact .brief-line');
+        const r = line ? line.getBoundingClientRect() : null;
+        return { at: location.pathname, inLine: !!(document.getElementById('assay') && document.getElementById('assay').closest('.brief-line')), seen: !!r && r.top >= 0 && r.bottom <= innerHeight };
+    });
+    if (assay.at.endsWith('/index.html') && assay.inLine && assay.seen) ok('/#assay with JavaScript off: lands on the homepage\'s line to The Brief');
+    else bad(`/#assay with JavaScript off: ${JSON.stringify(assay)}`);
     await noScript.close();
 
     // Back to top on a 390x844 phone: not before one full screen, and never
@@ -3913,10 +4147,13 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         const vm = require('vm');
         const gas = vm.createContext({});
         vm.runInContext(fs.readFileSync(path.join(ROOT, 'google-apps-script', 'Code.gs'), 'utf8'), gas);
-        await context.route('**/sustaintheworld/no/such/page', (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') }));
-        await context.route('**/sustaintheworld/notes/no-such-note.html', (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') }));
+        const notFound = (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') });
+        await context.route('**/no/such/page', notFound);
+        await context.route('**/notes/no-such-note.html', notFound);
+        // The old addresses are answered by the server, as Pages answers
+        // them: in Firefox, a page a route fulfils has no document.referrer.
         const everyPage = PAGES.filter(rel => rel !== '404.html').map(rel => [rel, pageNameOf(rel)])
-            .concat([['sustaintheworld/no/such/page', '404'], ['sustaintheworld/notes/no-such-note.html', '404']]);
+            .concat([['no/such/page', '404'], ['notes/no-such-note.html', '404']]);
         const wrong = [];
         for (const [rel, name] of everyPage) {
             const p = await context.newPage();
@@ -3934,6 +4171,32 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         }
         if (wrong.length) wrong.forEach(w => bad(`the count from ${w}`));
         else ok(`every page counts itself once, by name, with the documented keys, and the server accepts each: ${everyPage.map(([, n]) => n).join(', ')}`);
+
+        // An address from before the site moved to the root (the CV, a
+        // LinkedIn post) is answered by 404.html, which goes on to the same
+        // page here: query and fragment kept, the linking site passed on,
+        // one count for the page it lands on and none for a missing page.
+        {
+            const p = await context.newPage();
+            p.on('pageerror', (e) => errors.push(e.message));
+            const before = sent.length;
+            await p.goto(`${origin}/sustaintheworld/case-studies.html?lens=water#play-borehole`, { referer: 'https://www.linkedin.com/', waitUntil: 'load' });
+            await p.waitForURL(`${origin}/case-studies.html?lens=water#play-borehole`, { timeout: 5000 }).catch(() => null);
+            const at = p.url();
+            await leave(p);
+            await settle(p, before + 1);
+            const got = sent.slice(before).map((s) => { try { return JSON.parse(s.body); } catch (e) { return s.body; } });
+            if (at === `${origin}/case-studies.html?lens=water#play-borehole` && got.length === 1 && got[0].page === 'case-studies' && got[0].ref === 'www.linkedin.com') {
+                ok('an address from before the move (/sustaintheworld/…) goes on to the same page at the root, its query and fragment kept, counted once there with LinkedIn as the referrer, not as a missing page');
+            } else {
+                bad(`the old address: landed at ${at}; counts ${JSON.stringify(got)}`);
+            }
+            await p.goto(`${origin}/sustaintheworld`, { waitUntil: 'load' });
+            await p.waitForURL(`${origin}/`, { timeout: 5000 }).catch(() => null);
+            if (p.url() === `${origin}/`) ok('the old address of the homepage itself goes on to the root');
+            else bad(`/sustaintheworld landed at ${p.url()}`);
+            await p.close();
+        }
     }
 
     // The Brief: the count says it was run and the grade it gave, and no
@@ -3958,6 +4221,33 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
             ok(`brief.html: one count, saying the Brief was run and the grade it gave (${body.features.join(', ')}), and no request carries a word of the ad`);
         } else bad(`brief.html: ${got.length} count(s) ${got.map(s => s.body).join(' | ')}; requests with the ad: ${carried.join(', ') || 'none'}`);
         await p.close();   // its count has gone, so closing cannot send another
+    }
+
+    // A sample is counted as a sample, not a use and not a grade; and the
+    // reader's own result, reloaded, is not a shared link opened. One press
+    // of the WASH sample sent brief-run and brief-high, and its reload
+    // brief-shared.
+    {
+        const p = await context.newPage();
+        p.on('pageerror', (e) => errors.push(e.message));
+        const features = (from) => sent.slice(from).map((s) => { try { return JSON.parse(s.body).features.join('+'); } catch (e) { return '?'; } });
+        const before = sent.length;
+        await p.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+        await p.click('.bf-sample[data-sample="water"]');
+        await p.waitForTimeout(200);
+        await leave(p);
+        await settle(p, before + 1);
+        const sample = features(before);
+        const mid = sent.length;
+        await p.reload({ waitUntil: 'load' });
+        await p.waitForTimeout(200);
+        await leave(p);
+        await settle(p, mid + 1);
+        const reloaded = features(mid);
+        if (JSON.stringify(sample) === '["brief-sample"]' && reloaded.length === 1 && !/brief-(?:run|shared|high)/.test(reloaded[0])) {
+            ok(`brief.html: a sample is counted as brief-sample alone, and its reload as no shared link (${sample[0]}; "${reloaded[0]}")`);
+        } else bad(`brief.html: a sample counted ${JSON.stringify(sample)}, and its reload ${JSON.stringify(reloaded)}`);
+        await p.close();
     }
 
     // An old homepage address, shared on LinkedIn, goes on to where its
