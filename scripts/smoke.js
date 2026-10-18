@@ -36,6 +36,12 @@
 //     under the other pages' nav bar; a theme switch or nav item off the
 //     bar; back to top over a control; an address shared for something
 //     that moved off the homepage that does not go on to it
+//   - a page without exactly one Content-Security-Policy, ahead of every
+//     script and stylesheet; anything on any page the policy refuses (a
+//     console error, in Firefox as well as Chromium); an inline script or an
+//     on…="" attribute put into The Brief that the policy lets run; a link
+//     off the site that sends a Referer, or one between the site's own
+//     pages that does not
 //   - a page whose theme does not follow the reader's choice (or, with none,
 //     the system's; the homepage from its first frame), or a page other
 //     than the homepage with no room on a 320px phone for its nav and its
@@ -137,6 +143,13 @@ const COUNT_URL = (() => {
     return m[1];
 })();
 const BEACON_KEYS = ['v', 'page', 'lens', 'deepest', 'features', 'ref', 'vp', 'kb'];
+
+// Chromium reports what a Content-Security-Policy refuses as a console
+// error; Firefox may say so only in its own console. Said again by the page,
+// as an error, a refusal fails visit() in either. Every context opened from
+// here on carries it (see the wrapper around browser.newContext).
+const REPORT_REFUSED = () => addEventListener('securitypolicyviolation', (e) =>
+    console.error(`Content-Security-Policy refused ${e.blockedURI || 'inline'} (${e.effectiveDirective})`));
 
 // ------------------------------------------------------------------
 // A static server that behaves like the host: gzip for text, nothing else.
@@ -271,6 +284,7 @@ async function visit(context, page, rel, origin) {
     browser.newContext = async (options) => {
         const c = await openContext(options);
         await quietCounter(c);
+        await c.addInitScript(REPORT_REFUSED);
         return c;
     };
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
@@ -301,6 +315,15 @@ async function visit(context, page, rel, origin) {
         if (r.failed.length) r.failed.forEach(f => bad(`request failed: ${f}`)); else ok('every request succeeded');
         if (r.foreign.length) r.foreign.forEach(f => bad(`left the origin: ${f}`)); else ok('no request left this origin');
         if (r.measured) ok(`arrival: ${fmt(r.arrivalBytes)} over the wire in ${r.arrival.length} requests`);
+        // A policy given in a meta holds only what comes after it.
+        const csp = await page.evaluate(() => {
+            const metas = Array.from(document.querySelectorAll('meta[http-equiv]')).filter(m => /^content-security-policy$/i.test(m.httpEquiv));
+            const first = document.querySelector('script, style, link[rel~="stylesheet"]');
+            return { n: metas.length, head: !!metas[0] && metas[0].parentElement === document.head,
+                before: !!metas[0] && (!first || !!(metas[0].compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING)) };
+        });
+        if (csp.n === 1 && csp.head && csp.before) ok('one Content-Security-Policy, in <head>, before any script or stylesheet');
+        else bad(`${csp.n} Content-Security-Policy meta(s)${csp.head ? '' : ', not in <head>'}${csp.before ? '' : ', after a script or stylesheet it should govern'}`);
 
         if (rel === 'index.html') await exerciseHomepage(page, r, origin);
         if (rel === 'brief.html') await exerciseBrief(page, r);
@@ -314,6 +337,7 @@ async function visit(context, page, rel, origin) {
     await checkWithoutJs(browser, origin);
     await exerciseShell(browser, origin);
     await exerciseBriefPage(browser, origin);
+    await exerciseSecurity(browser, origin);
 
     // Each budgeted page's measured first view against the budget's
     // estimate. The estimate counts bodies; every response also carries a
@@ -702,6 +726,73 @@ async function exerciseBriefPage(browser, origin) {
     if (wide.length) bad(`brief.html scrolls sideways at ${wide.join(', ')}`);
     else ok('brief.html at 320-430px: nothing scrolls sideways, before a grade or after');
     if (errors.length) errors.forEach(e => bad(`brief.html: uncaught ${e}`));
+    await context.close();
+}
+
+// ------------------------------------------------------------------
+// The policy, live; and the referrer policy
+// ------------------------------------------------------------------
+// The Brief renders parts of a stranger's paste back into its page. If a
+// bug ever let markup through, the Content-Security-Policy is what stops it
+// running. Shown on The Brief itself: served with an inline script and an
+// on…="" attribute in it, as a bug would put them there, and given the same
+// again by script once it has loaded. None may run, and each is refused,
+// while the page's own inline script (the html.js mark) and brief.js run as
+// ever: the policy is live and fits the page, not merely present. Then the
+// referrer policy: a move between the site's own pages carries the address
+// it came from (count.js needs its host to believe ?via=), and a link off
+// the site carries none.
+async function exerciseSecurity(browser, origin) {
+    console.log('  the Content-Security-Policy, live, and the referrer policy');
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+    await context.addInitScript(() => {
+        window.__refused = [];
+        addEventListener('securitypolicyviolation', (e) => window.__refused.push(e.effectiveDirective));
+    });
+    const INJECTED = '<script>window.__ran = "a script in the markup"</script>' +
+        '<img src="data:," alt="" onerror="window.__ran = \'a handler in the markup\'">';
+    const html = fs.readFileSync(path.join(ROOT, 'brief.html'), 'utf8').replace(/<main\b[^>]*>/, m => m + INJECTED);
+    await context.route(`${origin}/brief.html`, route => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: html }));
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+    const r = await page.evaluate(async () => {
+        const script = document.createElement('script');
+        script.textContent = 'window.__ran = "a script added later"';
+        document.body.appendChild(script);
+        const box = document.createElement('div');
+        box.innerHTML = '<img src="data:," alt="" onerror="window.__ran = \'a handler added later\'">';
+        document.body.appendChild(box);
+        await new Promise(res => setTimeout(res, 300));
+        return { ran: window.__ran || null, refused: window.__refused.slice(), marked: document.documentElement.classList.contains('js') };
+    });
+    await page.fill('#briefAd', BRIEF_AD);
+    await page.click('#briefRun');
+    await page.waitForTimeout(200);
+    const graded = (await briefShown(page)).grade;
+    const scripts = r.refused.filter(d => /^script-src/.test(d));
+    if (!r.ran && scripts.length === 4 && scripts.length === r.refused.length && r.marked && graded) {
+        ok(`an inline script and an on…="" attribute in The Brief, in its markup or added later, are refused, all ${scripts.length} (${[...new Set(scripts)].join(', ')}), while its own mark and brief.js run (graded "${graded}")`);
+    } else {
+        bad(`The Brief with markup injected: ${r.ran ? `${r.ran} ran` : 'nothing ran'}; refused ${r.refused.join(', ') || 'nothing'}; html.js ${r.marked}; graded "${graded}"`);
+    }
+    if (errors.length) errors.forEach(e => bad(`brief.html, injected: uncaught ${e}`));
+
+    // The referrer: off the site, none; between the site's own pages, the
+    // address. The off-site page is a stand-in, answered here.
+    let sent = null;
+    await context.route('https://linkedin.com/**', async (route) => {
+        sent = await route.request().allHeaders();
+        await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<!DOCTYPE html><title>stand-in</title>' });
+    });
+    await page.goto(`${origin}/field-report.html`, { waitUntil: 'load' });
+    await Promise.all([page.waitForURL(/linkedin\.com/, { timeout: 5000 }), page.click('a[href^="https://linkedin.com/"]')]).catch(() => null);
+    await page.goto(`${origin}/field-report.html`, { waitUntil: 'load' });
+    await Promise.all([page.waitForURL(/case-studies\.html/, { timeout: 5000 }), page.click('nav a[href="case-studies.html"]')]).catch(() => null);
+    const back = await page.evaluate(() => document.referrer);
+    if (sent && !sent.referer && back === `${origin}/field-report.html`) ok('a link off the site sends no Referer; one to the next page of the site carries the address it left');
+    else bad(`the referrer policy: off the site ${sent ? `Referer "${sent.referer || ''}"` : 'not reached'}; on it, document.referrer "${back}"`);
     await context.close();
 }
 

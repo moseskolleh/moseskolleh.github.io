@@ -113,8 +113,9 @@ const BUDGETS = {
         readme: "Recorded narration: Moses's introduction (sized for his 60–90 s take)",
         hold: 'sized for his recording, which is not made yet'
     },
-    // The footer calls it "the whole portfolio in 10 KB"; this is what keeps
-    // that true.
+    // The footer calls it "the whole portfolio in 11 KB" (10 until every
+    // page took a Content-Security-Policy, in October 2026); this is what
+    // keeps that true.
     fieldReport: {
         label: 'Text-only field report, the HTML file as saved (uncompressed)',
         max: 11 * KB,

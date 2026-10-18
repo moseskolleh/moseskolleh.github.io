@@ -1,6 +1,4 @@
-// THEME for the pages on carbon-ai.css: in <head>, not deferred, so the
-// first frame is in it. The choice is the homepage's ('theme', as script.js
-// stores it), so it follows the reader; with none, the system's setting.
+// THEME for the pages on carbon-ai.css, from <head>: the README's "No dead ends".
 (function (root) {
     var bar = document.querySelector('meta[name="theme-color"]');
     var button;
@@ -15,7 +13,6 @@
         root.setAttribute('data-theme', theme);
         if (bar) bar.setAttribute('content', light ? '#f4f6f0' : '#0a0a0a');
         if (!button) return;
-        // Named for what a press does, as on the homepage.
         button.setAttribute('aria-label', 'Switch to ' + (light ? 'dark' : 'light') + ' theme');
         button.querySelector('use').setAttribute('href', light ? '#i-sun' : '#i-moon');
     }
@@ -31,6 +28,6 @@
         show(root.getAttribute('data-theme'));
         button.hidden = false;   // shipped hidden: without this it does nothing
     });
-    // Back to a page kept whole in memory: the choice may have changed since.
+    // Back from the page cache: the choice may have changed since.
     window.addEventListener('pageshow', function (e) { if (e.persisted) show(chosen()); });
 })(document.documentElement);

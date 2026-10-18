@@ -319,10 +319,10 @@ CI uses Node 22.
 | `npm run build:check` | every generated page still matches `content/` |
 | `npm run fonts:check` | the committed fonts still hash to their manifest and every stylesheet's `@font-face` block is current |
 | `npm run lint:html` | every page is valid HTML ([html-validate](https://html-validate.org/)'s recommended rules; the two relaxations are explained in `.htmlvalidate.cjs`) |
-| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty-one listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
+| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty-two listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
 | `npm run map:check` | the committed `journey-map.svg` still matches its generator |
 | `npm run budget` | the weights this README quotes, and that its budget tables still say what the script measures (see [Performance](#performance)) |
-| `npm run smoke` | every page in a real browser: no errors, no failed or off-origin requests, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; The Brief (a mismatched ad graded honestly, nothing sent and no word of the ad in any request or in its link, usable by keys, its shared link rebuilding the same fit and dossier, printed as one A4 page, nothing sideways at 320–430px); the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
+| `npm run smoke` | every page in a real browser: no errors (nothing the Content-Security-Policy refuses, either), no failed or off-origin requests, one policy on every page ahead of its scripts, an inline script and an `on…=""` attribute put into The Brief refused while its own scripts run, no `Referer` sent off the site, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; The Brief (a mismatched ad graded honestly, nothing sent and no word of the ad in any request or in its link, usable by keys, its shared link rebuilding the same fit and dossier, printed as one A4 page, nothing sideways at 320–430px); the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
 | `npm run mcp:verify` | the pinned MCP package still hashes to the reviewed tarball (needs network) |
 | `npm run health -- --dry-run` | the weekly health check, printed instead of posted: the live site against `main`, every link off the site, what has gone stale, and what still waits on Moses (needs network; see [Health checks and the quarterly review](#health-checks-and-the-quarterly-review)) |
 
@@ -512,6 +512,15 @@ The suites, and the failure each one exists to prevent:
   may use `navigator.sendBeacon`, which cannot leave cookies out; and every
   page loads `count.js` once, deferred. The field notes are read from their
   folder, `notes/`, so a link that climbs out of it wrongly fails too.
+- **`csp.test.js`** — the Content-Security-Policy and referrer policy every
+  page carries (see [What a page may run](#what-a-page-may-run)): one policy,
+  straight after the charset; a hash for each inline script the page runs,
+  read from the page itself, and none for a data block or for a script that
+  is gone; nothing that would let an injected script run (`'unsafe-inline'`,
+  `'unsafe-eval'`, `'unsafe-hashes'`, a scheme, a wildcard) and no `on…=""`
+  attribute, which the policy would refuse; off the site, exactly the
+  deployment `html.test.js` lets the scripts name and the host it redirects
+  to, the form's only on the homepage; and the policy the build would write.
 - **`notes.test.js`** — the field notes, their feed and the structured data
   (see [Field Notes and the feed](#field-notes-and-the-feed) and
   [Structured data](#structured-data)): the markdown reader refuses what is
@@ -1227,6 +1236,28 @@ Global Privacy Control or with JavaScript off. Every other browser context in
 the smoke test opens with Global Privacy Control on, so a test run never sends
 a count to the real endpoint.
 
+## What a page may run
+
+Every page carries a Content-Security-Policy, as a `<meta>` straight after
+its charset (GitHub Pages cannot send headers), and a referrer policy. The
+Brief renders parts of a stranger's paste back into its page; the policy is
+what would stop markup that ever got through from running. Scripts run from
+this origin, and inline ones only by the SHA-256 of their exact text, which
+`npm run build:content` works out from each page as it stands and
+`build:check` holds; there is no `'unsafe-inline'`, `'unsafe-eval'` or
+`on…=""` attribute anywhere (a page script whose failure takes the `html.js`
+mark off carries `data-js`, and the mark listens for it). Styles may be
+inline, by choice: CSS runs nothing, and anything a style could fetch is held
+to this origin. Off the site a page may reach the Apps Script deployment and
+`script.googleusercontent.com`, where Apps Script redirects, and nothing else;
+only the homepage's form may post there. A meta cannot set
+`frame-ancestors`, so a page can still be framed. The referrer policy is
+`same-origin`: `count.js` needs the host of the page a visit came from on
+this site, to believe a forwarded `?via=`, and a site this one links to is
+told nothing. Why each directive is what it is: the comment above
+`securityPolicy` in `scripts/build-content.js`. `tests/csp.test.js` and
+`npm run smoke` hold it.
+
 ## Customization Guide
 
 ### Colors
@@ -1293,13 +1324,13 @@ did.
 | Largest single image | ~200 KB | 210 KB |
 | Every image in the repository | ~3.41 MB | 3.5 MB |
 | Recorded narration: Moses's introduction (sized for his 60–90 s take) | 0 KB | 800 KB |
-| Text-only field report, the HTML file (the size the footer quotes) | ~10 KB | 11 KB |
-| Text-only field report, over the wire (with its visit counter) | ~6 KB | 8 KB |
+| Text-only field report, the HTML file (the size the footer quotes) | ~11 KB | 11 KB |
+| Text-only field report, over the wire (with its visit counter) | ~7 KB | 8 KB |
 | Case studies page, over the wire (fonts included) | ~109 KB | 109 KB |
 | Open counts page, over the wire (fonts included; sized for a full page) | ~97 KB | 103 KB |
 | Research outputs page, over the wire (fonts included) | ~97 KB | 99 KB |
 | Check my numbers (`claims.html`), over the wire (fonts included) | ~99 KB | 101 KB |
-| Each field note (`notes/*.html`), over the wire (fonts included; the heaviest) | ~89 KB | 94 KB |
+| Each field note (`notes/*.html`), over the wire (fonts included; the heaviest) | ~88 KB | 94 KB |
 | EcoPrompt Coach (`carbon-ai.html`), over the wire (fonts included) | ~111 KB | 111 KB |
 | The Brief (`brief.html`), over the wire (fonts and its script included) | ~107 KB | 113 KB |
 <!-- BUDGET-TABLE:END -->

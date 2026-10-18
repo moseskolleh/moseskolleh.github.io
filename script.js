@@ -119,12 +119,10 @@ mks.scrollMotion = scrollMotion;
 // ===================================
 // KEYBOARD — one listener
 // ===================================
-// Five document listeners, blind to each other, used to answer the keys:
-// one Escape closed the terminal and the menu behind it. A feature now
-// registers its keys with its layer's rank; the highest is asked first,
-// and true means the key is used, so one press closes one layer. A key a
-// control already used is left alone, and a widget's own keys (the games'
-// arrows, a dialog's Tab) stay on the widget.
+// A feature registers its keys with its layer's rank; the highest is asked
+// first, and true means the key is used, so one press closes one layer. A
+// key a control already used is left alone, and a widget's own keys (the
+// games' arrows, a dialog's Tab) stay on the widget.
 const KEY_RANK = Object.freeze({ terminal: 40, player: 20, menu: 10, page: 0 });
 const keyRoutes = {};
 mks.keyRank = KEY_RANK;
@@ -146,20 +144,14 @@ document.addEventListener('keydown', (e) => {
 // ===================================
 // ON-DEMAND MODULES
 // ===================================
-// Roughly two thirds of this site's JavaScript serves features most visits
-// never reach: the narration player, the field terminal, the interactives
-// in section 05 and the footer receipt. Each lives in modules/ and is
-// fetched the moment it is first needed: a "listen" press, the backtick
-// key, section 05 coming into range. What every visit pays for is what
-// every visit uses.
-//
-// Modules are classic scripts sharing the page's global scope. They declare
-// nothing at the top level (a second `const safeStorage` would be a
-// SyntaxError) and reach the core only through window.mks. Each marks
-// itself in mks.loaded when it has run, which is also how the jsdom
-// harness — which evaluates them directly — tells the loader they are here.
-// A module's own stylesheet is listed first, so it has arrived before the
-// script builds anything it styles.
+// What most visits never reach is fetched when first needed (the README's
+// table of modules says when). Modules are classic scripts sharing the
+// page's global scope. They declare nothing at the top level (a second
+// `const safeStorage` would be a SyntaxError) and reach the core only
+// through window.mks. Each marks itself in mks.loaded when it has run,
+// which is also how the jsdom harness — which evaluates them directly —
+// tells the loader they are here. A module's own stylesheet is listed
+// first, so it has arrived before the script builds anything it styles.
 const MODULES = {
     interactives: ['ai-carbon-data.js', 'modules/interactives.js'],
     terminal: ['modules/terminal.js'],
