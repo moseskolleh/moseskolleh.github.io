@@ -208,9 +208,9 @@
     },
     {
       "id": "first-view",
-      "value": "258",
+      "value": "259",
       "unit": "KB over the wire: the homepage's first view on a desktop, fonts included",
-      "forms": ["~258"],
+      "forms": ["~259"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
       "check": "https://github.com/moseskolleh/moseskolleh.github.io#performance"

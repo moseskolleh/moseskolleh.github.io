@@ -163,6 +163,7 @@ const SITE = profile.links.site;
 // ===================================================================
 const series = build.inSeries(notes);
 const csDoc = new JSDOM(read('case-studies.html')).window.document;
+const rsDoc = new JSDOM(read('research.html')).window.document;
 const ldOf = (doc) => Array.from(doc.querySelectorAll('script[type="application/ld+json"]')).map(s => JSON.parse(s.textContent));
 series.forEach((n, i) => {
     const rel = `notes/${n.slug}.html`;
@@ -182,6 +183,14 @@ series.forEach((n, i) => {
     const tie = doc.querySelector('.nt-tie a');
     const id = tie && (tie.getAttribute('href').match(/^\.\.\/case-studies\.html#([\w-]+)$/) || [])[1];
     assert(!!id && id === n.caseStudy && !!csDoc.getElementById(id), `${rel}: links its case study, ${n.caseStudy}, which the case studies page has`);
+    // And the way back: the case study's first line names the note by its
+    // number, as do the research outputs that sit in that case study.
+    const back = id && csDoc.querySelector(`#${id} .cs-card-meta a[href="${rel}"]`);
+    const number = `Note ${String(n.number).padStart(2, '0')}`;
+    assert(!!back && text(back) === number, `case-studies.html: ${n.caseStudy} links back to its field note, ${number}`);
+    const outputs = content.loadAll().research.outputs.filter(o => o.caseStudy === n.caseStudy);
+    const missing = outputs.filter(o => !rsDoc.querySelector(`#${o.id} .rs-item-head a[href="${rel}"]`)).map(o => o.id);
+    assert(outputs.length === 0 || missing.length === 0, `research.html: every output of ${n.caseStudy} links its field note (${missing.join(', ') || `${outputs.length} of ${outputs.length}`})`);
     assert(doc.querySelector('link[rel="canonical"]').getAttribute('href') === canonical && meta('meta[property="og:url"]') === canonical &&
         meta('meta[property="og:type"]') === 'article' && meta('meta[property="article:published_time"]') === n.date &&
         !!meta('meta[property="og:title"]') && !!meta('meta[property="og:image"]') && !!meta('meta[name="twitter:card"]'),

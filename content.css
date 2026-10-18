@@ -177,7 +177,6 @@ html:not(.js) .cs-lenses { display: none; }
     cursor: pointer;
 }
 .cs-method-fold > summary::-webkit-details-marker { display: none; }
-.cs-method-fold > summary:focus-visible { outline: 2px solid var(--primary-green); outline-offset: 2px; }
 .cs-method-fold .cs-stage-h { margin: 0; }
 .cs-method-fold .cs-stage-h::after {
     content: '+';
@@ -231,11 +230,6 @@ html:not(.js) .cs-lenses { display: none; }
 }
 .cs-artifact-kind { color: var(--text-dim); }
 .cs-artifact-name { display: inline; line-height: 1.5; }
-.cs-artifact-name a {
-    color: var(--primary-green);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
 .cs-artifact-note {
     margin: 6px 0 0;
     font-size: 0.82rem;
@@ -374,7 +368,6 @@ html:not(.js) .cs-lenses { display: none; }
     font-size: 1rem;
 }
 .cs-photos[open] > summary::before { content: '\2212'; }
-.cs-photos > summary:focus-visible { outline: 2px solid var(--primary-green); outline-offset: 2px; }
 .cs-photos-list {
     list-style: none;
     margin: 4px 0 0;
@@ -395,7 +388,6 @@ html:not(.js) .cs-lenses { display: none; }
     cursor: zoom-in;
 }
 .cs-photo a:hover { border-color: var(--primary-green); }
-.cs-photo a:focus-visible { outline: 2px solid var(--primary-green); outline-offset: 2px; }
 .cs-photo img {
     display: block;
     width: 100%;
@@ -477,6 +469,9 @@ html.lightbox-open { overflow: hidden; }
 .lightbox-close { position: absolute; top: 12px; right: 12px; }
 .lightbox-close:hover,
 .lightbox-step:hover { border-color: var(--primary-green); color: var(--primary-green); }
+.cs-method-fold > summary:focus-visible,
+.cs-photos > summary:focus-visible,
+.cs-photo a:focus-visible,
 .lightbox-close:focus-visible,
 .lightbox-step:focus-visible { outline: 2px solid var(--primary-green); outline-offset: 2px; }
 
@@ -486,7 +481,6 @@ html.lightbox-open { overflow: hidden; }
     border: 1px solid var(--border);
     border-radius: 8px;
 }
-.cs-footnote h2 { margin: 0 0 12px; font-size: 1.1rem; color: var(--primary-green); }
 .cs-footnote p { margin: 0 0 10px; line-height: 1.7; font-size: 0.9rem; }
 /* Folded, as research.html's reproduction notes are: the case studies'
    phone length (scripts/check-budget.js) had no room left once the
@@ -503,7 +497,8 @@ html.lightbox-open { overflow: hidden; }
 /* -------------------------------------------------------------------
    Research outputs
    ------------------------------------------------------------------- */
-.rs-intro { margin-bottom: 34px; }
+.rs-intro,
+.rs-group { margin-bottom: 34px; }
 .rs-intro p { line-height: 1.7; }
 
 .rs-summary {
@@ -537,7 +532,6 @@ html.lightbox-open { overflow: hidden; }
     color: var(--text-secondary);
 }
 
-.rs-group { margin-bottom: 34px; }
 .rs-group > h2 {
     margin: 0 0 14px;
     font-size: 1.05rem;
@@ -567,7 +561,8 @@ html.lightbox-open { overflow: hidden; }
     font-size: 1.08rem;
     line-height: 1.4;
 }
-.rs-item h3 a {
+.rs-item h3 a,
+.cs-artifact-name a {
     color: var(--primary-green);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -597,7 +592,8 @@ html.lightbox-open { overflow: hidden; }
     border-left: 3px solid var(--primary-green);
     border-radius: 8px;
 }
-.rs-repro h2 { margin: 0 0 12px; font-size: 1.1rem; color: var(--primary-green); }
+.rs-repro h2,
+.cs-footnote h2 { margin: 0 0 12px; font-size: 1.1rem; color: var(--primary-green); }
 .rs-repro summary,
 .cs-footnote summary { cursor: pointer; font-size: 0.92rem; color: var(--text-secondary); }
 .rs-repro summary:hover,
@@ -628,8 +624,7 @@ html.lightbox-open { overflow: hidden; }
        line and so a taller card: the page holds seven case studies to a
        length budget (scripts/check-budget.js). */
     .cs-card { padding: 18px 14px; }
-    .cs-card-head { margin-bottom: 16px; }
-    .cs-stage { margin-bottom: 16px; }
+    .cs-card-head, .cs-stage { margin-bottom: 16px; }
     .cs-stage p { line-height: 1.6; }   /* a short line needs less leading */
     .cs-artifacts, .cs-results { gap: 10px; }
     .cs-artifact, .cs-result { padding: 10px 12px; }

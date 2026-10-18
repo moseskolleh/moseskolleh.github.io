@@ -244,11 +244,13 @@ ${links.map(l => `        <li><a ${linkAttrs(l, current)}>${l.label}</a></li>`).
  * The closing call to action, the last thing in <main>: the three ways to
  * reach Moses. The full flavour opens with who he is open to hearing from,
  * in the words the homepage's hero uses, and ends with a link back to the
- * top (to <body>, so the next Tab starts again from the skip link). The
- * plain one is the three ways in a line: on the field report every byte
- * counts towards the size the homepage quotes.
+ * top (to <body>, so the next Tab starts again from the skip link). Beside
+ * it, The Brief, for whoever is hiring (`brief`; not on The Brief itself):
+ * that line had the room, so no page is longer for it. The plain one is
+ * the three ways in a line: on the field report every byte counts towards
+ * the size the homepage quotes.
  */
-function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta, root = '' } = {}) {
+function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta, root = '', brief = true } = {}) {
     const mail = `<a href="mailto:${esc(facts.email)}" data-analytics="${hooks.email}">${esc(facts.email)}</a>`;
     if (plain) {
         return `<p>Email ${mail}, <a href="${esc(shellHref('index.html#contact', base))}" data-analytics="${hooks.contact}">send a message</a> or download <a href="${esc(shellHref(facts.cv, base))}" download data-analytics="${hooks.cv}">my CV</a>.</p>`;
@@ -261,7 +263,7 @@ function shellCta(facts, { plain = false, base = '', hooks = SHELL_HOOKS.cta, ro
         <a class="ca-btn" href="${esc(root + facts.cv)}" download data-analytics="${hooks.cv}">Download CV</a>
     </p>
 </section>
-<p class="ca-top"><a href="#top">Back to top</a></p>`;
+<p class="ca-top"><a href="#top">Back to top</a>${brief ? ` &middot; <a href="${root}brief.html">Hiring? Paste your job ad</a>` : ''}</p>`;
 }
 
 /**
@@ -473,7 +475,7 @@ ${indentBlock(shellNav(facts, { current, icons, root }), '    ')}
         </header>
 ${main}
 
-${indentBlock(shellCta(facts, { root }), '        ')}
+${indentBlock(shellCta(facts, { root, brief: canonical !== `${SITE}brief.html` }), '        ')}
     </main>
     <footer class="ca-foot">
 ${indentBlock(shellFoot({ current, root }), '        ')}
@@ -489,6 +491,13 @@ ${bodyEnd}
 // ------------------------------------------------------------------
 // case-studies.html
 // ------------------------------------------------------------------
+
+/**
+ * A field note by its number ("Note 03", as the homepage numbers them),
+ * for a case study's first line and its research outputs' (each has room
+ * there on a phone for that and no more), said to be a field note on hover.
+ */
+const noteLink = (n) => `<a href="${esc(notePath(n))}" title="Field note">${noteNumber(n)}</a>`;
 
 // The two interactives, each hosted by the case study it illustrates
 // (content/projects.json `widget`). They used to sit inside the homepage's
@@ -734,6 +743,9 @@ const LIGHTBOX_SCRIPT = `
 function renderCaseStudies(data) {
     const { projects, lenses } = data;
     const all = [lenses.default].concat(lenses.lenses);
+    // The field note a case study has (content/notes/*.md, caseStudy), the
+    // way back from its note's "The case study" line.
+    const noteOf = (cs) => (data.notes || []).find(n => n.caseStudy === cs.id);
 
     // The lens switcher. Real links, so every view is shareable; the script
     // below switches them in place. Without JavaScript a lens link would only
@@ -826,7 +838,7 @@ function renderCaseStudies(data) {
         return `
             <article class="cs-card" id="${esc(cs.id)}" data-lenses="${esc((cs.lenses || []).join(' '))}">
                 <header class="cs-card-head">
-                    <p class="cs-card-meta mono-label">${esc(cs.period)}${cs.location ? ` &middot; ${esc(cs.location)}` : ''}</p>
+                    <p class="cs-card-meta mono-label">${esc(cs.period)}${cs.location ? ` &middot; ${esc(cs.location)}` : ''}${noteOf(cs) ? ` &middot; ${noteLink(noteOf(cs))}` : ''}</p>
                     <h3>${prose(cs.title)}</h3>
                     <p class="cs-card-sub">${prose(cs.subtitle || '')}</p>
                     <p class="cs-card-org">${prose(cs.organization)}${cs.partner ? ` &middot; with ${prose(cs.partner)}` : ''}${cs.role ? ` &middot; ${prose(cs.role)}` : ''}</p>
@@ -1044,6 +1056,10 @@ function renderResearch(data) {
         return lens ? `<a class="rs-link" href="case-studies.html?lens=${esc(lens)}">The ${esc(lensName[lens])} view &rarr;</a>` : '';
     };
     const note = (o) => [o.note && prose(o.note), o.heldBy && `Held by ${prose(o.heldBy)}.`, place(o)].filter(Boolean).join(' ');
+    // The field note on its case study, if it has one, at the end of the
+    // first line, as the case study's own header carries it: the end of
+    // the note's paragraph had no room on a phone for a second link.
+    const fieldNote = (o) => o.caseStudy && (data.notes || []).find(n => n.caseStudy === o.caseStudy);
 
     const entry = (o) => {
         const title = o.status === 'public' && o.url
@@ -1055,7 +1071,8 @@ function renderResearch(data) {
                     <div class="rs-item-head">
                         <span class="rs-type mono-label">${esc(o.type)}</span>
                         <span class="rs-year mono-label">${esc(o.year)}</span>
-                        ${statusChip(o)}
+                        ${statusChip(o)}${fieldNote(o) ? `
+                        <span class="mono-label">${noteLink(fieldNote(o))}</span>` : ''}
                     </div>
                     <h3>${title}</h3>
                     ${o.venue ? `<p class="rs-venue">${prose(o.venue)}</p>` : ''}

@@ -144,6 +144,11 @@ PAGES.forEach((page) => {
         const top = tail[1] && tail[1].querySelector('a');
         assert(!!top && top.getAttribute('href') === '#top' && doc.body.id === 'top' && text(top) === 'Back to top',
             `${page}: back to top goes to <body id="top">`);
+        // Beside it, for whoever is hiring, The Brief: on its line, which
+        // had the room, so it lengthens no page; not on The Brief itself.
+        const brief = tail[1] && Array.from(tail[1].querySelectorAll('a')).filter(a => /(^|\/)brief\.html$/.test(a.getAttribute('href')));
+        assert(page === 'brief.html' ? brief.length === 0 : brief.length === 1 && /^Hiring\?/.test(text(brief[0])),
+            `${page}: ${page === 'brief.html' ? 'no link to itself beside back to top' : 'beside back to top, "Hiring? Paste your job ad" goes to The Brief'}`);
     }
 });
 
