@@ -111,8 +111,8 @@ PAGES.forEach((rel) => {
         (!firstGoverned || head.indexOf(meta) < head.indexOf(firstGoverned)),
     `${rel}: the policy is in <head>, straight after the charset and before any script, stylesheet or other request`);
     const referrer = doc.querySelectorAll('meta[name="referrer"]');
-    assert(referrer.length === 1 && referrer[0].getAttribute('content') === 'same-origin' && head.indexOf(referrer[0]) === 2,
-        `${rel}: one referrer policy, same-origin, right after it (${Array.from(referrer).map(m => m.getAttribute('content')).join(', ') || 'none'})`);
+    assert(referrer.length === 1 && referrer[0].getAttribute('content') === 'strict-origin-when-cross-origin' && head.indexOf(referrer[0]) === 2,
+        `${rel}: one referrer policy, strict-origin-when-cross-origin, right after it (${Array.from(referrer).map(m => m.getAttribute('content')).join(', ') || 'none'})`);
 
     // --- What runs ---------------------------------------------------------
     const scriptSrc = policy['script-src'] || [];

@@ -779,8 +779,8 @@ async function exerciseSecurity(browser, origin) {
     }
     if (errors.length) errors.forEach(e => bad(`brief.html, injected: uncaught ${e}`));
 
-    // The referrer: off the site, none; between the site's own pages, the
-    // address. The off-site page is a stand-in, answered here.
+    // The referrer: off the site, the origin alone (no path, no query);
+    // between the site's own pages, the address. The off-site page is a stand-in, answered here.
     let sent = null;
     await context.route('https://linkedin.com/**', async (route) => {
         sent = await route.request().allHeaders();
@@ -791,7 +791,7 @@ async function exerciseSecurity(browser, origin) {
     await page.goto(`${origin}/field-report.html`, { waitUntil: 'load' });
     await Promise.all([page.waitForURL(/case-studies\.html/, { timeout: 5000 }), page.click('nav a[href="case-studies.html"]')]).catch(() => null);
     const back = await page.evaluate(() => document.referrer);
-    if (sent && !sent.referer && back === `${origin}/field-report.html`) ok('a link off the site sends no Referer; one to the next page of the site carries the address it left');
+    if (sent && sent.referer === `${origin}/` && back === `${origin}/field-report.html`) ok('a link off the site sends its origin alone as the Referer; one to the next page of the site carries the address it left');
     else bad(`the referrer policy: off the site ${sent ? `Referer "${sent.referer || ''}"` : 'not reached'}; on it, document.referrer "${back}"`);
     await context.close();
 }

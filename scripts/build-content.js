@@ -336,13 +336,17 @@ const indentBlock = (block, indent) => block.split('\n').map(l => (l ? indent + 
 // is not on the site: adding it would put its host in script-src and
 // frame-src, against the rule that nothing is loaded from elsewhere.
 //
-// The referrer policy is same-origin. count.js keeps the host of the page
-// that linked here, and believes the homepage's ?via= only from this site
-// (document.referrer's host), so a move between its own pages has to carry
-// one; no-referrer would count every visit an old address forwards as
-// direct. Off the site nothing is sent, not even the origin: a site this one
-// links to learns no more than a bookmark would tell it. The counter's own
-// request already sends none (referrerPolicy: 'no-referrer').
+// The referrer policy is strict-origin-when-cross-origin. count.js keeps
+// the host of the page that linked here, and believes the homepage's ?via=
+// only from this site (document.referrer's host), so a move between its own
+// pages has to carry one; no-referrer would count every visit an old
+// address forwards as direct. Off the site only the origin goes, never a
+// path or a query (so never The Brief's ?focus=): enough for the places
+// Moses links to (his repositories' traffic page, the maintained coach) to
+// show this site sent the visit, which is the measuring the site is for.
+// It is most browsers' default, written down for those whose default sends
+// the whole address. The counter's own request sends none
+// (referrerPolicy: 'no-referrer').
 // ------------------------------------------------------------------
 const DEPLOYMENT = (() => {
     const m = fs.readFileSync(path.join(ROOT, 'script.js'), 'utf8')
@@ -351,7 +355,7 @@ const DEPLOYMENT = (() => {
     return m[1];
 })();
 const OFF_SITE = [DEPLOYMENT, 'https://script.googleusercontent.com'];
-const REFERRER = 'same-origin';
+const REFERRER = 'strict-origin-when-cross-origin';
 
 /** The text of every inline script a browser would run: no src, and no type or a JavaScript one. Comments are passed over. */
 function inlineScripts(html) {
