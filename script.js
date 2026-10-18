@@ -645,8 +645,14 @@ const navSpies = navLinks.map((link) => {
         if (Math.abs(moved) >= 1) window.scrollBy({ top: moved, behavior: 'instant' });
     };
 
+    // A step of more than a screen (a jump, the End key) is drawn above in
+    // the frame it lands, not at rest, when the reader may be at work there
+    // (You Draw It's keys at 390px: the offset and progress bar moved 1,182px).
+    let lastY = scrollY;
     window.addEventListener('scroll', () => {
         onScroll();
+        if (Math.abs(scrollY - lastY) > innerHeight) drawAbove();
+        lastY = scrollY;
         clearTimeout(resting);
         resting = setTimeout(drawAbove, 150);
     }, { passive: true });
