@@ -123,7 +123,10 @@ const clockChecks = (async () => {
     // A page budget no browser measures is an estimate nobody checks: the
     // open counts page and the field report's wire budget arrived in the
     // same wave as this map, and neither was in it.
-    const mapped = new Set(Object.values(budget.PAGE_BUDGETS));
+    // The homepage's phone budget is measured at 390×844 (PHONE_BUDGETS).
+    const mapped = new Set(Object.values(budget.PAGE_BUDGETS).concat(Object.values(budget.PHONE_BUDGETS)));
+    assert(Object.entries(budget.PHONE_BUDGETS).every(([rel, key]) => fs.existsSync(path.join(ROOT, rel)) && budget.BUDGETS[key]),
+        'Budget map: each phone budget names a page that exists and a real budget');
     const unmapped = Object.keys(budget.BUDGETS).filter(k => /Wire$/.test(k) && !mapped.has(k));
     assert(unmapped.length === 0, `Budget map: every page's wire budget is measured in a browser too (not: ${unmapped.join(', ') || 'none'})`);
     assert(budget.criticalAssets('field-report.html').includes('assets/favicon.svg'),

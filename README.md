@@ -16,7 +16,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - **"Don't let it become a boat" flood scene**: a schematic Wupper cross-section on the [Wuppertal case study](case-studies.html#play-flood) — slide the river from a calm day to July 2021 and watch the margin under the Schwebebahn's hanging cars shrink. Both games load only when a reader scrolls near them, and without JavaScript each is a note that it needs JavaScript and one line of summary
 - **Field terminal**: press <code>`</code> anywhere (or the footer button) for a hidden green-on-black terminal — try `journey`, `drill`, `co2`, `voice`, `kushe`, `help`
 - **The spoken page**: one `Listen` control in the nav reads the section in view with the browser's own speech engine, which transfers **zero bytes**. The one recording on the site is Moses introducing himself in his own voice, offered once he has recorded it, fetched only on click and labelled with exactly what it transfers (see [Narration](#narration-the-spoken-page)). Nothing ever autoplays
-- **Carbon-aware by construction**: images ship as optimized WebP, the three typefaces are self-hosted subsets, and a first view costs about **274 KB over the wire, fonts included**, against a 288 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the narration player, the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model), counting network transfer only. A low-energy mode pauses all animation and honours `prefers-reduced-motion`
+- **Carbon-aware by construction**: images ship as WebP at the lowest quality that still looks the same, with AVIF where that is a tenth lighter again and an 800px hero on a phone (see [The photos](#the-photos)), the three typefaces are self-hosted subsets, and a first view costs about **258 KB over the wire on a desktop, fonts included**, less on a phone, against a 272 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the narration player, the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model), counting network transfer only. A low-energy mode pauses all animation and honours `prefers-reduced-motion`
 - **[Case studies](case-studies.html), evidence-first**: the homepage's six projects and a seventh, GAIA, an open method and tool for reporting an organisation's AI footprint on the lines of a sustainability report, each as **problem → method → artifact → result → findings**. Every result carries the basis it rests on and says plainly whether you can check it from outside; every artifact says whether it is public, available on request, or held by the client; every case study says what the work found or recommends, with its basis. The method is folded to one line until asked for. See [Content pipeline](#content-pipeline)
 - **Role-specific lenses**: `case-studies.html?lens=water`, `?lens=climate-risk`, `?lens=sustainable-ai`, `?lens=esg-csrd` — shareable views that reframe the portfolio for one kind of role. They **reorder and frame, they never filter**: every case study stays on the page in every view, because a view that hides inconvenient work is a CV that lies by omission. Without JavaScript the switcher steps aside and every case study shows in the default view
 - **No dead ends**: every page but the homepage shares one small nav (Home, Case studies, Research, CV, Contact, with the page you are on marked) and ends with a way to reach Moses: his address, the contact form and the CV. The pages built on `carbon-ai.css` have the homepage's light theme and its switch, and keep the reader's choice from page to page (`theme.js`, before the first paint); with nothing chosen they follow the system's setting, with or without JavaScript. The homepage follows it only with JavaScript: without, it stays dark, because following the system there would put a second copy of every light-theme rule in its first view. The text-only field report and the 404 page take the nav and the call to action as plain lines, and no script
@@ -319,7 +319,7 @@ CI uses Node 22.
 | `npm run build:check` | every generated page still matches `content/` |
 | `npm run fonts:check` | the committed fonts still hash to their manifest and every stylesheet's `@font-face` block is current |
 | `npm run lint:html` | every page is valid HTML ([html-validate](https://html-validate.org/)'s recommended rules; the two relaxations are explained in `.htmlvalidate.cjs`) |
-| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty-two listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
+| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty-three listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
 | `npm run map:check` | the committed `journey-map.svg` still matches its generator |
 | `npm run budget` | the weights this README quotes, and that its budget tables still say what the script measures (see [Performance](#performance)) |
 | `npm run smoke` | every page in a real browser: no errors (nothing the Content-Security-Policy refuses, either), no failed or off-origin requests, one policy on every page ahead of its scripts, an inline script and an `on…=""` attribute put into The Brief refused while its own scripts run, only the origin sent as `Referer` off the site, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; The Brief (a mismatched ad graded honestly, nothing sent and no word of the ad in any request or in its link, usable by keys, its shared link rebuilding the same fit and dossier, the reader's own result reloaded or come back to not taken for a shared link, printed as one A4 page for the samples and ordinary ads and the contact line and address on the first page of a longer one, a sample counted as a sample alone, nothing sideways at 320–430px); the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
@@ -544,6 +544,15 @@ The suites, and the failure each one exists to prevent:
   fails it once a card's words (a note retitled, a page's `og:title`, the
   role in `profile.json`) have moved on without a new render, or a card was
   replaced by hand.
+- **`images.test.js`** — the photos (see [The photos](#the-photos)): every
+  WebP and AVIF in `assets/img/` is the file `assets/img/manifest.json`
+  describes, by hash and by shape, each one made scored at an SSIM of 0.98
+  or more against its original with no colour moved, each AVIF copy a tenth
+  lighter than the WebP it stands in for, and each drawn by a page; every
+  `url()` in a stylesheet names a file that is there; the hero's two
+  preloads fetch the file `style.css` draws in that window, with no
+  `fetchpriority`, and its later slides draw nothing until the rotation
+  asks.
 - **`apps-script.test.js`** — the contact form's backend
   (`google-apps-script/Code.gs`), run in a VM with stand-ins for Google's
   services: both ways in (the JSON post and the JavaScript-free form post,
@@ -1294,9 +1303,9 @@ To change the color scheme, edit the CSS variables in `style.css`:
 - Add or remove projects, experiences, and skills as needed
 
 ### Images
-- All published images live in `assets/img/` as WebP; keep new ones under ~200 KB (e.g. `npx sharp-cli -i photo.jpg -o assets/img/photo.webp resize 900`)
+- All published images live in `assets/img/` as WebP; keep new ones under ~180 KB (e.g. `npx sharp-cli -i photo.jpg -o assets/img/photo.webp resize 900`), commit the photo, then run `npm run images` to re-encode it and record it (see [The photos](#the-photos))
 - The link previews in `assets/og/` are drawn, not photographed: `npm run og` (see [Preview images](#preview-images))
-- Hero backgrounds use the `-hero.webp` variants (1600 px wide)
+- Hero backgrounds use the `-hero.webp` variants (1600 px wide), and their `-hero-800.avif` copies below 600px
 - The journey map is generated, not drawn: edit `scripts/generate-journey-map.js` and re-run it to change stops
 
 ### Custom domain (recommended)
@@ -1333,10 +1342,11 @@ did.
 <!-- BUDGET-TABLE:START — generated by scripts/check-budget.js (npm run budget -- --readme). Do not edit by hand. -->
 | Budget | Measured | Ceiling |
 |---|---|---|
-| First view of the homepage, over the wire (fonts included) | ~274 KB | 288 KB |
+| First view of the homepage on a desktop, over the wire (fonts included) | ~258 KB | 272 KB |
+| First view of the homepage on a phone, over the wire (fonts included) | ~216 KB | 227 KB |
 | Everything a full visit adds on demand (modules, scripts, map) | ~58 KB | 72 KB |
-| Largest single image | ~200 KB | 210 KB |
-| Every image in the repository | ~3.41 MB | 3.5 MB |
+| Largest single image | ~180 KB | 189 KB |
+| Every image in the repository | ~3.39 MB | 3.5 MB |
 | Recorded narration: Moses's introduction (sized for his 60–90 s take) | 0 KB | 800 KB |
 | Text-only field report, the HTML file (the size the footer quotes) | ~11 KB | 11 KB |
 | Text-only field report, over the wire (with its visit counter) | ~7 KB | 8 KB |
@@ -1364,7 +1374,8 @@ than the old one and smaller than the old truth.
 JS are counted gzipped — what a visitor actually downloads — while images and
 fonts are counted as-is. The first view is `index.html`, its stylesheet, the
 core script, the visit counter, the four font files, the icon and the one
-preloaded hero image. Everything else is fetched only when it is reached: the
+preloaded hero image: the 1600px WebP on a desktop, its 800px AVIF copy on
+a phone, which is why each has a budget. Everything else is fetched only when it is reached: the
 journey map on the first scroll, the portrait and the six project photos as
 you get to them (a 480px copy wherever that is enough), a case study's photos
 when its row is opened, the remaining hero
@@ -1476,6 +1487,48 @@ npx lighthouse https://moseskolleh.github.io/ --view
   - The hero rotation stops in hidden tabs and once the hero has scrolled away
   - Sections are laid out and painted only as they near the screen (`content-visibility: auto`, where the browser anchors scrolling; a section the reader has passed stays drawn); every looping animation runs on transform and opacity, which the compositor handles alone, and pauses out of view and in hidden tabs. Measured at 4× CPU slowdown in Chromium (medians of 15 loads before, 10 after): layout on load 238 → 125 ms, the longest task 238 → 110 ms, and main-thread work while nobody touches the page 1,023 → 16 ms per 3 s at the top and 1,250 → 7 ms mid-page; `npm run smoke` holds the idle figure under a ceiling
   - Intrinsic `width`/`height` on every image, so nothing shifts as they arrive
+
+### The photos
+
+A phone fetched the hero's 1600px photo, the same file as a desktop and
+about half of its first view, to draw behind an overlay that lets at most
+22% of it through; and most photos had been saved at a higher quality than
+anyone can see. `npm run images` (`scripts/build-images.py`) does three
+things, each held to one test of likeness: an SSIM of 0.98 or more (luma,
+the standard 11×11 Gaussian window) against the photo as first committed,
+with no colour channel's mean moved by more than one level. Looked at side
+by side at twice their size, files at 0.98 could not be told from the
+originals; at 0.97 the finest texture had begun to smooth.
+
+- **Every WebP re-encoded** to the lowest quality that passes, where that
+  is at least 5% lighter: 34 of 36, 3.22 MB to 2.80 MB, which every browser
+  downloads, old or new.
+- **An 800px AVIF copy of each hero photo**, drawn below 600px wide and
+  preloaded there in place of the full size (`style.css`, `.hero-bg-1` to
+  4; the preload's media query is the stylesheet's, so a window fetches
+  one file). A browser that does not read AVIF gets the full-size WebP, as
+  every phone did before: an 800px WebP as like its source weighs 69–88 KB,
+  and four would not fit the image budget.
+- **AVIF beside a WebP only where it is a tenth lighter at the same
+  likeness**, for the photos the homepage draws: the fourth hero photo and
+  the portrait. Measured this way AVIF seldom pays on a photo that was a
+  WebP already, since a WebP re-encode keeps much of the original's own
+  pattern; it does pay on a freshly resized copy.
+
+The images budget counts every file, a WebP and its AVIF copy both, so the
+copies (0.40 MB) were paid for out of the re-encoding, and the repository's
+images fell from 3.41 MB to 3.39 MB. `assets/img/manifest.json` records each
+file's quality, score and hash and its original's git blob, so a second run
+starts from the original rather than re-encoding a re-encode, and
+`tests/images.test.js` fails on a photo replaced by hand or added without a
+run. The hero's preload carries no `fetchpriority`: in Chromium the largest
+paint is the hero's words, never its photo, at 1440×900 and 390×844, with
+the network and CPU throttled or not.
+
+```bash
+npm run images            # re-encode and write the copies (Python 3, Pillow 11.2+ with AVIF, numpy, git)
+npm run images -- --plan  # say what it would do; write nothing
+```
 
 ### Fonts
 

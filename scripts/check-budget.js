@@ -78,10 +78,28 @@ const MB = 1024 * 1024;
 // so the ratchet and the "you could lower" hints leave it where it is.
 // ------------------------------------------------------------------
 const BUDGETS = {
+    // Lowered from 288 KB to what it measured plus 5% once the hero's photo
+    // was re-encoded (scripts/build-images.py: 131 KB to 115 KB, as like
+    // the original as an SSIM of 0.98 says).
     criticalWire: {
-        label: 'First view of the homepage, over the wire (HTML + CSS + JS gzipped, the fonts, and eagerly-loaded images)',
-        max: 288 * KB,
-        readme: 'First view of the homepage, over the wire (fonts included)'
+        label: 'First view of the homepage on a desktop (1440×900), over the wire (HTML + CSS + JS gzipped, the fonts, and eagerly-loaded images)',
+        max: 272 * KB,
+        readme: 'First view of the homepage on a desktop, over the wire (fonts included)'
+    },
+    // The same page in a phone's window (390×844), which differs from the
+    // desktop's by its hero photo alone: an 800px AVIF copy (style.css,
+    // .hero-bg-1), in a browser that reads AVIF, as every current one does;
+    // one that does not fetches the desktop's photo, as every phone did
+    // before. One budget for the heavier view would let a phone go back to
+    // the desktop's photo, or fetch both, with nothing failing, so the
+    // phone has its own. Set when the copy was made (October 2026) at its
+    // measure plus 5%, as the ratchet would set it: a new budget, not a
+    // raised one. `npm run smoke` loads the page at 390×844 and holds what
+    // it fetches to this estimate, as it does the desktop's.
+    criticalPhoneWire: {
+        label: 'First view of the homepage on a phone (390×844), over the wire (the same, with the 800px hero)',
+        max: 227 * KB,
+        readme: 'First view of the homepage on a phone, over the wire (fonts included)'
     },
     // What a visit fetches after arriving, if it uses everything: the
     // on-demand modules, the narration scripts and AI data behind them, the
@@ -92,11 +110,24 @@ const BUDGETS = {
         max: 72 * KB,
         readme: 'Everything a full visit adds on demand (modules, scripts, map)'
     },
+    // Lowered from 210 KB when the photos were re-encoded (October 2026):
+    // the heaviest, the fourth hero photo at 200 KB, came to 169 KB, and
+    // the heaviest now is a case study's at 180 KB.
     largestImage: {
         label: 'Largest single image',
-        max: 210 * KB,
+        max: 189 * KB,
         readme: 'Largest single image'
     },
+    // Every file: a WebP and its AVIF copy count twice, though a browser
+    // fetches one of them. A copy costs the repository its whole weight to
+    // save a visitor a part of another's, so the AVIF and phone-sized copies
+    // were paid for here rather than by a new way of counting: every WebP
+    // was re-encoded to the lowest quality that still scores an SSIM of 0.98
+    // against its original (scripts/build-images.py), 3.22 MB to 2.80 MB,
+    // which every browser downloads too, and the six copies (0.40 MB) came
+    // out of that. The total fell, 3.41 MB to 3.39 MB. AVIF is offered only
+    // where it was a tenth lighter than the WebP at the same likeness: the
+    // hero's phone copies, the fourth hero photo and the portrait.
     allImages: {
         label: 'Every image in the repository',
         max: 3.5 * MB,
@@ -216,6 +247,12 @@ const PAGE_BUDGETS = {
     'notes/*.html': 'notesWire',
     'stats.html': 'statsWire',
     'field-report.html': 'fieldReportWire'
+};
+// The same, for a page whose first view on a phone differs from the
+// desktop's (a preload with a media query): measured at 390×844, in smoke
+// as here.
+const PHONE_BUDGETS = {
+    'index.html': 'criticalPhoneWire'
 };
 
 // ------------------------------------------------------------------
@@ -348,8 +385,28 @@ const wireOf = (rel) => (isText(rel) ? gzipOf(rel) : sizeOf(rel));
 // dropping loading="lazy" from an image shows up here instead of quietly
 // making the README wrong.
 // ------------------------------------------------------------------
-function criticalAssets(page = 'index.html') {
+// A preload with a media query is fetched only in a window it matches: the
+// homepage preloads its hero's 800px copy for a phone and the 1600px one
+// for anything wider, and a browser fetches one. Only the width features
+// the site uses are read; any other query is an error rather than a guess,
+// since a guess would be a first view counted with the wrong photo.
+function mediaMatches(media, width) {
+    if (!media || /^\s*all\s*$/i.test(media)) return true;
+    return media.split(',').some((query) => query.split(/\band\b/i).every((part) => {
+        const m = part.trim().match(/^\(\s*(min|max)-width\s*:\s*(\d+(?:\.\d+)?)px\s*\)$/i);
+        if (!m) throw new Error(`check-budget.js cannot read the media query "${media}"`);
+        return m[1].toLowerCase() === 'min' ? width >= +m[2] : width <= +m[2];
+    }));
+}
+
+// What the first view fetches at one window size (a key of VIEWPORTS; the
+// desktop's unless said), in a browser that reads AVIF, as every current
+// one does: a preload of an AVIF is fetched, and one that does not read it
+// skips that preload and fetches the WebP its stylesheet names instead
+// (style.css, .hero-bg-1), which the estimate does not count.
+function criticalAssets(page = 'index.html', viewport = '1440x900') {
     const html = fs.readFileSync(path.join(ROOT, page), 'utf8');
+    const width = VIEWPORTS[viewport].width;
     const assets = [page];
     // An address in a page in notes/ ("../carbon-ai.css") is the page's
     // folder's; in a stylesheet, the stylesheet's (from), and either is
@@ -371,10 +428,12 @@ function criticalAssets(page = 'index.html') {
         if (m) add(m[1]);
     });
 
-    // Anything explicitly preloaded is, by definition, on the critical path.
+    // Anything explicitly preloaded is, by definition, on the critical path,
+    // in a window its media query matches.
     (html.match(/<link[^>]+rel=["']preload["'][^>]*>/gi) || []).forEach((tag) => {
         const m = tag.match(/href=["']([^"']+)["']/i);
-        if (m) add(m[1]);
+        const media = tag.match(/\smedia=["']([^"']+)["']/i);
+        if (m && mediaMatches(media && media[1], width)) add(m[1]);
     });
 
     // The icon: a browser asks for it on arrival, on every page. It is about
@@ -490,10 +549,11 @@ function measure() {
     const critical = criticalAssets().map((rel) => ({ rel, raw: sizeOf(rel), wire: wireOf(rel) }));
     const onDemand = onDemandAssets().map((rel) => ({ rel, raw: sizeOf(rel), wire: wireOf(rel) }));
     // null for a page this checkout does not have (an older one, by --root).
-    const pageWire = (page) => (sizeOf(page) === null ? null : criticalAssets(page).reduce((n, rel) => n + wireOf(rel), 0));
+    const pageWire = (page, viewport) => (sizeOf(page) === null ? null : criticalAssets(page, viewport).reduce((n, rel) => n + wireOf(rel), 0));
 
     const measured = {
         criticalWire: critical.reduce((n, a) => n + a.wire, 0),
+        criticalPhoneWire: pageWire('index.html', '390x844'),
         onDemand: onDemand.reduce((n, a) => n + a.wire, 0),
         caseStudiesWire: pageWire('case-studies.html'),
         statsWire: pageWire('stats.html'),
@@ -796,8 +856,17 @@ function report() {
         console.log(`    ${rel.padEnd(40)} ${note}`);
     };
 
-    console.log('\n  First view, asset by asset:\n');
+    console.log('\n  First view, asset by asset (1440×900):\n');
     critical.slice().sort((a, b) => b.wire - a.wire).forEach(line);
+    // What a phone fetches instead, where a media query makes it differ.
+    const phone = criticalAssets('index.html', '390x844');
+    const desk = critical.map(a => a.rel);
+    const swapped = { out: desk.filter(r => !phone.includes(r)), in: phone.filter(r => !desk.includes(r)) };
+    if (swapped.out.length || swapped.in.length) {
+        console.log('\n  On a phone (390×844), in place of what is not fetched there:\n');
+        swapped.in.forEach(rel => line({ rel, raw: sizeOf(rel), wire: wireOf(rel) }));
+        swapped.out.forEach(rel => console.log(`    ${rel.padEnd(40)} not fetched`));
+    }
 
     console.log('\n  On demand, only when a feature is used:\n');
     onDemand.slice().sort((a, b) => b.wire - a.wire).forEach(line);
@@ -863,8 +932,8 @@ if (require.main === module) {
 }
 
 module.exports = {
-    BUDGETS, PAGE_BUDGETS, LENGTH, VIEWPORTS, RATCHET, SCHEMA, README_TABLES, MODULE_TABLE,
-    measure, criticalAssets, onDemandAssets, moduleRows, sitePages, covers, keyFor, lengthHeld,
+    BUDGETS, PAGE_BUDGETS, PHONE_BUDGETS, LENGTH, VIEWPORTS, RATCHET, SCHEMA, README_TABLES, MODULE_TABLE,
+    measure, criticalAssets, mediaMatches, onDemandAssets, moduleRows, sitePages, covers, keyFor, lengthHeld,
     budgetJson, ceilingsOf, readLengths, heldLength, hints, ratchetTarget, couldLowerTo, ratchetSource, loadSource,
     readmeTables, renderReadme, fmtCeiling
 };

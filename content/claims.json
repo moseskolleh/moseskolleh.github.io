@@ -25,7 +25,7 @@
     "value      the figure as the site writes it: \"164\", \"70%\", \"2–8×\"",
     "unit       what it counts or measures, as claims.html says it after the",
     "           value; no other figure in it",
-    "forms      optional; other ways the generated pages write it (\"~274\",",
+    "forms      optional; other ways the generated pages write it (\"~258\",",
     "           or in words with what it counts: \"team of six\"); a form in",
     "           words is marked on its number alone",
     "spoken     optional; how the narration says it, in words, with what",
@@ -208,9 +208,9 @@
     },
     {
       "id": "first-view",
-      "value": "274",
-      "unit": "KB over the wire: the homepage's first view, fonts included",
-      "forms": ["~274"],
+      "value": "258",
+      "unit": "KB over the wire: the homepage's first view on a desktop, fonts included",
+      "forms": ["~258"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
       "check": "https://github.com/moseskolleh/moseskolleh.github.io#performance"

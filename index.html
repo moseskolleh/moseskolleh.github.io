@@ -141,8 +141,18 @@
     </script>
     <!-- JSON-LD:END -->
 
-    <!-- Preload the hero (LCP) image so first paint doesn't wait to discover it in CSS -->
-    <link rel="preload" as="image" href="assets/img/groundwater-mapping-1-hero.webp" fetchpriority="high">
+    <!-- The hero's first photo, preloaded so it need not wait for the
+         stylesheet to be read: the file style.css draws there (.hero-bg-1)
+         in each window, so a window fetches one, never both. Under 600px
+         that is the 800px AVIF copy, which a browser that cannot read AVIF
+         skips (type), drawing the full-size WebP once style.css names it.
+         No fetchpriority: the photo is never the largest paint. Measured
+         in Chromium 141 (PerformanceObserver, largest-contentful-paint,
+         three loads each, unthrottled and at slow 4G with 4x CPU
+         slowdown): the hero's name, "Moses Kolleh", at 1440x900, and its
+         description at 390x844, both text, which waits on the fonts. -->
+    <link rel="preload" as="image" type="image/avif" href="assets/img/groundwater-mapping-1-hero-800.avif" media="(max-width: 599px)">
+    <link rel="preload" as="image" type="image/webp" href="assets/img/groundwater-mapping-1-hero.webp" media="(min-width: 600px)">
     <!-- The three typefaces are self-hosted (assets/fonts/, built by scripts/build-fonts.js):
          no request leaves this origin, and the bytes are counted in the budget. -->
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/space-grotesk-latin.woff2" crossorigin>
@@ -227,10 +237,10 @@
     <!-- Hero -->
     <header id="home" class="hero">
         <div class="hero-background" aria-hidden="true">
-            <div class="hero-bg-slide active" style="background-image: url('assets/img/groundwater-mapping-1-hero.webp');"></div>
-            <div class="hero-bg-slide" data-bg="assets/img/wuppertal-resilience-1-hero.webp"></div>
-            <div class="hero-bg-slide" data-bg="assets/img/coastal-pollution-1-hero.webp"></div>
-            <div class="hero-bg-slide" data-bg="assets/img/sustainable-ai-2-hero.webp"></div>
+            <div class="hero-bg-slide hero-bg-1 active"></div>
+            <div class="hero-bg-slide hero-bg-2"></div>
+            <div class="hero-bg-slide hero-bg-3"></div>
+            <div class="hero-bg-slide hero-bg-4"></div>
         </div>
         <div class="hero-overlay" aria-hidden="true"></div>
         <div class="contour-layer" aria-hidden="true"></div>
@@ -370,7 +380,7 @@
             <div class="about-grid">
                 <div class="about-portrait reveal">
                     <div class="portrait-frame">
-                        <img src="assets/img/profile.webp" alt="Moses Kolleh Sesay — Sustainability &amp; Climate Analyst" loading="lazy" width="640" height="960" decoding="async">
+                        <picture><source type="image/avif" srcset="assets/img/profile.avif"><img src="assets/img/profile.webp" alt="Moses Kolleh Sesay — Sustainability &amp; Climate Analyst" loading="lazy" width="640" height="960" decoding="async"></picture>
                         <div class="portrait-ring" aria-hidden="true"></div>
                     </div>
                     <div class="portrait-meta">
@@ -975,7 +985,7 @@
                     (&asymp;<span data-claim="web-carbon">0.36</span>&nbsp;g CO&#8322;e per MB, global average grid). Comparison point: the median web page ships &asymp;<span data-claim="median-page">2.5</span>&nbsp;MB
                     (<a href="https://httparchive.org/reports/page-weight" target="_blank" rel="noopener">HTTP Archive</a>).
                     A leading &ldquo;+&rdquo; means a request to another site couldn&rsquo;t be measured (the visit count or a message, both sent to the site&rsquo;s Apps Script), so the true figure is a touch higher &mdash; never lower.
-                    Before this redesign, this page loaded ~<span data-claim="old-images">22</span>&nbsp;MB of images on arrival. A first view now costs about <span data-claim="first-view">274</span>&nbsp;KB over the wire, fonts included &mdash; text compressed, one hero image, everything else loaded only if you go looking for it. That figure is a budget the test suite enforces, not a claim in a README.
+                    Before this redesign, this page loaded ~<span data-claim="old-images">22</span>&nbsp;MB of images on arrival. A first view now costs about <span data-claim="first-view">258</span>&nbsp;KB over the wire on a desktop, less on a phone, fonts included &mdash; text compressed, one hero image, everything else loaded only if you go looking for it. That figure is a budget the test suite enforces, not a claim in a README.
                     Want the logical extreme? The <a href="field-report.html">text-only field report</a> is the whole portfolio in <span data-claim="field-report-kb">11</span>&nbsp;KB.</p>
                 </div>
 

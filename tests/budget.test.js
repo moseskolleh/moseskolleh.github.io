@@ -274,6 +274,30 @@ try {
         assert(!!twice && /more than one row/.test(twice.message), 'Modules: a file in two rows stops it too');
     }
 
+    // --- A first view per window ---------------------------------------------
+    // The homepage preloads its hero's 800px copy under 600px and the
+    // full-size photo from 600px, and a browser fetches the one its window
+    // matches; counted both ways, a phone's first view would carry both.
+    {
+        const mq = budget.mediaMatches;
+        assert(mq('(max-width: 599px)', 390) && !mq('(max-width: 599px)', 1440) && mq('(min-width: 600px)', 1440) && !mq('(min-width: 600px)', 390),
+            'Media: min-width and max-width read against a window\'s width');
+        assert(mq('', 390) && mq('all', 390) && mq('(min-width: 300px) and (max-width: 500px)', 390) && !mq('(min-width: 400px) and (max-width: 500px)', 390)
+            && mq('(max-width: 100px), (min-width: 300px)', 390), 'Media: none, all, "and" and a list of queries');
+        let unread = null;
+        try { mq('(orientation: portrait)', 390); } catch (e) { unread = e; }
+        assert(!!unread && /cannot read the media query/.test(unread.message), 'Media: a query it cannot read is an error, not a guess');
+        const desk = budget.criticalAssets('index.html', '1440x900');
+        const phone = budget.criticalAssets('index.html', '390x844');
+        const heroes = (list) => list.filter(a => /-hero/.test(a));
+        assert(JSON.stringify(heroes(desk)) === '["assets/img/groundwater-mapping-1-hero.webp"]' && JSON.stringify(heroes(phone)) === '["assets/img/groundwater-mapping-1-hero-800.avif"]',
+            `First view: one hero photo in each window, the full size on a desktop and the 800px copy on a phone (${heroes(desk)}; ${heroes(phone)})`);
+        assert(desk.filter(a => !/-hero/.test(a)).join() === phone.filter(a => !/-hero/.test(a)).join(), 'First view: the two windows fetch the same files besides');
+        const m = budget.measure().measured;
+        assert(m.criticalPhoneWire < m.criticalWire && budget.PHONE_BUDGETS['index.html'] === 'criticalPhoneWire',
+            `First view: the phone's, measured as its own budget, is the lighter (${Math.round(m.criticalPhoneWire / KB)} KB against ${Math.round(m.criticalWire / KB)} KB)`);
+    }
+
     // --- The report and its hints ------------------------------------------
     {
         const json = budget.budgetJson({ criticalWire: 200 * KB, onDemand: 71 * KB, introAudio: 0, statsWire: 10 * KB });
