@@ -52,14 +52,10 @@
     --text-dim: #8f8f8f;
     --accent-color: #7CFC00;
     --hover-color: #9FFF4D;
-    /* Feature accents — theme-aware so they keep contrast in light mode */
+    /* A feature accent, theme-aware so it keeps contrast in light mode */
     --accent-amber: #f2b705;
-    --accent-blue: #2ea3e0;
-    --accent-salmon: #e07a5f;
-    --accent-emerald: #3ad07a;
     --line-color: rgba(124, 252, 0, 0.18);
     --line-soft: rgba(124, 252, 0, 0.08);
-    --transition: all 0.3s ease;
     --box-shadow: 0 8px 30px rgba(124, 252, 0, 0.1);
     --border-radius: 12px;
     --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
@@ -81,11 +77,8 @@ html.light-mode {
     --text-dim: #5f635a;
     --accent-color: #1a7a1a;
     --hover-color: #146414;
-    /* Darker accent variants that clear 4.5:1 on the light background */
+    /* A darker accent that clears 4.5:1 on the light background */
     --accent-amber: #8a6100;
-    --accent-blue: #1c6fa6;
-    --accent-salmon: #b0442c;
-    --accent-emerald: #127a3f;
     --line-color: rgba(34, 139, 34, 0.25);
     --line-soft: rgba(34, 139, 34, 0.1);
     --box-shadow: 0 8px 30px rgba(34, 139, 34, 0.1);
@@ -109,9 +102,6 @@ html.light-mode {
         --accent-color: #1a7a1a;
         --hover-color: #146414;
         --accent-amber: #8a6100;
-        --accent-blue: #1c6fa6;
-        --accent-salmon: #b0442c;
-        --accent-emerald: #127a3f;
         --line-color: rgba(34, 139, 34, 0.25);
         --line-soft: rgba(34, 139, 34, 0.1);
         --box-shadow: 0 8px 30px rgba(34, 139, 34, 0.1);
@@ -132,9 +122,12 @@ html.light-mode {
     display: none !important;
 }
 
+/* Jumps and Tab stops land below the fixed 72px bar, not under it: the
+   first stop after the skip link was hidden there. */
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    scroll-padding-top: 72px;
 }
 
 body {
@@ -181,7 +174,7 @@ section {
     position: relative;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 700;
     line-height: 1.15;
@@ -305,7 +298,7 @@ html.js .preloader {
     -webkit-backdrop-filter: blur(12px);
     z-index: 1000;
     border-bottom: 1px solid var(--line-soft);
-    transition: var(--transition);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 html.light-mode .navbar {
@@ -314,12 +307,6 @@ html.light-mode .navbar {
 
 .navbar.scrolled {
     box-shadow: 0 2px 24px rgba(124, 252, 0, 0.12);
-}
-
-/* Jumps and Tab stops land below the fixed 72px bar, not under it: the
-   first stop after the skip link was hidden there. */
-html {
-    scroll-padding-top: 72px;
 }
 
 .nav-container {
@@ -385,7 +372,7 @@ html {
     text-transform: uppercase;
     color: var(--text-secondary);
     text-decoration: none;
-    transition: var(--transition);
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     position: relative;
     padding: 6px 0;
 }
@@ -398,7 +385,7 @@ html {
     width: 0;
     height: 2px;
     background: var(--primary-green);
-    transition: var(--transition);
+    transition: width 0.3s ease, background-color 0.3s ease;
 }
 
 .nav-link:hover,
@@ -413,7 +400,7 @@ html {
 
 /* The one button in the bar, in outline: filled, it was a second green
    button on the first screen beside the hero's primary one. Filled on
-   hover, its text then as on .btn-primary. */
+   hover, as .btn-primary is (below). */
 .nav-link.contact-btn {
     border: 1px solid var(--primary-green);
     color: var(--primary-green);
@@ -422,15 +409,6 @@ html {
 }
 
 .nav-link.contact-btn::after { display: none; }
-
-.nav-link.contact-btn:hover {
-    background: var(--primary-green);
-    color: #051000;
-}
-
-html.light-mode .nav-link.contact-btn:hover {
-    color: #fff;
-}
 
 .nav-toggle {
     display: none;
@@ -450,7 +428,7 @@ html.light-mode .nav-link.contact-btn:hover {
     width: 26px;
     height: 2px;
     background: var(--text-primary);
-    transition: var(--transition);
+    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
 }
 
 .nav-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -471,7 +449,7 @@ html.light-mode .nav-link.contact-btn:hover {
     font-size: 1.05rem;
     line-height: 1;
     cursor: pointer;
-    transition: var(--transition);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .theme-toggle:hover {
@@ -708,14 +686,9 @@ html.light-mode .hero-availability {
     padding: 8px 16px;
     border-radius: 999px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: border-color 0.3s ease, color 0.3s ease;
     font-size: 0.72rem;
     letter-spacing: 0.08em;
-}
-
-.receipt-btn:hover {
-    border-color: var(--primary-green);
-    color: var(--primary-green);
 }
 
 .receipt-panel {
@@ -911,7 +884,7 @@ html.light-mode .ydi-hint { background: rgba(255, 255, 255, 0.85); }
     text-decoration: none;
     border-bottom: 1px dashed var(--line-color);
     padding-bottom: 1px;
-    transition: var(--transition);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 .play-index a:hover { color: var(--primary-green); border-bottom-color: var(--primary-green); }
 
@@ -956,7 +929,7 @@ html.light-mode .ydi-hint { background: rgba(255, 255, 255, 0.85); }
     text-decoration: underline;
     text-decoration-color: var(--line-color);
     text-underline-offset: 5px;
-    transition: var(--transition);
+    transition: color 0.3s ease, text-decoration-color 0.3s ease;
 }
 
 .hero-cv .icon {
@@ -979,19 +952,21 @@ html.light-mode .ydi-hint { background: rgba(255, 255, 255, 0.85); }
     border-radius: 999px;
     border: none;
     cursor: pointer;
-    transition: var(--transition);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
     display: inline-flex;
     align-items: center;
     gap: 10px;
 }
 
-.btn-primary {
+.btn-primary,
+.nav-link.contact-btn:hover {
     background: var(--primary-green);
     color: #051000;
 }
 
 /* Near-black on the light theme's darker green is 3.6:1; white is 5.5:1. */
-html.light-mode .btn-primary {
+html.light-mode .btn-primary,
+html.light-mode .nav-link.contact-btn:hover {
     color: #fff;
 }
 
@@ -1092,7 +1067,7 @@ html.light-mode .hero-photo-caption {
 
 /* On narrow screens the centred cue would cross the hero's figures, which
    on a phone reach the foot of the first screen. */
-@media (max-width: 900px) {
+@media (max-width: 899px) {
     .scroll-indicator {
         display: none;
     }
@@ -1101,7 +1076,7 @@ html.light-mode .hero-photo-caption {
 /* Where it is shown (a short window hides it too, below), the hero keeps
    the cue's 70px clear of its figures: at 1024x881 the line ran through
    "Continents studied and worked on". */
-@media (min-width: 901px) and (min-height: 881px) {
+@media (min-width: 900px) and (min-height: 881px) {
     .hero { padding-bottom: 76px; }
 }
 
@@ -1243,12 +1218,7 @@ html.light-mode .hero-photo-caption {
     border-radius: var(--border-radius);
     padding: 26px 30px;
     flex: 1;
-    transition: var(--transition);
-}
-
-.journey-card:hover {
-    border-color: var(--line-color);
-    transform: translateX(6px);
+    transition: border-color 0.3s ease, transform 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .journey-card-current {
@@ -1436,8 +1406,6 @@ html.light-mode .hero-photo-caption {
     opacity: 0.85;
 }
 
-.corelog-item:first-of-type .corelog-strata { border-top: 2px solid var(--primary-green); }
-
 /* rock textures, drawn with gradients — no images shipped */
 .strata-synthetic {
     background:
@@ -1468,10 +1436,6 @@ html.light-mode .hero-photo-caption {
     margin-bottom: 12px;
 }
 
-.corelog-item:last-of-type .timeline-content {
-    margin-bottom: 0;
-}
-
 .corelog-foot {
     margin-top: 16px;
     text-align: center;
@@ -1487,9 +1451,11 @@ html.light-mode .hero-photo-caption {
     border: 1px solid var(--line-soft);
     border-radius: var(--border-radius);
     padding: 18px 24px;
-    transition: var(--transition);
+    transition: border-color 0.3s ease, transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
+/* A journey stop's card slides the same way. */
+.journey-card:hover,
 .timeline-content:hover {
     border-color: var(--line-color);
     transform: translateX(6px);
@@ -1869,7 +1835,7 @@ html.js .timeline-date { padding-right: 64px; }
     font-size: 0.86rem;
     color: var(--text-secondary);
     text-decoration: none;
-    transition: var(--transition);
+    transition: color 0.3s ease;
 }
 
 a.toolkit-proof:hover {
@@ -2026,7 +1992,7 @@ a.toolkit-proof:hover {
     color: var(--text-secondary);
 }
 
-@media (max-width: 560px) {
+@media (max-width: 599px) {
     .skills-panel { padding: 20px 18px; }
 }
 
@@ -2066,7 +2032,7 @@ a.toolkit-proof:hover {
     padding: 14px 20px;
     text-decoration: none;
     color: inherit;
-    transition: var(--transition);
+    transition: border-color 0.3s ease, transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 .contact-card:hover {
@@ -2120,7 +2086,7 @@ a.toolkit-proof:hover {
     color: var(--text-primary);
     font-size: 1.2rem;
     text-decoration: none;
-    transition: var(--transition);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 }
 
 .social-links a:hover {
@@ -2168,7 +2134,7 @@ a.toolkit-proof:hover {
     color: var(--text-primary);
     font-family: var(--font-body);
     font-size: 0.95rem;
-    transition: var(--transition);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     resize: vertical;
 }
 
@@ -2186,7 +2152,7 @@ a.toolkit-proof:hover {
     color: var(--text-secondary);
     font-size: 0.95rem;
     pointer-events: none;
-    transition: var(--transition);
+    transition: top 0.3s ease, left 0.3s ease, font-size 0.3s ease, letter-spacing 0.3s ease, color 0.3s ease, background-color 0.3s ease;
     background: transparent;
     padding: 0 4px;
 }
@@ -2264,7 +2230,7 @@ html.light-mode .form-status.error {
 /* At the very end of the page back to top cannot be scrolled clear, and on
    narrow screens it sat on the low-energy switch and the terminal button.
    The footer leaves room under them for its 80px corner. */
-@media (max-width: 760px) {
+@media (max-width: 767px) {
     .footer {
         padding-bottom: 100px;
     }
@@ -2335,7 +2301,7 @@ html.light-mode .form-status.error {
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
-    transition: var(--transition);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     z-index: 999;
     /* Gone at once for a tap, not after the fade: it steps aside for
        controls, and a fading button would still catch their taps. */
@@ -2450,8 +2416,6 @@ html:not(.js) .needs-js {
     z-index: 2;
 }
 
-.nojs-note a { color: var(--primary-green); }
-
 html.js .nojs-note { display: none; }
 
 /* ===================================
@@ -2478,6 +2442,8 @@ html.js .nojs-note { display: none; }
 /* ===================================
    RESPONSIVE
    =================================== */
+/* Every width a query uses, here and above, is one of the breakpoints
+   tests/css.test.js names: min-width: N from it up, max-width: N-1 below. */
 /* Below 900px the bar's ~810px leave too little to spare, so the hamburger
    takes over (the theme switch and Listen stay in the bar). */
 @media (max-width: 899px) {
@@ -2568,7 +2534,7 @@ html.js .nojs-note { display: none; }
     }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
     .about-grid {
         grid-template-columns: minmax(0, 1fr);
         gap: 26px;
@@ -2609,7 +2575,7 @@ html.js .nojs-note { display: none; }
     }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 899px) {
     .skills-grid,
     .contact-content {
         grid-template-columns: minmax(0, 1fr);
@@ -2621,7 +2587,7 @@ html.js .nojs-note { display: none; }
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     section {
         padding: 44px 0;
     }
@@ -3038,7 +3004,8 @@ html.light-mode .journey-map-readout {
     opacity: 0.8;
 }
 
-.ecoprompt .section-description a,
+/* A certificate's Verify link and a testimonial's source are drawn only
+   when content/ gives one (build-content.js). */
 .eco-footnote a,
 .cert-meta a,
 .testimonial a {
@@ -3192,11 +3159,6 @@ html.light-mode .impact-seg-c { background: rgba(34, 139, 34, 0.3); }
     line-height: 1;
 }
 
-.carbon-badge-info:hover {
-    color: var(--primary-green);
-    border-color: var(--primary-green);
-}
-
 .carbon-method {
     max-width: 620px;
     margin: 14px auto 0;
@@ -3227,12 +3189,7 @@ html.light-mode .impact-seg-c { background: rgba(34, 139, 34, 0.3); }
     text-transform: uppercase;
     padding: 8px 16px;
     cursor: pointer;
-    transition: var(--transition);
-}
-
-.eco-mode-toggle:hover {
-    border-color: var(--primary-green);
-    color: var(--primary-green);
+    transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
 }
 
 body.eco-mode .eco-mode-toggle {
@@ -3339,6 +3296,11 @@ body.eco-mode .hero-bg-slide:not(.active) {
     transition: border-color 0.3s ease, color 0.3s ease;
 }
 
+/* The small outlined controls (the receipt, the badge's "i", low-energy
+   mode and the terminal) take the accent the same way on hover. */
+.receipt-btn:hover,
+.carbon-badge-info:hover,
+.eco-mode-toggle:hover,
 .terminal-toggle:hover {
     border-color: var(--primary-green);
     color: var(--primary-green);

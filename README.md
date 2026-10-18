@@ -319,7 +319,7 @@ CI uses Node 22.
 | `npm run build:check` | every generated page still matches `content/` |
 | `npm run fonts:check` | the committed fonts still hash to their manifest and every stylesheet's `@font-face` block is current |
 | `npm run lint:html` | every page is valid HTML ([html-validate](https://html-validate.org/)'s recommended rules; the two relaxations are explained in `.htmlvalidate.cjs`) |
-| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty-one listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
+| `npm run test:unit` | every `tests/*.test.js`, side by side, one process per suite, so a new suite runs the day it exists: the thirty-two listed below, and it ends by counting the assertions that passed, so no figure for them is kept here to go stale |
 | `npm run map:check` | the committed `journey-map.svg` still matches its generator |
 | `npm run budget` | the weights this README quotes, and that its budget tables still say what the script measures (see [Performance](#performance)) |
 | `npm run smoke` | every page in a real browser: no errors, no failed or off-origin requests, every on-demand module arrives when used, no axe-core violation at 1440×900 or 390×844 in either theme, and each budgeted page's measured first view no heavier than the budget claims, and every page no longer than its length budget at both sizes once it has settled; every page again with JavaScript off, and the homepage with `script.js` blocked and late; the skip link, Back, the theme switch (followed from page to page, and the system's setting with nothing chosen), back to top and the nav bar at every width, and every other page's shared nav and call to action at 320px, links to a game, a case study or Anatomy of a Prompt landing clear of that nav, and the nav not moving as its theme switch appears; the first screen's figures, caption, strip and primary action, as the strip is today and with every fact at the longest the validator accepts; the journey map pinned over none of its stop's text on a phone, and its delta's names clear of each other on a desktop; the listen control and its player; The Brief (a mismatched ad graded honestly, nothing sent and no word of the ad in any request or in its link, usable by keys, its shared link rebuilding the same fit and dossier, printed as one A4 page, nothing sideways at 320–430px); the case studies' two games, photo rows and lightbox; every drawing label at 11px or more on a phone, and inside its drawing; where jumps land while sections are drawn on demand, that reading back up after skipping ahead moves nothing, find-in-page and printing, which loops run, and how busy the idle page keeps the main thread at 4× CPU slowdown; the carbon-ai page's dropdowns and numbers; and the visit counter's one request, taken apart: exactly the documented fields, no cookie, no Referer, once per page view, and nothing under Do Not Track or Global Privacy Control or with JavaScript off (its own CI job; needs Chromium — `-- --browser firefox` runs it in Firefox, which CI also does) |
@@ -597,6 +597,13 @@ The suites, and the failure each one exists to prevent:
   the homepage's. `npm run smoke` follows the choice through the
   nav in a real browser, checks the system's setting with JavaScript off
   and on the homepage from its first frame, and every page at 320px.
+- **`css.test.js`** — the six stylesheets kept to what the pages use: a
+  selector that matches nothing on a page loading its sheet, nor anything a
+  script those pages run could make (the icon font's `i` rules outlived
+  it); a transition on `all`; an `@media` width that is not one of the
+  twelve named breakpoints, or one break spelled two ways (899, 900 and
+  901 were); a rule written twice; and a page that would declare the
+  typefaces twice, or not at all.
 - **`tooling.test.js`** — the machinery under the rest: the runner fails when
   any suite fails, keeps each suite's output in one block and counts the
   assertions that passed, `npm test` runs
