@@ -285,18 +285,16 @@ const initBackgroundSlideshow = () => {
     if (!slides.length) return;
     let currentSlide = 0;
 
-    // The first slide is fetched now; the rest only when the rotation is
-    // about to show them (150 KB each, for a picture eight seconds in: see
-    // check-budget.js on what the first view once paid for slide two), and
-    // only while it is running: hero on screen, tab visible, nobody having
-    // asked for calm.
+    // The first slide is drawn from the start; the rest only when the
+    // rotation is about to show them (up to 150 KB each, for a picture
+    // eight seconds in: see check-budget.js on what the first view once
+    // paid for slide two), and only while it is running: hero on screen,
+    // tab visible, nobody having asked for calm. Which file a slide draws,
+    // a phone's or a desktop's, AVIF or WebP, is style.css's to say
+    // (.hero-bg-N[data-loaded]), so the later slides follow the first's rule.
     const loadSlide = (index) => {
         const slide = slides[index];
-        if (!slide || slide.dataset.loaded) return;
-        const src = slide.getAttribute('data-bg');
-        if (!src) return;
-        slide.style.backgroundImage = `url('${src}')`;
-        slide.dataset.loaded = '1';
+        if (slide) slide.dataset.loaded = '1';
     };
     loadSlide(0);
 

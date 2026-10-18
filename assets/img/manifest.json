@@ -1,0 +1,1059 @@
+{
+  "about": "Written by scripts/build-images.py (npm run images). Do not edit by hand.",
+  "likeness": {
+    "metric": "SSIM of luma (Rec. 601), 11x11 Gaussian window, sigma 1.5, against the original as decoded",
+    "threshold": 0.98,
+    "colourShift": 1.0
+  },
+  "rules": {
+    "minRecode": 0.05,
+    "minAvif": 0.1,
+    "phoneWidth": 800,
+    "qualities": [
+      30,
+      95
+    ],
+    "webp": {
+      "method": 6
+    },
+    "avif": {
+      "speed": 4
+    }
+  },
+  "encoders": {
+    "pillow": "12.3.0",
+    "libwebp": "1.6.0",
+    "libavif": "1.4.2"
+  },
+  "images": [
+    {
+      "file": "assets/img/coastal-pollution-1-480.webp",
+      "original": {
+        "blob": "f467166801fa0de9331af0f62c36f647b545333e",
+        "bytes": 27536,
+        "sha256": "500772be9572ed407d5018f499bf0390ce2e34f8a3943e038c7489a2a7a2e7d9",
+        "width": 480,
+        "height": 360
+      },
+      "webp": {
+        "file": "assets/img/coastal-pollution-1-480.webp",
+        "width": 480,
+        "height": 360,
+        "quality": 58,
+        "bytes": 23768,
+        "sha256": "0f37f1ed45098c014cae7b904247133f0ccec2bbe321771d68767c5aa57fba76",
+        "ssim": 0.9801,
+        "colourShift": 0.11
+      },
+      "served": {
+        "bytes": 23768,
+        "sha256": "0f37f1ed45098c014cae7b904247133f0ccec2bbe321771d68767c5aa57fba76"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/coastal-pollution-1-hero.webp",
+      "original": {
+        "blob": "6a804989d98368f9fbf01e17c562b37ac1047e65",
+        "bytes": 127322,
+        "sha256": "1c150db7872eebf8404000aa95782130d84416d7a559246066122547eca771a3",
+        "width": 1600,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/coastal-pollution-1-hero.webp",
+        "width": 1600,
+        "height": 1200,
+        "quality": 55,
+        "bytes": 103610,
+        "sha256": "31ae212e9c156b7c0c584656d11fbb94a8ba49ee8028ee2f0677115f0d4998df",
+        "ssim": 0.9807,
+        "colourShift": 0.17
+      },
+      "served": {
+        "bytes": 103610,
+        "sha256": "31ae212e9c156b7c0c584656d11fbb94a8ba49ee8028ee2f0677115f0d4998df"
+      },
+      "copies": [
+        {
+          "file": "assets/img/coastal-pollution-1-hero-800.avif",
+          "width": 800,
+          "height": 600,
+          "quality": 62,
+          "bytes": 52735,
+          "sha256": "b2c7d955df558769dffefe4ff82b367b71dcc656e91ad118cf21d98e34cf0c30",
+          "ssim": 0.9801,
+          "colourShift": 0.93,
+          "against": "assets/img/coastal-pollution-1-hero.webp",
+          "saves": 0.491,
+          "webpWouldBe": 70894
+        }
+      ],
+      "notMade": [
+        {
+          "what": "an AVIF copy",
+          "bytes": 95738,
+          "why": "8% lighter than the WebP, under 10%"
+        }
+      ]
+    },
+    {
+      "file": "assets/img/coastal-pollution-1.webp",
+      "original": {
+        "blob": "f3fcb59bce396674bdcaffce2e10f680da94bc4b",
+        "bytes": 69058,
+        "sha256": "6005d0f9ed569672faf681e23a1f3935558fb8190a8d7bc4030424e7a88af020",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/coastal-pollution-1.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 62,
+        "bytes": 57430,
+        "sha256": "89c377add6504f0448592e722cece765c5db07e8656f827b1f8247ce114a88cb",
+        "ssim": 0.9803,
+        "colourShift": 0.2
+      },
+      "served": {
+        "bytes": 57430,
+        "sha256": "89c377add6504f0448592e722cece765c5db07e8656f827b1f8247ce114a88cb"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/coastal-pollution-2.webp",
+      "original": {
+        "blob": "8eb0ec992dab2ca73d06c86c2f19b151c58e99d2",
+        "bytes": 46986,
+        "sha256": "652c89b8a7c6201cd16b86bf293aa80fe37c53ec6cf0676a700ab24643594795",
+        "width": 900,
+        "height": 506
+      },
+      "webp": {
+        "file": "assets/img/coastal-pollution-2.webp",
+        "width": 900,
+        "height": 506,
+        "quality": 69,
+        "bytes": 38812,
+        "sha256": "db16b5dccc46b5801cc536653667242495e8027e77efa7d7f909a3a2d3619597",
+        "ssim": 0.9809,
+        "colourShift": 0.14
+      },
+      "served": {
+        "bytes": 38812,
+        "sha256": "db16b5dccc46b5801cc536653667242495e8027e77efa7d7f909a3a2d3619597"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/coastal-pollution-3.webp",
+      "original": {
+        "blob": "ac790fcb7ad565130fe0d337e1b7c395faf02bf6",
+        "bytes": 173916,
+        "sha256": "257383ed67f156de5d502f277140b40ef963cbebf0985d060b5677130e25f931",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": null,
+      "served": {
+        "bytes": 173916,
+        "sha256": "257383ed67f156de5d502f277140b40ef963cbebf0985d060b5677130e25f931"
+      },
+      "copies": [],
+      "notMade": [
+        {
+          "what": "a re-encoded WebP",
+          "bytes": 174150,
+          "why": "not 5% lighter than the original"
+        }
+      ]
+    },
+    {
+      "file": "assets/img/groundwater-mapping-1-480.webp",
+      "original": {
+        "blob": "cee459cae7842ab0da10990a39e0f4d3bca358ce",
+        "bytes": 25532,
+        "sha256": "fbab08736ccd8c0ca8adefc370007c27c58a9267f826ee8f19f516b8f3041daa",
+        "width": 480,
+        "height": 360
+      },
+      "webp": {
+        "file": "assets/img/groundwater-mapping-1-480.webp",
+        "width": 480,
+        "height": 360,
+        "quality": 63,
+        "bytes": 22982,
+        "sha256": "a0b49e174b7f0ec183f7327b827c7fc3d7acd717973f1305070446419becd5d4",
+        "ssim": 0.9818,
+        "colourShift": 0.17
+      },
+      "served": {
+        "bytes": 22982,
+        "sha256": "a0b49e174b7f0ec183f7327b827c7fc3d7acd717973f1305070446419becd5d4"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/groundwater-mapping-1-hero.webp",
+      "original": {
+        "blob": "b9883789fb54e0fcb5bc89244cf68bf984501e1e",
+        "bytes": 134372,
+        "sha256": "265c89392f56fb122b0b6898776169b999e55434e88b6e7ae54677060f92e729",
+        "width": 1600,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/groundwater-mapping-1-hero.webp",
+        "width": 1600,
+        "height": 1200,
+        "quality": 65,
+        "bytes": 117328,
+        "sha256": "a083ba50a968a38171ae305533b98a12af8e32d2181e903b46f96ceeb23597c3",
+        "ssim": 0.9803,
+        "colourShift": 0.09
+      },
+      "served": {
+        "bytes": 117328,
+        "sha256": "a083ba50a968a38171ae305533b98a12af8e32d2181e903b46f96ceeb23597c3"
+      },
+      "copies": [
+        {
+          "file": "assets/img/groundwater-mapping-1-hero-800.avif",
+          "width": 800,
+          "height": 600,
+          "quality": 72,
+          "bytes": 73796,
+          "sha256": "607f2b84bf835d825089fd1dfb4e59865ef638f05320c099f373d7bfade965d5",
+          "ssim": 0.9816,
+          "colourShift": 1.0,
+          "against": "assets/img/groundwater-mapping-1-hero.webp",
+          "saves": 0.371,
+          "webpWouldBe": 90598
+        }
+      ],
+      "notMade": [
+        {
+          "what": "an AVIF copy",
+          "bytes": 127225,
+          "why": "8% heavier than the WebP"
+        }
+      ]
+    },
+    {
+      "file": "assets/img/groundwater-mapping-1.webp",
+      "original": {
+        "blob": "5b4287324d83ef41234d0dbf6012486803cb7c13",
+        "bytes": 64534,
+        "sha256": "f2170483878769fed3d10f5edb0059b54e2cd634bc2aeb85acb50a4b8c356f5b",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/groundwater-mapping-1.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 66,
+        "bytes": 57360,
+        "sha256": "f014c67fedc220f0e33efb02581d97a8d29732b0f1896fb8a1847df8c007b377",
+        "ssim": 0.9802,
+        "colourShift": 0.15
+      },
+      "served": {
+        "bytes": 57360,
+        "sha256": "f014c67fedc220f0e33efb02581d97a8d29732b0f1896fb8a1847df8c007b377"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/groundwater-mapping-2.webp",
+      "original": {
+        "blob": "52778a07eca372fd12ad4cbc5eb5fd5f8bc06c2f",
+        "bytes": 183676,
+        "sha256": "75d7f444ff5a5d7949798ffd77752e9642dcc174ae763773447ae7b246373fe9",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/groundwater-mapping-2.webp",
+        "width": 900,
+        "height": 1200,
+        "quality": 61,
+        "bytes": 161818,
+        "sha256": "92c95aa464cd6a23be40913d5e3878287e49699d393d96aaed38bf7c20293a8d",
+        "ssim": 0.9803,
+        "colourShift": 0.23
+      },
+      "served": {
+        "bytes": 161818,
+        "sha256": "92c95aa464cd6a23be40913d5e3878287e49699d393d96aaed38bf7c20293a8d"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/groundwater-mapping-3.webp",
+      "original": {
+        "blob": "0844146a6e6be7c2e5ce9db28d04c2860b00f60a",
+        "bytes": 144986,
+        "sha256": "8ac6257f9c2166cafbd9a823ace47f08f77ba6c31b9712061f665bcb22b285d7",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/groundwater-mapping-3.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 47,
+        "bytes": 124730,
+        "sha256": "323b4cfe9e2b2c1e50df8fa570a5ccd3fdf73652d7da76986468d458c0472cd4",
+        "ssim": 0.9811,
+        "colourShift": 0.29
+      },
+      "served": {
+        "bytes": 124730,
+        "sha256": "323b4cfe9e2b2c1e50df8fa570a5ccd3fdf73652d7da76986468d458c0472cd4"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/groundwater-mapping-4.webp",
+      "original": {
+        "blob": "71ba713763383a94e2526bde9d3ed9c7d6305f05",
+        "bytes": 104976,
+        "sha256": "342af84715f32df62aa72a5f4f5edc5d01ad2607e48e01ef8ac79de22af56efc",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/groundwater-mapping-4.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 76,
+        "bytes": 94542,
+        "sha256": "68524359c5703ec4a5155487b12c6a229ed5a911b3f8f53f80cf1a36d1ccbcc4",
+        "ssim": 0.9822,
+        "colourShift": 0.14
+      },
+      "served": {
+        "bytes": 94542,
+        "sha256": "68524359c5703ec4a5155487b12c6a229ed5a911b3f8f53f80cf1a36d1ccbcc4"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/profile.webp",
+      "original": {
+        "blob": "1be93c8a06f4929194bd6e105cbeff164a2d2a64",
+        "bytes": 47458,
+        "sha256": "07be63e3a78697375478a0c54efd606abea34ad6e1a0f47e0d275e2fe8f66dcb",
+        "width": 640,
+        "height": 960
+      },
+      "webp": {
+        "file": "assets/img/profile.webp",
+        "width": 640,
+        "height": 960,
+        "quality": 71,
+        "bytes": 35550,
+        "sha256": "2cef906750b260d84de63b2d989e5cd47b3b0fa85d258bb85b378fdc5b91a12f",
+        "ssim": 0.9808,
+        "colourShift": 0.07
+      },
+      "served": {
+        "bytes": 35550,
+        "sha256": "2cef906750b260d84de63b2d989e5cd47b3b0fa85d258bb85b378fdc5b91a12f"
+      },
+      "copies": [
+        {
+          "file": "assets/img/profile.avif",
+          "width": 640,
+          "height": 960,
+          "quality": 54,
+          "bytes": 24305,
+          "sha256": "ee5275051bd206c625c535aeda764e596140bee616bbeeb1c2e1852179d62dc2",
+          "ssim": 0.9804,
+          "colourShift": 0.29,
+          "against": "assets/img/profile.webp",
+          "saves": 0.316
+        }
+      ],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/soft-path-2.webp",
+      "original": {
+        "blob": "15e4b070af387f27cf5e5d35f35ffdf8463a135b",
+        "bytes": 198864,
+        "sha256": "f60856173ea6200c290ff01af76a5aa4b36200aa90d67ddc7749ba26286feb33",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/soft-path-2.webp",
+        "width": 900,
+        "height": 1200,
+        "quality": 67,
+        "bytes": 183876,
+        "sha256": "226b50b57a58621f51c7c59e0acd0384419ed3cccad643ffd6cf1628e0cf94cf",
+        "ssim": 0.9843,
+        "colourShift": 0.16
+      },
+      "served": {
+        "bytes": 183876,
+        "sha256": "226b50b57a58621f51c7c59e0acd0384419ed3cccad643ffd6cf1628e0cf94cf"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/soft-path-3-480.webp",
+      "original": {
+        "blob": "d513773ddfafb0702d743330f7b0ddfb2c4b3ac1",
+        "bytes": 16958,
+        "sha256": "0ef827af080e7a78a24624faa21f2b6a60318f358587c008228af955647a2ac4",
+        "width": 480,
+        "height": 360
+      },
+      "webp": {
+        "file": "assets/img/soft-path-3-480.webp",
+        "width": 480,
+        "height": 360,
+        "quality": 62,
+        "bytes": 14570,
+        "sha256": "29f21f150a374e7db34e25a0495797ded7cee60732365c334b9cc217a603db39",
+        "ssim": 0.9803,
+        "colourShift": 0.21
+      },
+      "served": {
+        "bytes": 14570,
+        "sha256": "29f21f150a374e7db34e25a0495797ded7cee60732365c334b9cc217a603db39"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/soft-path-3.webp",
+      "original": {
+        "blob": "197e60584a6b5c034beee3a5617235408f1675bd",
+        "bytes": 44276,
+        "sha256": "d60cb154bad83fbcc9a22e7b76609ec4a1a10e4abcf4026d047c32d17eb9b991",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/soft-path-3.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 59,
+        "bytes": 34628,
+        "sha256": "01fb9e63bb095ed1ae834dcb2e3fb90cdd93b706b81b7e4bff2a2fc95239e0a6",
+        "ssim": 0.9808,
+        "colourShift": 0.14
+      },
+      "served": {
+        "bytes": 34628,
+        "sha256": "01fb9e63bb095ed1ae834dcb2e3fb90cdd93b706b81b7e4bff2a2fc95239e0a6"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/soft-path-4.webp",
+      "original": {
+        "blob": "2e17eb46b0367f764699e65c17bc0ba31e2d3093",
+        "bytes": 114216,
+        "sha256": "37a866a818df74cc6a2bee229788c306b37d26c1692e7c624a263192a6ed520c",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/soft-path-4.webp",
+        "width": 900,
+        "height": 1200,
+        "quality": 67,
+        "bytes": 99640,
+        "sha256": "9a9c410251b22e5b7e670ed305ada97050f8453470fc21cacdf1b974f7c93b9a",
+        "ssim": 0.9801,
+        "colourShift": 0.22
+      },
+      "served": {
+        "bytes": 99640,
+        "sha256": "9a9c410251b22e5b7e670ed305ada97050f8453470fc21cacdf1b974f7c93b9a"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/soft-path-5.webp",
+      "original": {
+        "blob": "2cc6b9dfb424bc50f77b99fca9b1e374b1879975",
+        "bytes": 86204,
+        "sha256": "3650a94c04db1877398bdfa91b556af446980a8d148b227b49b72e14a745a64f",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/soft-path-5.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 66,
+        "bytes": 70782,
+        "sha256": "9e81f8d019e51a1026a5557988d3d0b792fbb379272794114c5f8221c787a70f",
+        "ssim": 0.9825,
+        "colourShift": 0.19
+      },
+      "served": {
+        "bytes": 70782,
+        "sha256": "9e81f8d019e51a1026a5557988d3d0b792fbb379272794114c5f8221c787a70f"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/soft-path-6.webp",
+      "original": {
+        "blob": "f4fa327b6165bf6c338cbf1f412ed3783097a59a",
+        "bytes": 144246,
+        "sha256": "11b2c3ee3e6d3254c4a8119fb84a3c38a2b7b42f2de76f9c9dbc8b5aaa696c16",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/soft-path-6.webp",
+        "width": 900,
+        "height": 1200,
+        "quality": 70,
+        "bytes": 122352,
+        "sha256": "ee1afa7e4232d405bf61e531f64e16161115d5b6c3f7764544d192e397568fdb",
+        "ssim": 0.981,
+        "colourShift": 0.15
+      },
+      "served": {
+        "bytes": 122352,
+        "sha256": "ee1afa7e4232d405bf61e531f64e16161115d5b6c3f7764544d192e397568fdb"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/sustainable-ai-2-hero.webp",
+      "original": {
+        "blob": "0bc90158c6c458a5bf067d8ce6ba3ef937d9f517",
+        "bytes": 204672,
+        "sha256": "bfb1b0c970795a27048ba749ec6400166c04ca8fd6cc16288aa8c3cd2c8dcfe2",
+        "width": 1600,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/sustainable-ai-2-hero.webp",
+        "width": 1600,
+        "height": 1200,
+        "quality": 55,
+        "bytes": 172788,
+        "sha256": "f1294a2e75870136b99c2b8587ec652c7964dd3178281eedd1ad33997201e588",
+        "ssim": 0.9808,
+        "colourShift": 0.14
+      },
+      "served": {
+        "bytes": 172788,
+        "sha256": "f1294a2e75870136b99c2b8587ec652c7964dd3178281eedd1ad33997201e588"
+      },
+      "copies": [
+        {
+          "file": "assets/img/sustainable-ai-2-hero.avif",
+          "width": 1600,
+          "height": 1200,
+          "quality": 56,
+          "bytes": 145933,
+          "sha256": "12970224568d31c9cdd8aef26820e63f81e74dff5e06b884c9ccdd69ae22fa4a",
+          "ssim": 0.9814,
+          "colourShift": 0.53,
+          "against": "assets/img/sustainable-ai-2-hero.webp",
+          "saves": 0.155
+        },
+        {
+          "file": "assets/img/sustainable-ai-2-hero-800.avif",
+          "width": 800,
+          "height": 600,
+          "quality": 64,
+          "bytes": 62513,
+          "sha256": "02ca5d734a0cdff942b49f39ca19622242245c74701d472e0c9e75b78a091a52",
+          "ssim": 0.981,
+          "colourShift": 0.57,
+          "against": "assets/img/sustainable-ai-2-hero.webp",
+          "saves": 0.638,
+          "webpWouldBe": 85962
+        }
+      ],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/sustainable-ai-2.webp",
+      "original": {
+        "blob": "335f8c29d29b713764a62b5e15e1d546714fbc4d",
+        "bytes": 89592,
+        "sha256": "71e3f91dcec4101d9f2c3f88fed00b698cf604420d1d7869417f9907e8748371",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/sustainable-ai-2.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 59,
+        "bytes": 74550,
+        "sha256": "cd999d93064cedadc03cfcc38de19f7e78ed62a0148516c2e4de75ddd84b9a7a",
+        "ssim": 0.9803,
+        "colourShift": 0.11
+      },
+      "served": {
+        "bytes": 74550,
+        "sha256": "cd999d93064cedadc03cfcc38de19f7e78ed62a0148516c2e4de75ddd84b9a7a"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/sustainable-ai-3-480.webp",
+      "original": {
+        "blob": "60119ee96bddbfdf36a37a39ce3d714c4eda5260",
+        "bytes": 22892,
+        "sha256": "a75e02a09738fdc055562436f1e8351589a0107814b7a8fc802d45b61cb8b2f0",
+        "width": 480,
+        "height": 360
+      },
+      "webp": {
+        "file": "assets/img/sustainable-ai-3-480.webp",
+        "width": 480,
+        "height": 360,
+        "quality": 57,
+        "bytes": 19484,
+        "sha256": "62d241d067b39cbed327029a2a36276c3cecfb398f36a69fcc6d6f82db9f3e82",
+        "ssim": 0.9804,
+        "colourShift": 0.16
+      },
+      "served": {
+        "bytes": 19484,
+        "sha256": "62d241d067b39cbed327029a2a36276c3cecfb398f36a69fcc6d6f82db9f3e82"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/sustainable-ai-3.webp",
+      "original": {
+        "blob": "02ad6b08cca58b00b1a57a49e6d91da6de4e2706",
+        "bytes": 63298,
+        "sha256": "6097ddfeba2762cfdd44a4bc310f1524498ab6ee7aee0ed9369f70be3e462d9a",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/sustainable-ai-3.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 66,
+        "bytes": 53710,
+        "sha256": "a510a798e1a0f69a7ebd2e932e25ca23cb151b7b4484b920cd17900cb35e715a",
+        "ssim": 0.9805,
+        "colourShift": 0.13
+      },
+      "served": {
+        "bytes": 53710,
+        "sha256": "a510a798e1a0f69a7ebd2e932e25ca23cb151b7b4484b920cd17900cb35e715a"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/sustainable-ai-4.webp",
+      "original": {
+        "blob": "39fde4ca4e7f0e3a3b963ead6ad83d3a1dcbbdd4",
+        "bytes": 54624,
+        "sha256": "a61264009ccdec4e1a794348fb4a5cf014e28210c8fb31893571f1e1cfd2305e",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/sustainable-ai-4.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 71,
+        "bytes": 44156,
+        "sha256": "03ddb59c56535d05df826c4db2de7c6d7f4632accaf82613e48f02ff0ef62f34",
+        "ssim": 0.9814,
+        "colourShift": 0.18
+      },
+      "served": {
+        "bytes": 44156,
+        "sha256": "03ddb59c56535d05df826c4db2de7c6d7f4632accaf82613e48f02ff0ef62f34"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/sustainable-ai-5.webp",
+      "original": {
+        "blob": "fe640c1689139cc0e980fc052b64fa5b1033fbf2",
+        "bytes": 90696,
+        "sha256": "193905772b1225afda9fb8f02a032f2797aa800b8a5d0b7251b205f9393fdfe9",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/sustainable-ai-5.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 71,
+        "bytes": 76780,
+        "sha256": "4737094fd67545eeee04515f083eadce01c5740757c96bfc899b93d9c45cd39b",
+        "ssim": 0.98,
+        "colourShift": 0.17
+      },
+      "served": {
+        "bytes": 76780,
+        "sha256": "4737094fd67545eeee04515f083eadce01c5740757c96bfc899b93d9c45cd39b"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/sustainable-ai-6.webp",
+      "original": {
+        "blob": "655b5b6e4fb0cc7feb5601d0a2df6ca632e3052c",
+        "bytes": 60168,
+        "sha256": "64d6b73d0962c2eccdbe70c7ab9a7c601f1e2c929b0c58f6db7902747269dfb8",
+        "width": 900,
+        "height": 675
+      },
+      "webp": null,
+      "served": {
+        "bytes": 60168,
+        "sha256": "64d6b73d0962c2eccdbe70c7ab9a7c601f1e2c929b0c58f6db7902747269dfb8"
+      },
+      "copies": [],
+      "notMade": [
+        {
+          "what": "a re-encoded WebP",
+          "bytes": 57166,
+          "why": "not 5% lighter than the original"
+        }
+      ]
+    },
+    {
+      "file": "assets/img/undrr-bonn-2-480.webp",
+      "original": {
+        "blob": "d4159c47f134aa35d3ff2edbaba853288b9aab53",
+        "bytes": 25524,
+        "sha256": "d47b4263437a62324f2dd4b8b77341937fa62896a6ebf4b8ab013b051ed76cdd",
+        "width": 480,
+        "height": 360
+      },
+      "webp": {
+        "file": "assets/img/undrr-bonn-2-480.webp",
+        "width": 480,
+        "height": 360,
+        "quality": 59,
+        "bytes": 22218,
+        "sha256": "4924257cd7c81bb6320587e4345d1e6a878e40e9238c6c7018de8e595d09f822",
+        "ssim": 0.9805,
+        "colourShift": 0.13
+      },
+      "served": {
+        "bytes": 22218,
+        "sha256": "4924257cd7c81bb6320587e4345d1e6a878e40e9238c6c7018de8e595d09f822"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/undrr-bonn-2.webp",
+      "original": {
+        "blob": "77ae0d0d2740ea6931cf98b3a4a2a99aa2200764",
+        "bytes": 72004,
+        "sha256": "40fe3926bd24ee0f805fd0b1c3c0a09b417195ea2a1034fec2cf89236190e2b7",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/undrr-bonn-2.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 70,
+        "bytes": 59680,
+        "sha256": "6528ee76a6807deb1e25d4bebb5b5dec4844caca1b859290dd7faeffd421b531",
+        "ssim": 0.9806,
+        "colourShift": 0.25
+      },
+      "served": {
+        "bytes": 59680,
+        "sha256": "6528ee76a6807deb1e25d4bebb5b5dec4844caca1b859290dd7faeffd421b531"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/undrr-bonn-3.webp",
+      "original": {
+        "blob": "30070427d13cb8e9b1aa5880ee4294c1195f20fe",
+        "bytes": 112632,
+        "sha256": "4fbbcea34798295b94fce698e222111005af31530c36e67cc7b728ec4bbc9b8d",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/undrr-bonn-3.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 53,
+        "bytes": 100884,
+        "sha256": "7eec792e1b0db9668e02594e8ec4ca7dedaf145ed7a72d9d329db087f60ba8fd",
+        "ssim": 0.9804,
+        "colourShift": 0.16
+      },
+      "served": {
+        "bytes": 100884,
+        "sha256": "7eec792e1b0db9668e02594e8ec4ca7dedaf145ed7a72d9d329db087f60ba8fd"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/undrr-bonn.webp",
+      "original": {
+        "blob": "7647cccd49db5972cf898e275260b43f33dd4beb",
+        "bytes": 106090,
+        "sha256": "ee4298c63d693e690254c4d7b8313f2e7803673f6052040961a25f045114ee15",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/undrr-bonn.webp",
+        "width": 900,
+        "height": 1200,
+        "quality": 56,
+        "bytes": 86554,
+        "sha256": "53b399542d71792aa0a8bea8dc614c59019d661cabfc5459dad4e9a59909872b",
+        "ssim": 0.9806,
+        "colourShift": 0.23
+      },
+      "served": {
+        "bytes": 86554,
+        "sha256": "53b399542d71792aa0a8bea8dc614c59019d661cabfc5459dad4e9a59909872b"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/wuppertal-resilience-1-480.webp",
+      "original": {
+        "blob": "73a70b975bdf9c0203eb1f54e6e2ea7c310cf0bd",
+        "bytes": 25616,
+        "sha256": "29d8499a0a2bc5e99cd9e4c7219f6f9314bc8d92853517f046888d849a318b17",
+        "width": 480,
+        "height": 360
+      },
+      "webp": {
+        "file": "assets/img/wuppertal-resilience-1-480.webp",
+        "width": 480,
+        "height": 360,
+        "quality": 62,
+        "bytes": 22922,
+        "sha256": "8d3d3dfd3f23a940050db24c5a045ba54b579d0ba22814c8f1155545c3080425",
+        "ssim": 0.9841,
+        "colourShift": 0.12
+      },
+      "served": {
+        "bytes": 22922,
+        "sha256": "8d3d3dfd3f23a940050db24c5a045ba54b579d0ba22814c8f1155545c3080425"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/wuppertal-resilience-1-hero.webp",
+      "original": {
+        "blob": "b9554f62d687ac64d50367e03e4889bc32e9ecc0",
+        "bytes": 150558,
+        "sha256": "533220083b7f1271e1ce724dff2ac664145868ad0b5a8b3019a5fdc4c7fa21a7",
+        "width": 1600,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/wuppertal-resilience-1-hero.webp",
+        "width": 1600,
+        "height": 1200,
+        "quality": 60,
+        "bytes": 129284,
+        "sha256": "6ee3ba0d0002cbab017a2cb30776563d54b517f9234fb5a2d3519d809879ba2a",
+        "ssim": 0.9803,
+        "colourShift": 0.17
+      },
+      "served": {
+        "bytes": 129284,
+        "sha256": "6ee3ba0d0002cbab017a2cb30776563d54b517f9234fb5a2d3519d809879ba2a"
+      },
+      "copies": [
+        {
+          "file": "assets/img/wuppertal-resilience-1-hero-800.avif",
+          "width": 800,
+          "height": 600,
+          "quality": 67,
+          "bytes": 63931,
+          "sha256": "9369ea8c96d8532fb36ce9502c2a5806c26084f5753a9485551f5342e13eacc7",
+          "ssim": 0.9823,
+          "colourShift": 0.72,
+          "against": "assets/img/wuppertal-resilience-1-hero.webp",
+          "saves": 0.505,
+          "webpWouldBe": 75354
+        }
+      ],
+      "notMade": [
+        {
+          "what": "an AVIF copy",
+          "bytes": 129358,
+          "why": "0% lighter than the WebP, under 10%"
+        }
+      ]
+    },
+    {
+      "file": "assets/img/wuppertal-resilience-1.webp",
+      "original": {
+        "blob": "7e46b19766f174cd5faf5e03aa224d1939e36f5b",
+        "bytes": 68022,
+        "sha256": "141439ab29dce96cd3ab326b77fe1e8e7578ff5b068e87d88e6b1da868aa67f4",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/wuppertal-resilience-1.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 66,
+        "bytes": 61278,
+        "sha256": "d25dd48c05804b5ec4d097c4da935ea623142971686df77c955972d65a2beb2e",
+        "ssim": 0.9802,
+        "colourShift": 0.2
+      },
+      "served": {
+        "bytes": 61278,
+        "sha256": "d25dd48c05804b5ec4d097c4da935ea623142971686df77c955972d65a2beb2e"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/wuppertal-resilience-2.webp",
+      "original": {
+        "blob": "f4a971005747d24126a91ed964226751553836a3",
+        "bytes": 124820,
+        "sha256": "de51b3c168524b7c35f47c029a9ee0e4145ae86946971e1bb6656c8396fe811f",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/wuppertal-resilience-2.webp",
+        "width": 900,
+        "height": 1200,
+        "quality": 62,
+        "bytes": 104008,
+        "sha256": "c864d74866a12df5e4df0b0bed544c7b7e568dcebafd50163448ed0bb3b27ad5",
+        "ssim": 0.9811,
+        "colourShift": 0.25
+      },
+      "served": {
+        "bytes": 104008,
+        "sha256": "c864d74866a12df5e4df0b0bed544c7b7e568dcebafd50163448ed0bb3b27ad5"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/wuppertal-resilience-3.webp",
+      "original": {
+        "blob": "a33beb8e2fd836c1f995cd5b44079f3c8069a585",
+        "bytes": 149570,
+        "sha256": "c6cc8809c532e6a82f8bad364b73f822dab274d76e0fa2fbfa115326f983328b",
+        "width": 900,
+        "height": 1200
+      },
+      "webp": {
+        "file": "assets/img/wuppertal-resilience-3.webp",
+        "width": 900,
+        "height": 1200,
+        "quality": 67,
+        "bytes": 127128,
+        "sha256": "c92936a303631c20642e82583879c802dda2956f5be523d4762728495a6dfa77",
+        "ssim": 0.9817,
+        "colourShift": 0.18
+      },
+      "served": {
+        "bytes": 127128,
+        "sha256": "c92936a303631c20642e82583879c802dda2956f5be523d4762728495a6dfa77"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/wuppertal-resilience-4.webp",
+      "original": {
+        "blob": "95bf1f88f8a5421f0875235358aa14c35898beb6",
+        "bytes": 96054,
+        "sha256": "c2fd7a2c9d1033371db9c8c44a4ce52e9f6e441e375176ebccc860a6cc044151",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/wuppertal-resilience-4.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 70,
+        "bytes": 83310,
+        "sha256": "a2e0deb6ec64d7ed442dab058395281a14036da065147b1597b42401edc58119",
+        "ssim": 0.9808,
+        "colourShift": 0.19
+      },
+      "served": {
+        "bytes": 83310,
+        "sha256": "a2e0deb6ec64d7ed442dab058395281a14036da065147b1597b42401edc58119"
+      },
+      "copies": [],
+      "notMade": []
+    },
+    {
+      "file": "assets/img/wuppertal-resilience-5.webp",
+      "original": {
+        "blob": "b4612b4904269740e6540b14471987540d759c1a",
+        "bytes": 107446,
+        "sha256": "48b689920d8dba39586804848d30aedeb6923315973b460e45d1abcabbcef48b",
+        "width": 900,
+        "height": 675
+      },
+      "webp": {
+        "file": "assets/img/wuppertal-resilience-5.webp",
+        "width": 900,
+        "height": 675,
+        "quality": 72,
+        "bytes": 95318,
+        "sha256": "cd0503547b2fb71448dde76e4450dfb74349dadb7d97c2750f557d6388f74c1e",
+        "ssim": 0.9821,
+        "colourShift": 0.08
+      },
+      "served": {
+        "bytes": 95318,
+        "sha256": "cd0503547b2fb71448dde76e4450dfb74349dadb7d97c2750f557d6388f74c1e"
+      },
+      "copies": [],
+      "notMade": []
+    }
+  ]
+}

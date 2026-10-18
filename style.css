@@ -521,6 +521,44 @@ html.light-mode .nav-link.contact-btn:hover {
     animation: kenburns 16s ease-in-out infinite alternate;
 }
 
+/* Which file each slide draws. A window under 600px wide gets an 800px
+   copy, as AVIF: a phone was fetching the same 1600px photo as a desktop,
+   about half its first view, to draw behind an overlay that lets at most
+   22% of it through. A browser that does not read AVIF gets the
+   full-size WebP there, as before (the plain url() first, for a browser
+   that does not know image-set() either). Above 600px, the WebP, or the
+   AVIF where scripts/build-images.py found one a tenth lighter at the same
+   likeness (the fourth slide's). The first slide is drawn from the start,
+   and index.html preloads the file it draws in each window, so the two
+   change together (tests/images.test.js holds them to each other); the
+   others are drawn once script.js marks them [data-loaded], just before
+   the rotation shows them, so they follow the same rule. */
+.hero-bg-1 { background-image: url('assets/img/groundwater-mapping-1-hero.webp'); }
+.hero-bg-2[data-loaded] { background-image: url('assets/img/wuppertal-resilience-1-hero.webp'); }
+.hero-bg-3[data-loaded] { background-image: url('assets/img/coastal-pollution-1-hero.webp'); }
+.hero-bg-4[data-loaded] {
+    background-image: url('assets/img/sustainable-ai-2-hero.webp');
+    background-image: image-set(url('assets/img/sustainable-ai-2-hero.avif') type('image/avif'), url('assets/img/sustainable-ai-2-hero.webp') type('image/webp'));
+}
+@media (max-width: 599px) {
+    .hero-bg-1 {
+        background-image: url('assets/img/groundwater-mapping-1-hero.webp');
+        background-image: image-set(url('assets/img/groundwater-mapping-1-hero-800.avif') type('image/avif'), url('assets/img/groundwater-mapping-1-hero.webp') type('image/webp'));
+    }
+    .hero-bg-2[data-loaded] {
+        background-image: url('assets/img/wuppertal-resilience-1-hero.webp');
+        background-image: image-set(url('assets/img/wuppertal-resilience-1-hero-800.avif') type('image/avif'), url('assets/img/wuppertal-resilience-1-hero.webp') type('image/webp'));
+    }
+    .hero-bg-3[data-loaded] {
+        background-image: url('assets/img/coastal-pollution-1-hero.webp');
+        background-image: image-set(url('assets/img/coastal-pollution-1-hero-800.avif') type('image/avif'), url('assets/img/coastal-pollution-1-hero.webp') type('image/webp'));
+    }
+    .hero-bg-4[data-loaded] {
+        background-image: url('assets/img/sustainable-ai-2-hero.webp');
+        background-image: image-set(url('assets/img/sustainable-ai-2-hero-800.avif') type('image/avif'), url('assets/img/sustainable-ai-2-hero.webp') type('image/webp'));
+    }
+}
+
 @keyframes kenburns {
     from { transform: scale(1); }
     to { transform: scale(1.08); }

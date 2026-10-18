@@ -144,7 +144,7 @@ const BEACON_KEYS = ['v', 'page', 'lens', 'deepest', 'features', 'ref', 'vp', 'k
 const TYPES = {
     '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
     '.json': 'application/json', '.svg': 'image/svg+xml', '.xml': 'application/xml', '.txt': 'text/plain',
-    '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg',
+    '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg',
     '.woff2': 'font/woff2', '.pdf': 'application/pdf'
 };
 const server = http.createServer((req, res) => {
@@ -339,6 +339,8 @@ async function visit(context, page, rel, origin) {
         });
     });
 
+    await exerciseHeroPhotos(browser, origin, budget, estimates);
+
     await checkLengths(browser, origin);
 
     await exerciseFirstView(browser, origin);
@@ -396,6 +398,66 @@ async function visit(context, page, rel, origin) {
     if (failures) { console.log(`\n  ${failures} problem(s)\n`); process.exit(1); }
     console.log('\n  Smoke test passed\n');
 })().catch((e) => { console.error(e); server.close(); process.exit(1); });
+
+// ------------------------------------------------------------------
+// The hero's photo: one file, the window's size, AVIF where there is one
+// ------------------------------------------------------------------
+// A phone fetched the same 1600px photo as a desktop, about half of its
+// first view, to draw behind an overlay that lets at most 22% of it
+// through. Below 600px the homepage now preloads and draws an 800px copy,
+// and a browser that reads AVIF gets the AVIF copy (style.css, .hero-bg-1
+// to 4). Checked at the two sizes the budgets name: the first view fetches
+// one hero file, the one for that window, and weighs no more than
+// check-budget.js estimates for it; then the rotation runs, on Playwright's
+// clock so that three changes of slide do not take a real 24 s, and every
+// later slide's file is the same size and format as the first's.
+const HERO_FILE = /assets\/img\/([^/?]+-hero)(-800)?\.(webp|avif)$/;
+
+async function exerciseHeroPhotos(browser, origin, budget, estimates) {
+    console.log('  index.html — the hero\'s photos at each size');
+    const want = (name, phone) => `${name}${phone ? '-800' : ''}.${fs.existsSync(path.join(ROOT, 'assets', 'img', `${name}${phone ? '-800' : ''}.avif`)) ? 'avif' : 'webp'}`;
+    const sizes = [['1440x900', budget.PAGE_BUDGETS['index.html']], ['390x844', budget.PHONE_BUDGETS['index.html']]];
+    for (const [vp, key] of sizes) {
+        const { width, height } = budget.VIEWPORTS[vp];
+        const phone = width < 600;
+        const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference' });
+        const fetched = [];
+        context.on('request', (q) => { const m = q.url().match(HERO_FILE); if (m) fetched.push(m[0].split('/').pop()); });
+
+        // The first view, as a visitor's browser fetches it.
+        const page = await context.newPage();
+        const r = await visit(context, page, 'index.html', origin);
+        const first = fetched.splice(0);
+        const firstWant = want('groundwater-mapping-1-hero', phone);
+        if (first.length === 1 && first[0] === firstWant) ok(`${vp}: the first view fetches one hero photo, ${firstWant}`);
+        else bad(`${vp}: the first view fetched ${first.join(', ') || 'no hero photo'}, not ${firstWant} alone`);
+        if (r.measured) {
+            const estimate = estimates[key];
+            if (r.arrivalBytes <= estimate + 300 * r.arrival.length) ok(`${vp}: measured first view ${fmt(r.arrivalBytes)} is within the budget's estimate of ${fmt(estimate)} (${key})`);
+            else bad(`${vp}: measured first view ${fmt(r.arrivalBytes)} exceeds the budget's estimate of ${fmt(estimate)} (${key}) — check-budget.js is missing something the page fetches on load`);
+        }
+        await page.close();
+
+        // The rotation: each later slide is fetched just before it shows.
+        const turn = await context.newPage();
+        await turn.clock.install();
+        await turn.goto(`${origin}/index.html`, { waitUntil: 'load' });
+        const slides = await turn.evaluate(() => document.querySelectorAll('.hero-bg-slide').length);
+        fetched.splice(0);   // the first slide's, again (or from the cache)
+        for (let i = 1; i < slides; i++) {
+            const had = fetched.length;
+            await turn.clock.runFor(8000);
+            for (let t = 0; t < 40 && fetched.length === had; t++) await turn.waitForTimeout(100);
+        }
+        const nameOf = (f) => f.match(/^(.+-hero)/)[1];
+        const names = new Set(fetched.map(nameOf).concat('groundwater-mapping-1-hero'));
+        const wrong = fetched.filter(f => f !== want(nameOf(f), phone));
+        if (fetched.length === slides - 1 && names.size === slides && !wrong.length) {
+            ok(`${vp}: the rotation fetched the other ${slides - 1} slides, each once, as it came to them: ${fetched.join(', ')}`);
+        } else bad(`${vp}: the rotation fetched ${fetched.join(', ') || 'nothing'} for the ${slides - 1} slides after the first${wrong.length ? ` (the wrong size or format: ${wrong.join(', ')})` : ''}`);
+        await context.close();
+    }
+}
 
 // Wait until the page has done its own deferred work: at least 1.6 s past
 // the load event (script.js's one post-load check runs at 1.5 s) and no
