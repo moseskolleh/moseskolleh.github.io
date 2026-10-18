@@ -4140,7 +4140,9 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         const notFound = (route) => route.fulfill({ status: 404, contentType: 'text/html; charset=utf-8', path: path.join(ROOT, '404.html') });
         await context.route('**/no/such/page', notFound);
         await context.route('**/notes/no-such-note.html', notFound);
-        await context.route('**/sustaintheworld/**', notFound);
+        // Pages answers /sustaintheworld, with or without anything after it,
+        // with 404.html now that nothing is there.
+        await context.route((url) => /^\/sustaintheworld(?:\/|$)/.test(url.pathname), notFound);
         const everyPage = PAGES.filter(rel => rel !== '404.html').map(rel => [rel, pageNameOf(rel)])
             .concat([['no/such/page', '404'], ['notes/no-such-note.html', '404']]);
         const wrong = [];

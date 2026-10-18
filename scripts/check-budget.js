@@ -107,7 +107,7 @@ const BUDGETS = {
     // become the place where weight goes to hide.
     onDemand: {
         label: 'Everything a full visit adds on demand (modules, scripts, map — gzipped)',
-        max: 72 * KB,
+        max: 61 * KB,
         readme: 'Everything a full visit adds on demand (modules, scripts, map)'
     },
     // Lowered from 210 KB when the photos were re-encoded (October 2026):
@@ -207,7 +207,7 @@ const BUDGETS = {
     // would set it.
     notesWire: {
         label: 'Each field note (notes/*.html), over the wire (with fonts): the heaviest',
-        max: 94 * KB,
+        max: 93 * KB,
         readme: 'Each field note (`notes/*.html`), over the wire (fonts included; the heaviest)'
     },
     // The EcoPrompt Coach's page carries its calculator and the emission-factor
@@ -293,12 +293,12 @@ const VIEWPORTS = {
     '390x844': { width: 390, height: 844, label: 'phone' }
 };
 const LENGTH = {
-    'index.html': { '1440x900': 9.79, '390x844': 17.09 },
+    'index.html': { '1440x900': 9.74, '390x844': 17.03 },
     'case-studies.html': { '1440x900': 11.85, '390x844': 19.78 },
     'carbon-ai.html': { '1440x900': 7.07, '390x844': 13.38 },
     'claims.html': { '1440x900': 7.54, '390x844': 13.53 },
     'brief.html': { '1440x900': 2.63, '390x844': 3.74 },
-    'research.html': { '1440x900': 5.86, '390x844': 8.99 },
+    'research.html': { '1440x900': 5.75, '390x844': 8.99 },
     'stats.html': { '1440x900': 10.97, '390x844': 16.25 },
     'field-report.html': { '1440x900': 4.4, '390x844': 7.44 },
     '404.html': { '1440x900': 1.05, '390x844': 1.05 },
