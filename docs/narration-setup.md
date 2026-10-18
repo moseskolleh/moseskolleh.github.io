@@ -243,7 +243,7 @@ npm run voice -- --sections --dry-run
 ```
 
 The full page is **~8,300 credits** for its eight sections (the dry run above
-prints the exact figure: 8,345 on 2026-10-17). The projects script grew when it
+prints the exact figure: 8,336 on 2026-10-17). The projects script grew when it
 began reading each card's basis, the contact script shrank when the Assay left
 the homepage for The Brief, and the free plan grants **8,000 per cycle**, so
 one complete render uses about 104% of a free month: more than a cycle

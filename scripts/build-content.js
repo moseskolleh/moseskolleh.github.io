@@ -20,7 +20,7 @@
 //                       below 5, and exactly what it sends (content/stats.json,
 //                       which scripts/fetch-stats.js writes once a week)
 //   brief.html          The Brief: paste a job ad, get an honest fit and
-//                       a one-page dossier, graded in the browser by
+//                       a dossier to forward, graded in the browser by
 //                       brief.js over content/brief.json, the facts in
 //                       content/profile.json and where the homepage shows
 //                       each named tool; the dossier is the case studies,
@@ -1227,8 +1227,8 @@ function fiveNumbers(stats, under) {
         {
             key: 'briefUses',
             name: 'Brief uses',
-            def: 'Page views in which <a href="brief.html">The Brief</a> graded a job ad: it turns a pasted ad into an ' +
-                 'honest fit and a one-page dossier tailored to it.' +
+            def: 'Page views in which <a href="brief.html">The Brief</a> graded a job ad someone pasted in (its sample ads are not counted): ' +
+                 'it turns the ad into an honest fit and a dossier tailored to it.' +
                  (stats.briefLive ? '' : ' It is not built yet, so there is nothing to count; the figure appears here once it is.')
         }
     ];
@@ -1511,7 +1511,7 @@ ${table('Kilobytes transferred per page view', cols('Per page view'), [
                 <dt><code>features</code></dt>
                 <dd>
                     Up to ${rule('featuresMax')} names of things used on the page, such as a CV link or the carbon receipt, and, if
-                    The Brief graded a job ad, the grade it gave. Never the ad itself.
+                    The Brief graded a job ad someone pasted in, the grade it gave. Never the ad itself.
                 </dd>
                 <dt><code>ref</code></dt>
                 <dd>The host name of the site you came from; empty if there was none, or if it was this site. An old homepage address for something that has since moved sends you on to its new page with that host name, so the visit is not counted as direct.</dd>
@@ -2191,7 +2191,7 @@ const SPLIT_SENTENCES = String.raw`    // Sentence splitting, shared by the play
 //
 // A recruiter pastes a job ad and gets an honest fit (each requirement
 // mapped to the work that backs it, the gaps as plainly as the matches,
-// what only Moses can confirm) and a one-page dossier: the at-a-glance
+// what only Moses can confirm) and a dossier to print or forward: the at-a-glance
 // facts, the case studies that match and how to reach him. brief.js does
 // the grading in the browser, over what this writes into the page's
 // #briefData block: the rubric (content/brief.json), the facts it may
@@ -2298,7 +2298,7 @@ function renderBrief(data, pages) {
         <section class="bf-input" id="grade" aria-labelledby="gradeTitle">
             <h2 id="gradeTitle">Paste a job ad</h2>
             <label class="mono-label" for="briefAd">The ad, or its requirements</label>
-            <textarea id="briefAd" rows="7" placeholder="Paste the role&rsquo;s description or its requirements here&hellip;"></textarea>
+            <textarea id="briefAd" rows="7" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="Paste the role&rsquo;s description or its requirements here&hellip;"></textarea>
             <div class="bf-actions">
                 <button type="button" class="ca-btn ca-btn-primary" id="briefRun">Grade this ad</button>
                 <button type="button" class="ca-btn" id="briefClear" hidden>Clear</button>
@@ -2310,9 +2310,10 @@ function renderBrief(data, pages) {
         <p class="nojs-note">Grading an ad needs JavaScript, which is off here; it would run in your browser and send nothing. Below is the whole dossier: every case study, in the order the case studies page gives them.</p>
 
         <div class="bf-share" id="briefShare" hidden>
-            <p>This page&rsquo;s address now rebuilds this fit and this dossier for whoever you send it to. It carries only the names of what matched and what did not, from this page&rsquo;s own list: never a word of the ad.</p>
+            <p>This page&rsquo;s address now rebuilds this fit and this dossier for whoever you send it to. It carries ids from this page&rsquo;s own list (the grade, what matched, the gaps, what to confirm), the years of experience and the language levels the ad asked for, and, if the fit is too long for it, how many rows it leaves out: never a word of the ad.</p>
             <p class="bf-link"><code id="briefLink">${esc(SITE)}brief.html</code></p>
-            <p class="bf-share-go"><button type="button" class="ca-btn" id="briefCopy" data-analytics="brief-copy">Copy link</button> <button type="button" class="ca-btn" id="briefPrint" data-analytics="brief-print">Print the dossier</button></p>
+            <p id="briefLeft" hidden></p>
+            <p class="bf-share-go"><button type="button" class="ca-btn" id="briefCopy" data-analytics="brief-copy">Copy link</button> <button type="button" class="ca-btn" id="briefPrint" data-analytics="brief-print">Print the dossier</button><span class="sr-only" id="briefCopied" role="status"></span></p>
         </div>
 
         <section class="bf-dossier" id="dossier" aria-labelledby="dossierName">
@@ -2340,11 +2341,11 @@ function renderBrief(data, pages) {
     const json = JSON.stringify(briefData(data, pages['index.html'])).replace(/</g, '\\u003c');
     return pageShell({
         title: 'The Brief — Moses Kolleh Sesay',
-        description: 'Paste a job ad: an honest fit, each requirement mapped to the evidence that backs it or listed as a gap, and a one-page dossier of the case studies that match. It runs in your browser; the ad is never sent.',
+        description: 'Paste a job ad: an honest fit, each requirement mapped to the evidence that backs it or listed as a gap, and a dossier of the case studies that match, to print or forward. It runs in your browser; the ad is never sent.',
         canonical: `${SITE}brief.html`,
-        heroTag: 'PASTE A JOB AD &middot; AN HONEST FIT &middot; A ONE-PAGE DOSSIER',
+        heroTag: 'PASTE A JOB AD &middot; AN HONEST FIT &middot; A DOSSIER TO FORWARD',
         heroTitle: 'The <span class="ca-accent">Brief</span>',
-        heroLead: 'Paste a job ad and get an honest fit: each requirement mapped to the work that backs it, the gaps listed as plainly as the matches, and what only I can confirm. Then a one-page dossier of the case studies that match, to print or forward. It runs in your browser, with no AI, and the ad never leaves this page.',
+        heroLead: 'Paste a job ad and get an honest fit: each requirement mapped to the work that backs it, the gaps listed as plainly as the matches, and what only I can confirm. Then a dossier of the case studies that match, to print or forward: one A4 page for most ads. It runs in your browser, with no AI, and the ad never leaves this page.',
         main,
         bodyEnd: `    <script type="application/json" id="briefData">${json}</script>`,
         // content.css is the case studies' and the research page's; of it

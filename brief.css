@@ -8,8 +8,8 @@
    gap, set for each theme and for paper below.
 
    On screen: the box to paste into, the link a result leaves, then the
-   dossier. On paper: the dossier alone, on one A4 page, with the address
-   that rebuilds it.
+   dossier. On paper: the dossier alone, with the address that rebuilds
+   it, on one A4 page for most ads.
    =================================================================== */
 
 :root { --bf-gap: #ff8f7a; }
@@ -158,10 +158,12 @@ button.ca-btn-primary { background: var(--primary-green); }
     .bf-row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
 }
 
-/* --- On paper: the dossier on one A4 page ------------------------------
+/* --- On paper: the dossier, one A4 page for most ads ------------------
    No box to paste into, no nav, no link bar, no call to action: what a
-   hiring manager is handed. The address that rebuilds it is printed at the
-   foot, since a sheet of paper has no address bar. */
+   hiring manager is handed. The contact line and the address that rebuilds
+   it (a sheet of paper has no address bar) come up under the name, so a
+   fit too long for one page still has them on its first. The short rows,
+   the gaps, what to confirm and the case studies, run in two columns. */
 @media print {
     :root, :root[data-theme] { --bf-gap: #b3361e; }
     @page { size: A4; margin: 10mm 12mm; }
@@ -171,19 +173,29 @@ button.ca-btn-primary { background: var(--primary-green); }
     html, body { background: #fff; }
     body { line-height: 1.3; }
     .ca-shell { max-width: none; padding: 0; }
-    .bf-dossier { margin: 0; padding: 0; border: 0; background: none; }
-    .bf-role, .bf-open { margin-bottom: 1px; }
-    .bf-dossier h3 { margin: 8px 0 3px; }
-    .bf-grade { margin-bottom: 4px; padding: 4px 10px; background: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .bf-grade p { margin-top: 2px; }
+    .bf-dossier { display: flex; flex-direction: column; margin: 0; padding: 0; border: 0; background: none; }
+    .bf-head { order: 1; }
+    .bf-contact { order: 2; margin: 3px 0 0; }
+    .bf-address { order: 3; display: block; margin: 1px 0 0; font: 0.7rem 'IBM Plex Mono', monospace; color: var(--text-secondary); overflow-wrap: anywhere; }
+    .bf-fit { order: 4; }
+    .bf-cases-wrap { order: 5; }
+    /* The name, the title and the place on one line, what he is open to under them. */
+    .bf-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
+    .bf-head .bf-role, .bf-head .bf-open { margin: 0; }
+    .bf-open { order: 1; flex-basis: 100%; }
+    .bf-dossier h3 { margin: 6px 0 2px; }
+    .bf-grade { margin-bottom: 4px; padding: 3px 10px; background: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .bf-grade-tag { margin-right: 8px; }
+    .bf-grade p { display: inline; margin: 0; }
     .bf-map + .bf-map { margin-top: 4px; }
     .bf-map-h { margin-bottom: 1px; }
-    .bf-row { grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr); gap: 8px; padding: 2px 0; break-inside: avoid; }
+    .bf-row { grid-template-columns: minmax(0, 0.7fr) minmax(0, 2fr); gap: 8px; padding: 2px 0; break-inside: avoid; }
+    .bf-gaps, .bf-cases { columns: 2; column-gap: 20px; }
+    .bf-gaps .bf-map-h { column-span: all; }
+    .bf-gaps .bf-row { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 6px; }
     .bf-ev { gap: 0; }
-    .bf-ev span, .bf-ev a { line-height: 1.3; }
+    .bf-ev span, .bf-ev a { padding-left: 14px; line-height: 1.3; }
     .bf-note { margin-top: 3px; font-size: 0.68rem; }
     .bf-cs { padding: 3px 0; break-inside: avoid; }
     .bf-cs p { margin-top: 1px; line-height: 1.3; }
-    .bf-contact { margin-top: 6px; }
-    .bf-address { display: block; margin: 3px 0 0; font: 0.7rem 'IBM Plex Mono', monospace; color: var(--text-secondary); overflow-wrap: anywhere; }
 }

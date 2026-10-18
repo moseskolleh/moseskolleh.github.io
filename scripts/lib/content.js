@@ -1310,8 +1310,9 @@ function checkBrief(brief, { projects, research, claims, indexHtml }) {
 
     // Ids, across the file: the strengths, the tools and languages (by
     // name), the gap rules, the facts to confirm and the grades. "years"
-    // is the years rule's.
-    const ids = new Map([['years', 'the years rule']]);
+    // is the years rule's, and "more" the shared link's own, for the rows
+    // an ad too long for it leaves out (brief.js).
+    const ids = new Map([['years', 'the years rule'], ['more', 'the shared link\'s count of rows left out']]);
     const claimId = (id, what) => {
         if (!BRIEF_ID.test(id || '')) say(`${what}: id "${id}" must be kebab-case`);
         else if (ids.has(id)) say(`${what}: id "${id}" is ${ids.get(id)}'s too`);

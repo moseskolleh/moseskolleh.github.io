@@ -120,8 +120,13 @@ const profile = JSON.parse(read('content/profile.json'));
 {
     const contact = bare.getElementById('contact');
     const form = bare.getElementById('contactForm');
-    assert(!bare.getElementById('assay') && !bare.querySelector('[class*="assay"], #assayInput, #assayResult'), 'Contact: the Assay\'s box has left the homepage');
     const line = bare.querySelector('#contact .brief-line');
+    // Its id stays only inside <noscript>, which a browser builds only with
+    // scripts off: there script.js cannot send /#assay on to The Brief, and
+    // the address lands on the line that leads there instead.
+    const assay = bare.getElementById('assay');
+    assert(!!assay && assay.closest('noscript') && assay.closest('.brief-line') === line && !bare.querySelector('[class*="assay"], #assayInput, #assayResult'),
+        'Contact: the Assay\'s box has left the homepage, its id kept only for a reader without scripts, on the line to The Brief');
     const link = line && line.querySelector('a[href="brief.html"]');
     assert(!!line && !!(form.compareDocumentPosition(line) & bare.defaultView.Node.DOCUMENT_POSITION_FOLLOWING) && !line.closest('form'),
         'Contact: one line under the form leads to The Brief');
@@ -314,8 +319,8 @@ const profile = JSON.parse(read('content/profile.json'));
         [/^I'm open to roles and consulting in sustainability, climate risk, E\.S\.G\. and sustainable A\.I\. — in Amsterdam and the E\.U\., and remote-friendly\.$/,
             ['Open to roles & consulting in sustainability, climate risk, ESG and sustainable AI', 'Amsterdam / EU, remote-friendly']],
         [/^I usually reply within a couple of days\.$/, ['I usually reply within a couple of days.']],
-        [/^And if you're hiring, paste your job ad into The Brief, on a page of its own: an honest fit, gaps included, and a one-page dossier to forward\.$/,
-            ['Hiring?', 'Paste your job ad into The Brief', 'an honest fit, gaps included, and a one-page dossier to forward']],
+        [/^And if you're hiring, paste your job ad into The Brief, on a page of its own: an honest fit, gaps included, and a dossier to forward\.$/,
+            ['Hiring?', 'Paste your job ad into The Brief', 'an honest fit, gaps included, and a dossier to forward']],
         [/^It runs in your browser, and the ad is never sent\.$/, ['It runs in your browser', 'the ad is never sent']]
     ];
     sentences(byId.contact.text).forEach((sentence) => {
