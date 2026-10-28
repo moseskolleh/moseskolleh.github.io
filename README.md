@@ -5,7 +5,7 @@
 
 ## About
 
-Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Climate Analyst specialising in ESG analysis, climate resilience, and data-driven environmental solutions.
+Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Climate Analyst and, from November 2026, a doctoral researcher on urban flood risk at Scuola Universitaria Superiore IUSS Pavia.
 
 **Live Website:** [https://moseskolleh.github.io/](https://moseskolleh.github.io/) (until October 2026 at `/sustaintheworld/`; an old address goes on to the same page, see `404.html`)
 
@@ -17,7 +17,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - **Field terminal**: press <code>`</code> anywhere (or the footer button) for a hidden green-on-black terminal — try `journey`, `drill`, `co2`, `kushe`, `help`
 - **Carbon-aware by construction**: images ship as WebP at the lowest quality that still looks the same, with AVIF where that is a tenth lighter again and an 800px hero on a phone (see [The photos](#the-photos)), the three typefaces are self-hosted subsets, and a first view costs about **257 KB over the wire on a desktop, fonts included**, less on a phone, against a 272 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model v3, which allocates data-centre, network and device energy per byte transferred). A low-energy mode pauses all animation and honours `prefers-reduced-motion`
 - **[Case studies](case-studies.html), evidence-first**: the homepage's six projects and a seventh, GAIA, an open method and tool for reporting an organisation's AI footprint on the lines of a sustainability report, each as **problem → method → artifact → result → findings**. Every result carries the basis it rests on and says plainly whether you can check it from outside; every artifact says whether it is public, available on request, or held by the client; every case study says what the work found or recommends, with its basis. The method is folded to one line until asked for. See [Content pipeline](#content-pipeline)
-- **Role-specific lenses**: `case-studies.html?lens=water`, `?lens=climate-risk`, `?lens=sustainable-ai`, `?lens=esg-csrd` — shareable views that reframe the portfolio for one field of work. They **reorder and frame, they never filter**: every case study stays on the page in every view, because a view that hides inconvenient work is a CV that lies by omission. Without JavaScript the switcher steps aside and every case study shows in the default view
+- **Lenses**: `case-studies.html?lens=water`, `?lens=climate-risk`, `?lens=sustainable-ai`, `?lens=esg-csrd` — shareable views that reframe the portfolio for one field of work. They **reorder and frame, they never filter**: every case study stays on the page in every view, because a view that hides inconvenient work is a CV that lies by omission. Without JavaScript the switcher steps aside and every case study shows in the default view
 - **No dead ends**: every page but the homepage shares one small nav (Home, Case studies, Research, CV, Contact, with the page you are on marked) and ends with a way to reach Moses: his address, the contact form and the CV. The pages built on `carbon-ai.css` have the homepage's light theme and its switch, and keep the reader's choice from page to page (`theme.js`, before the first paint); with nothing chosen they follow the system's setting, with or without JavaScript. The homepage follows it only with JavaScript: without, it stays dark, because following the system there would put a second copy of every light-theme rule in its first view. The text-only field report and the 404 page take the nav and the call to action as plain lines, and no script
 - **[Research outputs](research.html)**: first, at `#phd`, the doctorate under way at IUSS Pavia, in the public call's terms only: the question, why it matters for Monza and Brianza, what the work will do, the month it is written as of, and what it does not claim yet (no results, no model, no data). Then theses, reports, datasets, code and tools, grouped by whether you can open them: public, on request, held by the client, or planned (the PhD thesis). The public ones lead with Moses's own repositories on GitHub (a CMIP6 extremes pipeline, a groundwater toolkit, the GAIA Green AI framework, the newer EcoPrompt Coach and the sustainable-AI prototypes), each described only as far as the repository itself shows; coursework (an A/B test in SQL and Python) and the site's own pages and scripts come after the theses and reports, folded. The Pavia journey stop, the core log and the education card link to `#phd`. No DOI, journal or conference is named anywhere, because none of this work has one — and a test fails the build if one ever appears without proof
 - **[Check my numbers](claims.html)**: every figure the site prints, in digits or in words, from the hero's 164 water points and the Wuppertal "team of six" to the first view's weight, with what it counts, the one basis it rests on and whether a reader can check it (public, with where; on request; or not checkable from outside). Each figure on a page is marked with its entry in `content/claims.json`, and `npm test` fails on a figure the ledger does not hold, on a page, in its labels and captions, or in what a script prints of its own (the field terminal, the receipt, the coach's tips). See [Every number has a basis](#every-number-has-a-basis-the-claims-ledger)
@@ -62,7 +62,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - Short cards at every width: dates, role, organisation and the first line, with the rest and the tags behind a More button named for its role; on a desktop a shut card is one row
 
 ### 🔬 Projects
-- Six teaser cards, generated from `content/projects.json` so they cannot disagree with the case studies: where and when, the headline result with the one line of its basis and whether you can check it from outside, the role lenses, the tools, a thumbnail photo, and one link to the whole story on `case-studies.html` (the subtitle is the case study's). The seventh case study, GAIA, has no card (`homepageCard: false`): it is method and tooling with no photo, and leads the ESG lens, linked from the section's introduction with the other three
+- Six teaser cards, generated from `content/projects.json` so they cannot disagree with the case studies: where and when, the headline result with the one line of its basis and whether you can check it from outside, the lenses, the tools, a thumbnail photo, and one link to the whole story on `case-studies.html` (the subtitle is the case study's). The seventh case study, GAIA, has no card (`homepageCard: false`): it is method and tooling with no photo, and leads the ESG lens, linked from the section's introduction with the other three
 - The two games that used to sit in the dossiers are on the case studies they illustrate: "Seven in ten" on groundwater, "Don't let it become a boat" on Wuppertal
 - So are the dossiers' 25 field photos, with their captions word for word: a row under each case study, folded under one line until asked for (nothing is fetched until then), each photo a link to the full one. With JavaScript they open in a lightbox that steps through that case study's photos: previous and next, the arrow keys, "2 of 5", Escape
 
@@ -573,7 +573,7 @@ Everything derived now comes from `content/`:
 |---|---|
 | `content/profile.json` | the homepage's JSON-LD (the Person, with the certificates as `hasCredential`, and the WebSite), `sitemap.xml`, the homepage's at-a-glance strip, its certificates and its core log's depths, the shared shell's call to action on every page but the homepage, the CV, the facts `content.test.js` holds every page to |
 | `content/projects.json` | `case-studies.html` (with each case study's photos, game and findings), the homepage's six project cards (every case study not marked `homepageCard: false`), and each case study's headline result on the CV |
-| `content/lenses.json` | the role-specific views (`water`, `climate-risk`, `sustainable-ai`, `esg-csrd`) |
+| `content/lenses.json` | the views by field of work (`water`, `climate-risk`, `sustainable-ai`, `esg-csrd`) |
 | `content/research.json` | `research.html`, the CV's public work, and `carbon-ai.html`'s JSON-LD (the coach as a SoftwareApplication) |
 | `content/notes/*.md` | a page per note, `notes/<slug>.html`; `feed.xml`; the homepage's links to the newest three; their entries in `sitemap.xml`; and each note's Article in its JSON-LD (and, by `npm run og`, its preview card) |
 | `content/testimonials.json` | the homepage's testimonials, once there is one |
@@ -623,7 +623,7 @@ In the Freetown Complex, a wrong guess isn't a bad cell in a spreadsheet — …
 published on this site; `tag` the topic the homepage shows; `summary` one
 line of plain text, the homepage's line under the title, the page's
 description and the feed's summary; and `caseStudy` or `lens` (one of the
-two) the case study or role view it belongs with. `npm run build:content`
+two) the case study or lens it belongs with. `npm run build:content`
 turns each into `notes/<slug>.html`: the shared shell, the light theme, the
 visit counter, the date in a `<time>` with the words "first published on
 this site", a permalink, its tag, a link to its case study or view, the
@@ -764,7 +764,7 @@ should fail the build rather than ship. `scripts/lib/content.js` refuses:
 - **A venue that implies peer review without a DOI.** Two MSc theses were
   examined and defended, and a BSc dissertation examined; none is published in
   a journal, and nothing on the site says otherwise.
-- **A role view with nothing a reader can open.** Every lens in
+- **A lens with nothing a reader can open.** Every lens in
   `content/lenses.json` needs at least one public artifact or research output
   of its own beyond this site's own pages: from a case study that lists it
   first, or an output its own `lenses` place there, which the view's panel
@@ -778,7 +778,7 @@ should fail the build rather than ship. `scripts/lib/content.js` refuses:
   the question, why there, where it is (naming the institution), what the
   work will do, the month it is written as of (no later than the record's own
   date) and what it does not claim yet, with its thesis listed as `planned`
-  at that institution, linked nowhere and in no role view. The block goes
+  at that institution, linked nowhere and in no lens. The block goes
   when the degree is no longer in progress. An `aside` (coursework, the
   site's own pages and scripts) must be public.
 - **A testimonial without a source** (`content/testimonials.json`): a

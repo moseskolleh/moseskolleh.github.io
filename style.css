@@ -1653,7 +1653,7 @@ html.js .timeline-date { padding-right: 64px; }
    PROJECTS — SIX TEASER CARDS
    =================================== */
 /* One card per case study, generated from content/projects.json: where and
-   when, the headline result with its basis, the role lenses and the tools,
+   when, the headline result with its basis, the lenses and the tools,
    and one link to the whole story on case-studies.html. Three across on a
    desktop, two on a tablet and one on a phone, the photo a thumbnail beside
    the date and title at every width: as a banner it was a fifth of each
@@ -1745,7 +1745,7 @@ html.js .timeline-date { padding-right: 64px; }
     font-size: 0.7rem;
 }
 
-/* The role lenses and the tools, on one run of small type. */
+/* The lenses and the tools, on one run of small type. */
 .project-tags {
     display: flex;
     flex-wrap: wrap;

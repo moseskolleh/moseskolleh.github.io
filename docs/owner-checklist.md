@@ -522,12 +522,14 @@ These are what it could not settle for you.
     computer.
   - *Check:* Fish Audio lists the key as revoked.
 
-- [ ] **U11. The lenses still speak to someone hiring.**
-  - *What:* each lens on the case studies says "Best fit for: Roles in …",
-    and the homepage's projects section offers to read them "as a water
-    role". The site no longer looks for work, so these could say "Useful
-    if you work on: …" and "read them through one thread: water, …" (the
-    audit's wording). They were left for you to decide.
+- [ ] **U11. Approve the lenses' new wording.**
+  - *What:* the lenses spoke to someone hiring ("Best fit for: Roles in …",
+    the ESG lens offering sustainability consulting, and the homepage's
+    "read them as a water role"). Since the site offers research
+    collaborations only, each lens now reads "Best fit for: Collaborations
+    on …", the ESG lens no longer names consulting, and the homepage reads
+    them "for water". Change the wording if you would put it differently;
+    consulting comes back only after U3.
   - *Where:* `content/lenses.json` → each lens's `bestFor`; the label
     "Best fit for:" in `scripts/build-content.js`; the projects section's
     line in `index.html`, by hand. The quarterly review checks the lenses

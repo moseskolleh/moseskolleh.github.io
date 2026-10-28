@@ -23,7 +23,7 @@
     "THE REPOSITORIES. Each entry with a github.com url says only what that",
     "repository itself shows: no result its README states as a target, no",
     "standard it maps to called 'compliance', and no client or partner it names.",
-    "`lenses` places an output with no case study of its own in a role view",
+    "`lenses` places an output with no case study of its own in a lens",
     "(content/lenses.json ids), whose panel on case-studies.html lists it after",
     "the lens's evidence. Every lens must have at least one public piece of",
     "work of its own beyond this site's pages: an output placed in it, or an",

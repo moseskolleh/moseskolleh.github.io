@@ -14,7 +14,7 @@
 // GENERATED (do not hand-edit — the header on each file says so):
 //
 //   case-studies.html   problem → method → artifact → result → findings,
-//                       per case study, with role lenses
+//                       per case study, with lenses
 //   research.html       research outputs and how to reproduce them
 //   stats.html          what the visit counter has counted, suppressed
 //                       below 5, and exactly what it sends (content/stats.json,
@@ -1265,7 +1265,7 @@ function fourNumbers(under) {
         {
             key: 'lensVisits',
             name: 'Lens-link visits, a proxy',
-            def: 'Page views that arrived through a role link such as <code>case-studies.html?lens=water</code>. ' +
+            def: 'Page views that arrived through a lens link such as <code>case-studies.html?lens=water</code>. ' +
                  'What I want to know is how many of those go on to read a case study, but the totals are kept field ' +
                  'by field, not visit by visit, so the lens and how far the reader got cannot be joined. This counts ' +
                  'the arrivals, so the real figure is at most this.'
@@ -1363,7 +1363,7 @@ ${four.map((n) => {
             <p>What will appear here, with every figure under ${under} held back:</p>
             <ul class="st-list">
                 <li>the four numbers below, for the last week, for all time, and week by week;</li>
-                <li>page views by page, by role lens and by window width;</li>
+                <li>page views by page, by lens and by window width;</li>
                 <li>the sites readers came from, by host name only;</li>
                 <li>which features were used, and how far down a page readers got;</li>
                 <li>the kilobytes transferred per page view.</li>
@@ -1452,9 +1452,9 @@ ${table('The four numbers, week by week', ['Week', 'Page views', 'Contact', 'CV'
             <h2 id="st-pages-h">Page views</h2>
             <h3>By page</h3>
 ${breakdownTable('page', 'Page views by page', 'Page', k => (k === 'other' ? 'Any other name <span class="st-def">not a page this site has</span>' : esc(PAGE_NAMES[k] || k)), true)}
-            <h3>By role lens</h3>
+            <h3>By lens</h3>
             <p>Page views that arrived with <code>?lens=</code> in the address; the rest had none.</p>
-${breakdownTable('lens', 'Page views by role lens', 'Lens', k => (k === 'other' ? 'Any other name <span class="st-def">not a lens this site has</span>' : esc(lensNames[k] || k)), true)}
+${breakdownTable('lens', 'Page views by lens', 'Lens', k => (k === 'other' ? 'Any other name <span class="st-def">not a lens this site has</span>' : esc(lensNames[k] || k)), true)}
             <h3>By window width</h3>
             <p>The width of the browser window, which on a desktop is not always the width of the screen.</p>
 ${breakdownTable('vp', 'Page views by window width', 'Window', k => VIEWPORT_NAMES[k] || esc(k), true)}
@@ -1551,7 +1551,7 @@ ${table('Kilobytes transferred per page view', cols('Per page view'), [
             <pre class="st-payload"><code>${esc(JSON.stringify(EXAMPLE_PAYLOAD, null, 2))}</code></pre>
             <dl class="st-fields">
                 <dt><code>page</code>, <code>lens</code>, <code>deepest</code></dt>
-                <dd>The page, the role lens in its address if there was one, and the id of the furthest section reached.</dd>
+                <dd>The page, the lens in its address if there was one, and the id of the furthest section reached.</dd>
                 <dt><code>features</code></dt>
                 <dd>
                     Up to ${rule('featuresMax')} names of things used on the page, such as a CV link or the carbon receipt.
@@ -1925,7 +1925,7 @@ ${groups}
 // scripts/lib/content.js refuses one without a title, a real date, a slug
 // the counter can name or a tie to a case study or lens that exists): a
 // page of its own in notes/, dated the day it was first published on this
-// site, with its permalink, its tag, a link to the case study or role view
+// site, with its permalink, its tag, a link to the case study or lens
 // it belongs with, the older and newer note, an Article in its structured
 // data, and the shared shell. The homepage keeps a short link to each of
 // the newest three; the feed and the sitemap list every one.
@@ -1983,12 +1983,12 @@ function renderNote(data, note) {
     const canonical = `${SITE}${notePath(note)}`;
     const own = `${note.slug}.html`;
 
-    // Where the note belongs: its case study, or else its role view.
+    // Where the note belongs: its case study, or else its lens.
     const cs = note.caseStudy && projects.caseStudies.find(c => c.id === note.caseStudy);
     const lens = note.lens && lenses.lenses.find(l => l.id === note.lens);
     const tie = cs
         ? `<span class="nt-label">The case study</span> <a href="${NOTE_ROOT}case-studies.html#${esc(cs.id)}">${prose(cs.title)}</a>`
-        : `<span class="nt-label">The role view</span> <a href="${NOTE_ROOT}case-studies.html?lens=${esc(lens.id)}">${prose(lens.label)}</a>`;
+        : `<span class="nt-label">The lens</span> <a href="${NOTE_ROOT}case-studies.html?lens=${esc(lens.id)}">${prose(lens.label)}</a>`;
 
     // The older and newer note: from the three newest on the homepage, every
     // note is a few presses away, and the page stays the same length however
@@ -2321,7 +2321,7 @@ function injectAtAGlance(data, html) {
 // the case studies, and had. Now it shows a teaser per case study (bar any
 // marked homepageCard: false; see onHomepage in scripts/lib/content.js), drawn
 // from the same entry: where and when, the headline result with the one
-// line of its basis and whether a reader can check it, the role lenses it
+// line of its basis and whether a reader can check it, the lenses it
 // belongs to, its tools, and one link to the whole story. The subtitle is
 // the case study's to tell; the photo is a thumbnail beside the title.
 const CARDS_START = '            <!-- PROJECT-CARDS:START — generated by scripts/build-content.js from content/projects.json. Do not edit by hand. -->';
@@ -2347,7 +2347,7 @@ function renderProjectCards(data) {
                         <p class="project-basis"><span class="mono-label">${head.verifiable ? 'Checkable from outside' : 'Not checkable from outside'}</span> ${prose(head.brief)}</p>
                     </div>
                     <div class="project-tags">
-                        <ul class="project-lenses" aria-label="Role lenses">${cs.lenses.map(l => `<li>${esc(lensName[l])}</li>`).join('')}</ul>
+                        <ul class="project-lenses" aria-label="Lenses">${cs.lenses.map(l => `<li>${esc(lensName[l])}</li>`).join('')}</ul>
                         <div class="project-tech">${cs.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
                     </div>
                     <a class="project-link" href="case-studies.html#${esc(cs.id)}" data-analytics="projects-to-case-studies">Read the case study<span class="sr-only">: ${prose(cs.title)}</span> <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"></use></svg></a>

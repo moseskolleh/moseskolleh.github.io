@@ -16,7 +16,7 @@
 }
 
 /* -------------------------------------------------------------------
-   Role lenses
+   Lenses
    ------------------------------------------------------------------- */
 .cs-lenses {
     display: flex;
@@ -581,7 +581,7 @@ html.lightbox-open { overflow: hidden; }
     color: var(--text-secondary);
 }
 .rs-methods .mono-label { margin-right: 4px; }
-/* The case study or role view, at the end of the note: underlined, as a
+/* The case study or lens, at the end of the note: underlined, as a
    link in a run of text has to be told apart by more than its colour. */
 .rs-link { white-space: nowrap; color: var(--primary-green); text-underline-offset: 3px; }
 

@@ -532,7 +532,7 @@ const fieldText = plain(fieldReport);
     }));
     assert(stray.length === 0, `Repos: every repository link names one of the six as GitHub spells it (stray: ${stray.join(', ') || 'none'})`);
 
-    // Every role view has public work a reader can open somewhere other
+    // Every lens has public work a reader can open somewhere other
     // than this site, whatever lenses content/lenses.json holds. The
     // validator refuses one without; this says which work each lens has.
     const bare = lenses.map(l => [l.id, content.publicWorkFor(l.id, { caseStudies: projects }, research)

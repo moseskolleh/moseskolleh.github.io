@@ -479,7 +479,7 @@ function publishedSums(stats) {
         const cells = (metric, keep) => rows(metric, keep).map(r => fig(r[col]));
         sums.push({ label: `page views by page (${when})`, cells: [h.visits, ...cells('page')] });
         sums.push({ label: `page views by window width (${when})`, cells: [h.visits, ...cells('vp')] });
-        sums.push({ label: `page views by role lens (${when})`, cells: [h.lensVisits, ...cells('lens', k => k !== 'other')] });
+        sums.push({ label: `page views by lens (${when})`, cells: [h.lensVisits, ...cells('lens', k => k !== 'other')] });
         const cv = rows('feature', k => k === 'cv-download')[0];
         if (cv) sums.push({ label: `cvDownloads and the "cv-download" feature (${when})`, cells: [h.cvDownloads, fig(cv[col])] });
     });
@@ -798,7 +798,7 @@ function checkNow(now, outputs, profile) {
     else {
         if (thesis.status !== 'planned') problems.push(`${at}: its thesis, "${thesis.id}", is "${thesis.status}" — a thesis still to be written is planned`);
         if (thesis.venue !== degree.institution) problems.push(`${at}: its thesis's venue is "${thesis.venue}", not ${degree.institution}`);
-        if (thesis.caseStudy || thesis.lenses) problems.push(`${at}: its thesis has no case study or role view to sit in until there is work to show`);
+        if (thesis.caseStudy || thesis.lenses) problems.push(`${at}: its thesis has no case study or lens to sit in until there is work to show`);
         if (thesis.aside) problems.push(`${at}: its thesis is not an aside`);
     }
     return problems;
@@ -945,7 +945,7 @@ function checkQuotedFigures({ testimonials, certifications }, claims) {
 //   tag        the topic the homepage shows ("Water", "Scenarios")
 //   summary    one line, plain text: the homepage's line under the title,
 //              the page's description and the feed's summary
-//   caseStudy  or lens, one of the two: the case study or role view it is
+//   caseStudy  or lens, one of the two: the case study or lens it is
 //              tied to, which has to exist, and which the note links
 //
 // A figure in a note is held to the claims ledger like any other: one the
@@ -1260,7 +1260,7 @@ function checkClaims(ledger, { profile, projects, factors }) {
 }
 
 /**
- * The public work a role view holds as its own: the public artifacts of the
+ * The public work a lens holds as its own: the public artifacts of the
  * case studies it is home to (those that list it first, and so lead the
  * view), and the public research outputs of those case studies or placed in
  * the view by their own `lenses`, which its panel lists (renderCaseStudies,

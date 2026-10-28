@@ -12,7 +12,7 @@ follows them says how.
 
 - [ ] **Publish one note.** One Field Note a month (owner checklist L2).
 - [ ] **Read `stats.html`.** The open counts, rebuilt each Monday from the
-  week before: which pages, role views and features are used, and the four
+  week before: which pages, lenses and features are used, and the four
   numbers.
 - [ ] **Answer every contact within two days.** Messages land in the
   sheet's Responses tab and in the `OWNER_EMAIL` inbox.

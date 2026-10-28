@@ -19,7 +19,7 @@
     "  · No publication venue, DOI or journal is named anywhere unless the",
     "    artifact genuinely has one. Two MSc theses were examined and defended,",
     "    and a BSc dissertation examined; that is what they say, and nothing more.",
-    "  · `lenses` lists which role-specific views a case study belongs to, and",
+    "  · `lenses` lists which views by field of work a case study belongs to, and",
     "    must reference ids defined in content/lenses.json. Nearest first: in",
     "    the view of its first lens a case study leads, ahead of those that",
     "    only touch that lens.",

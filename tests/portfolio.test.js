@@ -1,4 +1,4 @@
-// Tests for the case studies, role lenses and research outputs.
+// Tests for the case studies, lenses and research outputs.
 //
 // The content model exists to stop a portfolio drifting back into unsupported
 // claims, so most of what follows checks the guards rather than the content:
@@ -133,7 +133,7 @@ const { projects, research, lenses } = data;
     const checkable = data.projects.caseStudies.flatMap(cs => cs.results.filter(r => r.verifiable).map(r => `${cs.id}: ${r.claim.slice(0, 30)}`));
     assert(!checkable.some(r => /^(?:coastal|water-management):/.test(r)), `Results: the coastal count and the Hunan defence are not called checkable while nothing says where (${checkable.join('; ')})`);
 
-    // A role view needs public work a reader can open beyond this site: a
+    // A lens needs public work a reader can open beyond this site: a
     // game on one of its pages is not enough, a repository is, and so is
     // an output placed in the view by its own `lenses`.
     const lens = [{ id: 'x' }];
@@ -171,7 +171,7 @@ const { projects, research, lenses } = data;
         ['a block whose thesis is not listed', now, [], who],
         ['a thesis called public before it is written', now, [{ ...thesis, status: 'public', url: 'research.html' }], who],
         ['a thesis at another institution', now, [{ ...thesis, venue: 'Elsewhere' }], who],
-        ['a thesis placed in a role view', now, [{ ...thesis, lenses: ['water'] }], who]
+        ['a thesis placed in a lens', now, [{ ...thesis, lenses: ['water'] }], who]
     ].forEach(([label, n, outs, p]) => assert(nowSays(n, outs, p) !== '', `Guard: rejects ${label}`));
 
     // An aside is folded after the rest: something a reader can open.
@@ -582,14 +582,14 @@ function loadWith(name, change) {
         `Research page: the key explains each availability shown (${shown.map(s => labels[s]).join(', ')})`);
 
     // Each output says where it sits, at the end of its note: its case
-    // study, the role view of an output with none, or, for the thesis of
+    // study, the lens of an output with none, or, for the thesis of
     // the doctorate under way, what it sets out to do at the top.
     const placed = research.outputs.filter((o) => {
         const link = doc.querySelector(`#${o.id} .rs-note a.rs-link`);
         const want = o.caseStudy ? `case-studies.html#${o.caseStudy}` : (o.lenses ? `case-studies.html?lens=${o.lenses[0]}` : (research.now && o.id === research.now.thesis ? '#phd' : null));
         return want ? !!link && link.getAttribute('href') === want : !link;
     });
-    assert(placed.length === research.outputs.length, `Research page: each output links its case study or role view, and only those (${placed.length}/${research.outputs.length})`);
+    assert(placed.length === research.outputs.length, `Research page: each output links its case study or lens, and only those (${placed.length}/${research.outputs.length})`);
 
     // How to reproduce it is a press away, not a screen of the page.
     const repro = reproduce && reproduce.closest('.rs-repro');
@@ -631,7 +631,7 @@ function loadWith(name, change) {
     const thesis = byId[now.thesis];
     assert(!!thesis && thesis.status === 'planned' && !thesis.url && !thesis.lenses && !thesis.caseStudy &&
         !!doc.querySelector(`#rs-planned #${thesis.id}`) && !/\d/.test(thesis.title),
-        'Research page: the thesis is listed as planned, with no link, no role view and no figure in its title');
+        'Research page: the thesis is listed as planned, with no link, no lens and no figure in its title');
     assert(/\bdoctorate under way\b/.test(flat(doc.querySelector('.ca-hero p'))) && !/happily/.test(flat(doc.querySelector('.ca-hero p'))),
         'Research page: the hero lead says a doctorate is under way, without the sales line');
 
