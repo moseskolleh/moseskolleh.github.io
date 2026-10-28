@@ -12,7 +12,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 ## Features
 
 - **Living journey map**: a hand-built SVG map of the journey region — West Africa to East Asia, so every stop gets real resolution instead of a world map that's half empty ocean (Natural Earth 50 m coastlines, simplified hardest away from the Rhine delta where the map zooms deepest, zero runtime dependencies). It flies from Freetown to Changsha, Bonn, Wageningen, Amsterdam and Pavia as you scroll (on a phone, in a band pinned under the nav bar above the stop you are reading), and fieldwork sites like Wuppertal join the map when the story reaches them. Every name on it is 11px or more on any screen, and the Rhine delta's four sit clear of each other and of the route. Regenerate with `npm install && npm run map:build`, then sync the printed stop pixels into `script.js`; `npm run map:check` proves the committed SVG still matches the script and runs in CI
-- **"Seven in ten" — site the borehole**: a playable resistivity profile on the [groundwater case study](case-studies.html#play-borehole) — read the curve, place the rig, drill. Water-bearing fracture, clay pocket or dry hole; your holes fill a scoreboard beside the field records' 7 in 10 (reading the curve first) and blind drilling's ~3 in 10, which is labelled illustrative until it has a source. It was two widgets, the game and a strike-rate slider, making one point; it is one now
+- **"Seven in ten" — site the borehole**: a playable resistivity profile on the [groundwater case study](case-studies.html#play-borehole) — read the curve, place the rig, drill. Water-bearing fracture, clay pocket or dry hole; your holes fill a scoreboard beside the field records' 7 in 10 at survey-selected sites. It is practice in reading the curve: it once drew blind drilling's ~3 in 10 beside them, which had no source and claimed a gain nothing measured, so that row is gone. It was two widgets, the game and a strike-rate slider, making one point; it is one now
 - **"Don't let it become a boat" flood scene**: a schematic Wupper cross-section on the [Wuppertal case study](case-studies.html#play-flood) — slide the river from a calm day to July 2021 and watch the margin under the Schwebebahn's hanging cars shrink. Both games load only when a reader scrolls near them, and without JavaScript each is a note that it needs JavaScript and one line of summary
 - **Field terminal**: press <code>`</code> anywhere (or the footer button) for a hidden green-on-black terminal — try `journey`, `drill`, `co2`, `kushe`, `help`
 - **Carbon-aware by construction**: images ship as WebP at the lowest quality that still looks the same, with AVIF where that is a tenth lighter again and an 800px hero on a phone (see [The photos](#the-photos)), the three typefaces are self-hosted subsets, and a first view costs about **257 KB over the wire on a desktop, fonts included**, less on a phone, against a 272 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model), counting network transfer only. A low-energy mode pauses all animation and honours `prefers-reduced-motion`
@@ -53,7 +53,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - The living journey map: Freetown → Changsha → Bonn → Wageningen → Amsterdam → Pavia, flown as you scroll, with a visitor mark for wherever you are reading from. On a phone it is a band pinned under the nav bar while the stops scroll past below it, showing the one being read; it jumps instead of flying under reduced motion or low-energy mode
 
 ### 👤 About
-- Professional summary with the CV download, and the 164 water points itemised (100 wells rehabilitated, 50 boreholes drilled, 14 solar-powered)
+- Professional summary with the CV download, and the 164 water points itemised (100 wells rehabilitated, 50 boreholes constructed, 14 solar-powered)
 - A link to each of the newest three Field Notes: its number, tag and date, its title and its one line, the note itself a page of its own (`notes/`)
 
 ### 💼 Experience
@@ -204,10 +204,11 @@ The suites, and the failure each one exists to prevent:
   weights the footer, the lens and this README quote are the ones `npm run
   budget` measures, the claims removed for having no basis ("10,000+
   people", a project completion rate, "15% efficiency", "advised the UN",
-  "certified across", "if a skill is listed, there's a project behind it")
-  stay gone, the field report names no tool the homepage does not show, the
-  two illustrative numbers (the 30% blind-drilling baseline and the You Draw
-  It guess line) say so wherever they are shown, and You Draw It judges a
+  "certified across", "if a skill is listed, there's a project behind it",
+  the UNDRR coverage gain, "top of class", a GPA, and skills with no receipt)
+  stay gone, the government partner is named nowhere, the field report names
+  no tool the homepage does not show, the illustrative You Draw It guess line
+  says so wherever it is shown, and You Draw It judges a
   guess against the published range rather than calling an estimate the
   actual value.
 - **`claims.test.js`** — the claims ledger (see [Every number has a
@@ -273,8 +274,8 @@ The suites, and the failure each one exists to prevent:
   a host is within a screen of view, then the stylesheet before the script;
   the module runs without `script.js` (and with storage refused), wires a
   host before showing it, plays a round with one scoreboard and no second
-  slider, never counts a re-drilled strike, labels the 30% illustrative
-  wherever it shows, drills and floods at once under reduced motion or
+  slider, never counts a re-drilled strike, draws no blind-drilling rate to
+  claim a gain over, drills and floods at once under reduced motion or
   low-energy mode, and sizes its drawing labels for the scale they are
   drawn at, so a phone reads them at 11px or more. `npm run smoke` plays both
   in Chromium and measures those labels at 390 and 320px.

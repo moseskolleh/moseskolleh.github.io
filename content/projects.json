@@ -641,7 +641,7 @@
           "kind": "tool",
           "status": "public",
           "url": "case-studies.html#play-borehole",
-          "note": "A playable version of the reading the method depends on. Play it below (it needs JavaScript): read the resistivity curve, place the rig, drill, and set your strike rate beside the field records."
+          "note": "A playable version of the reading the method depends on. Play it below (it needs JavaScript): read the resistivity curve, place the rig, drill, and set your holes beside the field records."
         }
       ],
 
@@ -672,7 +672,7 @@
         }
       ],
 
-      "caveat": "The strike rate comes from field records, not a controlled trial. Geology varies between sites, and a good surveyor is part of the result."
+      "caveat": "The success rate comes from field records, not a controlled trial. Geology varies between sites, and a good surveyor is part of the result."
     }
   ]
 }
