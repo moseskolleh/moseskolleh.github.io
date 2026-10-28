@@ -140,7 +140,7 @@
     {
       "id": "wur-grade",
       "value": "7.8/10",
-      "unit": "grade for the MSc in Environmental Sciences at Wageningen, on the Dutch scale",
+      "unit": "average grade for the MSc in Environmental Sciences at Wageningen, on the Dutch scale",
       "basis": { "profile": "education.1.grade", "note": "The transcript is the evidence." },
       "checkable": "on-request"
     },

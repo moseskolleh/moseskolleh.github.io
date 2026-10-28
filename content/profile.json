@@ -163,7 +163,7 @@
     }
   ],
 
-  "$education": "Newest first. An entry with \"inProgress\": true is a degree under way, not one awarded: it is not counted among the degrees the site says he holds (\"three degrees\", scripts/lib/claims.js), and the JSON-LD does not list him as an alumnus of its institution.",
+  "$education": "Newest first. An entry with \"inProgress\": true is a degree under way, not one awarded: it is not counted among the degrees the site says he holds (\"three degrees\", scripts/lib/claims.js), and the JSON-LD does not list him as an alumnus of its institution. specialisation, scholarship and classification (the degree's, not a dissertation's) are named as the award documents name them, and tests/content.test.js holds both editions to these words.",
   "education": [
     {
       "degree": "PhD in Sustainable Development and Climate Change",
@@ -177,6 +177,8 @@
       "institution": "Wageningen University & Research",
       "displayDates": "2021 — 2024",
       "textEditionDates": "2021–2024",
+      "specialisation": "Human-Environment Interaction · Water Systems & Global Change",
+      "scholarship": "Wageningen African Scholarship Programme",
       "grade": "7.8/10 (Dutch scale)",
       "consultancyTeamSize": 6
     },
@@ -184,13 +186,15 @@
       "degree": "MSc Industrial Engineering",
       "institution": "Hunan University",
       "displayDates": "2019 — 2021",
-      "textEditionDates": "2019–2021"
+      "textEditionDates": "2019–2021",
+      "scholarship": "Chinese Government (MOFCOM) Scholarship"
     },
     {
       "degree": "BSc Honours Geology",
       "institution": "University of Sierra Leone",
       "displayDates": "2013 — 2017",
-      "textEditionDates": "2013–2017"
+      "textEditionDates": "2013–2017",
+      "classification": "First Class Honours"
     }
   ],
 

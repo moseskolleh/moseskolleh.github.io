@@ -149,6 +149,7 @@ function assert(cond, msg) {
             { re: /certified across|highly sought|mastered/i, why: 'wording the site dropped' },
             { re: /advised the (?:UN|United Nations)/i, why: 'the UN role was an internship' },
             { re: /coverage by 25%|25% (?:more )?regional|\baudited\b|for national policy use/i, why: 'the UNDRR wording the site dropped: an unsourced coverage gain, an audit, a policy use nothing records' },
+            { re: /top of class|dual master|\bGPA\b|Life Cycle Assessment|Carbon Markets|Circular Economy|\bSASB\b/i, why: 'a rank, terms and skills the site dropped for want of a record' },
             { re: /Ministry of Finance|Ministerie/i, why: 'naming the partner on the CV waits on the owner (consent)' },
             { re: /Dr\.? Timbo|\bACF\b|Living Water International|WiNGiN|Matthijs|\bJop\b|Rezaei/i, why: 'a client or partner named in the repositories, not cleared' }
         ];

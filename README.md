@@ -760,9 +760,9 @@ should fail the build rather than ship. `scripts/lib/content.js` refuses:
   plausible-looking DOI or repository URL fails `npm test` — which is the
   point, because a fabricated link is the easiest thing to write and the
   hardest thing for a reader to check.
-- **A venue that implies peer review without a DOI.** Three theses were written
-  and defended; none is published in a journal, and nothing on the site says
-  otherwise.
+- **A venue that implies peer review without a DOI.** Two MSc theses were
+  examined and defended, and a BSc dissertation examined; none is published in
+  a journal, and nothing on the site says otherwise.
 - **A role view with nothing a reader can open.** Every lens in
   `content/lenses.json` needs at least one public artifact or research output
   of its own beyond this site's own pages: from a case study that lists it

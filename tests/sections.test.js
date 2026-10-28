@@ -144,8 +144,8 @@ const profile = JSON.parse(read('content/profile.json'));
         ['164 water points across Sierra Leone', () => /164 water points/.test(text(about.querySelector('.about-text p:nth-of-type(2)'))), 'About\'s own paragraph'],
         ['Python, SQL, GIS & ML', () => ['Python', 'SQL', 'QGIS & ArcGIS', 'Machine Learning'].every(t => Array.from(bare.querySelectorAll('#skills .toolkit-name')).some(n => text(n).startsWith(t))), 'the toolkit, each with its proof'],
         ['ESG Specialist Program, Corporate Finance Institute (2024)', () => /^ESG Specialist Program Corporate Finance Institute · Sep 2024/.test(text(bare.querySelector('#education .certification'))), 'the certificates'],
-        ['the six chips', () => ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Life Cycle Assessment', 'Climate Risk Assessment', 'Water Resource Management'].every(s => text(bare.querySelector('.skills-checklist')).includes(s)) &&
-            ['IFRS S1&S2', 'SASB', 'GRI', 'CSRD'].every(s => text(bare.querySelector('.frameworks-list')).includes(s)), 'Skills\' two lists']
+        ['the six chips', () => ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Climate Risk Assessment', 'Water Resource Management'].every(s => text(bare.querySelector('.skills-checklist')).includes(s)) &&
+            ['IFRS S1&S2', 'GRI', 'CSRD'].every(s => text(bare.querySelector('.frameworks-list')).includes(s)), 'Skills\' two lists']
     ];
     said.forEach(([what, where, name]) => assert(where(), `About: "${what}" is still on the page, in ${name}`));
 
@@ -219,12 +219,16 @@ const profile = JSON.parse(read('content/profile.json'));
         'Skills & Education: one section; #education is a part of it, still an address');
     assert(/Skills & Education/.test(text(skills.querySelector('.section-title'))), 'Skills & Education: the heading says both');
 
-    const expertise = ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Life Cycle Assessment', 'Climate Risk Assessment',
-        'Water Resource Management', 'Disaster Risk Reduction', 'Carbon Markets', 'Circular Economy'];
-    const frameworks = ['SBTi', 'CDP', 'GHG Protocol', 'TCFD', 'TNFD', 'ISO 14000', 'IFRS S1&S2', 'SASB', 'GRI', 'CSRD'];
+    // Life Cycle Assessment, Carbon Markets, Circular Economy and SASB were
+    // listed too, under "every tool comes with the receipt", with nothing on
+    // the site behind them; they went in October 2026 (content.test.js keeps
+    // them off the homepage and the field report).
+    const expertise = ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Climate Risk Assessment',
+        'Water Resource Management', 'Disaster Risk Reduction'];
+    const frameworks = ['SBTi', 'CDP', 'GHG Protocol', 'TCFD', 'TNFD', 'ISO 14000', 'IFRS S1&S2', 'GRI', 'CSRD'];
     const listed = (sel) => Array.from(skills.querySelectorAll(sel)).map(text);
-    assert(JSON.stringify(listed('.skills-checklist li')) === JSON.stringify(expertise), `Skills: all eight areas of expertise are listed (${listed('.skills-checklist li').length})`);
-    assert(JSON.stringify(listed('.frameworks-list li')) === JSON.stringify(frameworks), `Skills: all ten frameworks are listed (${listed('.frameworks-list li').length})`);
+    assert(JSON.stringify(listed('.skills-checklist li')) === JSON.stringify(expertise), `Skills: every area of expertise is listed (${listed('.skills-checklist li').length})`);
+    assert(JSON.stringify(listed('.frameworks-list li')) === JSON.stringify(frameworks), `Skills: every framework is listed (${listed('.frameworks-list li').length})`);
     assert(skills.querySelectorAll('.toolkit-item .toolkit-proof').length === 6, 'Skills: the six tools keep their proof links');
 
     // What left Skills was said elsewhere on the page too, and still is.
@@ -251,8 +255,8 @@ const profile = JSON.parse(read('content/profile.json'));
             !!d.querySelector('.specialization') && d.querySelectorAll('li').length >= 2,
             `Education: ${e.degree} keeps its dates, institution, distinction and lines`);
     });
-    ['Wageningen African Scholarship Programme scholar', 'GPA 7.8/10 (Dutch scale)', 'Full Chinese Government MOFCOM Scholarship',
-        'First Class Honours — graduated top of class', 'Human-Environment Interaction · Water Systems & Global Change',
+    ['Wageningen African Scholarship Programme scholar', 'Average grade 7.8/10 (Dutch scale)', 'Full Chinese Government (MOFCOM) Scholarship',
+        'First Class Honours', 'Human-Environment Interaction · Water Systems & Global Change',
         'Thesis: socioeconomic drivers of river export of pollutants worldwide', 'Thesis: soft path water management — Freetown case study',
         'Dissertation: groundwater potential mapping, geophysical approach', 'Project management, operations research, systems analysis',
         'Hydrogeology, geophysics, environmental geology']

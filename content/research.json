@@ -5,8 +5,9 @@
     "What exists, where it is, and — where it is not public — who holds it.",
     "",
     "WHAT THIS FILE DELIBERATELY DOES NOT CONTAIN: a DOI, a journal name, a",
-    "conference, or a citation for anything that does not have one. Three theses",
-    "were written, examined and defended; none has been published in a journal,",
+    "conference, or a citation for anything that does not have one. Two MSc",
+    "theses were examined and defended, and a BSc dissertation examined; none",
+    "has been published in a journal,",
     "and saying otherwise would be the exact failure mode this whole review was",
     "about. `status` carries the honest answer instead, and the page prints it",
     "next to every entry rather than burying it.",
@@ -55,7 +56,7 @@
       "caseStudy": "water-management",
       "summary": "Argued that Freetown's water gap is not primarily a pipe-capacity problem, and developed demand-side, reuse and community-stewardship alternatives scoped for resource-constrained settings.",
       "methods": ["Systems analysis", "Feasibility assessment", "Implementation framework design"],
-      "note": "Defended May 2021, on a full Chinese Government (MOFCOM) scholarship."
+      "note": "Defended May 2021, on a full Chinese Government (MOFCOM) Scholarship."
     },
     {
       "id": "bsc-usl",

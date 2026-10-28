@@ -259,7 +259,21 @@ const fieldText = plain(fieldReport);
     profile.education.filter(e => e.grade).forEach((e) => {
         if (!indexText.includes(e.grade)) missing.push(`index: grade ${e.grade} (${e.institution})`);
     });
+    // A degree's specialisation, scholarship and classification, in the
+    // award's own words, the same on both editions.
+    profile.education.forEach((e) => ['specialisation', 'scholarship', 'classification'].filter(k => e[k]).forEach((k) => {
+        if (!indexText.includes(e[k])) missing.push(`index: ${k} "${e[k]}" (${e.institution})`);
+        if (!fieldText.includes(e[k])) missing.push(`field-report: ${k} "${e[k]}" (${e.institution})`);
+    }));
     assert(missing.length === 0, `Figures: the pages print the record facts profile.json holds (missing: ${missing.join('; ') || 'none'})`);
+
+    // The Hunan scholarship was named four ways, one of which reads as a
+    // different scheme. Every page that names it uses profile.json's name.
+    const hunan = profile.education.find(e => /MOFCOM/.test(e.scholarship || ''));
+    const otherWays = new RegExp(`Chinese Government (?!\\(MOFCOM\\) Scholarship)|(?<!Chinese Government \\()MOFCOM|MOFCOM\\) scholarship`);
+    const named = ['index.html', 'field-report.html', 'case-studies.html', 'research.html']
+        .map(f => [f, plain(read(f)).match(otherWays)]).filter(([, m]) => m).map(([f, m]) => `${f}: "${m[0]}"`);
+    assert(!!hunan && named.length === 0, `Figures: the Hunan scholarship has one name everywhere, "${hunan && hunan.scholarship}" (${named.join('; ') || 'no other'})`);
 }
 
 // --- Figures: case-study periods ------------------------------------------
@@ -361,6 +375,10 @@ const fieldText = plain(fieldReport);
         { re: /for national policy use/i, why: 'nothing records that the factsheet was used in national policy' },
         { re: /well above local averages|against roughly 30%/i, why: 'leans on the blind-drilling baseline, which has no recorded source' },
         { re: /if a skill is listed, there's a project behind it/i, why: 'Life Cycle Assessment, Carbon Markets and Circular Economy are listed with no project behind them' },
+        { re: /Life Cycle Assessment|\bLCA\b|Carbon Markets|Circular Economy|\bSASB\b/, why: 'listed as skills with nothing on the site behind them: no course, case study or output' },
+        { re: /top of (?:the |his |my )?class/i, why: 'a class rank no document on record states; the degree\'s First Class Honours stays' },
+        { re: /dual master|\bGPA\b/i, why: 'two separate master\'s degrees, not a joint programme; a Dutch university gives an average grade, not a GPA' },
+        { re: /representing graduate researchers/i, why: 'reads as a formal office nothing records' },
         { re: /anywhere in the E\.?U\b/i, why: 'relocation and EU right to work are not stated on the site (owner checklist F2, F3)' },
         { re: /GeoPandas|GeoAI/i, why: 'not in the homepage\'s toolkit, so the CV printed from it left them off; the field report kept GeoPandas' }
     ];
