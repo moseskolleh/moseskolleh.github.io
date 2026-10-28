@@ -3,6 +3,7 @@ number: 2
 title: Why I wrote a pessimistic future on purpose
 slug: why-i-wrote-a-pessimistic-future
 date: 2026-07-06
+updated: 2026-10-28
 tag: Scenarios
 summary: Model output alone seldom moves a decision; a story people can picture often does.
 caseStudy: coastal

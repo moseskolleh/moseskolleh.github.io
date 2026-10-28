@@ -215,10 +215,11 @@ const fieldText = plain(fieldReport);
     const missing = profile.pages.filter(p => !sitemap.includes(p.loc)).map(p => p.path);
     assert(missing.length === 0, `Sitemap: lists every page (missing: ${missing.join(', ') || 'none'})`);
 
-    // And every field note, each at its own address, dated the day it was published.
+    // And every field note, each at its own address, dated the day it last
+    // changed: its `updated` once corrected, or else the day it was published.
     const notes = require('../scripts/lib/content.js').loadAll().notes;
-    const noteMissing = notes.filter(n => !sitemap.includes(`<loc>${profile.links.site}notes/${n.slug}.html</loc>\n    <lastmod>${n.date}</lastmod>`)).map(n => n.slug);
-    assert(notes.length >= 3 && noteMissing.length === 0, `Sitemap: lists every field note, with the day it was published as its lastmod (missing: ${noteMissing.join(', ') || 'none'})`);
+    const noteMissing = notes.filter(n => !sitemap.includes(`<loc>${profile.links.site}notes/${n.slug}.html</loc>\n    <lastmod>${n.updated || n.date}</lastmod>`)).map(n => n.slug);
+    assert(notes.length >= 3 && noteMissing.length === 0, `Sitemap: lists every field note, with the day it last changed as its lastmod (missing: ${noteMissing.join(', ') || 'none'})`);
 
     const locs = sitemap.match(/<loc>([^<]+)<\/loc>/g) || [];
     const known = profile.pages.map(p => p.loc).concat(notes.map(n => `${profile.links.site}notes/${n.slug}.html`));

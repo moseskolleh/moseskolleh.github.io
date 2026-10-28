@@ -942,6 +942,10 @@ function checkQuotedFigures({ testimonials, certifications }, claims) {
 //              keeps to the counter's page-name rule (NOTE_PAGE)
 //   date       the day it was first published on this site, a real day
 //              and not one still to come
+//   updated    optional: the day it was last changed after that (a dated
+//              correction, say), a real day no earlier than its date and not
+//              one still to come; the sitemap, the feed and the Article's
+//              dateModified carry it, so readers and crawlers fetch it again
 //   tag        the topic the homepage shows ("Water", "Scenarios")
 //   summary    one line, plain text: the homepage's line under the title,
 //              the page's description and the feed's summary
@@ -952,7 +956,7 @@ function checkQuotedFigures({ testimonials, certifications }, claims) {
 // ledger does not hold as written is refused here, by name.
 // ------------------------------------------------------------------
 const NOTES_DIR = path.join(CONTENT_DIR, 'notes');
-const NOTE_KEYS = ['number', 'title', 'slug', 'date', 'tag', 'summary', 'caseStudy', 'lens'];
+const NOTE_KEYS = ['number', 'title', 'slug', 'date', 'updated', 'tag', 'summary', 'caseStudy', 'lens'];
 const NOTE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 // The counter's page-name rule: count.js sends a page only under a name
 // that passes it, and Code.gs (BEACON_NAME) accepts nothing else.
@@ -977,6 +981,7 @@ function loadNotes(dir = NOTES_DIR) {
             title: m.title,
             slug: m.slug,
             date: m.date,
+            updated: m.updated,
             tag: m.tag,
             summary: m.summary,
             caseStudy: m.caseStudy,
@@ -1019,6 +1024,11 @@ function checkNotes(notes, { projects, lenses, claims }) {
 
         if (!realDay(String(n.date))) problems.push(`${at}: date must be a day, as YYYY-MM-DD (got ${JSON.stringify(n.date)})`);
         else if (n.date > latest) problems.push(`${at}: date ${n.date} is still to come; a note is dated the day it was first published on this site`);
+        if (n.updated !== undefined) {
+            if (!realDay(String(n.updated))) problems.push(`${at}: updated must be a day, as YYYY-MM-DD (got ${JSON.stringify(n.updated)})`);
+            else if (n.updated > latest) problems.push(`${at}: updated ${n.updated} is still to come; it is the day the note was last changed`);
+            else if (realDay(String(n.date)) && n.updated < n.date) problems.push(`${at}: updated ${n.updated} is before its date ${n.date}; a note cannot change before it is published`);
+        }
 
         const ties = ['caseStudy', 'lens'].filter(k => n[k] !== undefined);
         if (ties.length !== 1) problems.push(`${at}: ties to one case study or one lens (caseStudy or lens, not ${ties.length ? 'both' : 'neither'})`);

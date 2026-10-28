@@ -8,7 +8,7 @@
   <subtitle>Short dispatches from the intersection of mud, models and megawatts</subtitle>
   <link rel="self" type="application/atom+xml" href="https://moseskolleh.github.io/feed.xml"/>
   <link rel="alternate" type="text/html" href="https://moseskolleh.github.io/"/>
-  <updated>2026-07-06T00:00:00Z</updated>
+  <updated>2026-10-28T00:00:00Z</updated>
   <author>
     <name>Moses Kolleh Sesay</name>
     <uri>https://moseskolleh.github.io/</uri>
@@ -18,7 +18,7 @@
     <title>Every prompt has a footprint — so what?</title>
     <link rel="alternate" type="text/html" href="https://moseskolleh.github.io/notes/every-prompt-has-a-footprint.html"/>
     <published>2026-07-06T00:00:00Z</published>
-    <updated>2026-07-06T00:00:00Z</updated>
+    <updated>2026-10-28T00:00:00Z</updated>
     <category term="Sustainable AI"/>
     <summary>A watt-hour means nothing to most people.</summary>
     <content type="html">&lt;p&gt;A watt-hour means nothing to most people. The same answer counted in phone charges or cups of coffee does. At the Digital Society School I helped build decision tools for a Dutch government partner around exactly that translation — because the gap between the most and least efficient model on the same task can exceed an order of magnitude, and few tools put that in front of the person typing the prompt.&lt;/p&gt;
@@ -30,7 +30,7 @@
     <title>Why I wrote a pessimistic future on purpose</title>
     <link rel="alternate" type="text/html" href="https://moseskolleh.github.io/notes/why-i-wrote-a-pessimistic-future.html"/>
     <published>2026-07-06T00:00:00Z</published>
-    <updated>2026-07-06T00:00:00Z</updated>
+    <updated>2026-10-28T00:00:00Z</updated>
     <category term="Scenarios"/>
     <summary>Model output alone seldom moves a decision; a story people can picture often does.</summary>
     <content type="html">&lt;p&gt;My Wageningen thesis ended with &amp;quot;Dirty Delta&amp;quot; — a deliberately dark storyline for Africa's coastal waters by mid-century. Model output alone seldom moves a decision; a story people can picture often does. Turning regression coefficients on income, urbanisation and agriculture into a narrative was the most useful translation work I've done.&lt;/p&gt;
@@ -42,7 +42,7 @@
     <title>What 164 water points taught me about data</title>
     <link rel="alternate" type="text/html" href="https://moseskolleh.github.io/notes/what-164-water-points-taught-me.html"/>
     <published>2026-07-06T00:00:00Z</published>
-    <updated>2026-07-06T00:00:00Z</updated>
+    <updated>2026-10-28T00:00:00Z</updated>
     <category term="Water"/>
     <summary>Geophysics taught me that data only matters when someone stakes something on it.</summary>
     <content type="html">&lt;p&gt;In hard rock, a wrong guess isn't a bad cell in a spreadsheet — it's a dry hole a community paid for. Geophysics taught me that data only matters when someone stakes something on it. The boreholes we sited from resistivity surveys struck water 70% of the time, and every strike was the same lesson: collect the data &lt;em&gt;before&lt;/em&gt; the drill bit, not after.&lt;/p&gt;

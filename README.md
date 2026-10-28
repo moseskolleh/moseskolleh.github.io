@@ -620,7 +620,10 @@ In the Freetown Complex, a wrong guess isn't a bad cell in a spreadsheet — …
 ```
 
 `number` is its place in the series ("Note 01"); `date` the day it was first
-published on this site; `tag` the topic the homepage shows; `summary` one
+published on this site; `updated`, which is optional, the day it last
+changed after that (a dated correction, say), which the sitemap's
+`lastmod`, the feed's `<updated>` and the Article's `dateModified` carry so
+that readers and crawlers fetch it again; `tag` the topic the homepage shows; `summary` one
 line of plain text, the homepage's line under the title, the page's
 description and the feed's summary; and `caseStudy` or `lens` (one of the
 two) the case study or lens it belongs with. `npm run build:content`
@@ -651,7 +654,8 @@ markdown file it finds, so until the deploy stops publishing `content/`
 (docs/plan.md, Phase 6.1) a plain copy of each note is at
 `/content/notes/<slug>.html` too; the canonical address is the page in
 `notes/`. The validator (`checkNotes` in `scripts/lib/content.js`) refuses a
-note with no title, a date that is not a day or is still to come, a slug
+note with no title, a date that is not a day or is still to come, an
+`updated` day before its date or still to come, a slug
 of more than 35 characters (with `note-` before it, the name has to keep to
 the counter's 40), a file not named for its slug, a tie to a case study or lens
 that does not exist, a reused number, a later number on an earlier date, or a

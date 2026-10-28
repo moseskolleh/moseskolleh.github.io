@@ -3,6 +3,7 @@ number: 1
 title: What 164 water points taught me about data
 slug: what-164-water-points-taught-me
 date: 2026-07-06
+updated: 2026-10-28
 tag: Water
 summary: Geophysics taught me that data only matters when someone stakes something on it.
 caseStudy: groundwater

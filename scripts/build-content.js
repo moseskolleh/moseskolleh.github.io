@@ -1949,6 +1949,8 @@ const noteId = (slug) => `${TAG_ID}/notes/${slug}`;
 const notePath = (note) => `notes/${note.slug}.html`;
 const noteNumber = (note) => `Note ${String(note.number).padStart(2, '0')}`;
 const noteDate = (note) => `<time datetime="${esc(note.date)}">${dayName(note.date)}</time>`;
+// The day a note last changed: its `updated`, once it has been corrected, or else the day it was published.
+const noteModified = (note) => note.updated || note.date;
 // The structured data's people and site, by name, so a page's blocks point at one another.
 const personId = (profile) => `${profile.links.site}#person`;
 const websiteId = (profile) => `${profile.links.site}#website`;
@@ -2004,6 +2006,7 @@ function renderNote(data, note) {
         headline: note.title,
         description: note.summary,
         datePublished: note.date,
+        dateModified: noteModified(note),
         articleSection: note.tag,
         url: canonical,
         mainEntityOfPage: canonical,
@@ -2047,8 +2050,9 @@ ${indentBlock(blocksHtml(note.blocks, { root: NOTE_ROOT }), '            ')}
 
 /**
  * feed.xml, Atom (RFC 4287): every note, newest first, whole. Deterministic,
- * as everything here is: no build time, and `updated` is the newest note's
- * date. A note is dated by the day, so each time is that day's midnight, UTC.
+ * as everything here is: no build time. Each entry's `updated` is the day its
+ * note last changed, and the feed's is the latest of those. A note is dated
+ * by the day, so each time is that day's midnight, UTC.
  */
 function renderFeed(data) {
     const { notes, profile } = data;   // newest first (loadAll)
@@ -2059,7 +2063,7 @@ function renderFeed(data) {
     <title>${esc(n.title)}</title>
     <link rel="alternate" type="text/html" href="${esc(SITE + notePath(n))}"/>
     <published>${when(n.date)}</published>
-    <updated>${when(n.date)}</updated>
+    <updated>${when(noteModified(n))}</updated>
     <category term="${esc(n.tag)}"/>
     <summary>${esc(n.summary)}</summary>
     <content type="html">${esc(blocksHtml(n.blocks, { root: SITE, mark: false }))}</content>
@@ -2075,7 +2079,7 @@ function renderFeed(data) {
   <subtitle>Short dispatches from the intersection of mud, models and megawatts</subtitle>
   <link rel="self" type="application/atom+xml" href="${esc(SITE + FEED)}"/>
   <link rel="alternate" type="text/html" href="${esc(SITE)}"/>
-  <updated>${when(notes[0].date)}</updated>
+  <updated>${when(notes.map(noteModified).sort().pop())}</updated>
   <author>
     <name>${esc(profile.person.name)}</name>
     <uri>${esc(profile.links.site)}</uri>
@@ -2118,8 +2122,9 @@ function renderSitemap(data) {
     <changefreq>${esc(p.changefreq || 'monthly')}</changefreq>
     <priority>${esc(p.priority || '0.5')}</priority>
   </url>`;
-    // Each note as of the day it was published: it is not edited after.
-    const notes = inSeries(data.notes).map(n => ({ loc: SITE + notePath(n), lastmod: n.date, changefreq: 'yearly', priority: '0.6' }));
+    // Each note as of the day it last changed: the day it was published,
+    // or its `updated` once a dated correction has been made to it.
+    const notes = inSeries(data.notes).map(n => ({ loc: SITE + notePath(n), lastmod: noteModified(n), changefreq: 'yearly', priority: '0.6' }));
     const entries = data.profile.pages.concat(notes).map(url).join('\n');
 
     return `<?xml version="1.0" encoding="UTF-8"?>

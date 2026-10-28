@@ -3,6 +3,7 @@ number: 3
 title: Every prompt has a footprint — so what?
 slug: every-prompt-has-a-footprint
 date: 2026-07-06
+updated: 2026-10-28
 tag: Sustainable AI
 summary: A watt-hour means nothing to most people.
 caseStudy: sustainable-ai
