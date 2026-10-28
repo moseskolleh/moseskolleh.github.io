@@ -28,12 +28,50 @@
     "the lens's evidence. Every lens must have at least one public piece of",
     "work of its own beyond this site's pages: an output placed in it, or an",
     "artifact of a case study that lists it first (scripts/lib/content.js,",
-    "checkLensWork)."
+    "checkLensWork).",
+    "",
+    "`aside` (public outputs only) lists an output after the rest, folded:",
+    "coursework, and this site's own pages and scripts. They stay on the page,",
+    "and on the CV; they no longer lead the theses and reports.",
+    "",
+    "NOW RESEARCHING. `now` is the doctorate under way, printed at the top of",
+    "research.html (#phd): its question, why it matters there, where it is",
+    "and who co-funds it (`position`), what the work will do, the month it is",
+    "written as of (`asOf`), and what it does not claim yet. It says only what",
+    "the public call for the position says. `thesis` names its output, which",
+    "stays `planned` until there is a thesis. scripts/lib/content.js",
+    "(checkNow) holds it to the degree in progress in content/profile.json,",
+    "and refuses it once there is none."
   ],
 
-  "intro": "This page says which is which — because a portfolio that lists outputs without saying whether anyone can read them is a list of assertions.",
+  "now": {
+    "asOf": "2026-11",
+    "question": "How will a changing climate alter the odds of extreme rainfall, and what will that mean for urban drainage and for the losses floods cause?",
+    "why": "The Province of Monza and Brianza, in Northern Italy, is densely built up and exposed to pluvial flooding, and its drainage was built for the rainfall of the past.",
+    "position": "My PhD at Scuola Universitaria Superiore IUSS Pavia is co-funded by BrianzAcque, the province's water utility.",
+    "will": [
+      "Follow climate projections through to the odds of extreme rainfall, and on to the drainage that must take it.",
+      "Estimate direct and indirect flood losses: damage to buildings and infrastructure, services disrupted, business interrupted.",
+      "Bring hazard, exposure and vulnerability together as an expected annual loss, and find where the system is most critical.",
+      "Weigh adaptation options for the drainage, to support risk-based design."
+    ],
+    "notYet": ["No results", "No model built or run", "No data in hand", "Nothing here is a finding"],
+    "thesis": "phd-thesis"
+  },
+
+  "intro": "Each entry below says whether you can read it, because a portfolio that lists outputs without saying so is a list of assertions.",
 
   "outputs": [
+    {
+      "id": "phd-thesis",
+      "title": "Climate-driven flood risk assessment and adaptation of urban drainage systems in Northern Italy",
+      "type": "PhD thesis",
+      "venue": "Scuola Universitaria Superiore IUSS Pavia",
+      "year": "expected 2029",
+      "status": "planned",
+      "summary": "The thesis of my doctorate in the National PhD Programme in Sustainable Development and Climate Change, begun in November 2026. The title is the topic of the funded position; nothing is written yet.",
+      "methods": []
+    },
     {
       "id": "msc-wur",
       "title": "A study of socioeconomic drivers of river export of multiple pollutants in sub-basins worldwide, and qualitative future storylines for African coastal water pollution",
@@ -110,6 +148,18 @@
       "note": "Written during the internship."
     },
     {
+      "id": "climatematch-pipeline",
+      "title": "climatematch-pipeline — climate extremes for West Africa",
+      "type": "Code",
+      "year": "2026",
+      "status": "public",
+      "url": "https://github.com/moseskolleh/climatematch-pipeline",
+      "lenses": ["climate-risk"],
+      "summary": "A Python starter pipeline that pulls historical CMIP6 runs (1980–2014) and observed temperature and precipitation for West Africa, computes monthly-based extreme indices, fits GEV 20-year return levels and builds a graph of which models behave alike.",
+      "methods": [],
+      "note": "Built for the Climatematch Academy course. Historical runs only; code on GitHub, with no licence file."
+    },
+    {
       "id": "waterproject",
       "title": "Groundwater Investigation Toolkit",
       "type": "Code",
@@ -134,27 +184,16 @@
       "note": "A mapping to disclosure line items, not a claim of compliance. Its estimator weighs workloads typed into it and cannot read actual usage."
     },
     {
-      "id": "climatematch-pipeline",
-      "title": "climatematch-pipeline — climate extremes for West Africa",
+      "id": "promptcoach",
+      "title": "EcoPrompt Coach — the newer tool (promptcoach)",
       "type": "Code",
       "year": "2026",
       "status": "public",
-      "url": "https://github.com/moseskolleh/climatematch-pipeline",
-      "lenses": ["climate-risk"],
-      "summary": "A Python starter pipeline that pulls historical CMIP6 runs (1980–2014) and observed temperature and precipitation for West Africa, computes monthly-based extreme indices, fits GEV 20-year return levels and builds a graph of which models behave alike.",
+      "url": "https://github.com/moseskolleh/promptcoach",
+      "caseStudy": "sustainable-ai",
+      "summary": "A JavaScript engine, web app and Chrome extension that estimate the energy, water and carbon of an LLM prompt from published benchmarks, in everyday terms. Version 2's list of models runs to September 2026; the repo links the web app.",
       "methods": [],
-      "note": "Built for the Climatematch Academy course. Historical runs only; code on GitHub, with no licence file."
-    },
-    {
-      "id": "globox-ab-test",
-      "title": "GloBox A/B test analysis",
-      "type": "Analysis",
-      "year": "2023",
-      "status": "public",
-      "url": "https://github.com/moseskolleh/A-B-Testing-at-Globox",
-      "summary": "SQL queries and a Python notebook (t-tests, confidence intervals, power analysis) on whether a new banner on GloBox's mobile website paid off, from a Masterschool data-analytics sprint. The README links a Tableau Public dashboard.",
-      "methods": [],
-      "note": "Coursework. Conversion rose with the banner and spending did not, so the advice was to hold off."
+      "note": "Began as a Digital Society School prototype. Its 2026 models are extrapolated, as no lab has published a figure for one; the extension runs unpacked, in no store."
     },
     {
       "id": "sustainable-ai-prototypes",
@@ -169,18 +208,6 @@
       "note": "My role, as its README records it: SCRUM Master & Integration Lead. The README's success metrics are targets, not results."
     },
     {
-      "id": "promptcoach",
-      "title": "EcoPrompt Coach — the newer tool (promptcoach)",
-      "type": "Code",
-      "year": "2026",
-      "status": "public",
-      "url": "https://github.com/moseskolleh/promptcoach",
-      "caseStudy": "sustainable-ai",
-      "summary": "A JavaScript engine, web app and Chrome extension that estimate the energy, water and carbon of an LLM prompt from published benchmarks, in everyday terms. Version 2's list of models runs to September 2026; the repo links the web app.",
-      "methods": [],
-      "note": "Began as a Digital Society School prototype. Its 2026 models are extrapolated, as no lab has published a figure for one; the extension runs unpacked, in no store."
-    },
-    {
       "id": "ecoprompt-web",
       "title": "EcoPrompt Coach — this site's edition, with its evidence ledger",
       "type": "Tool",
@@ -188,6 +215,7 @@
       "year": "2026",
       "status": "public",
       "url": "carbon-ai.html",
+      "aside": true,
       "caseStudy": "sustainable-ai",
       "summary": "Interactive per-query footprint calculator, with an evidence ledger giving every emission factor a source, publication date, vintage, uncertainty range and review date. Input and output tokens are priced separately, because decode costs several times what prefill does.",
       "methods": ["Inference estimates adapted from Jegham et al. (2025)", "Ember grid intensities", "Disclosed provider PUE/WUE"],
@@ -202,11 +230,24 @@
       "year": "2026",
       "status": "public",
       "url": "ai-carbon-data.js",
+      "aside": true,
       "caseStudy": "sustainable-ai",
       "summary": "The machine-readable factor set behind the EcoPrompt Coach and the homepage's AI energy chart: ten models, thirteen grid regions, four cooling profiles, plus PUE, the token-energy model and everyday equivalents — each with a citation, a vintage and a plausible range.",
       "methods": ["Literature synthesis", "Provider disclosure review"],
       "reproducible": true,
       "note": "Reusable on its own. A test fails the build if any factor loses its source, range or review date."
+    },
+    {
+      "id": "globox-ab-test",
+      "title": "GloBox A/B test analysis",
+      "type": "Analysis",
+      "year": "2023",
+      "status": "public",
+      "url": "https://github.com/moseskolleh/A-B-Testing-at-Globox",
+      "aside": true,
+      "summary": "SQL queries and a Python notebook (t-tests, confidence intervals, power analysis) on whether a new banner on GloBox's mobile website paid off, from a Masterschool data-analytics sprint. The README links a Tableau Public dashboard.",
+      "methods": [],
+      "note": "Coursework. Conversion rose with the banner and spending did not, so the advice was to hold off."
     },
     {
       "id": "field-notes",
@@ -216,6 +257,7 @@
       "year": "2026",
       "status": "public",
       "url": "index.html#notes",
+      "aside": true,
       "summary": "Short essays connecting water, climate and AI: what 164 water points taught me about data, why I wrote a pessimistic future on purpose, and what to do about the footprint of a prompt.",
       "methods": [],
       "note": "Written for the site, not peer-reviewed."
@@ -228,6 +270,7 @@
       "year": "2026",
       "status": "public",
       "url": "scripts/generate-journey-map.js",
+      "aside": true,
       "summary": "Builds the site's journey map from Natural Earth 50 m coastlines: a region-fitted Natural Earth projection, variable simplification, and deterministic output. Pinned dependencies, and a check that the committed SVG still matches the script.",
       "methods": ["d3-geo Natural Earth projection", "TopoJSON variable simplification"],
       "reproducible": true,

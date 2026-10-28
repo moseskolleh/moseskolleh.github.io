@@ -753,6 +753,58 @@ function checkMeta(meta) {
 }
 
 // ------------------------------------------------------------------
+// research.now — the doctorate under way, at the top of research.html
+//
+// A degree in progress (profile.education, inProgress) is said on the
+// research page only as what it sets out to do, dated, with what it does
+// not claim yet, and its thesis listed as planned: never as a result. The
+// block goes with the degree: none while no degree is in progress, and one
+// that names the institution the degree is at. `asOf` is the month it is
+// written as of, which cannot be later than the record (meta.verifiedOn).
+// ------------------------------------------------------------------
+const NOW_TEXT = ['question', 'why', 'position'];
+
+// An aside (coursework, this site's own pages and scripts) is listed after
+// the theses, reports and code, folded: something a reader can open, so
+// public, and true or left out.
+function checkAside(at, o) {
+    return o.aside !== undefined && (o.aside !== true || o.status !== 'public')
+        ? [`${at}: aside is true or left out, and only on a public output`] : [];
+}
+
+function checkNow(now, outputs, profile) {
+    const degree = ((profile && profile.education) || []).find(e => e.inProgress);
+    if (now === undefined) return degree ? [`research.json: ${degree.degree} is in progress (profile.json), so the research page needs its "now" block — what it sets out to do, and what it does not claim yet`] : [];
+    if (!degree) return ['research.json: "now" describes a degree in progress, and profile.json has none — retire the block, or list the thesis as what it now is'];
+    const problems = [];
+    const at = 'research.json now';
+    NOW_TEXT.forEach((f) => {
+        if (typeof now[f] !== 'string' || !now[f].trim()) problems.push(`${at}: missing ${f}`);
+    });
+    ['will', 'notYet'].forEach((f) => {
+        if (!Array.isArray(now[f]) || !now[f].length || now[f].some(x => typeof x !== 'string' || !x.trim())) {
+            problems.push(`${at}: ${f} must be a list of short lines`);
+        }
+    });
+    const month = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(String(now.asOf));
+    const logged = String((profile.meta || {}).verifiedOn || '').slice(0, 7);
+    if (!month) problems.push(`${at}: asOf must be a month, as YYYY-MM (got ${JSON.stringify(now.asOf)})`);
+    else if (logged && now.asOf > logged) problems.push(`${at}: asOf ${now.asOf} is after the record's own date (meta.verifiedOn ${profile.meta.verifiedOn})`);
+    if (typeof now.position === 'string' && !now.position.includes(degree.institution)) {
+        problems.push(`${at}: position should name where the degree is, ${degree.institution}`);
+    }
+    const thesis = (outputs || []).find(o => o.id === now.thesis);
+    if (!thesis) problems.push(`${at}: thesis "${now.thesis}" is not a research output`);
+    else {
+        if (thesis.status !== 'planned') problems.push(`${at}: its thesis, "${thesis.id}", is "${thesis.status}" — a thesis still to be written is planned`);
+        if (thesis.venue !== degree.institution) problems.push(`${at}: its thesis's venue is "${thesis.venue}", not ${degree.institution}`);
+        if (thesis.caseStudy || thesis.lenses) problems.push(`${at}: its thesis has no case study or role view to sit in until there is work to show`);
+        if (thesis.aside) problems.push(`${at}: its thesis is not an aside`);
+    }
+    return problems;
+}
+
+// ------------------------------------------------------------------
 // profile.certifications — each with what it covered, and optionally
 // where the issuer says so
 //
@@ -1336,12 +1388,16 @@ function loadAll() {
             if (!lensIds.includes(l)) problems.push(`${at}: unknown lens "${l}"`);
         });
 
+        problems.push(...checkAside(at, o));
+
         // A venue that looks like a journal without a DOI is the exact shape
         // of an overclaim, so anything asserting peer review has to prove it.
         if (/journal|proceedings|conference/i.test(o.venue || '') && !o.doi) {
             problems.push(`${at}: names a publication venue but has no DOI — do not imply peer review without one`);
         }
     });
+
+    problems.push(...checkNow(research.now, research.outputs, profile));
 
     // --- lenses -----------------------------------------------------------
     lenses.lenses.forEach((l) => {
@@ -1431,6 +1487,8 @@ module.exports = {
     publicWorkFor,
     checkLensWork,
     checkMeta,
+    checkNow,
+    checkAside,
     VERIFY_HOSTS,
     checkCertifications,
     TESTIMONIAL_LIMITS,

@@ -8,14 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>document.documentElement.classList.add('js')</script>
     <title>Research outputs — Moses Kolleh Sesay</title>
-    <meta name="description" content="Theses, reports, datasets, code and tools — what exists, where it is, and who holds the parts that are not public.">
+    <meta name="description" content="The doctorate under way, and the theses, reports, datasets, code and tools before it — what exists, where it is, and who holds the parts that are not public.">
     <meta name="author" content="Moses Kolleh Sesay">
     <link rel="canonical" href="https://moseskolleh.github.io/research.html">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <meta name="theme-color" content="#0a0a0a">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Research outputs — Moses Kolleh Sesay">
-    <meta property="og:description" content="Theses, reports, datasets, code and tools — what exists, where it is, and who holds the parts that are not public.">
+    <meta property="og:description" content="The doctorate under way, and the theses, reports, datasets, code and tools before it — what exists, where it is, and who holds the parts that are not public.">
     <meta property="og:url" content="https://moseskolleh.github.io/research.html">
     <meta property="og:image" content="https://moseskolleh.github.io/assets/og/research.png">
     <meta property="og:image:width" content="1200">
@@ -57,25 +57,58 @@
         <header class="ca-hero">
             <div class="ca-hero-tag">WHAT EXISTS &middot; WHERE IT IS &middot; WHO HOLDS IT</div>
             <h1>Research <span class="ca-accent">outputs</span></h1>
-            <p>Three degrees of research, a consultancy, an internship and code on GitHub: some of it public, some held by the organisations it was done for, the rest a PDF I will happily send you.</p>
+            <p>A doctorate under way, three degrees of research, a consultancy, an internship and code on GitHub: some public, some I hold and will send, some held by those it was done for.</p>
         </header>
 
+        <section class="rs-repro rs-now" id="phd" aria-labelledby="phd-h">
+            <h2 id="phd-h">Now researching <span class="mono-label">&middot; As of <time datetime="2026-11">November 2026</time></span></h2>
+            <p class="rs-now-q">How will a changing climate alter the odds of extreme rainfall, and what will that mean for urban drainage and for the losses floods cause?</p>
+            <p>The Province of Monza and Brianza, in Northern Italy, is densely built up and exposed to pluvial flooding, and its drainage was built for the rainfall of the past. My PhD at Scuola Universitaria Superiore IUSS Pavia is co-funded by BrianzAcque, the province's water utility.</p>
+            <h3>What the work will do</h3>
+            <ul>
+                <li>Follow climate projections through to the odds of extreme rainfall, and on to the drainage that must take it.</li>
+                <li>Estimate direct and indirect flood losses: damage to buildings and infrastructure, services disrupted, business interrupted.</li>
+                <li>Bring hazard, exposure and vulnerability together as an expected annual loss, and find where the system is most critical.</li>
+                <li>Weigh adaptation options for the drainage, to support risk-based design.</li>
+            </ul>
+            <h3>What this does not claim yet</h3>
+            <ul class="rs-now-not">
+                <li>No results</li>
+                <li>No model built or run</li>
+                <li>No data in hand</li>
+                <li>Nothing here is a finding</li>
+            </ul>
+        </section>
         <section class="rs-intro">
-            <p>This page says which is which &mdash; because a portfolio that lists outputs without saying whether anyone can read them is a list of assertions.</p>
+            <p>Each entry below says whether you can read it, because a portfolio that lists outputs without saying so is a list of assertions.</p>
 
         <ul class="rs-summary">
-            <li><strong>10</strong> public</li><li><strong>3</strong> on request</li><li><strong>3</strong> held by the client</li>
+            <li><strong>10</strong> public</li><li><strong>3</strong> on request</li><li><strong>3</strong> held by the client</li><li><strong>1</strong> planned</li>
         </ul>
             <p class="rs-key">
                 <strong>Public</strong>: open it now.
                 <strong>On request</strong>: it exists and I hold it &mdash; ask.
                 <strong>Held by the client</strong>: it belongs to the organisation it was made for.
+                <strong>Planned</strong>: intended, not yet done.
                 No entry names a journal, a conference or a DOI, because none of this work has one.
             </p>
         </section>
 
             <section class="rs-group" id="rs-public">
                 <h2>Public</h2>
+
+                <article class="rs-item" id="climatematch-pipeline">
+                    <div class="rs-item-head">
+                        <span class="rs-type mono-label">Code</span>
+                        <span class="rs-year mono-label">2026</span>
+                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
+                    </div>
+                    <h3><a href="https://github.com/moseskolleh/climatematch-pipeline">climatematch-pipeline &mdash; climate extremes for West Africa</a></h3>
+
+                    <p class="rs-summary-text">A Python starter pipeline that pulls historical CMIP6 runs (1980–2014) and observed temperature and precipitation for West Africa, computes monthly-based extreme indices, fits GEV 20-year return levels and builds a graph of which models behave alike.</p>
+
+                    <p class="rs-note">Built for the Climatematch Academy course. Historical runs only; code on GitHub, with no licence file. <a class="rs-link" href="case-studies.html?lens=climate-risk">The Climate &amp; DRR view &rarr;</a></p>
+                </article>
 
                 <article class="rs-item" id="waterproject">
                     <div class="rs-item-head">
@@ -104,46 +137,6 @@
                     <p class="rs-note">A mapping to disclosure line items, not a claim of compliance. Its estimator weighs workloads typed into it and cannot read actual usage. <a class="rs-link" href="case-studies.html#gaia">Read the case study &rarr;</a></p>
                 </article>
 
-                <article class="rs-item" id="climatematch-pipeline">
-                    <div class="rs-item-head">
-                        <span class="rs-type mono-label">Code</span>
-                        <span class="rs-year mono-label">2026</span>
-                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
-                    </div>
-                    <h3><a href="https://github.com/moseskolleh/climatematch-pipeline">climatematch-pipeline &mdash; climate extremes for West Africa</a></h3>
-
-                    <p class="rs-summary-text">A Python starter pipeline that pulls historical CMIP6 runs (1980–2014) and observed temperature and precipitation for West Africa, computes monthly-based extreme indices, fits GEV 20-year return levels and builds a graph of which models behave alike.</p>
-
-                    <p class="rs-note">Built for the Climatematch Academy course. Historical runs only; code on GitHub, with no licence file. <a class="rs-link" href="case-studies.html?lens=climate-risk">The Climate &amp; DRR view &rarr;</a></p>
-                </article>
-
-                <article class="rs-item" id="globox-ab-test">
-                    <div class="rs-item-head">
-                        <span class="rs-type mono-label">Analysis</span>
-                        <span class="rs-year mono-label">2023</span>
-                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
-                    </div>
-                    <h3><a href="https://github.com/moseskolleh/A-B-Testing-at-Globox">GloBox A/B test analysis</a></h3>
-
-                    <p class="rs-summary-text">SQL queries and a Python notebook (t-tests, confidence intervals, power analysis) on whether a new banner on GloBox's mobile website paid off, from a Masterschool data-analytics sprint. The README links a Tableau Public dashboard.</p>
-
-                    <p class="rs-note">Coursework. Conversion rose with the banner and spending did not, so the advice was to hold off.</p>
-                </article>
-
-                <article class="rs-item" id="sustainable-ai-prototypes">
-                    <div class="rs-item-head">
-                        <span class="rs-type mono-label">Code</span>
-                        <span class="rs-year mono-label">2025</span>
-                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
-                        <span class="mono-label"><a href="notes/every-prompt-has-a-footprint.html" title="Field note">Note 03</a></span>
-                    </div>
-                    <h3><a href="https://github.com/moseskolleh/SustainableAIPrototypes">Sustainable AI Prototypes</a></h3>
-
-                    <p class="rs-summary-text">Browser prototypes that make generative AI's energy and carbon use visible: a prompt coach and dashboard, a department display, a Tetris-style usage visual, a digital forest and a Chrome extension (v1.0). A November 2025 team project, revised after partner feedback.</p>
-
-                    <p class="rs-note">My role, as its README records it: SCRUM Master &amp; Integration Lead. The README's success metrics are targets, not results. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
-                </article>
-
                 <article class="rs-item" id="promptcoach">
                     <div class="rs-item-head">
                         <span class="rs-type mono-label">Code</span>
@@ -158,58 +151,18 @@
                     <p class="rs-note">Began as a Digital Society School prototype. Its 2026 models are extrapolated, as no lab has published a figure for one; the extension runs unpacked, in no store. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
                 </article>
 
-                <article class="rs-item" id="ecoprompt-web">
-                    <div class="rs-item-head">
-                        <span class="rs-type mono-label">Tool</span>
-                        <span class="rs-year mono-label">2026</span>
-                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
-                        <span class="mono-label"><a href="notes/every-prompt-has-a-footprint.html" title="Field note">Note 03</a></span>
-                    </div>
-                    <h3><a href="carbon-ai.html">EcoPrompt Coach &mdash; this site's edition, with its evidence ledger</a></h3>
-                    <p class="rs-venue">moseskolleh.github.io</p>
-                    <p class="rs-summary-text">Interactive per-query footprint calculator, with an evidence ledger giving every emission factor a source, publication date, vintage, uncertainty range and review date. Input and output tokens are priced separately, because decode costs several times what prefill does.</p>
-                    <p class="rs-methods"><span class="mono-label">Methods</span> Inference estimates adapted from Jegham et al. (2025) &middot; Ember grid intensities &middot; Disclosed provider PUE/WUE</p>
-                    <p class="rs-note">Every factor is auditable from the page itself. Its code and data are its own, separate from the newer tool's. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
-                </article>
-
-                <article class="rs-item" id="carbon-data">
-                    <div class="rs-item-head">
-                        <span class="rs-type mono-label">Dataset</span>
-                        <span class="rs-year mono-label">2026</span>
-                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
-                        <span class="mono-label"><a href="notes/every-prompt-has-a-footprint.html" title="Field note">Note 03</a></span>
-                    </div>
-                    <h3><a href="ai-carbon-data.js">AI carbon factor set &mdash; sources, ranges and review dates</a></h3>
-                    <p class="rs-venue">moseskolleh.github.io</p>
-                    <p class="rs-summary-text">The machine-readable factor set behind the EcoPrompt Coach and the homepage's AI energy chart: <span data-claim="coach-models">ten</span> models, <span data-claim="coach-regions">thirteen</span> grid regions, <span data-claim="coach-cooling">four</span> cooling profiles, plus PUE, the token-energy model and everyday equivalents &mdash; each with a citation, a vintage and a plausible range.</p>
-                    <p class="rs-methods"><span class="mono-label">Methods</span> Literature synthesis &middot; Provider disclosure review</p>
-                    <p class="rs-note">Reusable on its own. A test fails the build if any factor loses its source, range or review date. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
-                </article>
-
-                <article class="rs-item" id="field-notes">
-                    <div class="rs-item-head">
-                        <span class="rs-type mono-label">Essays</span>
-                        <span class="rs-year mono-label">2026</span>
-                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
-                    </div>
-                    <h3><a href="index.html#notes">Field Notes</a></h3>
-                    <p class="rs-venue">moseskolleh.github.io</p>
-                    <p class="rs-summary-text">Short essays connecting water, climate and AI: what <span data-claim="water-points">164</span> water points taught me about data, why I wrote a pessimistic future on purpose, and what to do about the footprint of a prompt.</p>
-
-                    <p class="rs-note">Written for the site, not peer-reviewed.</p>
-                </article>
-
-                <article class="rs-item" id="journey-map">
+                <article class="rs-item" id="sustainable-ai-prototypes">
                     <div class="rs-item-head">
                         <span class="rs-type mono-label">Code</span>
-                        <span class="rs-year mono-label">2026</span>
+                        <span class="rs-year mono-label">2025</span>
                         <span class="cs-status cs-status-public" title="Open it now.">Public</span>
+                        <span class="mono-label"><a href="notes/every-prompt-has-a-footprint.html" title="Field note">Note 03</a></span>
                     </div>
-                    <h3><a href="scripts/generate-journey-map.js">Journey map generator &mdash; reproducible cartography</a></h3>
-                    <p class="rs-venue">moseskolleh.github.io</p>
-                    <p class="rs-summary-text">Builds the site's journey map from Natural Earth 50 m coastlines: a region-fitted Natural Earth projection, variable simplification, and deterministic output. Pinned dependencies, and a check that the committed SVG still matches the script.</p>
-                    <p class="rs-methods"><span class="mono-label">Methods</span> d3-geo Natural Earth projection &middot; TopoJSON variable simplification</p>
-                    <p class="rs-note">npm run map:build to regenerate, npm run map:check to verify. Byte-identical across runs.</p>
+                    <h3><a href="https://github.com/moseskolleh/SustainableAIPrototypes">Sustainable AI Prototypes</a></h3>
+
+                    <p class="rs-summary-text">Browser prototypes that make generative AI's energy and carbon use visible: a prompt coach and dashboard, a department display, a Tetris-style usage visual, a digital forest and a Chrome extension (v1.0). A November 2025 team project, revised after partner feedback.</p>
+
+                    <p class="rs-note">My role, as its README records it: SCRUM Master &amp; Integration Lead. The README's success metrics are targets, not results. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
                 </article>
             </section>
 
@@ -300,6 +253,97 @@
                     <p class="rs-note">Written during the internship. Held by UNDRR. <a class="rs-link" href="case-studies.html#un-disaster">Read the case study &rarr;</a></p>
                 </article>
             </section>
+
+            <section class="rs-group" id="rs-planned">
+                <h2>Planned</h2>
+
+                <article class="rs-item" id="phd-thesis">
+                    <div class="rs-item-head">
+                        <span class="rs-type mono-label">PhD thesis</span>
+                        <span class="rs-year mono-label">expected 2029</span>
+                        <span class="cs-status cs-status-planned" title="Intended, not yet done.">Planned</span>
+                    </div>
+                    <h3>Climate-driven flood risk assessment and adaptation of urban drainage systems in Northern Italy</h3>
+                    <p class="rs-venue">Scuola Universitaria Superiore IUSS Pavia</p>
+                    <p class="rs-summary-text">The thesis of my doctorate in the National PhD Programme in Sustainable Development and Climate Change, begun in November 2026. The title is the topic of the funded position; nothing is written yet.</p>
+
+                    <p class="rs-note"><a class="rs-link" href="#phd">What it sets out to do &uarr;</a></p>
+                </article>
+            </section>
+
+        <section class="rs-repro rs-aside" id="rs-aside" aria-labelledby="rs-aside-h">
+            <h2 id="rs-aside-h">Also public</h2>
+            <details>
+                <summary>Coursework, and this site&rsquo;s own pages and scripts</summary>
+
+                <article class="rs-item" id="ecoprompt-web">
+                    <div class="rs-item-head">
+                        <span class="rs-type mono-label">Tool</span>
+                        <span class="rs-year mono-label">2026</span>
+                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
+                        <span class="mono-label"><a href="notes/every-prompt-has-a-footprint.html" title="Field note">Note 03</a></span>
+                    </div>
+                    <h3><a href="carbon-ai.html">EcoPrompt Coach &mdash; this site's edition, with its evidence ledger</a></h3>
+                    <p class="rs-venue">moseskolleh.github.io</p>
+                    <p class="rs-summary-text">Interactive per-query footprint calculator, with an evidence ledger giving every emission factor a source, publication date, vintage, uncertainty range and review date. Input and output tokens are priced separately, because decode costs several times what prefill does.</p>
+                    <p class="rs-methods"><span class="mono-label">Methods</span> Inference estimates adapted from Jegham et al. (2025) &middot; Ember grid intensities &middot; Disclosed provider PUE/WUE</p>
+                    <p class="rs-note">Every factor is auditable from the page itself. Its code and data are its own, separate from the newer tool's. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
+                </article>
+
+                <article class="rs-item" id="carbon-data">
+                    <div class="rs-item-head">
+                        <span class="rs-type mono-label">Dataset</span>
+                        <span class="rs-year mono-label">2026</span>
+                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
+                        <span class="mono-label"><a href="notes/every-prompt-has-a-footprint.html" title="Field note">Note 03</a></span>
+                    </div>
+                    <h3><a href="ai-carbon-data.js">AI carbon factor set &mdash; sources, ranges and review dates</a></h3>
+                    <p class="rs-venue">moseskolleh.github.io</p>
+                    <p class="rs-summary-text">The machine-readable factor set behind the EcoPrompt Coach and the homepage's AI energy chart: <span data-claim="coach-models">ten</span> models, <span data-claim="coach-regions">thirteen</span> grid regions, <span data-claim="coach-cooling">four</span> cooling profiles, plus PUE, the token-energy model and everyday equivalents &mdash; each with a citation, a vintage and a plausible range.</p>
+                    <p class="rs-methods"><span class="mono-label">Methods</span> Literature synthesis &middot; Provider disclosure review</p>
+                    <p class="rs-note">Reusable on its own. A test fails the build if any factor loses its source, range or review date. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
+                </article>
+
+                <article class="rs-item" id="globox-ab-test">
+                    <div class="rs-item-head">
+                        <span class="rs-type mono-label">Analysis</span>
+                        <span class="rs-year mono-label">2023</span>
+                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
+                    </div>
+                    <h3><a href="https://github.com/moseskolleh/A-B-Testing-at-Globox">GloBox A/B test analysis</a></h3>
+
+                    <p class="rs-summary-text">SQL queries and a Python notebook (t-tests, confidence intervals, power analysis) on whether a new banner on GloBox's mobile website paid off, from a Masterschool data-analytics sprint. The README links a Tableau Public dashboard.</p>
+
+                    <p class="rs-note">Coursework. Conversion rose with the banner and spending did not, so the advice was to hold off.</p>
+                </article>
+
+                <article class="rs-item" id="field-notes">
+                    <div class="rs-item-head">
+                        <span class="rs-type mono-label">Essays</span>
+                        <span class="rs-year mono-label">2026</span>
+                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
+                    </div>
+                    <h3><a href="index.html#notes">Field Notes</a></h3>
+                    <p class="rs-venue">moseskolleh.github.io</p>
+                    <p class="rs-summary-text">Short essays connecting water, climate and AI: what <span data-claim="water-points">164</span> water points taught me about data, why I wrote a pessimistic future on purpose, and what to do about the footprint of a prompt.</p>
+
+                    <p class="rs-note">Written for the site, not peer-reviewed.</p>
+                </article>
+
+                <article class="rs-item" id="journey-map">
+                    <div class="rs-item-head">
+                        <span class="rs-type mono-label">Code</span>
+                        <span class="rs-year mono-label">2026</span>
+                        <span class="cs-status cs-status-public" title="Open it now.">Public</span>
+                    </div>
+                    <h3><a href="scripts/generate-journey-map.js">Journey map generator &mdash; reproducible cartography</a></h3>
+                    <p class="rs-venue">moseskolleh.github.io</p>
+                    <p class="rs-summary-text">Builds the site's journey map from Natural Earth 50 m coastlines: a region-fitted Natural Earth projection, variable simplification, and deterministic output. Pinned dependencies, and a check that the committed SVG still matches the script.</p>
+                    <p class="rs-methods"><span class="mono-label">Methods</span> d3-geo Natural Earth projection &middot; TopoJSON variable simplification</p>
+                    <p class="rs-note">npm run map:build to regenerate, npm run map:check to verify. Byte-identical across runs.</p>
+                </article>
+            </details>
+        </section>
 
         <section class="rs-repro">
             <h2>Reproducing what is here</h2>

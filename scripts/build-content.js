@@ -1029,20 +1029,28 @@ function renderResearch(data) {
     // Grouped by what a reader can do with each output (open it, ask for it,
     // or know who holds it), the question the page is here to answer.
     // Grouped by type, eleven outputs took eight headings, most of them over
-    // one entry; the type is on each entry's first line.
+    // one entry; the type is on each entry's first line. The asides
+    // (coursework, and this site's own pages and scripts) come after every
+    // group, folded, so the theses and reports are not read after them.
     const groups = content.STATUSES
-        .map(s => ({ status: s, outputs: research.outputs.filter(o => o.status === s) }))
+        .map(s => ({ status: s, outputs: research.outputs.filter(o => o.status === s && !o.aside) }))
         .filter(g => g.outputs.length);
+    const asides = research.outputs.filter(o => o.aside);
+    const counts = content.STATUSES
+        .map(s => ({ status: s, n: research.outputs.filter(o => o.status === s).length }))
+        .filter(c => c.n);
 
     const summary = `
         <ul class="rs-summary">
-            ${groups.map(g => `<li><strong>${g.outputs.length}</strong> ${esc(STATUS_LABEL[g.status].toLowerCase())}</li>`).join('')}
+            ${counts.map(c => `<li><strong>${c.n}</strong> ${esc(STATUS_LABEL[c.status].toLowerCase())}</li>`).join('')}
         </ul>`;
 
     // Where an output sits in the portfolio, its case study or else the role
     // view it is in, at the end of its note rather than on a line of its own.
+    const now = research.now;
     const place = (o) => {
         if (o.caseStudy) return `<a class="rs-link" href="case-studies.html#${esc(o.caseStudy)}">Read the case study &rarr;</a>`;
+        if (now && o.id === now.thesis) return '<a class="rs-link" href="#phd">What it sets out to do &uarr;</a>';
         const lens = (o.lenses || [])[0];
         return lens ? `<a class="rs-link" href="case-studies.html?lens=${esc(lens)}">The ${esc(lensName[lens])} view &rarr;</a>` : '';
     };
@@ -1080,6 +1088,39 @@ function renderResearch(data) {
                 <h2>${esc(STATUS_LABEL[g.status])}</h2>
                 ${g.outputs.map(entry).join('\n')}
             </section>`).join('\n');
+    // Public too, each with its chip, but coursework and this site's own
+    // pages and scripts rather than research: after the theses and reports,
+    // in the reproduction notes' frame and folded as they are, so the same
+    // print rule and PRINT_FOLDS open it for paper.
+    const asideSection = asides.length ? `
+        <section class="rs-repro rs-aside" id="rs-aside" aria-labelledby="rs-aside-h">
+            <h2 id="rs-aside-h">Also public</h2>
+            <details>
+                <summary>Coursework, and this site&rsquo;s own pages and scripts</summary>
+                ${asides.map(entry).join('\n')}
+            </details>
+        </section>` : '';
+
+    // The doctorate under way, before the outputs, in the same frame: what
+    // it asks, why there, where it is and who co-funds it, what the work will
+    // do, the month it is written as of, and what it does not claim yet. Only
+    // what the public call for the position says (research.json, now; held
+    // to the degree in progress by checkNow).
+    const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const nowSection = now ? `
+        <section class="rs-repro rs-now" id="phd" aria-labelledby="phd-h">
+            <h2 id="phd-h">Now researching <span class="mono-label">&middot; As of <time datetime="${esc(now.asOf)}">${MONTH_NAMES[Number(now.asOf.slice(5, 7)) - 1]} ${now.asOf.slice(0, 4)}</time></span></h2>
+            <p class="rs-now-q">${prose(now.question)}</p>
+            <p>${prose(now.why)} ${prose(now.position)}</p>
+            <h3>What the work will do</h3>
+            <ul>
+                ${now.will.map(w => `<li>${prose(w)}</li>`).join('\n                ')}
+            </ul>
+            <h3>What this does not claim yet</h3>
+            <ul class="rs-now-not">
+                ${now.notYet.map(w => `<li>${prose(w)}</li>`).join('\n                ')}
+            </ul>
+        </section>` : '';
 
     // Folded under its heading: it is for whoever means to run the code, and
     // open it was a screen of a phone that made room for the repositories.
@@ -1096,27 +1137,29 @@ function renderResearch(data) {
             </details>
         </section>`;
 
-    const main = `
+    const main = `${nowSection}
         <section class="rs-intro">
             <p>${prose(research.intro)}</p>
             ${summary}
             <p class="rs-key">
                 <strong>Public</strong>: open it now.
                 <strong>On request</strong>: it exists and I hold it &mdash; ask.
-                <strong>Held by the client</strong>: it belongs to the organisation it was made for.
+                <strong>Held by the client</strong>: it belongs to the organisation it was made for.${counts.some(c => c.status === 'planned') ? `
+                <strong>Planned</strong>: intended, not yet done.` : ''}
                 No entry names a journal, a conference or a DOI, because none of this work has one.
             </p>
         </section>
 ${sections}
+${asideSection}
 ${reproSection}`;
 
     return pageShell({
         title: 'Research outputs — Moses Kolleh Sesay',
-        description: 'Theses, reports, datasets, code and tools — what exists, where it is, and who holds the parts that are not public.',
+        description: 'The doctorate under way, and the theses, reports, datasets, code and tools before it — what exists, where it is, and who holds the parts that are not public.',
         canonical: `${SITE}research.html`,
         heroTag: 'WHAT EXISTS &middot; WHERE IT IS &middot; WHO HOLDS IT',
         heroTitle: 'Research <span class="ca-accent">outputs</span>',
-        heroLead: 'Three degrees of research, a consultancy, an internship and code on GitHub: some of it public, some held by the organisations it was done for, the rest a PDF I will happily send you.',
+        heroLead: 'A doctorate under way, three degrees of research, a consultancy, an internship and code on GitHub: some public, some I hold and will send, some held by those it was done for.',
         main,
         bodyEnd: `    <script>${PRINT_FOLDS}    </script>`,
         current: 'research.html',
