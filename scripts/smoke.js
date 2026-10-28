@@ -1694,7 +1694,9 @@ async function exerciseNavigation(browser, origin) {
     const next = await page.evaluate(() => {
         const a = document.activeElement;
         const main = document.querySelector('main');
-        const r = a.getBoundingClientRect();
+        // The first line's box: a link that wraps has a bounding box whose
+        // top-left corner is on the line's other words, not on the link.
+        const r = a.getClientRects()[0] || a.getBoundingClientRect();
         const hit = document.elementFromPoint(r.left + Math.min(r.width, 16) / 2, r.top + Math.min(r.height, 16) / 2);
         return { inside: a !== main && main.contains(a), seen: !!hit && (hit === a || a.contains(hit)), what: a.textContent.trim().slice(0, 40) || a.tagName };
     });
