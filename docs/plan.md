@@ -360,6 +360,11 @@ real disclosure. Publish the first one after at least a quarter of Phase 1 data.
 
 ### 4.3 `NEW` His own voice · 1 day
 
+> **Withdrawn, 2026-10-28.** Moses decided the site should not speak at all. The
+> Listen control, its player, the browser voice, the narration scripts and the
+> Fish Audio pipeline were removed, and there is nothing to record. The step is
+> kept below as it was planned.
+
 - Replace the ten stock-voice section tracks with **one 60–90 second introduction
   recorded by Moses** (opening with "Kushe"), and keep the 0-byte browser voice for
   reading any section aloud.
@@ -530,7 +535,8 @@ About 10 days that still change how the site lands:
 - **No new mini-games or widgets** until the homepage passes its length budget.
 - **No AI chatbot "ask my portfolio".** It contradicts the site's own argument about
   the cost of generation; the Brief does the useful part with 0 bytes sent.
-- **No per-section recorded narration** after Phase 4.3.
+- **No narration of any kind** (since 2026-10-28, when Phase 4.3 was withdrawn and
+  the Listen control, its player and the Fish Audio pipeline were removed).
 - **No numbers typed straight into `index.html`.** They go through the claims ledger.
 - **No raising a budget ceiling** without removing something of equal weight.
 
@@ -542,7 +548,7 @@ About 10 days that still change how the site lands:
 | Phase 2.1 | Target roles and seniority, available-from date, languages and Dutch level, right to work |
 | Phase 3.5 | Two or three testimonials with permission |
 | Phase 3.10 | Is the Digital Society School role still current? |
-| Phase 4.3 | A clean 60–90 s voice recording |
+| Phase 4.3 | Nothing now: the step was withdrawn on 2026-10-28 |
 | Phase 5.2 | One note a month |
 | Phase 5.5 | Domain purchase; a decision on the `moseskolleh.github.io` template site |
 | Phase 5.6 | A native-speaker review of the Dutch pages |

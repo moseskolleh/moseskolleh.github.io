@@ -1,9 +1,9 @@
 # What only Moses can do or supply
 
 The single list of everything the site needs from Moses: facts only he can
-state, evidence only he holds, a recording only he can make, and checks on
-accounts only he can open. It grows from the "What only Moses can supply" table
-in [docs/plan.md](plan.md) and from what each wave of work found. An item is
+state, evidence only he holds, and checks on accounts only he can open. It
+grows from the "What only Moses can supply" table in [docs/plan.md](plan.md)
+and from what each wave of work found. An item is
 ticked only once it can be seen to be done: in the repository, on the live
 site, or by Moses saying so. One item is ticked, S7, because the repository
 shows it done; nothing else is yet.
@@ -15,7 +15,8 @@ in `content/`, run `npm run build:content` and then `npm test`.
 
 Last updated with wave 6 of the plan, 2026-10-18. Waves 1 to 5 are on
 `main` (pull requests #48 to #53): Phase 0, the narration steps of 2.5 and
-4.3, Phase 1, Phase 2, Phase 3, The Brief, the notes as articles with a
+4.3 (the narration has since been removed, and its two items with it),
+Phase 1, Phase 2, Phase 3, The Brief, the notes as articles with a
 feed and preview cards, structured data, the weekly health and quarterly
 review issues, and Phase 6 steps 3, 6, 7 and 8. Wave 5's items are the
 group headed "wave 5" below (H1, H2, B1, B2, L5). Wave 6 (lighter images,
@@ -411,9 +412,8 @@ limits allow.
       counts and EcoPrompt Coach pages ("Open to …: write to me at …"). The
       homepage's Contact section says the same in its own words, written
       by hand in `index.html` ("Open to roles & consulting in
-      sustainability, climate risk, ESG and sustainable AI"), and so does
-      its narration (the `contact` script in `content/narration.json`): if
-      you correct the field, correct those two lines too.
+      sustainability, climate risk, ESG and sustainable AI"): if you
+      correct the field, correct that line too.
     - `seniority`: `null` today. One short phrase for the level of role
       you are looking for.
     - `availableFrom`: `null` today. `"now"`, or a date as `YYYY-MM` or
@@ -461,10 +461,9 @@ limits allow.
     written, not by you, so it is only the day the record is logged as of. If the role has ended, say when: its end
     month goes in `currentRole` and `experience[0]`, and the pages that call
     it current change with them, by hand, in one commit: "Sept 2025 —
-    Present" in `index.html`'s experience card, "Sep 2025–now" and
-    "2025–now" in `field-report.html`, and "At the surface, as last logged,
-    I'm a researcher…" in the experience script of `content/narration.json`
-    (the notice `npm test` prints names the same places).
+    Present" in `index.html`'s experience card, and "Sep 2025–now" and
+    "2025–now" in `field-report.html` (the notice `npm test` prints names
+    the same places).
   - *Then:* `npm run build:content`, then `npm run cv`, and commit
     `content/profile.json`, `index.html`, `assets/Moses_Kolleh_Sesay_CV.pdf`
     and `assets/cv.hash` together. Since wave 4 the day you set is also the
@@ -737,9 +736,8 @@ app as the canonical tool. These are the questions only you can answer.
   - *What:* a public notebook or repository of yours that shows it.
   - *Where:* a new public output in `content/research.json` (a `github.com`
     URL is already trusted), then the toolkit's machine-learning row in
-    `index.html` becomes a link to it, as the others are; the skills
-    narration in `content/narration.json` says "no public project yet" and
-    changes with it. R7 asks the same of GIS.
+    `index.html` becomes a link to it, as the others are. R7 asks the same
+    of GIS.
   - *Check:* `npm test` passes; `npm run cv` again.
 - [ ] **R4. Is the Tableau Public dashboard still live?** Tableau's only
   evidence is the GloBox README's link to it
@@ -777,8 +775,7 @@ app as the canonical tool. These are the questions only you can answer.
   - *Where:* a public artifact on the groundwater case study in
     `content/projects.json` whose name or note says it is QGIS or ArcGIS
     work (or a new output in `content/research.json`); then the row in
-    `index.html` drops "on request; no public GIS project yet", and the
-    skills narration in `content/narration.json` with it.
+    `index.html` drops "on request; no public GIS project yet".
   - *Check:* `npm test` passes (`tests/content.test.js` accepts a case
     study as a proof only when a public artifact of it names the tool);
     `npm run cv` again.
@@ -840,8 +837,8 @@ keep, and some figures could move to "public" with a link only you have.
 - [ ] **N4. Two results that were labelled checkable, with nowhere to
   check them.** The coastal case's "10,226 sub-basins modelled" and the
   soft-path case's "Successfully defended at Hunan University, May 2021"
-  said "Checkable from outside" on the homepage cards, the case studies,
-  the CV and in the narration, while the site cited no source for the
+  said "Checkable from outside" on the homepage cards, the case studies
+  and the CV, while the site cited no source for the
   count, and `claims.html` filed the same degree certificate under "on
   request". Both now say "not checkable from outside".
   - *What:* for the count, open Wageningen University's MARINA page,
@@ -855,46 +852,9 @@ keep, and some figures could move to "public" with a link only you have.
     `results[0]`: add `"check": "<the address>"` and set `verifiable` to
     `true`; add the host to `TRUSTED_HOSTS` in `scripts/lib/content.js`,
     with a line saying you opened it. Then `npm run build:content` and
-    `npm run cv`, and in `content/narration.json` the projects script's
-    "You cannot check that…" line for it.
+    `npm run cv`.
   - *Check:* `npm test` passes; the card says "Checkable from outside", and
     `claims.html` links the address.
-
----
-
-## Your own voice (Phase 4.3)
-
-- [ ] **V1. Approve the wording of the introduction.**
-  - *What:* the `intro` script in `content/narration.json`: 193 words, first
-    person, opening with "Kushe". Every fact in it is from the hero narration,
-    `content/profile.json` or `content/projects.json`; it states no dates,
-    availability, languages or right to work.
-  - *Where:* edit `content/narration.json` → `intro.text` to sound like you,
-    keeping it to 150–220 words, opening with "Kushe", and to facts the site
-    already states. `npm run build:content` checks the length and the
-    opening; the facts are for you and a reviewer to check.
-  - *Unlocks:* V2.
-
-- [ ] **V2. Record one clean 60–90 second take of the introduction.**
-  - *How:* a phone voice memo in a quiet, soft-furnished room is enough.
-    Then, with [ffmpeg](https://ffmpeg.org), make it a mono 64 kbps MP3 and
-    install it:
-
-    ```bash
-    ffmpeg -i take.m4a -ac 1 -b:a 64k take.mp3
-    npm run voice:intro -- take.mp3
-    ```
-
-    If you changed words while recording, first edit `intro.text` to match
-    what you said and run `npm run build:content`, then run
-    `npm run voice:intro`. Full steps are in section 0 of
-    [docs/narration-setup.md](narration-setup.md).
-  - *Unlocks:* the Listen player offers "Hear Moses introduce himself · N KB".
-    Until then the site plays no recording at all, and the browser voice reads
-    the sections.
-  - *Check:* `npm test` passes (manifest, captions and the 800 KB audio
-    budget); locally, press **Listen** in the nav and the player offers the
-    recording.
 
 ---
 
@@ -934,8 +894,6 @@ keep, and some figures could move to "public" with a link only you have.
     - `content/profile.json` → `currentRole.partner`, and on the homepage
       (`index.html`, written by hand) the journey's Amsterdam stop, Field
       Note 03 and the experience card's "Partner" line;
-    - the narration's introduction and experience scripts
-      (`content/narration.json`);
     - the field terminal's projects list (`modules/terminal.js`) and the
       Assay's evidence line (`modules/interactives.js`);
     - three times in `field-report.html`.
