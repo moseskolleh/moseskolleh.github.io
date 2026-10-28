@@ -35,7 +35,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 
 - **HTML5**: Semantic markup for better SEO and accessibility
 - **CSS3**: Modern styling with CSS Grid, Flexbox, animations, and transitions
-- **JavaScript (Vanilla)**: no framework, no bundler. A 69 KB core (`script.js`, 23 KB gzipped) and four on-demand modules in `modules/`, each fetched the first time it is needed: the core fetches two on the homepage (the section-05 interactives with the footer receipt, and the field terminal), the case studies fetch the two games (`dossier.js` and `.css`) and `carbon-ai.html` fetches Anatomy of a Prompt (`anatomy.js` and `.css`), each as it comes near the screen
+- **JavaScript (Vanilla)**: no framework, no bundler. A 70 KB core (`script.js`, 23 KB gzipped) and four on-demand modules in `modules/`, each fetched the first time it is needed: the core fetches two on the homepage (the section-05 interactives with the footer receipt, and the field terminal), the case studies fetch the two games (`dossier.js` and `.css`) and `carbon-ai.html` fetches Anatomy of a Prompt (`anatomy.js` and `.css`), each as it comes near the screen
 - **Icons**: an inline SVG symbol sprite, no icon font
 - **Fonts**: Inter, Space Grotesk and IBM Plex Mono, self-hosted as Latin subsets under the SIL Open Font License (see [Fonts](#fonts))
 - **GitHub Pages**: Free hosting for static websites
@@ -1140,7 +1140,7 @@ did.
 | Budget | Measured | Ceiling |
 |---|---|---|
 | First view of the homepage on a desktop, over the wire (fonts included) | ~257 KB | 272 KB |
-| First view of the homepage on a phone, over the wire (fonts included) | ~214 KB | 227 KB |
+| First view of the homepage on a phone, over the wire (fonts included) | ~215 KB | 227 KB |
 | Everything a full visit adds on demand (modules, scripts, map) | ~41 KB | 44 KB |
 | Largest single image | ~180 KB | 189 KB |
 | Every image in the repository | ~3.38 MB | 3.5 MB |

@@ -376,6 +376,11 @@ const focusTarget = (target) => {
 // router): then where it sits is theirs. The height is taken now: the
 // observer's first report comes a frame late, and growth in that frame was
 // once taken for the start (250-440px short).
+// While it holds, the hold alone keeps the target in place: the browser's
+// scroll anchoring is off. Firefox anchored against the same growth as well,
+// mid-glide, and the two together carried a jump to #contact past it by the
+// growth again (-262px, section 05's 334px counted twice). Released, the
+// page anchors as before, for a reader scrolling up.
 let releaseHold = () => {};
 const hold = (land) => {
     releaseHold();
@@ -386,11 +391,14 @@ const hold = (land) => {
         const now = height();
         if (now !== last) { last = now; land(); }
     });
+    const anchored = [document.documentElement, document.body];
+    anchored.forEach(el => { el.style.overflowAnchor = 'none'; });
     const HANDS = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
     const release = () => {
         ro.disconnect();
         clearTimeout(timer);
         HANDS.forEach(t => window.removeEventListener(t, release, true));
+        anchored.forEach(el => { el.style.overflowAnchor = ''; });
         if (releaseHold === release) releaseHold = () => {};
     };
     const timer = setTimeout(release, 4000);
