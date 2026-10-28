@@ -293,7 +293,7 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         assert(byId(rs, 'profile-confirmed').status === 'waiting', 'Stale: a confirmation more than a quarter old is waiting again');
 
         let g = health.checkAtAGlance(context({ files: { 'content/profile.json': profile({}, { seniority: null, availableFrom: null, rightToWork: null }) } }));
-        assert(g.status === 'waiting' && g.summary.startsWith('Seniority, available from, languages and right to work in the NL and the EU are not stated') && g.items.join() === 'F3,F1,F2',
+        assert(g.status === 'waiting' && g.summary.startsWith('Seniority, available from, languages and right to work in Italy and the EU are not stated') && g.items.join() === 'F3,F1,F2',
             `Stale: each at-a-glance fact the checklist's table names is waiting while unstated, on its own item (${g.summary})`);
         const filled = { seniority: 'Mid-level', rightToWork: 'EU citizen' };
         const said = (from) => health.checkAtAGlance(context({ files: { 'content/profile.json': profile({}, { ...filled, availableFrom: from }, { languages: [{ language: 'English', level: 'C2' }] }) } }));
