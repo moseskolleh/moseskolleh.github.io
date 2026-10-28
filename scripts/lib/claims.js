@@ -170,6 +170,7 @@ const EXEMPT = [
     { why: 'the name of a cohort', re: /\bCohort \d+\b/g },
     { why: 'a place\'s coordinates', re: /\d+(?:\.\d+)?° ?[NSEW]\b/g },
     { why: 'a phone number', re: /\+\d{1,3}(?:[  ]\d{2,4}){2,4}/g },
+    { why: 'an ORCID iD', re: /\b\d{4}-\d{4}-\d{4}-\d{3}[\dX]\b/g },
     { why: 'an HTTP status code', re: /\b(?:error|HTTP) 404\b/g },
     { why: 'a unit: per thousand tokens', re: /\b(?:per[- ]|Wh\/)1k\b/g },
     { why: 'a model\'s size, as its name gives it (a 1B model)', re: /\b\d+B model\b/g },
@@ -213,7 +214,8 @@ const SHOWN_IN_FULL = [
     { re: /\bsix projects\b/gi, what: 'the homepage\'s project cards',
       count: d => d.projects.caseStudies.filter(cs => cs.homepageCard !== false).length },
     { re: /\bseven case studies\b/gi, what: 'the case studies', count: d => d.projects.caseStudies.length },
-    { re: /\bthree degrees\b/gi, what: 'the degrees', count: d => d.profile.education.length },
+    // A degree still under way (inProgress, the PhD) is not one he holds.
+    { re: /\bthree degrees\b/gi, what: 'the degrees awarded', count: d => d.profile.education.filter(e => !e.inProgress).length },
     { re: /\bfour certificates\b/gi, what: 'the certificates', count: d => d.profile.certifications.length },
     { re: /\btwo of them you can play with\b/gi, what: 'the case studies with a game', count: d => d.projects.caseStudies.filter(cs => cs.widget).length },
     { re: /\bthree field notes\b/gi, what: 'the homepage\'s field notes', count: d => d.page('index.html').querySelectorAll('#notes .fieldnote').length },

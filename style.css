@@ -1281,6 +1281,12 @@ html.light-mode .hero-photo-caption {
     color: var(--text-primary);
 }
 
+.journey-card p a {
+    color: var(--accent-color);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 /* ===================================
    ABOUT
    =================================== */
@@ -1431,6 +1437,14 @@ html.light-mode .hero-photo-caption {
 }
 
 /* rock textures, drawn with gradients — no images shipped */
+/* made ground: the fill at the top of a city borehole */
+.strata-fill {
+    background:
+        repeating-linear-gradient(0deg, transparent 0 6px, rgba(124, 252, 0, 0.26) 6px 8px),
+        radial-gradient(rgba(124, 252, 0, 0.2) 1px, transparent 1px);
+    background-size: auto, 7px 8px;
+}
+
 .strata-synthetic {
     background:
         repeating-linear-gradient(90deg, rgba(124, 252, 0, 0.28) 0 2px, transparent 2px 9px),
@@ -1686,7 +1700,7 @@ html.js .timeline-date { padding-right: 64px; }
     align-self: end;
 }
 
-/* Tighter than the house label, so "2025 — present · Amsterdam, NL"
+/* Tighter than the house label, so "Jun 2023 — Oct 2023 · Bonn, DE"
    keeps to one line beside the photo. */
 .project-meta .mono-label {
     letter-spacing: 0.03em;

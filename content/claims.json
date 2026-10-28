@@ -32,7 +32,7 @@
     "                           the figure, and its basis and checkability",
     "                           are this entry's (not repeated here)",
     "             profile       a path, or paths, in content/profile.json",
-    "                           (\"experience.4.teamSize\"); a note when the",
+    "                           (\"experience.5.teamSize\"); a note when the",
     "                           figure is counted from it rather than read",
     "             factor        a path in ai-carbon-data.js: a calculator's",
     "                           input, with its cited source; `count: true`",
@@ -136,35 +136,35 @@
       "id": "continents",
       "value": "3",
       "unit": "continents studied and worked on: Africa, Asia and Europe",
-      "basis": { "profile": ["education", "experience"], "note": "Sierra Leone for the BSc and the drilling work, China for the MSc at Hunan, and the Netherlands and Germany for the MSc at Wageningen, UNDRR in Bonn and the Digital Society School. The degree certificates are the evidence." },
+      "basis": { "profile": ["education", "experience"], "note": "Sierra Leone for the BSc and the drilling work, China for the MSc at Hunan, the Netherlands and Germany for the MSc at Wageningen, UNDRR in Bonn and the Digital Society School, and Italy for the PhD at IUSS Pavia. The degree certificates and the PhD enrolment are the evidence." },
       "checkable": "on-request"
     },
     {
       "id": "countries",
-      "value": "4",
-      "unit": "countries studied and worked in: Sierra Leone, China, Germany and the Netherlands",
-      "basis": { "profile": ["education", "experience"], "note": "The places of the degrees and roles in the record, as the journey on the homepage follows them. The degree certificates are the evidence for Sierra Leone, China and the Netherlands; for Germany, the UNDRR internship, as I record it." },
+      "value": "5",
+      "unit": "countries studied and worked in: Sierra Leone, China, Germany, the Netherlands and Italy",
+      "basis": { "profile": ["education", "experience"], "note": "The places of the degrees and roles in the record, as the journey on the homepage follows them. The degree certificates are the evidence for Sierra Leone, China and the Netherlands; for Germany, the UNDRR internship, as I record it; for Italy, the PhD enrolment at IUSS Pavia." },
       "checkable": "on-request"
     },
     {
       "id": "wur-grade",
       "value": "7.8/10",
       "unit": "grade for the MSc in Environmental Sciences at Wageningen, on the Dutch scale",
-      "basis": { "profile": "education.0.grade", "note": "The transcript is the evidence." },
+      "basis": { "profile": "education.1.grade", "note": "The transcript is the evidence." },
       "checkable": "on-request"
     },
     {
       "id": "team-size",
       "value": "23",
       "unit": "people in the drilling team managed at Sierra Drilling and Water Supply Enterprise",
-      "basis": { "profile": "experience.4.teamSize", "note": "As I record it; the employer's records are not public." },
+      "basis": { "profile": "experience.5.teamSize", "note": "As I record it; the employer's records are not public." },
       "checkable": "not-checkable"
     },
     {
       "id": "programme-weeks",
       "value": "8",
       "unit": "weeks: the length of the OnePointFive sustainability consulting accelerator",
-      "basis": { "profile": "experience.1.programmeWeeks", "note": "As I record it; no outside record of it is linked yet." },
+      "basis": { "profile": "experience.2.programmeWeeks", "note": "As I record it; no outside record of it is linked yet." },
       "checkable": "not-checkable"
     },
     {
@@ -172,7 +172,7 @@
       "value": "6",
       "unit": "people in the interdisciplinary team of the Wuppertal flood-resilience consultancy",
       "forms": ["six-person", "team of six"],
-      "basis": { "profile": "education.0.consultancyTeamSize", "note": "As I record it; the consultancy report is the client's." },
+      "basis": { "profile": "education.1.consultancyTeamSize", "note": "As I record it; the consultancy report is the client's." },
       "checkable": "not-checkable"
     },
     {
@@ -180,7 +180,7 @@
       "value": "5",
       "unit": "months with UNDRR in Bonn: the internship, June to October",
       "forms": ["five months"],
-      "basis": { "profile": "experience.2", "note": "Counted from the internship's dates as I record them; UNDRR holds its own record." },
+      "basis": { "profile": "experience.3", "note": "Counted from the internship's dates as I record them; UNDRR holds its own record." },
       "checkable": "not-checkable"
     },
     {
@@ -198,9 +198,9 @@
     },
     {
       "id": "first-view",
-      "value": "256",
+      "value": "257",
       "unit": "KB over the wire: the homepage's first view on a desktop, fonts included",
-      "forms": ["~256"],
+      "forms": ["~257"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
       "check": "https://github.com/moseskolleh/moseskolleh.github.io#performance"

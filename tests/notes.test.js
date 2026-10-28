@@ -338,7 +338,7 @@ series.forEach((n, i) => {
     const withLanguages = build.personLd(Object.assign({}, profile, { languages: [{ language: 'Dutch', level: 'B1' }] }));
     assert(JSON.stringify(withLanguages.knowsLanguage) === '[{"@type":"Language","name":"Dutch"}]', 'Structured data: and then it is written from them');
     // The X profile the plan names is not in profile.json's links, so it is not in sameAs.
-    assert(JSON.stringify(person.sameAs) === JSON.stringify([profile.links.github, profile.links.linkedin]), 'Structured data: sameAs is profile.json\'s links, and nothing it does not hold');
+    assert(JSON.stringify(person.sameAs) === JSON.stringify([profile.links.github, profile.links.linkedin, profile.links.orcid]), 'Structured data: sameAs is profile.json\'s links (GitHub, LinkedIn, ORCID), and nothing it does not hold');
 
     const coach = ldOf(new JSDOM(read('carbon-ai.html')).window.document).find(ld => ld['@type'] === 'SoftwareApplication');
     const edition = data.research.outputs.find(o => o.id === 'ecoprompt-web');

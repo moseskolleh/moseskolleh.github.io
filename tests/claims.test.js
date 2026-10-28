@@ -104,7 +104,10 @@ const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.doc
 // The ledger's own rules, fed bad entries
 // ===================================================================
 {
-    const good = { id: 'team-size', value: '23', unit: 'people in the team', basis: { profile: 'experience.4.teamSize' }, checkable: 'not-checkable' };
+    // The drilling team's size, wherever its role sits in the record (a role
+    // added above it moves it down one).
+    const teamPath = `experience.${data.profile.experience.findIndex(r => r.teamSize === 23)}.teamSize`;
+    const good = { id: 'team-size', value: '23', unit: 'people in the team', basis: { profile: teamPath }, checkable: 'not-checkable' };
     const refuses = (label, entry, why) => {
         const problems = content.checkClaims({ claims: [entry] }, { profile: data.profile, projects: data.projects, factors: content.loadFactors() });
         assert(problems.some(p => why.test(p)), `Validator refuses ${label} (${problems.join('; ') || 'it passed'})`);
@@ -112,7 +115,7 @@ const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.doc
     assert(content.checkClaims({ claims: [good] }, { profile: data.profile, projects: data.projects, factors: content.loadFactors() }).length === 0,
         'Validator: a sound entry passes');
     refuses('an entry with no basis', { ...good, basis: undefined }, /exactly one basis/);
-    refuses('an entry with two bases', { ...good, basis: { profile: 'experience.4.teamSize', illustrative: 'why' } }, /exactly one basis/);
+    refuses('an entry with two bases', { ...good, basis: { profile: teamPath, illustrative: 'why' } }, /exactly one basis/);
     refuses('a profile basis that says another number', { ...good, value: '24' }, /is 23, not 24/);
     refuses('a result that does not state the figure', { id: 'x', value: '65%', unit: 'strike rate', basis: { result: 'groundwater' } }, /no result .* states 65%/);
     refuses('a result entry that sets its own checkability', { id: 'x', value: '70%', unit: 'strike rate', basis: { result: 'groundwater' }, checkable: 'public' }, /the case study's/);

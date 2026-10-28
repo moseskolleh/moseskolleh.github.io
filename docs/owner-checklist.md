@@ -9,7 +9,7 @@ site, or by Moses saying so. One item is ticked, S7, because the repository
 shows it done; nothing else is yet.
 
 Each item says what is needed, where it goes, what it unlocks, and how to
-check it. A path such as `content/profile.json` → `experience[4].teamSize`
+check it. A path such as `content/profile.json` → `experience[5].teamSize`
 means that file, then that field (lists count from 0). After editing anything
 in `content/`, run `npm run build:content` and then `npm test`.
 
@@ -417,12 +417,12 @@ limits allow.
 - [ ] **F4. Which roles count as paid professional experience.**
   - *What:* for each role in `content/profile.json` → `experience`, whether it
     was paid employment. In particular: is the Digital Society School
-    researcher role (`experience[0]`) employment?
+    researcher role (`experience[1]`) employment?
   - *Where:* today the Assay counts years from every role whose title does not
     say intern, cohort, accelerator, trainee, volunteer or student (the
     `notCountedAsYears` list in `modules/interactives.js`). That counts the
-    Digital Society School role and the two Sierra Leone roles (`experience[3]`
-    and `experience[4]`). If a role was not paid, the cleanest fix is a field
+    Digital Society School role and the two Sierra Leone roles (`experience[4]`
+    and `experience[5]`). If a role was not paid, the cleanest fix is a field
     on its profile entry that the build copies into the Assay; that is a small
     code change, so say which roles and it can be made.
   - *Unlocks:* an honest "N+ years of experience" line in the Assay.
@@ -497,8 +497,8 @@ limits allow.
     the figure cites it.
 
 - [ ] **E3. Method and denominator for the 95% project completion rate (Sierra Drilling) and the 15% efficiency gain (Team & Team).**
-  - *Where:* `content/profile.json` → `experience[4]` (Operations Supervisor,
-    Sierra Drilling) and `experience[3]` (Field Operations Manager, Team &
+  - *Where:* `content/profile.json` → `experience[5]` (Operations Supervisor,
+    Sierra Drilling) and `experience[4]` (Field Operations Manager, Team &
     Team International), each with its method and denominator. The file's
     `$figures` note explains why: an outcome rate is not a record fact like
     `teamSize`, so it needs a method before it goes back on a page. The field
@@ -551,10 +551,10 @@ already on the site; confirm it or give the right value.
 
 - [ ] **K1. Wageningen GPA 7.8/10 (Dutch scale).** On the site since its first
   commit but not on the 2025 CV. Now in `content/profile.json` →
-  `education[0].grade`.
+  `education[1].grade`.
 - [ ] **K2. Sierra Drilling team of 23 and the 8-week OnePointFive programme.**
-  `content/profile.json` → `experience[4].teamSize` and
-  `experience[1].programmeWeeks`.
+  `content/profile.json` → `experience[5].teamSize` and
+  `experience[2].programmeWeeks`.
 - [ ] **K3. Wuppertal: did you formally lead the six-person team?** The case
   study's role says "Interdisciplinary team of six", and the CV claims
   neither way. Until you say, every page says "Worked in a six-person
@@ -793,7 +793,7 @@ keep, and some figures could move to "public" with a link only you have.
     (K2): `content/claims.json` → `team-size` and `programme-weeks`;
   - the six people in the Wuppertal consultancy team and the five months
     with UNDRR, which the site writes in words and which are entries now:
-    `wuppertal-team` (from `education[0].consultancyTeamSize` in
+    `wuppertal-team` (from `education[1].consultancyTeamSize` in
     `content/profile.json`) and `undrr-months` (counted from the
     internship's dates; the build fails if the two disagree). Confirm both;
   - the 164 water points (100 wells rehabilitated, 50 boreholes, 14 solar)

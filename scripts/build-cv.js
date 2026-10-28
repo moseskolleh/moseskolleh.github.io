@@ -130,6 +130,7 @@ function cvModel(data, indexHtml) {
             { text: bare(site), href: site },
             { text: bare(profile.links.linkedin), href: profile.links.linkedin },
             { text: bare(profile.links.github), href: profile.links.github },
+            ...(profile.links.orcid ? [{ text: bare(profile.links.orcid), href: profile.links.orcid }] : []),
             { text: `${profile.person.locality}, ${profile.person.country}` }
         ],
         openTo: `Open to ${g.targetRoles}${g.workArea && g.workArea.length ? ` — ${g.workArea.join(', ')}` : ''}`,

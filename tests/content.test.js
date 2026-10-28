@@ -59,7 +59,7 @@ const fieldText = plain(fieldReport);
 // One wrong LinkedIn URL on one page is a dead end for whoever clicks it.
 {
     const files = ['index.html', 'field-report.html', 'carbon-ai.html', '404.html', 'README.md'];
-    ['linkedin', 'github'].forEach((key) => {
+    ['linkedin', 'github', 'orcid'].forEach((key) => {
         const canonical = profile.links[key];
         const host = canonical.replace(/^https?:\/\//, '').split('/')[0];
         const handlePath = canonical.replace(/^https?:\/\/[^/]+/, '');
@@ -82,6 +82,11 @@ const fieldText = plain(fieldReport);
     assert(
         index.includes(profile.person.email) && fieldReport.includes(profile.person.email),
         'Links: the contact email matches profile.json on both editions'
+    );
+    // The ORCID iD a researcher is found by, in both editions' contact links.
+    assert(
+        !!profile.links.orcid && index.includes(`href="${profile.links.orcid}"`) && fieldReport.includes(`href="${profile.links.orcid}"`),
+        `Links: both editions link the ORCID record profile.json holds (${profile.links.orcid})`
     );
     // The phone number the CV prints is the one the homepage publishes.
     const tel = (index.match(/href="tel:([^"]+)"[\s\S]*?<p>([^<]+)<\/p>/) || []).slice(1);
@@ -107,30 +112,43 @@ const fieldText = plain(fieldReport);
         assert(ld.email === `mailto:${profile.person.email}`, `JSON-LD: email matches profile.json (${ld.email})`);
         assert(ld.url === profile.links.site, `JSON-LD: url matches profile.json (${ld.url})`);
 
-        // worksFor has to name the employer the rest of the page names, and
-        // its parent organisation — the reason it is spelled out here rather
-        // than left as a bare string.
+        // Where he is now has to name the organisation the rest of the page
+        // names, and its parent organisation where it has one — the reason
+        // it is spelled out here rather than left as a bare string. An
+        // employer is worksFor; a university he is enrolled at as a doctoral
+        // researcher, on a scholarship and not a contract
+        // (currentRole.enrolled), is his affiliation, and no employer is
+        // named at all.
+        const role = profile.currentRole;
+        const [is, isNot] = role.enrolled ? ['affiliation', 'worksFor'] : ['worksFor', 'affiliation'];
+        const org = ld[is];
         assert(
-            ld.worksFor && ld.worksFor.name === profile.currentRole.organization,
-            `JSON-LD: worksFor names the current employer (${ld.worksFor && ld.worksFor.name})`
+            !!org && org['@type'] === 'Organization' && org.name === role.organization && !(isNot in ld),
+            `JSON-LD: ${is} names the current organisation, and there is no ${isNot} (${org && org.name})`
         );
         assert(
-            ld.worksFor && ld.worksFor.parentOrganization === profile.currentRole.parentOrganization,
-            `JSON-LD: worksFor records the parent organisation (${ld.worksFor && ld.worksFor.parentOrganization})`
+            !!org && org.parentOrganization === role.parentOrganization,
+            `JSON-LD: ${is} records the parent organisation, where profile.json gives one (${org && org.parentOrganization})`
         );
 
         const sameAs = ld.sameAs || [];
-        [profile.links.github, profile.links.linkedin].forEach((url) => {
+        [profile.links.github, profile.links.linkedin, profile.links.orcid].forEach((url) => {
             assert(sameAs.includes(url), `JSON-LD: sameAs lists ${url}`);
         });
 
-        // alumniOf must be exactly the institutions in the education list —
-        // no more (a school that was never attended) and no fewer.
+        // alumniOf must be exactly the institutions of the degrees awarded —
+        // no more (a school that was never attended, or one whose degree is
+        // still under way) and no fewer.
         const alumni = (ld.alumniOf || []).map(a => a.name).sort();
-        const expected = profile.education.map(e => e.institution).sort();
+        const expected = profile.education.filter(e => !e.inProgress).map(e => e.institution).sort();
         assert(
             JSON.stringify(alumni) === JSON.stringify(expected),
-            `JSON-LD: alumniOf matches the education list (${alumni.join(', ')} vs ${expected.join(', ')})`
+            `JSON-LD: alumniOf matches the degrees awarded (${alumni.join(', ')} vs ${expected.join(', ')})`
+        );
+        const underWay = profile.education.filter(e => e.inProgress);
+        assert(
+            underWay.every(e => !alumni.includes(e.institution)),
+            `JSON-LD: a degree still in progress makes no one an alumnus (${underWay.map(e => e.institution).join(', ') || 'none in progress'})`
         );
     }
 }

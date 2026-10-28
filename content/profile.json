@@ -29,7 +29,7 @@
   ],
 
   "meta": {
-    "verifiedOn": "2026-08-05",
+    "verifiedOn": "2026-11-02",
     "confirmedOn": null,
     "staleAfterMonths": 6
   },
@@ -38,9 +38,9 @@
     "name": "Moses Kolleh Sesay",
     "jobTitle": "Sustainability & Climate Analyst",
     "email": "moseskollehsesay@gmail.com",
-    "locality": "Amsterdam",
-    "country": "NL",
-    "coordinates": "52.3676° N, 4.9041° E",
+    "locality": "Pavia",
+    "country": "IT",
+    "coordinates": "45.1847° N, 9.1582° E",
     "phone": "+31 659 361 423"
   },
   "$phone": "The number the homepage's contact card publishes (index.html, a tel: link); tests/content.test.js holds the two together, and the CV prints it in its header. Take it off both or neither.",
@@ -58,7 +58,7 @@
   "$languages": "Optional and deliberately absent: add \"languages\": [{ \"language\": \"Dutch\", \"level\": \"B1\" }], named in English with a CEFR level (A1-C2) or \"native\", once Moses states them. Until then the site states no language rather than guessing. npm run build:content copies it into the at-a-glance strip below and the JSON-LD (knowsLanguage).",
 
   "$atAGlance": [
-    "The strip under the homepage hero's copy: what a recruiter checks first.",
+    "The strip under the homepage hero's copy: what a reader checks first.",
     "npm run build:content writes it into index.html between the AT-A-GLANCE",
     "markers. A fact that is null is not shown at all: no 'TBC', no placeholder,",
     "and the validator refuses one written as a value. Only Moses can state",
@@ -82,8 +82,7 @@
     "strip these allow still fits (GLANCE_LIMITS in scripts/lib/content.js)."
   ],
   "atAGlance": {
-    "targetRoles": "sustainability, climate-risk, ESG and sustainable-AI roles and consulting",
-    "workArea": ["EU", "remote-friendly"],
+    "targetRoles": "research collaborations on climate and flood risk, water and ESG",
     "seniority": null,
     "availableFrom": null,
     "rightToWork": null
@@ -93,30 +92,40 @@
     "site": "https://moseskolleh.github.io/",
     "github": "https://github.com/moseskolleh",
     "linkedin": "https://linkedin.com/in/moseskollehsesay",
+    "orcid": "https://orcid.org/0009-0002-9429-1672",
     "cv": "assets/Moses_Kolleh_Sesay_CV.pdf"
   },
 
   "currentRole": {
     "$comment": "The one fact on the site with an open end date. Everything else is closed and cannot rot.",
-    "title": "Researcher — Sustainable Artificial Intelligence",
-    "organization": "Digital Society School",
-    "parentOrganization": "Amsterdam University of Applied Sciences",
-    "partner": "Ministry of Finance (Ministerie van Financiën)",
-    "location": "Amsterdam, The Netherlands",
-    "start": "2025-09",
+    "$enrolled": "true when the organisation is a university he is enrolled at as a doctoral researcher, on a scholarship rather than an employment contract: the JSON-LD then names it as his affiliation, not as an employer (worksFor). The co-funder of the scholarship is not an employer either, so it is not named here.",
+    "title": "PhD Researcher — Climate-Driven Urban Flood Risk",
+    "organization": "Scuola Universitaria Superiore IUSS Pavia",
+    "enrolled": true,
+    "location": "Pavia, Italy",
+    "start": "2026-11",
     "end": null,
-    "displayDates": "Sept 2025 — Present"
+    "displayDates": "Nov 2026 — Present"
   },
 
   "$figures": "A figure on a page needs a basis in content/. A case-study result carries its own; a record fact about a role or a degree (a team's headcount, a programme's length, a grade; the Wuppertal consultancy's team, part of the Wageningen degree) sits on the entry it describes, here, and tests/content.test.js holds the pages to it. An outcome rate (a completion percentage, an efficiency gain, people reached) is not a record fact: it needs a method, and without one it stays off the site.",
 
   "experience": [
     {
+      "title": "PhD Researcher — Climate-Driven Urban Flood Risk",
+      "organization": "Scuola Universitaria Superiore IUSS Pavia",
+      "displayDates": "Nov 2026 — Present",
+      "start": "2026-11",
+      "end": null
+    },
+    {
       "title": "Researcher — Sustainable Artificial Intelligence",
       "organization": "Digital Society School",
-      "displayDates": "Sept 2025 — Present",
+      "parentOrganization": "Amsterdam University of Applied Sciences",
+      "partner": "Ministry of Finance (Ministerie van Financiën)",
+      "displayDates": "Sept 2025 — Feb 2026",
       "start": "2025-09",
-      "end": null
+      "end": "2026-02"
     },
     {
       "title": "Cohort 7 Member — Sustainability Consulting Accelerator",
@@ -150,7 +159,15 @@
     }
   ],
 
+  "$education": "Newest first. An entry with \"inProgress\": true is a degree under way, not one awarded: it is not counted among the degrees the site says he holds (\"three degrees\", scripts/lib/claims.js), and the JSON-LD does not list him as an alumnus of its institution.",
   "education": [
+    {
+      "degree": "PhD in Sustainable Development and Climate Change",
+      "institution": "Scuola Universitaria Superiore IUSS Pavia",
+      "displayDates": "2026 — 2029",
+      "textEditionDates": "2026–2029",
+      "inProgress": true
+    },
     {
       "degree": "MSc Environmental Sciences",
       "institution": "Wageningen University & Research",
@@ -220,10 +237,10 @@
   "$pages": "Drives sitemap.xml. lastmod is set by hand when a page's content changes — a build timestamp would claim every page changed on every deploy, which is the fastest way to teach a crawler to ignore the field.",
   "pages": [
     { "path": "index.html", "loc": "https://moseskolleh.github.io/", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "1.0" },
-    { "path": "case-studies.html", "loc": "https://moseskolleh.github.io/case-studies.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.9" },
-    { "path": "research.html", "loc": "https://moseskolleh.github.io/research.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.8" },
-    { "path": "carbon-ai.html", "loc": "https://moseskolleh.github.io/carbon-ai.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.8" },
-    { "path": "field-report.html", "loc": "https://moseskolleh.github.io/field-report.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.3" },
+    { "path": "case-studies.html", "loc": "https://moseskolleh.github.io/case-studies.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.9" },
+    { "path": "research.html", "loc": "https://moseskolleh.github.io/research.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.8" },
+    { "path": "carbon-ai.html", "loc": "https://moseskolleh.github.io/carbon-ai.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.8" },
+    { "path": "field-report.html", "loc": "https://moseskolleh.github.io/field-report.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.3" },
     { "path": "claims.html", "loc": "https://moseskolleh.github.io/claims.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.5" },
     { "path": "stats.html", "loc": "https://moseskolleh.github.io/stats.html", "lastmod": "2026-10-28", "changefreq": "weekly", "priority": "0.2" }
   ]

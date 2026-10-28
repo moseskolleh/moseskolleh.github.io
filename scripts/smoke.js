@@ -1395,7 +1395,8 @@ async function exerciseJourneyAndChart(browser, origin) {
         const where = `journey band at ${width}x${height}`;
         const trouble = [];
         const small = new Set();
-        for (let i = 0; i < 5; i++) {
+        const stopCount = await page.evaluate(() => document.querySelectorAll('.journey-stop').length);
+        for (let i = 0; i < stopCount; i++) {
             // Met as a reader meets each stop: its top just under the band.
             await page.evaluate((i) => {
                 const map = document.getElementById('journeyMap');
@@ -1442,7 +1443,7 @@ async function exerciseJourneyAndChart(browser, origin) {
             r.labels.filter(([, px]) => px < LABEL_MIN_PX - 0.05).forEach(([name, px]) => small.add(`${name} ${px.toFixed(1)}px`));
         }
         if (trouble.length) trouble.forEach(t => bad(`${where}, ${t}`));
-        else ok(`${where}: pinned on screen at each of the five stops, showing that stop, over none of its text`);
+        else ok(`${where}: pinned on screen at each of the ${stopCount} stops, showing that stop, over none of its text`);
         if (small.size) bad(`${where}: names under ${LABEL_MIN_PX}px (${Array.from(small).join(', ')})`);
         else ok(`${where}: every name on it ${LABEL_MIN_PX}px or more`);
 
@@ -1484,17 +1485,19 @@ async function exerciseJourneyAndChart(browser, origin) {
     }
 
     // The Rhine delta on a desktop, every name showing, for a visitor in
-    // Amsterdam (their mark on the Amsterdam stop) and in Brussels (theirs
-    // beside Wuppertal's name): no name on another or cut by the frame, and
-    // no stop's or site's name across the route.
-    for (const zone of ['Europe/Amsterdam', 'Europe/Brussels']) {
+    // Amsterdam (their mark on the Amsterdam stop), in Brussels (theirs
+    // beside Wuppertal's name) and in Rome (theirs south of Pavia): no name
+    // on another or cut by the frame, and no stop's or site's name across
+    // the route, at the delta's two stops and at Pavia, where the last leg
+    // runs south past Wuppertal's name.
+    for (const zone of ['Europe/Amsterdam', 'Europe/Brussels', 'Europe/Rome']) {
         const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce', timezoneId: zone });
         const page = await context.newPage();
         await page.goto(`${origin}/index.html`, { waitUntil: 'load' });
         await mapReady(page);
         const clash = [];
         let count = 0;
-        for (const i of [3, 4]) {
+        for (const i of [3, 4, 5]) {
             await page.evaluate((i) => document.querySelector(`.journey-stop[data-stop="${i}"]`).scrollIntoView({ block: 'center', behavior: 'instant' }), i);
             await page.waitForFunction((i) => document.querySelector(`#mapStop${i}.active`) && document.querySelector('.map-you'), i, { timeout: 5000 }).catch(() => null);
             await page.waitForTimeout(300);
@@ -3256,8 +3259,8 @@ async function exerciseCpu(browser, origin) {
             return page.evaluate(() => document.getElementById('journeyMapReadout').textContent.split('—').pop().trim());
         };
         const early = await readAt(1);
-        const late = await readAt(4);
-        if (late === 'Amsterdam' && early !== late) ok(`the journey map flies with the stops (${early}, then ${late})`);
+        const late = await readAt(5);
+        if (late === 'Pavia' && early !== late) ok(`the journey map flies with the stops (${early}, then ${late})`);
         else bad(`the journey map did not follow the stops (${early}, then ${late})`);
         await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
         await page.click('#navToggle');

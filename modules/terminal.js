@@ -25,7 +25,7 @@
     const COMMANDS = {
         help: () => {
             print('available commands:');
-            [['journey', 'the route, Freetown to Amsterdam'],
+            [['journey', 'the route, Freetown to Pavia'],
              ['projects', 'list the six projects'],
              ['drill', 'spud in a borehole right here'],
              ['co2', 'how much this visit weighed'],
@@ -41,14 +41,15 @@
         },
         whoami: () => {
             print('Moses Kolleh Sesay — geologist by training, sustainability analyst by conviction.');
-            print('currently: Amsterdam, NL (52.3676° N, 4.9041° E). previously: see \'journey\'.');
+            print('currently: Pavia, IT (45.1847° N, 9.1582° E). previously: see \'journey\'.');
         },
         journey: () => {
             [['2013–2019', 'Freetown, SL', '8.4657° N, 13.2317° W', 'BSc Geology · 164 water points'],
              ['2019–2021', 'Changsha, CN', '28.2282° N, 112.9388° E', 'MSc Industrial Engineering'],
              ['2023', 'Bonn, DE', '50.7374° N, 7.0982° E', 'UNDRR · 54 hazard systems'],
              ['2021–2024', 'Wageningen, NL', '51.9692° N, 5.6654° E', 'MSc Env. Sciences · 10,226 sub-basins'],
-             ['2025–now', 'Amsterdam, NL', '52.3676° N, 4.9041° E', 'Sustainable AI research']
+             ['2025–2026', 'Amsterdam, NL', '52.3676° N, 4.9041° E', 'Sustainable AI research'],
+             ['2026–now', 'Pavia, IT', '45.1847° N, 9.1582° E', 'PhD · urban flood risk']
             ].forEach(s => print(`  ${s[0].padEnd(10)} ${s[1].padEnd(16)} ${s[2].padEnd(24)} ${s[3]}`));
             print('run \'map\' to fly the route.');
         },

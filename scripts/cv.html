@@ -14,7 +14,10 @@
     <style>
         /* CV:FONTS */
 
-        @page { size: A4; margin: 13mm 15mm 12mm; }
+        /* Tightened in October 2026, when a role and a degree (the PhD)
+           joined the record: a little less margin, line height and space
+           between entries, so it still comes to two pages. */
+        @page { size: A4; margin: 12mm 15mm 11mm; }
 
         :root {
             --ink: #18211c;
@@ -25,8 +28,8 @@
 
         html {
             font-family: 'Inter', sans-serif;
-            font-size: 8.7pt;
-            line-height: 1.34;
+            font-size: 8.6pt;
+            line-height: 1.3;
             color: var(--ink);
             /* Ligatures off: a reader's or an applicant-tracking system's
                copy of "fi" should be two letters, not one glyph. */
@@ -56,13 +59,13 @@
             color: var(--green);
             border-bottom: 0.5pt solid var(--rule);
             padding-bottom: 1.5pt;
-            margin: 9pt 0 4pt;
+            margin: 8pt 0 3.5pt;
             break-after: avoid;
         }
 
         .summary p + p { margin-top: 2pt; }
 
-        .entry { break-inside: avoid; margin-bottom: 5.5pt; }
+        .entry { break-inside: avoid; margin-bottom: 4.5pt; }
         .entry-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10pt; }
         .entry-title { font-weight: 600; }
         .when { font-family: 'IBM Plex Mono', monospace; font-size: 7.6pt; color: var(--dim); white-space: nowrap; }

@@ -40,6 +40,8 @@ const TRUSTED_HOSTS = [
     'moseskolleh.github.io',
     'linkedin.com',
     'www.linkedin.com',
+    // His ORCID record (profile.json links.orcid), the iD Moses gave.
+    'orcid.org',
     // Where two issuers publish a certificate's verification page (see
     // VERIFY_HOSTS below): Coursera for the Google certificate, and the
     // Corporate Finance Institute's own credential site.
@@ -1017,7 +1019,7 @@ const CLAIM_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 /** The calculators' inputs, as the pages load them. */
 const loadFactors = () => require(path.join(ROOT, 'ai-carbon-data.js'));
 
-/** A value at a dotted path ("experience.4.teamSize"), or undefined. */
+/** A value at a dotted path ("experience.5.teamSize"), or undefined. */
 const atPath = (obj, dotted) => String(dotted).split('.').reduce((o, k) => (o === null || o === undefined ? undefined : o[k]), obj);
 
 /**

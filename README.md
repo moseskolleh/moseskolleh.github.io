@@ -11,11 +11,11 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 
 ## Features
 
-- **Living journey map**: a hand-built SVG map of the journey region — West Africa to East Asia, so every stop gets real resolution instead of a world map that's half empty ocean (Natural Earth 50 m coastlines, simplified hardest away from the Rhine delta where the map zooms deepest, zero runtime dependencies). It flies from Freetown to Changsha, Bonn, Wageningen and Amsterdam as you scroll (on a phone, in a band pinned under the nav bar above the stop you are reading), and fieldwork sites like Wuppertal join the map when the story reaches them. Every name on it is 11px or more on any screen, and the Rhine delta's four sit clear of each other and of the route. Regenerate with `npm install && npm run map:build`, then sync the printed stop pixels into `script.js`; `npm run map:check` proves the committed SVG still matches the script and runs in CI
+- **Living journey map**: a hand-built SVG map of the journey region — West Africa to East Asia, so every stop gets real resolution instead of a world map that's half empty ocean (Natural Earth 50 m coastlines, simplified hardest away from the Rhine delta where the map zooms deepest, zero runtime dependencies). It flies from Freetown to Changsha, Bonn, Wageningen, Amsterdam and Pavia as you scroll (on a phone, in a band pinned under the nav bar above the stop you are reading), and fieldwork sites like Wuppertal join the map when the story reaches them. Every name on it is 11px or more on any screen, and the Rhine delta's four sit clear of each other and of the route. Regenerate with `npm install && npm run map:build`, then sync the printed stop pixels into `script.js`; `npm run map:check` proves the committed SVG still matches the script and runs in CI
 - **"Seven in ten" — site the borehole**: a playable resistivity profile on the [groundwater case study](case-studies.html#play-borehole) — read the curve, place the rig, drill. Water-bearing fracture, clay pocket or dry hole; your holes fill a scoreboard beside the field records' 7 in 10 (reading the curve first) and blind drilling's ~3 in 10, which is labelled illustrative until it has a source. It was two widgets, the game and a strike-rate slider, making one point; it is one now
 - **"Don't let it become a boat" flood scene**: a schematic Wupper cross-section on the [Wuppertal case study](case-studies.html#play-flood) — slide the river from a calm day to July 2021 and watch the margin under the Schwebebahn's hanging cars shrink. Both games load only when a reader scrolls near them, and without JavaScript each is a note that it needs JavaScript and one line of summary
 - **Field terminal**: press <code>`</code> anywhere (or the footer button) for a hidden green-on-black terminal — try `journey`, `drill`, `co2`, `kushe`, `help`
-- **Carbon-aware by construction**: images ship as WebP at the lowest quality that still looks the same, with AVIF where that is a tenth lighter again and an 800px hero on a phone (see [The photos](#the-photos)), the three typefaces are self-hosted subsets, and a first view costs about **256 KB over the wire on a desktop, fonts included**, less on a phone, against a 272 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model), counting network transfer only. A low-energy mode pauses all animation and honours `prefers-reduced-motion`
+- **Carbon-aware by construction**: images ship as WebP at the lowest quality that still looks the same, with AVIF where that is a tenth lighter again and an 800px hero on a phone (see [The photos](#the-photos)), the three typefaces are self-hosted subsets, and a first view costs about **257 KB over the wire on a desktop, fonts included**, less on a phone, against a 272 KB ceiling `npm test` enforces — a budget, not a number in a README, and one that `npm run smoke` checks against a real browser (see [Performance](#performance)). Everything a visit does not reach — the field terminal, the section-05 interactives, the case studies' two games — is fetched only when it is used. Nothing is loaded from any other origin, and only two things are ever sent to one, both to the site's own Apps Script endpoint: a contact message, and one cookieless visit count per page view (never under Do Not Track or Global Privacy Control; see [The visit counter and privacy](#the-visit-counter-and-privacy)). A live footer badge weighs each visit in the browser (Resource Timing API × Sustainable Web Design model), counting network transfer only. A low-energy mode pauses all animation and honours `prefers-reduced-motion`
 - **[Case studies](case-studies.html), evidence-first**: the homepage's six projects and a seventh, GAIA, an open method and tool for reporting an organisation's AI footprint on the lines of a sustainability report, each as **problem → method → artifact → result → findings**. Every result carries the basis it rests on and says plainly whether you can check it from outside; every artifact says whether it is public, available on request, or held by the client; every case study says what the work found or recommends, with its basis. The method is folded to one line until asked for. See [Content pipeline](#content-pipeline)
 - **Role-specific lenses**: `case-studies.html?lens=water`, `?lens=climate-risk`, `?lens=sustainable-ai`, `?lens=esg-csrd` — shareable views that reframe the portfolio for one kind of role. They **reorder and frame, they never filter**: every case study stays on the page in every view, because a view that hides inconvenient work is a CV that lies by omission. Without JavaScript the switcher steps aside and every case study shows in the default view
 - **No dead ends**: every page but the homepage shares one small nav (Home, Case studies, Research, CV, Contact, with the page you are on marked) and ends with a way to reach Moses: his address, the contact form and the CV. The pages built on `carbon-ai.css` have the homepage's light theme and its switch, and keep the reader's choice from page to page (`theme.js`, before the first paint); with nothing chosen they follow the system's setting, with or without JavaScript. The homepage follows it only with JavaScript: without, it stays dark, because following the system there would put a second copy of every light-theme rule in its first view. The text-only field report and the 404 page take the nav and the call to action as plain lines, and no script
@@ -50,7 +50,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - Four exact figures (164 water points, 54 hazard systems, 3 continents, 2 master's degrees), written into the HTML so they read correctly without JavaScript; with it they count up to the same values, with nothing appended, and stay still under reduced motion or low-energy mode
 
 ### 🗺️ Journey
-- The living journey map: Freetown → Changsha → Bonn → Wageningen → Amsterdam, flown as you scroll, with a visitor mark for wherever you are reading from. On a phone it is a band pinned under the nav bar while the stops scroll past below it, showing the one being read; it jumps instead of flying under reduced motion or low-energy mode
+- The living journey map: Freetown → Changsha → Bonn → Wageningen → Amsterdam → Pavia, flown as you scroll, with a visitor mark for wherever you are reading from. On a phone it is a band pinned under the nav bar while the stops scroll past below it, showing the one being read; it jumps instead of flying under reduced motion or low-energy mode
 
 ### 👤 About
 - Professional summary with the CV download, and the 164 water points itemised (100 wells rehabilitated, 50 boreholes drilled, 14 solar-powered)
@@ -73,7 +73,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 ### 🛠️ Skills & Education
 - Evidence-first: every tool's proof is public work that shows it, or it says there is none; real field numbers instead of percentages
 - Areas of expertise, and ESG frameworks and standards (SBTi, CDP, GHG Protocol, TCFD, TNFD, etc.)
-- Master's degrees in Environmental Sciences and Industrial Engineering, and a Bachelor's in Geology, each with its dates, institution and what it held
+- A PhD in Sustainable Development and Climate Change in progress at IUSS Pavia, master's degrees in Environmental Sciences and Industrial Engineering, and a Bachelor's in Geology, each with its dates, institution and what it held
 - Professional certifications (ESG Specialist, Google Data Analytics, etc.), each with its issuer, date and what it covered, written from `content/profile.json`; a certificate links its issuer's verification page as soon as its `verifyUrl` is filled in
 
 ### 📧 Contact
@@ -726,14 +726,14 @@ alone:
 
 | Page | Block | From |
 |---|---|---|
-| `index.html` | `Person`: name, role, employer, address, degrees (`alumniOf`), certificates (`hasCredential`, each with its issuer and year, and its verification page once `verifyUrl` is set), `knowsAbout`, `sameAs` | `content/profile.json` |
+| `index.html` | `Person`: name, role, where he is now (`affiliation` for the university where he is a doctoral researcher on a scholarship, `worksFor` for an employer), address, degrees awarded (`alumniOf`; the PhD in progress is not one), certificates (`hasCredential`, each with its issuer and year, and its verification page once `verifyUrl` is set), `knowsAbout`, `sameAs` | `content/profile.json` |
 | `index.html` | `WebSite`, its author the Person by `@id` | `content/profile.json` |
 | `notes/*.html` | `Article`: headline, one line, date, tag, author | `content/notes/*.md` |
 | `carbon-ai.html` | `SoftwareApplication`: this site's edition of the EcoPrompt Coach, as `content/research.json` names and describes it; it `mentions` the maintained tool by its repository, never claiming to be it or built on it | `content/research.json` |
 
 `knowsLanguage` is written once `profile.json` states his languages, which it
-does not yet; `sameAs` lists the profiles `profile.json` holds (GitHub and
-LinkedIn) and no other. `tests/notes.test.js` parses every block on every
+does not yet; `sameAs` lists the profiles `profile.json` holds (GitHub,
+LinkedIn and ORCID) and no other. `tests/notes.test.js` parses every block on every
 page and fails on any value `content/` does not hold, bar the few that are
 schema.org's own vocabulary (a credential's category). `404.html`, which
 search engines are told not to index, has a title and a description.
@@ -1130,7 +1130,7 @@ did.
 <!-- BUDGET-TABLE:START — generated by scripts/check-budget.js (npm run budget -- --readme). Do not edit by hand. -->
 | Budget | Measured | Ceiling |
 |---|---|---|
-| First view of the homepage on a desktop, over the wire (fonts included) | ~256 KB | 272 KB |
+| First view of the homepage on a desktop, over the wire (fonts included) | ~257 KB | 272 KB |
 | First view of the homepage on a phone, over the wire (fonts included) | ~214 KB | 227 KB |
 | Everything a full visit adds on demand (modules, scripts, map) | ~41 KB | 44 KB |
 | Largest single image | ~180 KB | 189 KB |
@@ -1180,7 +1180,7 @@ few data files features read, is fetched the moment it is first needed:
 | `modules/dossier.js` (+ `dossier.css`) | on `case-studies.html`, a game's host comes within a screen of view (the page's own loader, not `script.js`) | ~9 KB |
 | `modules/terminal.js` | the backtick key or the footer button | ~4 KB |
 | `modules/anatomy.css` + `anatomy.js`, on `carbon-ai.html` | Anatomy of a Prompt comes within 400px of the screen (`carbon-ai.js` fetches them) | ~5 KB |
-| `assets/journey-map.svg` | the first sign a reader is heading down the page: a scroll, a key, a touch, or a deep link | ~4 KB |
+| `assets/journey-map.svg` | the first sign a reader is heading down the page: a scroll, a key, a touch, or a deep link | ~5 KB |
 | `assets/timezones.json` | the journey map arrives, for its "you?" mark (the zone is looked up in the page, never sent) | ~2 KB |
 <!-- MODULE-TABLE:END -->
 
@@ -1371,7 +1371,8 @@ flow through the interactive widgets.
 - 📧 Email: [moseskollehsesay@gmail.com](mailto:moseskollehsesay@gmail.com)
 - 💼 LinkedIn: [linkedin.com/in/moseskollehsesay](https://linkedin.com/in/moseskollehsesay)
 - 🐙 GitHub: [github.com/moseskolleh](https://github.com/moseskolleh)
-- 📍 Location: Amsterdam, The Netherlands
+- 🆔 ORCID: [orcid.org/0009-0002-9429-1672](https://orcid.org/0009-0002-9429-1672)
+- 📍 Location: Pavia, Italy
 
 ## License
 

@@ -22,7 +22,7 @@
     "id": "all",
     "label": "Everything",
     "shortLabel": "All",
-    "summary": "Seven case studies, joined by one question: what does the data actually say, and who is it for? Water first, then climate risk, now the footprint of the tools themselves, and how to report it."
+    "summary": "Seven case studies, joined by one question: what does the data actually say, and who is it for? Water first, then climate risk, later the footprint of the tools themselves, and how to report it."
   },
 
   "lenses": [
@@ -59,13 +59,13 @@
       "label": "Sustainable AI & AI governance",
       "shortLabel": "Sustainable AI",
       "tagline": "Every prompt has a footprint",
-      "summary": "The newest thread, and the one that made the rest make sense: the tools we now use to analyse environmental problems have environmental costs of their own, and almost nobody is measuring them. At the Digital Society School I am building the framework and the decision-support tooling for a finance ministry adopting generative AI — mapping Scope 2 electricity, Scope 3 hardware and data-centre water, in a reporting language the organisation already speaks.",
+      "summary": "A thread I followed from 2025 into 2026, and the one that made the rest make sense: the tools we now use to analyse environmental problems have environmental costs of their own, and almost nobody is measuring them. At the Digital Society School I was part of a team building the framework and the decision-support tooling for a finance ministry adopting generative AI — mapping Scope 2 electricity, Scope 3 hardware and data-centre water, in a reporting language the organisation already speaks.",
       "bestFor": "Roles in sustainable AI, AI governance, green software, or ESG where digital footprint is in scope — and anywhere the job is to make an environmental claim survive scrutiny.",
       "evidence": [
         "Sustainable-AI framework and prototype for the Dutch Ministry of Finance",
         "EcoPrompt Coach — a public tool with a full evidence ledger behind every factor",
         "Framework framed against CSRD/ESRS disclosure logic",
-        "This site: a first view of ~256 KB with its fonts, budgeted and enforced in CI"
+        "This site: a first view of ~257 KB with its fonts, budgeted and enforced in CI"
       ]
     },
     {

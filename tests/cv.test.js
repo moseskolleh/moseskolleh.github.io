@@ -96,6 +96,7 @@ function assert(cond, msg) {
         need('site', bare(profile.links.site));
         need('LinkedIn', bare(profile.links.linkedin));
         need('GitHub', bare(profile.links.github));
+        if (profile.links.orcid) need('ORCID', bare(profile.links.orcid));
         need('location', `${profile.person.locality}, ${profile.person.country}`);
         need('current role', profile.currentRole.title);
         need('current employer', profile.currentRole.organization);
@@ -209,7 +210,10 @@ function assert(cond, msg) {
         assert(model.experience.every(r => r.lines.length >= 2), 'Model: each role carries its lines from the homepage card');
         assert(model.profile.length === 2 && model.skills.toolkit.length >= 6 && model.skills.toolkit.every(t => t.name && t.proof),
             'Model: the profile is the hero\'s two sentences, and every tool comes with its proof');
-        assert(!JSON.stringify(model).includes(profile.currentRole.partner), 'Model: the partner is not named (owner checklist: consent)');
+        // Every role's partner, the closed ones' too: the current role has none.
+        const partners = [profile.currentRole].concat(profile.experience).map(r => r.partner).filter(Boolean);
+        assert(partners.every(p => !JSON.stringify(model).includes(p)),
+            `Model: no role's partner is named (owner checklist: consent) (${partners.length} checked)`);
         // The CV copies the homepage's words into its own order, Skills last,
         // after the certificates: a proof that says where to look on the
         // homepage ("certificate, below") points the wrong way on paper.

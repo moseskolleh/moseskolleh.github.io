@@ -106,23 +106,28 @@ const label = (d) => `${d.top === d.base ? d.top : `${d.top}–${d.base}`} m`;
     assert(stale !== index && injectCorelog(data, stale) === index, 'Build: hand-typed depths and head are rewritten to the computed ones, and nothing else changes');
     assert(injectCorelog(data, index) === index, 'Build: the page as committed is what the build writes');
 
+    // The two roles under the open one, swapped: the page's second layer
+    // is still the first of them.
     const swapped = clone(profile);
     [swapped.experience[1], swapped.experience[2]] = [swapped.experience[2], swapped.experience[1]];
     let threw = '';
     try { injectCorelog({ profile: swapped }, index); } catch (e) { threw = e.message; }
-    assert(/layer 2 is "Cohort 7 Member/.test(threw), `Build: roles reordered in profile.json and not on the page stop the build (${threw || 'accepted'})`);
+    const second = profile.experience[1].title;
+    assert(threw.includes(`layer 2 is "${second}", but profile.json's role 2 is "${profile.experience[2].title}"`),
+        `Build: roles reordered in profile.json and not on the page stop the build (${threw || 'accepted'})`);
     const extra = clone(profile);
     extra.experience.push({ title: 'Earlier role', start: '2017-01', end: '2017-06' });
     threw = '';
     try { injectCorelog({ profile: extra }, index); } catch (e) { threw = e.message; }
-    assert(/5 layers for profile\.json's 6 roles/.test(threw), `Build: a role with no layer stops the build (${threw || 'accepted'})`);
+    const n = profile.experience.length;
+    assert(threw.includes(`the core log has ${n} layers for profile.json's ${n + 1} roles`), `Build: a role with no layer stops the build (${threw || 'accepted'})`);
 }
 
 // --- The stylesheet keeps an interval on one line ----------------------------
 {
     const css = read('style.css');
     assert(/\.corelog-depth strong \{[^}]*white-space: nowrap;/.test(css), 'Style: a layer\'s interval does not wrap');
-    assert(/\.corelog-item \{\s*grid-template-columns: 60px 20px 1fr;/.test(css), 'Style: on a tablet the depth column has room for "73–79 m" (60px; smoke.js measures it)');
+    assert(/\.corelog-item \{\s*grid-template-columns: 60px 20px 1fr;/.test(css), 'Style: on a tablet the depth column has room for "75–82 m" (60px; smoke.js measures it)');
 }
 
 if (failures > 0) {

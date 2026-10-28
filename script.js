@@ -235,7 +235,8 @@ const lateStart = !document.documentElement.classList.contains('js');
         '28.2282° N, 112.9388° E', // Changsha
         '50.7374° N, 7.0982° E',   // Bonn
         '51.9692° N, 5.6654° E',   // Wageningen
-        '52.3676° N, 4.9041° E'    // Amsterdam
+        '52.3676° N, 4.9041° E',   // Amsterdam
+        '45.1847° N, 9.1582° E'    // Pavia
     ];
     let i = 0;
     const ticker = setInterval(() => {
@@ -751,7 +752,11 @@ if (statsSection && 'IntersectionObserver' in window) {
         { x: 901.6, y: 254.1, zoom: 2.4, readout: '28.2282° N, 112.9388° E — Changsha' },
         { x: 279.7, y: 90.1,  zoom: 5.0, readout: '50.7374° N, 7.0982° E — Bonn' },
         { x: 273.5, y: 81.4,  zoom: 7.5, close: true, readout: '51.9692° N, 5.6654° E — Wageningen' },
-        { x: 269.9, y: 78.6,  zoom: 7.5, close: true, readout: '52.3676° N, 4.9041° E — Amsterdam' }
+        { x: 269.9, y: 78.6,  zoom: 7.5, close: true, readout: '52.3676° N, 4.9041° E — Amsterdam' },
+        // Pavia: close enough that the delta's names, still in view to the
+        // north, clear the legs (at 5 Wageningen's sat on the arc from
+        // Changsha), not so close that Amsterdam's is cut by the frame (6.5).
+        { x: 284.5, y: 129.8, zoom: 5.75, readout: '45.1847° N, 9.1582° E — Pavia' }
     ];
     const VB_W = 1000, VB_H = 726;
     // Tuned in a desktop's 660px column: screen px per map unit at zoom 1.

@@ -1,11 +1,11 @@
 # Written by npm run og (scripts/build-og.js). tests/og.test.js fails if any
 # line no longer matches: run npm run og again and commit the images with it.
-source ffdd7ac25e01ae0a93728962697a67ff2baf39111f39e367104db8e353fca20b  every card's words, and scripts/build-og.js
+source a1e0e5413b74ef844d21dce7430051f33727b1a3af69be95f63258ba28a8db68  every card's words, and scripts/build-og.js
 png    e74a304db1d2da8d88a34f6ea468f1dd9c89de6f7aa1d2561e20d32b2b5cbc7e  assets/og/carbon-ai.png
 png    6a61a204549c4a8c9f81b1b4368b924e37f9b986f30fc19ef4bf54d4892dd6b0  assets/og/case-studies.png
 png    bf43d43ae75435408cb0dc2dea3ca8b9960b070cea6b16fa0f5b3b056e1663f8  assets/og/claims.png
 png    4dd1f7b987b4898e7ca170befd653a737ae445276a3796c801e27efa3ce742d5  assets/og/field-report.png
-png    b647ac8da36cf14f610c6e44b7d3d59f61ecb9965d7e658db03ac534cffe0bf7  assets/og/index.png
+png    5fe6090f104d8b546cd6d00b456ef89fd21824c2109566756daf3190e93a9c59  assets/og/index.png
 png    0e5cb8c5989d0c00e018378ded0a5853c3d4d3e449340fc983cbd737c0f1326d  assets/og/research.png
 png    cea0ad53526fd118045225cc656db73581251254d5a78faa4a8dfe9f8acf450c  assets/og/stats.png
 png    27ce64172b77e1b675bfcc6ae35f31f6301453763c323b5cc6756ede84a3fa7d  assets/og/note-every-prompt-has-a-footprint.png
