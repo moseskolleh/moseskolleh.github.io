@@ -109,7 +109,10 @@ const NEEDS = {
     counter: ['`STATS_TOKEN`'],
     form: ['`SPREADSHEET_ID`', 'Send one real message', 'HEALTH_URL'],
     statsSource: ['`STATS_SOURCE_URL`'],
-    confirm: ['`meta.confirmedOn`']
+    confirm: ['`meta.confirmedOn`'],
+    // The item a passed available-from date is waiting on. The date is
+    // only wanted for a job search, so it is not in the at-a-glance table.
+    availableFrom: ['`availableFrom`']
 };
 
 // ------------------------------------------------------------------
@@ -154,8 +157,8 @@ const declaredVersion = (source) => (String(source).match(/\bvar CODE_VERSION = 
 /**
  * Every item ("- [ ] **C1. Title.**", ticked or not) with its section and
  * the text of its "*Where:*" note, and every table row that maps a fact to
- * a field and an item (the at-a-glance table: | Seniority |
- * `atAGlance.seniority` | ... | F3 |).
+ * a field and an item (the at-a-glance table: | Languages … |
+ * a top-level `languages` list | ... | F1 |).
  */
 function parseChecklist(md) {
     const lines = String(md).replace(/\r\n/g, '\n').split('\n');
@@ -480,7 +483,13 @@ function checkProfile(ctx) {
     return out;
 }
 
-/** The fields the checklist's at-a-glance table names, and availableFrom's date. */
+/**
+ * The fields the checklist's at-a-glance table names, and availableFrom's
+ * date once one is set. The table names only what Moses is asked for now:
+ * the facts an employer asks (seniority, a start date, a right to work)
+ * are out of it while he is not looking for work, so the issue does not
+ * ask for them in public week after week.
+ */
 function checkAtAGlance(ctx) {
     const title = 'The at-a-glance facts';
     const profile = JSON.parse(ctx.read('content/profile.json'));
@@ -489,19 +498,19 @@ function checkAtAGlance(ctx) {
     const items = [];
     if (missing.length) {
         // The table's names, up to their first comma or bracket.
-        const names = missing.map((f, i) => f.label.split(/,|\s\(/)[0].trim().replace(/^./, c => (i ? c.toLowerCase() : c)));
-        problems.push(`${list(names)} ${missing.length === 1 ? 'is' : 'are'} not stated in content/profile.json, so the homepage's at-a-glance strip leaves ${missing.length === 1 ? 'it' : 'them'} out`);
+        const names = missing.map(f => f.label.split(/,|\s\(/)[0].trim().toLowerCase());
+        problems.push(`content/profile.json does not state ${list(names)}, so the homepage's at-a-glance strip leaves ${missing.length === 1 ? 'that line' : 'those lines'} out`);
         missing.forEach(f => items.push(f.item));
     }
     const from = profile.atAGlance && profile.atAGlance.availableFrom;
     const today = isoDay(ctx.now);
     if (typeof from === 'string' && from !== 'now' && (/^\d{4}-\d{2}$/.test(from) ? from < today.slice(0, 7) : from < today)) {
         problems.push(`atAGlance.availableFrom says ${from}, which has passed: set a new date, or "now"`);
-        ctx.checklist.facts.filter(f => f.field === 'atAGlance.availableFrom').forEach(f => items.push(f.item));
+        itemsFor(ctx.checklist, NEEDS.availableFrom).forEach(id => items.push(id));
     }
     return problems.length
         ? result('at-a-glance', title, 'waiting', `${problems.join('; ')}.`, { items: [...new Set(items)] })
-        : result('at-a-glance', title, 'pass', `Every fact the strip can show is stated${from && from !== 'now' ? `, and the available-from date (${from}) is still to come` : ''}.`);
+        : result('at-a-glance', title, 'pass', `Every fact the checklist's table asks for is stated${from && from !== 'now' ? `, and the available-from date (${from}) is still to come` : ''}.`);
 }
 
 function checkAiData(ctx) {

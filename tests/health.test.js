@@ -115,8 +115,11 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         const f5 = checklist.items.find(i => i.id === 'F5');
         assert(f5 && /`meta\.confirmedOn`/.test(f5.where) && f5.section === 'Facts about you the site cannot state yet', 'Checklist: an item keeps its "Where" note and its section');
         const fields = checklist.facts.map(f => `${f.field}:${f.item}`).join(' ');
-        assert(fields === 'atAGlance.seniority:F3 atAGlance.availableFrom:F3 languages:F1 atAGlance.rightToWork:F2',
-            `Checklist: the at-a-glance table maps each fact to its field and its item (${fields})`);
+        // Only the languages: seniority, a start date and a right to work are
+        // what an employer asks, so they are out of the table, and the weekly
+        // issue does not ask for them in public while he is not looking for work.
+        assert(fields === 'languages:F1',
+            `Checklist: the at-a-glance table maps each fact to its field and its item, and asks for no job-search fact (${fields})`);
 
         // Each check names its items by what they say, not by number; a
         // rewording that loses one fails here rather than in the issue.
@@ -128,8 +131,8 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         });
         assert(health.itemsFor(checklist, health.NEEDS.publish).join() === 'C2' && health.itemsFor(checklist, health.NEEDS.statsSource).join() === 'S2'
             && health.itemsFor(checklist, health.NEEDS.counter).join() === 'S1' && health.itemsFor(checklist, health.NEEDS.confirm).join() === 'F5'
-            && health.itemsFor(checklist, health.NEEDS.form).join() === 'C1,C3,H1',
-            'Checklist: the needles find publishing the script (C2), the counter (S1), the open counts\' secret (S2), the confirmation (F5) and the form (C1, C3, and H1 for HEALTH_URL)');
+            && health.itemsFor(checklist, health.NEEDS.form).join() === 'C1,C3,H1' && health.itemsFor(checklist, health.NEEDS.availableFrom).join() === 'F3',
+            'Checklist: the needles find publishing the script (C2), the counter (S1), the open counts\' secret (S2), the confirmation (F5), the form (C1, C3, and H1 for HEALTH_URL) and the available-from date (F3)');
 
         const fixture = health.parseChecklist([
             '## Do first', '',
@@ -293,8 +296,8 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         assert(byId(rs, 'profile-confirmed').status === 'waiting', 'Stale: a confirmation more than a quarter old is waiting again');
 
         let g = health.checkAtAGlance(context({ files: { 'content/profile.json': profile({}, { seniority: null, availableFrom: null, rightToWork: null }) } }));
-        assert(g.status === 'waiting' && g.summary.startsWith('Seniority, available from, languages and right to work in Italy and the EU are not stated') && g.items.join() === 'F3,F1,F2',
-            `Stale: each at-a-glance fact the checklist's table names is waiting while unstated, on its own item (${g.summary})`);
+        assert(g.status === 'waiting' && g.summary.startsWith('content/profile.json does not state languages, so the homepage\'s at-a-glance strip leaves that line out') && g.items.join() === 'F1',
+            `Stale: each at-a-glance fact the checklist's table names is waiting while unstated, on its own item, and no other (${g.summary})`);
         const filled = { seniority: 'Mid-level', rightToWork: 'EU citizen' };
         const said = (from) => health.checkAtAGlance(context({ files: { 'content/profile.json': profile({}, { ...filled, availableFrom: from }, { languages: [{ language: 'English', level: 'C2' }] }) } }));
         assert(said('2027-01').status === 'pass' && said('now').status === 'pass' && said('2026-10').status === 'pass', 'Stale: a date still to come, "now", or this month passes');

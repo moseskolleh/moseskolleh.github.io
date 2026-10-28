@@ -44,7 +44,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 
 ### 🏠 Home (Hero)
 - Name, role and a one-line value proposition over a rotating set of fieldwork photographs (the rotation only runs while the hero is on screen and the tab is visible)
-- An at-a-glance strip written from `content/profile.json` by `npm run build:content`: what he is open to (research collaborations, since he began his PhD) and where he is today; seniority, start date, languages and right to work appear once Moses states them, and a fact that is `null` is simply not shown
+- An at-a-glance strip written from `content/profile.json` by `npm run build:content`: what he is open to (research collaborations, since he began his PhD) and where he is today; his languages appear once Moses states them, and a fact that is `null` is simply not shown
 - One primary action (**See the evidence**, to the case studies), **Get in touch** second, and a quieter CV link; it is the one filled button on the first screen (the nav's Contact is an outline there, filled on hover). The figures below and the photo's caption sit inside the first screen at 1440×900 and 390×844, in a laptop's shorter browser window (1366×657, 1280×720), where the description follows the figures as it does on a phone, and on a small phone (375×667, 360×640)
 - A six-link nav: Work, About, Experience, Research, CV and Contact, with the theme switch beside them. The index of the five interactive features sits just before Contact
 - Four exact figures (164 water points, 54 hazard systems, 3 continents, 2 master's degrees), written into the HTML so they read correctly without JavaScript; with it they count up to the same values, with nothing appended, and stay still under reduced motion or low-energy mode

@@ -396,10 +396,9 @@ These are what it could not settle for you.
 
 - [ ] **U3. Check IUSS's rules on paid outside work before "consulting"
   comes back.**
-  - *What:* whether the PhD's rules allow paid outside work, and whether
-    BrianzAcque's co-funding comes with exclusivity or conflict-of-interest
-    terms. Until you have checked, the site offers research collaborations
-    and nothing else: no consulting, no roles, no job search.
+  - *What:* whether the PhD's rules allow paid outside work. Until you have
+    checked, the site offers research collaborations and nothing else: no
+    consulting, no roles, no job search.
   - *Where:* `content/profile.json` → `atAGlance.targetRoles` (the build
     writes "Open to " before it, on the homepage, in every other page's
     closing call to action, on the CV and on the homepage's preview card),
@@ -469,9 +468,8 @@ These are what it could not settle for you.
     or LCA, carbon markets, circular economy and SASB. It dates the Digital
     Society School role September 2025 to February 2026, and the PhD from
     November 2026. Look for those figures and dates on LinkedIn and in any
-    CV or application you have sent since 2025, the one to IUSS among
-    them, and change them there too, or send the evidence and they come
-    back here (E1 to E9 say where).
+    CV or application you have sent since 2025, and change them there too,
+    or send the evidence and they come back here (E1 to E9 say where).
   - *Where:* off the site: LinkedIn, and your own files. Nothing in this
     repository.
   - *Check:* LinkedIn says what the CV the site prints
@@ -560,23 +558,23 @@ These are what it could not settle for you.
 homepage hero's copy, written by `npm run build:content` from
 `content/profile.json` into `index.html` between the `AT-A-GLANCE` markers.
 Today it shows two: what you are open to (research collaborations, U3) and
-where you are (Pavia). It was built for a job search: three of the four
-facts it leaves out, seniority, a start date and a right to work, are what
-an employer asks, and while you are not looking for work they can stay
-unstated. The fourth, your languages, a research collaborator may still
-want. A missing fact is left out rather than shown as "TBC":
+where you are (Pavia). It was built for a job search, and it can show four
+more facts. Three of them, seniority, a start date and a right to work,
+are what an employer asks; while you are not looking for work they stay
+unstated, and they are out of the table below, so the weekly health issue
+does not ask for them in public (F2 and F3 say where each would go). The
+fourth, your languages, a research collaborator may still want. A missing
+fact is left out rather than shown as "TBC":
 
 | Fact | Where it goes in `content/profile.json` | Today | Item |
 |---|---|---|---|
-| Seniority | `atAGlance.seniority` | `null`, not shown | F3 |
-| Available from | `atAGlance.availableFrom` | `null`, not shown | F3 |
 | Languages, with your Italian and Dutch levels | a top-level `languages` list | absent, not shown | F1 |
-| Right to work in Italy and the EU (and whether a visa needs sponsoring) | `atAGlance.rightToWork` | `null`, not shown | F2 |
 
 The weekly health issue lists each fact in this table as waiting on you
-while it is unstated. If you would rather it stopped asking for the three an
-employer asks, say so: their rows come out of this table, and
-`tests/health.test.js` changes with it in the same commit.
+while it is unstated. If you look for work again and want it to ask for the
+other three, add a row for each (`atAGlance.seniority` and
+`atAGlance.availableFrom` on F3, `atAGlance.rightToWork` on F2), and change
+`tests/health.test.js` with it in the same commit.
 
 Each is a short phrase, and "short" is a number: `npm test` refuses a
 seniority over 32 characters, a right to work over 48, or languages that
@@ -654,7 +652,7 @@ limits allow.
     Artificial Intelligence" (by the Amsterdam University of Applied
     Sciences, the school's parent), or did you take part in one of the
     school's programmes? How many people were on the team? The answer
-    should match the CV you sent IUSS.
+    should match the CVs you have sent.
   - *Where:* `content/profile.json` → `experience[1]`: its `title`, and the
     team's size if you give it (a figure needs its entry in
     `content/claims.json`, as `team-size` has). The homepage's core log and
@@ -662,8 +660,8 @@ limits allow.
     `role` is in `content/projects.json` → `sustainable-ai`. Until you say,
     every page keeps the title and credits the work to the team ("As a
     team, mapped…", "I was part of a team building…").
-  - *Unlocks:* a title you can stand behind in an interview, on the site
-    and on the CV it prints.
+  - *Unlocks:* a title you can stand behind anywhere it is read, on the
+    site and on the CV it prints.
   - *Check:* `npm test` names a page that disagrees with the profile; then
     `npm run cv`.
 
@@ -1274,7 +1272,7 @@ keep, and some figures could move to "public" with a link only you have.
     phone number, take it off both: the contact card in `index.html` and
     `person.phone`.
   - *Check:* `npm test` passes (`tests/cv.test.js`), and the PDF reads as you
-    would want IUSS, or a collaborator, to read it. Copies you sent before
+    would want a reader or a collaborator to read it. Copies you sent before
     it are U7.
 - [ ] **D2. May the site and the CV name the Digital Society School's
   government partner?**
