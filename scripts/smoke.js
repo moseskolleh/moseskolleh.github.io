@@ -1053,7 +1053,7 @@ async function playGames(page) {
         if (/STRIKE/.test(await page.textContent('#drillResult'))) break;
         for (let k = 0; k < 6; k++) await page.keyboard.press('ArrowRight');   // past this dip
     }
-    // The river raised to July 2021 by keyboard, as the slider allows.
+    // The river raised to a severe flood by keyboard, as the slider allows.
     await page.focus('#floodSlider');
     await page.keyboard.press('End');
     await page.waitForTimeout(800);   // the water rises over 650 ms
@@ -1087,7 +1087,7 @@ async function exerciseCaseStudyGames(page, r) {
     const rig = await sliderKeys(page, '#boreholeStage');
     if (rig.length) bad(`the rig's slider keys: ${rig.join('; ')}`);
     else ok('the rig takes a slider\'s keys (Home, End, Page Up/Down, Up/Down), and none scrolls the page');
-    if (played.level === 'July 2021' && played.water < 200) ok(`the flood slider raises the Wupper to July 2021 (water line at ${played.water})`);
+    if (played.level === 'severe flood' && played.water < 200) ok(`the flood slider raises the Wupper to a severe flood (water line at ${played.water})`);
     else bad(`the flood slider: level "${played.level}", water line at ${played.water}`);
 
     // Every label a reader needs, drawn at 11px or more and whole (the

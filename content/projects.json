@@ -341,7 +341,7 @@
       "partner": "Municipality of Wuppertal",
       "lenses": ["climate-risk", "water"],
       "role": "Interdisciplinary team of six",
-      "tags": ["Climate Modelling", "GIS", "Risk Assessment", "Policy"],
+      "tags": ["Climate Projections", "GIS", "Risk Assessment", "Policy"],
       "photo": { "src": "assets/img/wuppertal-resilience-1.webp", "thumb": "assets/img/wuppertal-resilience-1-480.webp", "width": 900, "height": 675,
                  "alt": "The consultancy team riding the Wuppertal Schwebebahn" },
       "widget": "flood",
@@ -390,19 +390,19 @@
           "kind": "tool",
           "status": "public",
           "url": "case-studies.html#play-flood",
-          "note": "A schematic Wupper cross-section, below (it needs JavaScript): slide the river from a calm day to July 2021 and watch the clearance under the Schwebebahn's hanging cars shrink."
+          "note": "A schematic Wupper cross-section, below (it needs JavaScript): slide the river from a calm day to a severe flood and watch the clearance under the Schwebebahn's hanging cars shrink."
         }
       ],
 
       "results": [
         {
-          "claim": "A complete flood-risk management framework delivered to the municipality",
+          "claim": "A flood-risk management framework, delivered to the municipality",
           "basis": "The deliverable of the consultancy: accepted and presented to municipal stakeholders. Held by the client.",
           "brief": "The deliverable is held by the client; nothing here claims it was implemented.",
           "verifiable": false
         },
         {
-          "claim": "Critical infrastructure vulnerabilities identified alongside cost-effective interventions",
+          "claim": "Critical infrastructure vulnerabilities identified, with interventions proposed for them",
           "basis": "GIS and climate-projection analysis, cross-checked in stakeholder workshops. Whether the recommendations were implemented is not something I can claim — that is the municipality's to report.",
           "verifiable": false
         }

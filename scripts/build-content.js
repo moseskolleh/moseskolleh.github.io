@@ -529,15 +529,15 @@ const WIDGET_HOSTS = {
         title: 'Don&rsquo;t let it become a boat',
         noun: 'river slider',
         live: `
-                        <p class="dw-intro">The Schwebebahn hangs a few metres above the Wupper. Raise the river and watch the margin shrink &mdash; this is the problem the municipality handed us.</p>
+                        <p class="dw-intro">The Schwebebahn hangs above the Wupper. Raise the river and watch the margin shrink &mdash; this is the problem the municipality handed us.</p>
                         <div class="flood-stage" id="floodStage"></div>
                         <div class="flood-controls">
                             <label class="dw-label" for="floodSlider">River level: <span id="floodLevelLabel">normal</span></label>
                             <input type="range" id="floodSlider" min="0" max="3" step="1" value="0" aria-describedby="floodNote">
-                            <div class="flood-ticks" aria-hidden="true"><span>Normal</span><span>+1 m</span><span>+2 m</span><span>July 2021</span></div>
+                            <div class="flood-ticks" aria-hidden="true"><span>Normal</span><span>Bankfull</span><span>Overbank</span><span>Severe</span></div>
                         </div>
                         <p class="flood-note" id="floodNote" aria-live="polite">A calm day &mdash; the Wupper runs its channel, well below the suspended track.</p>`,
-        summary: 'A schematic, not to scale: the Schwebebahn hangs a few metres above the Wupper, and the July 2021 flood pushed the river towards its hanging cars &mdash; the &ldquo;boat&rdquo; this project set out to prevent.'
+        summary: 'A schematic, not to scale, and its levels are stages, not measurements: the Wupper rising towards the Schwebebahn&rsquo;s hanging cars is the &ldquo;boat&rdquo; this project set out to prevent.'
     }
 };
 

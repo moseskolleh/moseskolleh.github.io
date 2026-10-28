@@ -235,9 +235,9 @@ const shownInFull = { why: 'a count of what the page shows in full, every one of
 // ------------------------------------------------------------------
 // Numerals a page draws from its own structure
 //
-// The core log's depth scale, a photo row's count, the flood game's river
-// steps: numerals that are not claims about anything, which the scan
-// (tests/claims.test.js) skips by selector, each with its reason. A count
+// The core log's depth scale, a photo row's count: numerals that are not
+// claims about anything, which the scan (tests/claims.test.js) skips by
+// selector, each with its reason. A count
 // of what the page shows is already in claims.html's "Not on this list";
 // the rest say there what they are (`listed`), from here, so the page and
 // the test cannot name different exceptions. `once` marks a host that is
@@ -246,12 +246,10 @@ const shownInFull = { why: 'a count of what the page shows in full, every one of
 const DRAWN = {
     'index.html': [
         { sel: '.corelog-depth, .corelog-head', why: 'the core log\'s depth scale: time drawn as depth',
-          listed: 'the core log’s depths, which draw time as depth from the dates beside them' }],
+          listed: 'the core log’s depth scale, which draws time as depth from the dates beside it' }],
     'case-studies.html': [
         { sel: '.cs-photos > summary', why: 'a count of the photos in the row, made from the gallery' },
-        { sel: '.cs-method-n', why: 'a count of the method\'s steps, made from the list it folds' },
-        { sel: '.flood-ticks', why: 'the river slider\'s steps, on a schematic not drawn to scale',
-          listed: 'the flood game’s river steps, on a schematic not drawn to scale' }],
+        { sel: '.cs-method-n', why: 'a count of the method\'s steps, made from the list it folds' }],
     'research.html': [{ sel: '.rs-summary', why: 'a count of the entries the page lists, made from them' }],
     // The open counts page: its counts are the counter's, rewritten each
     // week, and its rules are marked [data-rule] and held to the code.

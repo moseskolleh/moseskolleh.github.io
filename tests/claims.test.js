@@ -683,7 +683,8 @@ const PRINTED = {
         `claims.html: reads every field note's marks too, each named by its number (${NOTE_PAGES.map(p => named[p]).join(', ')})`);
 
     // "Not on this list" names what the scan lets by. The core log's depths
-    // and the flood game's steps were let by here and named nowhere there;
+    // (and, until they became stages, the flood game's steps in metres) were
+    // let by here and named nowhere there;
     // the open counts page was excused for its counts, not its rules.
     const notListed = doc.querySelector('.cl-not-listed').textContent.replace(/\s+/g, ' ');
     const unnamed = Object.values(figures.DRAWN).flat().filter(d => d.listed && !notListed.toLowerCase().includes(d.listed.toLowerCase())).map(d => d.sel)

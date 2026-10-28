@@ -331,7 +331,7 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
 
     // What the stylesheet does with the scale: 12px, 11 for small print,
     // and no drawing label at a fixed size anywhere.
-    assert(/\.bh-label,\s*\.fl-label\s*\{[^}]*font-size:\s*calc\(12px \* var\(--k, 1\)\)/.test(moduleCss) &&
+    assert(/\.bh-label\s*\{[^}]*font-size:\s*calc\(12px \* var\(--k, 1\)\)/.test(moduleCss) &&
         /\.bh-label-dim\s*\{[^}]*font-size:\s*calc\(11px \* var\(--k, 1\)\)/.test(moduleCss),
         'Labels: the stylesheet sizes drawing labels at 12px and 11px times the scale');
     const fixed = (moduleCss.match(/\.(?:bh|fl)-[\w-]+[^{]*\{[^}]*font-size:\s*[\d.]+px\s*;/g) || []);
@@ -377,12 +377,18 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
     let guard = 0;
     while (flush(1e6) && guard++ < 5);
     const flood = water();
-    assert(flood < calm - 80, `Flood: raised to July 2021, the channel water climbs towards the cars (y ${calm} → ${flood})`);
-    assert(doc.getElementById('floodLevelLabel').textContent === 'July 2021' && /2021 flood/.test(doc.getElementById('floodNote').textContent),
+    assert(flood < calm - 80, `Flood: raised to a severe flood, the channel water climbs towards the cars (y ${calm} → ${flood})`);
+    assert(doc.getElementById('floodLevelLabel').textContent === 'severe flood' && /severe flood/i.test(doc.getElementById('floodNote').textContent),
         'Flood: the level and the note follow the slider');
-    assert(slider.getAttribute('aria-valuetext') === 'river at the July 2021 flood level', `Flood: the slider speaks the level, not a number (${slider.getAttribute('aria-valuetext')})`);
+    assert(slider.getAttribute('aria-valuetext') === 'a severe flood', `Flood: the slider speaks the level, not a number (${slider.getAttribute('aria-valuetext')})`);
     set(1);
-    assert(slider.getAttribute('aria-valuetext') === 'river +1 m above normal', `Flood: a step up is spoken as one (${slider.getAttribute('aria-valuetext')})`);
+    assert(slider.getAttribute('aria-valuetext') === 'river at bankfull', `Flood: a step up is spoken as one (${slider.getAttribute('aria-valuetext')})`);
+    // A schematic carries no measured levels: no metres, no flood's date,
+    // and no claim about how often a flood comes.
+    const levels = (moduleJs.match(/const LEVELS = \[[\s\S]*?\];/) || [''])[0];
+    const ticks = doc.querySelector('.flood-ticks').textContent;
+    assert(!!levels && !/\d\s*m\b|20\d\d|more often|warming climate/.test(levels + ticks) && !doc.querySelector('#floodStage .fl-refline'),
+        `Flood: the steps are stages, not metres or a dated flood, and no line marks one (${ticks.trim()})`);
     set(0);
     while (flush(1e6) && guard++ < 10);
     assert(water() === calm && slider.getAttribute('aria-valuetext') === 'normal river level', 'Flood: and back down to a calm day');

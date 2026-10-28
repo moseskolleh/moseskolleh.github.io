@@ -343,15 +343,18 @@
         const BED = 303, BANK = 240, CH_L = 252, CH_R = 548;
         const CAR_BOTTOM = 178;
 
+        // Stages, not measured levels: the drawing is not to scale, and no
+        // gauge record sits behind any of them, so none is given in metres
+        // or tied to a date.
         const LEVELS = [
-            { y: 278, label: 'normal',
+            { y: 278, label: 'normal', said: 'normal river level',
               note: 'A calm day — the Wupper runs its channel, well below the suspended track.' },
-            { y: 248, label: '+1 m',
-              note: 'Riverside paths go under. In a warming climate, days like this come more often.' },
-            { y: 222, label: '+2 m',
+            { y: BANK, label: 'bankfull', said: 'river at bankfull',
+              note: 'Bankfull: the river fills its channel to the top of its banks.' },
+            { y: 222, label: 'overbank', said: 'river over its banks',
               note: 'Over the banks: streets and basements flood, and the city\'s lowest infrastructure is in the water.' },
-            { y: CAR_BOTTOM + 5, label: 'July 2021',
-              note: 'The 2021 flood pushed the Wupper towards the hanging cars — the "boat" scenario. Our roadmap: early warning, room for the river, unsealed surfaces.' }
+            { y: 194, label: 'severe flood', said: 'a severe flood',
+              note: 'A severe flood, the "boat" scenario this project planned for. Our roadmap: early warning, room for the river, unsealed surfaces.' }
         ];
 
         const settle = goLive(host);
@@ -382,10 +385,6 @@
         // water (overbank sheet + channel), drawn behind the structure
         const overbank = el('rect', { x: 40, y: BANK, width: W - 80, height: 0, class: 'fl-water' });
         const channel = el('rect', { x: CH_L, y: LEVELS[0].y, width: CH_R - CH_L, height: BED - LEVELS[0].y, class: 'fl-water' });
-
-        // July 2021 reference line
-        el('line', { x1: 46, y1: LEVELS[3].y, x2: W - 46, y2: LEVELS[3].y, class: 'fl-refline' });
-        el('text', { x: 52, y: LEVELS[3].y - 6, class: 'fl-label' }).textContent = 'July 2021';
 
         // Schwebebahn: pylons, track beam, hanging car
         [290, 510].forEach(px => {
@@ -429,8 +428,7 @@
             const lv = LEVELS[+slider.value] || LEVELS[0];
             levelLabel.textContent = lv.label;
             note.textContent = lv.note;
-            slider.setAttribute('aria-valuetext', lv.label === 'normal' ? 'normal river level'
-                : /^\+/.test(lv.label) ? `river ${lv.label} above normal` : `river at the ${lv.label} flood level`);
+            slider.setAttribute('aria-valuetext', lv.said);
             setWater(lv.y, instant);
         };
         slider.addEventListener('input', () => update(false));

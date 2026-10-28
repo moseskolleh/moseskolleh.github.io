@@ -1,4 +1,4 @@
 # Written by npm run cv (scripts/build-cv.js). tests/cv.test.js fails if either
 # line no longer matches: run npm run cv again and commit both files.
-source 855530a59bade2f775d24645f95268e3625761c20db37ebeabc5ef41b8a0a788  content/, index.html, scripts/cv.html and scripts/build-cv.js as printed
-pdf    1f148dcb2b0184b3584c136237a67cd232b37bc17dce14ce082e5517afb64c8d  assets/Moses_Kolleh_Sesay_CV.pdf
+source 5baf2482229b3f020551a7850411769760936db858366030d4f4ecca3904c076  content/, index.html, scripts/cv.html and scripts/build-cv.js as printed
+pdf    3cea83536561e7b30d5122e96aa8641701045475252f362e25c4f631ad7917c2  assets/Moses_Kolleh_Sesay_CV.pdf
