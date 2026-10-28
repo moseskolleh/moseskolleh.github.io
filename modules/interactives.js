@@ -474,7 +474,7 @@ window.mks.share = (() => {
         const stamp = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}  ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 
         const lines = [];
-        lines.push({ t: 'c', s: 'MKS · SUSTAINTHEWORLD', b: true });
+        lines.push({ t: 'c', s: 'MKS · moseskolleh.github.io', b: true });
         lines.push({ t: 'c', s: 'page-load carbon receipt' });
         lines.push({ t: 'c', s: stamp, dim: true });
         lines.push({ t: 'd' });

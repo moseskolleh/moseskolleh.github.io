@@ -195,7 +195,9 @@ const fieldText = plain(fieldReport);
     profile.certifications.forEach((c) => {
         if (!indexText.includes(c.name)) certMissing.push(`index: "${c.name}"`);
         if (!indexText.includes(c.issuer)) certMissing.push(`index: "${c.issuer}"`);
-        if (!fieldText.includes(c.issuer) && !fieldText.includes(c.name)) certMissing.push(`field-report: "${c.name}"`);
+        // The field report once gave the issuers' longer titles; it names
+        // each certificate as the homepage does, with its issuer and year.
+        if (!fieldText.includes(`${c.name} — ${c.issuer}, ${c.year}`)) certMissing.push(`field-report: "${c.name} — ${c.issuer}, ${c.year}"`);
     });
     assert(certMissing.length === 0, `Certifications: both editions carry every entry (missing: ${certMissing.join('; ') || 'none'})`);
 
@@ -379,6 +381,7 @@ const fieldText = plain(fieldReport);
         { re: /top of (?:the |his |my )?class/i, why: 'a class rank no document on record states; the degree\'s First Class Honours stays' },
         { re: /dual master|\bGPA\b/i, why: 'two separate master\'s degrees, not a joint programme; a Dutch university gives an average grade, not a GPA' },
         { re: /representing graduate researchers/i, why: 'reads as a formal office nothing records' },
+        { re: /Clean Coast/, why: 'a storyline nothing in projects.json or the coastal case study records' },
         { re: /anywhere in the E\.?U\b/i, why: 'relocation and EU right to work are not stated on the site (owner checklist F2, F3)' },
         { re: /GeoPandas|GeoAI/i, why: 'not in the homepage\'s toolkit, so the CV printed from it left them off; the field report kept GeoPandas' }
     ];

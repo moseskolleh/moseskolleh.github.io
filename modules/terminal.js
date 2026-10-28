@@ -125,7 +125,7 @@
 
     const runCommand = (raw) => {
         const cmd = raw.trim().toLowerCase();
-        print('moses@sustaintheworld:~$ ' + raw, 'ft-echo');
+        print('moses@field:~$ ' + raw, 'ft-echo');
         if (!cmd) return;
         history.push(raw);
         histIdx = history.length;
@@ -146,12 +146,12 @@
         overlay.innerHTML = `
             <div class="ft-panel">
                 <div class="ft-bar">
-                    <span class="mono-label">field terminal — sustaintheworld</span>
+                    <span class="mono-label">field terminal — moseskolleh.github.io</span>
                     <button class="ft-close" aria-label="Close terminal">×</button>
                 </div>
                 <div class="ft-screen" aria-live="polite"></div>
                 <form class="ft-line">
-                    <label class="ft-prompt" for="ftInput">moses@sustaintheworld:~$</label>
+                    <label class="ft-prompt" for="ftInput">moses@field:~$</label>
                     <input id="ftInput" class="ft-input" type="text" aria-label="Terminal command" autocomplete="off" spellcheck="false" autocapitalize="off">
                 </form>
             </div>`;
@@ -193,7 +193,7 @@
                 e.preventDefault();
             }
         });
-        print('SUSTAINTHEWORLD field terminal');
+        print('FIELD TERMINAL');
         print('from bedrock to cloud. type \'help\' to see what\'s down here.');
         print('');
     };

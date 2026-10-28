@@ -5,7 +5,7 @@
 
 ## About
 
-Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Climate Analyst specializing in ESG analysis, climate resilience, and data-driven environmental solutions.
+Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Climate Analyst specialising in ESG analysis, climate resilience, and data-driven environmental solutions.
 
 **Live Website:** [https://moseskolleh.github.io/](https://moseskolleh.github.io/) (until October 2026 at `/sustaintheworld/`; an old address goes on to the same page, see `404.html`)
 
@@ -25,7 +25,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - **[Open counts](stats.html)**: what the site's own cookieless counter has counted, rebuilt weekly — the four numbers that say whether the site works, page views by page, lens and window width, referrers, features used and bytes per page view, in whole weeks. Every count under 5 reads `<5`, a figure that would let one be worked out by subtraction reads `held`, and the page prints the exact payload a page view sends. See [Open counts](#open-counts)
 - **Borehole core-log experience timeline**: career history logged the way a geologist logs a core — depth is time, every layer is a chapter. Each role is a short card (dates, role, organisation, one line), the rest a press away
 - **EcoPrompt Coach**: one name for one tool. The homepage's section 05 is its teaser, one chart: guess how the energy of one AI answer grows with model size, then see the published estimates. This site's edition of the coach (model × grid × tokens → energy, carbon, water, with an evidence ledger) and Anatomy of a Prompt are on [`carbon-ai.html`](carbon-ai.html), which says how old its figures are; the maintained version, with newer models (their figures extrapolated, as it says), is the [EcoPrompt Coach app](https://moseskolleh.github.io/promptcoach/) ([code](https://github.com/moseskolleh/promptcoach))
-- **Evidence-first skills**: no invented percentages — every tool's proof is public work that shows it, a repository on GitHub, or says there is none: machine learning, shown only by a certificate, links nowhere, and the GIS row links its case study, whose maps are on request. The 164 water points are itemized in About
+- **Evidence-first skills**: no invented percentages — every tool's proof is public work that shows it, a repository on GitHub, or says there is none: machine learning, shown only by a certificate, links nowhere, and the GIS row links its case study, whose maps are on request. The 164 water points are itemised in About
 - **The Brief** (`brief.html`), a page that set a job ad against the work on this site, was retired in October 2026. Its address now answers with a short note, `noindex` and out of the sitemap, that points to the homepage and the case studies, so a link already sent to it (`brief.html?focus=…`) does not end in a 404; an old `/#assay` link goes on to the same note
 - **[Field Notes](notes/what-164-water-points-taught-me.html)**: short essays connecting boreholes, scenario storytelling and sustainable AI, each an article of its own in `notes/`, dated the day it was first published on this site, with an [Atom feed](feed.xml); About links the newest three. They are written in markdown in `content/notes/` (see [Field Notes and the feed](#field-notes-and-the-feed))
 - **Modern design**: dark theme with vibrant green accents, light mode (the reader's choice, shared by every page, or with none the system's, from the first paint), responsive layout, full SEO/social metadata (Open Graph, a sitemap, an Atom feed, and JSON-LD written from `content/`: see [Structured data](#structured-data))
@@ -1069,7 +1069,7 @@ from. Why each directive is what it is: the comment above
 `securityPolicy` in `scripts/build-content.js`. `tests/csp.test.js` and
 `npm run smoke` hold it.
 
-## Customization Guide
+## Customisation Guide
 
 ### Colors
 To change the color scheme, edit the CSS variables in `style.css`:
@@ -1390,7 +1390,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [x] Blog section for sustainability articles (Field Notes)
 - [x] Dark/Light theme toggle
-- [ ] Multi-language support (English, Dutch)
 - [x] Project detail pages (case studies, with a teaser card for each on the homepage)
 - [x] Interactive data visualizations (journey map, AI cost widget, impact charts)
 - [x] PDF resume download (printed from `content/` by `npm run cv`)
