@@ -12,4 +12,4 @@ A watt-hour means nothing to most people. The same answer counted in phone charg
 
 The point is not AI guilt. It's the same soft-path thinking I learned in water management: before you build a bigger pipe — or call a bigger model — ask whether the demand itself can be smarter. Try the [EcoPrompt Coach chart](index.html#ecoprompt) on the homepage; that's the argument, running live.
 
-*Corrected October 2026: I left the Digital Society School in February 2026.*
+*Corrected October 2026: this first said "I'm building"; that work ended in February 2026.*
