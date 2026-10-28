@@ -82,8 +82,8 @@ const cells = (line) => line.split('|').slice(1, -1).map(s => s.trim());
     assert(cs[3] === '−11.7 KB' && cs[4] === '✓ 110 KB (was 120 KB)', `Bytes: a fall, and a ceiling the branch lowered (${cs.join(' | ')})`);
     const od = cells(row('Everything a full visit adds on demand (modules, scripts, map)'));
     assert(od[4] === '✗ over 72 KB', `Bytes: a budget over its ceiling says so (${od[4]})`);
-    const audio = cells(row("Recorded narration: Moses's introduction (sized for his 60–90 s take)"));
-    assert(audio[1] === '0 KB' && audio[3] === '0', `Bytes: no change is 0 (${audio.join(' | ')})`);
+    const held = cells(row('A budget held for later (sized for what is not there yet)'));
+    assert(held[1] === '0 KB' && held[3] === '0', `Bytes: no change is 0 (${held.join(' | ')})`);
     const gone = cells(row('A page this branch removes, over the wire'));
     const fresh = cells(row('A page new on this branch, over the wire'));
     assert(gone[2] === '—' && gone[3] === '—' && gone[4] === 'none (was 8 KB)', `Bytes: a budget only main has shows a dash for the branch, and the ceiling it had (${gone.join(' | ')})`);
@@ -121,7 +121,7 @@ const cells = (line) => line.split('|').slice(1, -1).map(s => s.trim());
     assert(could.includes('- Case studies page, over the wire (fonts included): 110 KB → 89 KB'),
         `Could come down: a byte budget with more than 10% headroom (${could.join('; ')})`);
     assert(could.includes('- `stats.html` at 390×844: 15.66 → 12.6 screens'), 'Could come down: a length with more than 10% headroom, from the drawn-full length');
-    assert(!could.some(l => /Recorded narration/.test(l)), 'Could come down: never a held budget');
+    assert(!could.some(l => /A budget held for later/.test(l)), 'Could come down: never a held budget');
 }
 
 // --- The Markdown's shape ----------------------------------------------------

@@ -123,7 +123,7 @@ mks.scrollMotion = scrollMotion;
 // first, and true means the key is used, so one press closes one layer. A
 // key a control already used is left alone, and a widget's own keys (the
 // games' arrows, a dialog's Tab) stay on the widget.
-const KEY_RANK = Object.freeze({ terminal: 40, player: 20, menu: 10, page: 0 });
+const KEY_RANK = Object.freeze({ terminal: 40, menu: 10, page: 0 });
 const keyRoutes = {};
 mks.keyRank = KEY_RANK;
 mks.onKey = (keys, handler, rank = KEY_RANK.page) => {
@@ -154,8 +154,7 @@ document.addEventListener('keydown', (e) => {
 // first, so it has arrived before the script builds anything it styles.
 const MODULES = {
     interactives: ['ai-carbon-data.js', 'modules/interactives.js'],
-    terminal: ['modules/terminal.js'],
-    dispatch: ['modules/dispatch.css', 'voice-scripts.js', 'modules/dispatch.js']
+    terminal: ['modules/terminal.js']
 };
 
 const mksLoad = (() => {
@@ -524,7 +523,7 @@ if (navToggle && navMenu) {
         }
     });
 
-    // The lowest layer Escape closes: a dialog or the player goes first.
+    // The lowest layer Escape closes: the terminal goes first.
     mks.onKey('Escape', () => {
         if (!navMenu.classList.contains('active')) return false;
         setMenuOpen(false);
@@ -1551,63 +1550,3 @@ mks.ready = true;
         if (mks && typeof mks.track === 'function') mks.track('contact-form-submit');
     });
 })();
-
-// ===================================
-// THE SPOKEN PAGE — one listen control, in the nav
-// ===================================
-// The player behind it (modules/dispatch.js, its stylesheet and the scripts
-// it reads) is about 16 KB gzipped that only a visitor who presses Listen
-// needs. So the core only decides whether to show the button; the first
-// press fetches the player, which reads the section in view and moves
-// between sections itself. One control, not one per section (eight-plus
-// Tab stops for a feature most visits never use).
-//
-// The button stays hidden unless something can actually speak. A speech
-// engine that reports no voices (headless browsers, Linux without
-// speech-dispatcher) accepts an utterance and silently drops it, and a
-// button that loads a player to say nothing is worse than no button. The one
-// other thing that can speak is Moses's own recorded introduction, so a
-// browser with no voice asks the manifest once, well after the first view
-// (no-cache: a cached empty one must not hide a new recording).
-(() => {
-    const wrap = document.getElementById('navListen');
-    const btn = document.getElementById('listenBtn');
-    if (!wrap || !btn) return;
-
-    const synth = window.speechSynthesis;
-    const canSynth = typeof synth !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function';
-    const hasVoice = () => canSynth && (synth.getVoices() || []).length > 0;
-    const show = () => { wrap.hidden = false; };
-
-    if (hasVoice()) {
-        show();
-    } else {
-        // Chrome's first getVoices() is routinely empty; the list arrives later.
-        if (canSynth && typeof synth.addEventListener === 'function') {
-            synth.addEventListener('voiceschanged', () => { if (hasVoice()) show(); });
-        }
-        window.addEventListener('load', () => setTimeout(() => {
-            if (!wrap.hidden || typeof window.fetch !== 'function') return;
-            fetch('assets/audio/voice-manifest.json', { cache: 'no-cache' })
-                .then(r => (r.ok ? r.json() : null))
-                .then(m => { if (m && m.tracks && m.tracks.intro) show(); })
-                .catch(() => { /* no recording: the button stays hidden */ });
-        }, 1500));
-    }
-
-    // Every press goes through the player once it is here; the first one
-    // also fetches it. A second press while it is on its way is the same
-    // request, not a close.
-    btn.addEventListener('click', () => {
-        if (btn.getAttribute('aria-busy') === 'true') return;
-        btn.setAttribute('aria-busy', 'true');
-        mksLoad('dispatch').then(() => {
-            btn.removeAttribute('aria-busy');
-            if (mks.narration) mks.narration.toggle();
-        }, (err) => {
-            btn.removeAttribute('aria-busy');
-            mksLoadWarn(err);
-        });
-    });
-})();
-

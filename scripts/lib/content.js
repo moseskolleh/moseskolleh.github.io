@@ -1014,7 +1014,7 @@ function checkNotes(notes, { projects, lenses, claims }) {
 // ------------------------------------------------------------------
 const CHECKABLE = ['public', 'on-request', 'not-checkable'];
 const BASIS_KINDS = ['result', 'profile', 'factor', 'source', 'budget', 'derived', 'illustrative'];
-const CLAIM_KEYS = ['id', 'value', 'unit', 'forms', 'spoken', 'basis', 'checkable', 'check'];
+const CLAIM_KEYS = ['id', 'value', 'unit', 'forms', 'basis', 'checkable', 'check'];
 const BASIS_EXTRA = { factor: ['url', 'note', 'count', 'own'], source: ['url', 'note'], derived: ['from'], profile: ['note'], budget: ['note'] };
 const CLAIM_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -1109,16 +1109,14 @@ function checkClaims(ledger, { profile, projects, factors }) {
         }
 
         // Every other way of writing it has to come to the same thing.
-        ['forms', 'spoken'].forEach((key) => {
-            if (c[key] === undefined) return;
-            if (!Array.isArray(c[key]) || !c[key].length || c[key].some(s => typeof s !== 'string' || !s.trim())) {
-                problems.push(`${where}: ${key} must be a list of phrases`);
-                return;
+        if (c.forms !== undefined) {
+            if (!Array.isArray(c.forms) || !c.forms.length || c.forms.some(s => typeof s !== 'string' || !s.trim())) {
+                problems.push(`${where}: forms must be a list of phrases`);
+            } else {
+                c.forms.filter(s => !figures.agrees(value, s))
+                    .forEach(s => problems.push(`${where}: the form "${s}" does not say ${c.value}`));
             }
-            c[key].filter(s => !figures.agrees(value, s))
-                .forEach(s => problems.push(`${where}: ${key === 'spoken' ? 'the narration\'s' : 'the form'} "${s}" does not say ${c.value}`));
-            if (key === 'spoken') c[key].filter(s => /\d/.test(s)).forEach(s => problems.push(`${where}: "${s}" is spoken, so it is written in words`));
-        });
+        }
         // The marker finds a figure in content/ by how it is written (a bare
         // pair of digits with its unit's first word); two entries written
         // alike would leave it guessing.
@@ -1415,7 +1413,6 @@ function loadAll() {
     const projects = load('projects');
     const research = load('research');
     const lenses = load('lenses');
-    const narration = load('narration');
     const stats = load('stats');
     const testimonials = load('testimonials');
     const claims = load('claims');
@@ -1533,25 +1530,6 @@ function loadAll() {
     });
     problems.push(...checkLensWork(lenses.lenses, projects, research));
 
-    // --- narration ---------------------------------------------------------
-    narration.scripts.forEach((s) => {
-        if (!s.id || !s.label || !s.text) problems.push(`narration "${s.id || '?'}": missing id, label or text`);
-    });
-    // The introduction is read by Moses himself, so it has a shape to keep:
-    // one 60-90 second take, which at a measured pace is 150-220 words, and
-    // it opens with the greeting the recording is known by.
-    const intro = narration.intro;
-    if (intro) {
-        if (intro.id !== 'intro' || !intro.label || !intro.readBy || !intro.text) {
-            problems.push('narration intro: needs id "intro", a label, readBy and text');
-        } else {
-            const words = intro.text.trim().split(/\s+/).length;
-            if (words < 150 || words > 220) problems.push(`narration intro: ${words} words; a 60-90 s take is 150-220`);
-            if (!/^Kushe\b/.test(intro.text)) problems.push('narration intro: must open with "Kushe"');
-            if (intro.readBy !== profile.person.name) problems.push(`narration intro: readBy "${intro.readBy}" is not ${profile.person.name}`);
-        }
-    }
-
     // --- the record's dates ---------------------------------------------
     problems.push(...checkMeta(profile.meta));
 
@@ -1575,7 +1553,7 @@ function loadAll() {
         throw new Error(`content failed validation:\n  - ${problems.join('\n  - ')}`);
     }
 
-    return { profile, projects, research, lenses, narration, stats, testimonials, claims, notes: notesNewestFirst(notes), brief, lensIds };
+    return { profile, projects, research, lenses, stats, testimonials, claims, notes: notesNewestFirst(notes), brief, lensIds };
 }
 
 /**

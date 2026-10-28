@@ -50,12 +50,12 @@ const key = (window, k, target, init) => {
             'Globals: script.js adds to a window.mks another script made first (count.js), and never replaces it');
 
         const shared = ['storage', 'motionOK', 'scrollMotion', 'onKey', 'keyRank', 'load', 'loaded', 'carbon', 'ready',
-            'terminal', 'narration', 'share'];
+            'terminal', 'share'];
         const missing = shared.filter(k => mks[k] === undefined);
         assert(missing.length === 0, `Globals: the core and its modules share everything through window.mks (missing: ${missing.join(', ') || 'none'})`);
 
         const OLD = ['mksStorage', 'mksScrollMotion', 'mksLoad', 'mksLoaded', 'mksCarbon', 'mksShare', 'mksAssay',
-            'mksReady', 'FieldTerminal', 'FieldDispatch'];
+            'mksReady', 'FieldTerminal'];
         const left = OLD.filter(k => k in window);
         assert(left.length === 0, `Globals: none of the old names is left on window (${left.join(', ') || 'none'})`);
         assert(!('hold' in window) && !('releaseHold' in window), 'Globals: the hold that keeps a jump on target is the core\'s own, not a name on window');
@@ -68,7 +68,7 @@ const key = (window, k, target, init) => {
             (read(rel).match(/^(?:async\s+)?function\s*\*?\s*[\w$]+/gm) || []).forEach(m => declared.push(`${rel}: ${m}`));
         });
         assert(declared.length === 0, `Globals: no shipped script declares a function at the top level, where it would land on window (${declared.join(', ') || 'none'})`);
-        const marked = ['terminal', 'interactives', 'dispatch'].filter(m => mks.loaded[m] !== true);
+        const marked = ['terminal', 'interactives'].filter(m => mks.loaded[m] !== true);
         assert(marked.length === 0, `Globals: every module marks itself in mks.loaded (unmarked: ${marked.join(', ') || 'none'})`);
 
         // No shipped script hangs a new name on window, the visit counter
@@ -93,7 +93,6 @@ const key = (window, k, target, init) => {
         // is set to).
         const EXPECTED_ELSEWHERE = {
             'ai-carbon-data.js': ['AICarbonData'],
-            'voice-scripts.js': ['VoiceScripts'],
             'carbon-ai.js': ['EcoPromptCoach', 'calculate', 'clampNumber', 'sanitize', 'suggest']
         };
         const found = {};
@@ -134,8 +133,8 @@ const key = (window, k, target, init) => {
         const stray = ['script.js', 'modules/dossier.js', ...MODULE_FILES].filter(rel => (read(rel).match(/document\.addEventListener\(\s*['"]keydown/g) || []).length > (rel === 'script.js' ? 1 : 0));
         assert(stray.length === 0, `Keys: no module adds a document keydown listener of its own (${stray.join(', ') || 'none'})`);
         const ranks = mks.keyRank;
-        assert(ranks.terminal > ranks.player && ranks.player > ranks.menu && ranks.menu > ranks.page,
-            'Keys: the layers rank terminal, player, menu, page — the order Escape closes them in');
+        assert(ranks.terminal > ranks.menu && ranks.menu > ranks.page,
+            'Keys: the layers rank terminal, menu, page — the order Escape closes them in');
         // The photo lightbox left with the photos, for case-studies.html,
         // which answers its own keys (tests/phone.test.js).
         assert(!('lightbox' in ranks) && !doc.getElementById('lightbox'), 'Keys: the homepage has no lightbox layer left, nor a lightbox');
@@ -152,16 +151,6 @@ const key = (window, k, target, init) => {
         assert(!mks.terminal.isOpen() && menuOpen(), 'Escape: the terminal closes first, the menu stays open');
         key(window, 'Escape');
         assert(!menuOpen() && doc.activeElement === toggle, 'Escape: then the menu, and focus returns to its button');
-
-        // Focus inside the open player, menu open behind it.
-        const bar = doc.getElementById('dispatchBar');
-        bar.hidden = false;
-        toggle.click();
-        const inBar = bar.querySelector('button');
-        key(window, 'Escape', inBar);
-        assert(bar.hidden && menuOpen(), 'Escape: inside the player it closes the player, and the menu stays open');
-        key(window, 'Escape');
-        assert(!menuOpen(), 'Escape: then the menu');
 
         // The backtick, one rule before and after the terminal is loaded.
         const term = mks.terminal;
@@ -236,7 +225,7 @@ const key = (window, k, target, init) => {
         const intro = !!doc.getElementById('preloader');
         assert(intro === expectIntro, `Motion: low-energy mode ${eco} — the intro ${expectIntro ? 'plays' : 'is skipped'} (the mode is restored before the intro asks)`);
         assert(doc.getElementById('ecoModeLabel').textContent === `Low-energy mode: ${eco}`, `Motion: the footer switch names the restored mode (${eco})`);
-        await wait(0);   // the player's manifest check settles before the window goes
+        await wait(0);   // anything the boot queued settles before the window goes
         window.close();
     }
 
@@ -273,7 +262,7 @@ const key = (window, k, target, init) => {
             box.innerHTML = svgMarkup;
             doc.body.appendChild(box);
             let rescaled = 0;
-            const since = fetched.length;   // the narration player asks for its manifest on load
+            const since = fetched.length;   // only what the map's arrival asks for
             doc.dispatchEvent(new window.CustomEvent('journeymap:ready', { detail: { svg: box.querySelector('svg'), mapBox: box, rescale: () => { rescaled++; } } }));
             await wait(20);
             const mark = box.querySelector('.map-you');
@@ -509,8 +498,7 @@ const key = (window, k, target, init) => {
         // that is never out of sight while it runs.
         const EXEMPT = {
             '.icon-spin': 'spins only on the send button while a message is sending',
-            '.preloader-bar span': 'runs only during the intro, gone once the page shows',
-            '.listen-btn.is-playing .icon': 'in the fixed nav bar, always in view, and only while speaking'
+            '.preloader-bar span': 'runs only during the intro, gone once the page shows'
         };
         const css = read('style.css').replace(/\/\*[\s\S]*?\*\//g, '');
         const loopSelectors = [];

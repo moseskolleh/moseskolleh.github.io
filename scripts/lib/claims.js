@@ -11,9 +11,8 @@
 //                              generated pages carry the same
 //                              <span data-claim="…"> as the hand-authored
 //                              ones
-//   scripts/lib/content.js     checks that each entry's other forms, and
-//                              what the narration says aloud, come to the
-//                              entry's own value (quantity)
+//   scripts/lib/content.js     checks that each entry's other forms come
+//                              to the entry's own value (quantity)
 //   tests/claims.test.js       finds every number on every page, in digits
 //                              or in words, and every size said in words
 //                              ("a fifth", "twice", "an order of
@@ -24,7 +23,8 @@
 // So the rules live here, once. A figure is compared by what it amounts
 // to, not by how it is written: "70%", "7 in 10", "7 times out of 10" and
 // "seventy per cent" are one strike rate, and "a hundred and sixty-four"
-// is 164. That is what lets the spoken page be held to the ledger too.
+// is 164. That is what lets a figure written in words be held to the
+// ledger too.
 // ===================================================================
 
 // ------------------------------------------------------------------
@@ -79,7 +79,7 @@ function wordsValue(words) {
         const v = WORD_VALUE[w];
         if (SCALES[w] === 100) group = (group || 1) * 100;
         else if (SCALES[w]) { total += (group || 1) * v; group = 0; }
-        // "twenty thirteen", "twenty twenty-one": a year, spoken as two numbers.
+        // "twenty thirteen", "twenty twenty-one": a year, written as two numbers.
         else if (last !== null && !SCALES[last] && WORD_VALUE[last] >= 10 && v >= 10) group = group * 100 + v;
         else group += v;
         last = w;
@@ -196,13 +196,11 @@ function exemptAt(text, index, end) {
 // Numbers in words that are not claims
 //
 // The site writes small counts in words ("a team of six", "four
-// certificates"), and the narration says every figure that way ("a hundred
-// and sixty-four water points"). A count in words that is a figure is a
-// ledger entry like any other: the pages mark it, and the narration's has
-// to be an entry's `spoken` phrase. These are the words that are numbers
-// without being figures: "one" as in "one thread", a name (net zero), the
-// ordinals of a spoken list, and counts of things the page or the section
-// shows in full, so the reader could count them there.
+// certificates"). A count in words that is a figure is a ledger entry like
+// any other, and the pages mark it. These are the words that are numbers
+// without being figures: "one" as in "one thread", a name (net zero), and
+// counts of things the page or the section shows in full, so the reader
+// could count them there.
 // ------------------------------------------------------------------
 const SMALL = '(?:one|two|three|four|five|six|seven|eight|nine|ten)';
 
@@ -330,16 +328,6 @@ const WORD_EXEMPT = [
     heldSizes
 ];
 
-/** In the narration, which also says years and the ordinals of its lists. */
-const SPOKEN_EXEMPT = [
-    { why: 'a year, said aloud', test: (run) => run.value >= 1900 && run.value < 2100 },
-    ONE,
-    { why: 'a list ordinal ("One, the sustainable A.I. framework")', res: [new RegExp(`(?:^|[.:!?]\\s+)(?:And\\s+)?${SMALL},`, 'gi')] },
-    { why: 'the name of a standard (Scopes 1 to 3)', res: [/\bscopes? one to three\b/gi] },
-    shownInFull,
-    heldSizes
-];
-
 /** Why a run of number words in `text` is not a figure, by `rules`, or null. */
 function wordExemptBy(rules, text, run) {
     for (const rule of rules) {
@@ -354,7 +342,6 @@ function wordExemptBy(rules, text, run) {
     }
     return null;
 }
-const spokenExempt = (text, run) => wordExemptBy(SPOKEN_EXEMPT, text, run);
 const wordExempt = (text, run) => wordExemptBy(WORD_EXEMPT, text, run);
 
 // ------------------------------------------------------------------
@@ -462,4 +449,4 @@ function unheld(text, claims) {
     return out;
 }
 
-module.exports = { unheld, wordRuns, sizeRuns, numbers, quantity, agrees, EXEMPT, exemptAt, SHOWN_IN_FULL, DRAWN, foldAround, HELD_SIZES, WORD_EXEMPT, wordExempt, SPOKEN_EXEMPT, spokenExempt, markable, displays, pattern, marker, plain };
+module.exports = { unheld, wordRuns, sizeRuns, numbers, quantity, agrees, EXEMPT, exemptAt, SHOWN_IN_FULL, DRAWN, foldAround, HELD_SIZES, WORD_EXEMPT, wordExempt, markable, displays, pattern, marker, plain };

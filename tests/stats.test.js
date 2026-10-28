@@ -235,7 +235,7 @@ function walk(value, visit, where = '') {
         assert(known.pages.has(p), `Known: page "${p}"`);
     });
     ['cv-download-hero', 'cv-download-nav', 'cv-download-fieldreport', 'email-fieldreport', 'cv-download', 'receipt-open',
-        'contact-form-submit', 'module-dossier', 'module-terminal', 'module-interactives', 'module-dispatch']
+        'contact-form-submit', 'module-dossier', 'module-terminal', 'module-interactives']
         .forEach((f) => assert(known.features.has(f), `Known: feature "${f}"`));
     // The counter names a module fetched on demand "module-<name>"; the bare
     // name is not something it sends, so it is not a name the page may show.
@@ -243,7 +243,7 @@ function walk(value, visit, where = '') {
     // Hooks a script writes into the page, and the Brief's grades, which it
     // sends as "brief-<class>": the Assay's were counted as "other" until the
     // names were read from the scripts as well as the pages.
-    ['listen', 'listen-intro', 'brief-copy', 'brief-contact', 'brief-run', 'brief-shared', 'brief-high', 'brief-workable', 'brief-marginal']
+    ['brief-copy', 'brief-contact', 'brief-run', 'brief-shared', 'brief-high', 'brief-workable', 'brief-marginal']
         .forEach((f) => assert(known.features.has(f), `Known: feature "${f}"`));
     assert(!known.features.has('brief-') && !known.features.has('assay-high'), 'Known: the start of a composed name (track(\'brief-\' + a.cls)) is not a feature, nor is a grade the site no longer gives');
     assert(known.pages.has('brief'), 'Known: page "brief"');

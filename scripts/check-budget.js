@@ -67,8 +67,7 @@ const MB = 1024 * 1024;
 // report over the wire) to 96% (the on-demand total: the wave-1 review's
 // fixes filled it to within 100 bytes, until the journey map shed 1.6 KB of
 // path points that drew nothing, then 3.6 KB more written as steps, which
-// paid for the time-zone table moving here out of script.js), with the
-// audio budget at 0% until Moses records his introduction. To make room,
+// paid for the time-zone table moving here out of script.js). To make room,
 // remove something of equal weight rather than raise a ceiling
 // (docs/plan.md, "Stop doing"); `--ratchet` lowers them. The README's
 // table is written from these (`readme` is the row's name there) by
@@ -102,12 +101,13 @@ const BUDGETS = {
         readme: 'First view of the homepage on a phone, over the wire (fonts included)'
     },
     // What a visit fetches after arriving, if it uses everything: the
-    // on-demand modules, the narration scripts and AI data behind them, the
-    // journey map, the narration manifest. Bounded so "on demand" cannot
-    // become the place where weight goes to hide.
+    // on-demand modules, the AI data behind them, the journey map and its
+    // time-zone table. Bounded so "on demand" cannot become the place where
+    // weight goes to hide. Lowered from 61 KB to what it measured plus 5%
+    // when the Listen player and its scripts were removed (October 2026).
     onDemand: {
         label: 'Everything a full visit adds on demand (modules, scripts, map — gzipped)',
-        max: 61 * KB,
+        max: 44 * KB,
         readme: 'Everything a full visit adds on demand (modules, scripts, map)'
     },
     // Lowered from 210 KB when the photos were re-encoded (October 2026):
@@ -132,17 +132,6 @@ const BUDGETS = {
         label: 'Every image in the repository',
         max: 3.5 * MB,
         readme: 'Every image in the repository'
-    },
-    // The only audio the site ships is Moses's own recorded introduction:
-    // one 60–90 s take, and 90 s of mono MP3 at 64 kbps is about 720 KB.
-    // Every audio file in the repository counts against it, so the ten
-    // stock-voice section tracks this replaced (4.13 MB, retired with their
-    // 4.5 MB budget) cannot drift back in unbudgeted. 0 KB until he records.
-    introAudio: {
-        label: "Recorded narration: Moses's introduction, the one audio file the site ships",
-        max: 800 * KB,
-        readme: "Recorded narration: Moses's introduction (sized for his 60–90 s take)",
-        hold: 'sized for his recording, which is not made yet'
     },
     // The footer calls it "the whole portfolio in 11 KB" (10 until every
     // page took a Content-Security-Policy, in October 2026); this is what
@@ -481,7 +470,7 @@ function onDemandAssets() {
         fs.readdirSync(modulesDir).filter(f => /\.(js|css)$/.test(f)).sort()
             .forEach(f => files.push(`modules/${f}`));
     }
-    ['voice-scripts.js', 'ai-carbon-data.js', 'assets/journey-map.svg', 'assets/timezones.json', 'assets/audio/voice-manifest.json']
+    ['ai-carbon-data.js', 'assets/journey-map.svg', 'assets/timezones.json']
         .forEach((rel) => { if (sizeOf(rel) !== null) files.push(rel); });
     return files;
 }
@@ -496,8 +485,6 @@ function onDemandAssets() {
 const MODULE_TABLE = [
     { module: '`modules/interactives.js` (+ `ai-carbon-data.js`)', files: ['modules/interactives.js', 'ai-carbon-data.js'],
         when: 'section 05 or the footer receipt comes within a screen of the viewport, or a deep link lands there' },
-    { module: '`modules/dispatch.js` (+ `dispatch.css`, `voice-scripts.js`)', files: ['modules/dispatch.js', 'modules/dispatch.css', 'voice-scripts.js'],
-        when: 'the first press of Listen, or `voice` in the terminal' },
     { module: '`modules/dossier.js` (+ `dossier.css`)', files: ['modules/dossier.js', 'modules/dossier.css'],
         when: 'on `case-studies.html`, a game\'s host comes within a screen of view (the page\'s own loader, not `script.js`)' },
     { module: '`modules/terminal.js`', files: ['modules/terminal.js'],
@@ -507,9 +494,7 @@ const MODULE_TABLE = [
     { module: '`assets/journey-map.svg`', files: ['assets/journey-map.svg'],
         when: 'the first sign a reader is heading down the page: a scroll, a key, a touch, or a deep link' },
     { module: '`assets/timezones.json`', files: ['assets/timezones.json'],
-        when: 'the journey map arrives, for its "you?" mark (the zone is looked up in the page, never sent)' },
-    { module: '`assets/audio/voice-manifest.json`', files: ['assets/audio/voice-manifest.json'],
-        when: '1.5 s after load, only where the browser has no voice to read aloud with: whether a recording can stand in' }
+        when: 'the journey map arrives, for its "you?" mark (the zone is looked up in the page, never sent)' }
 ];
 
 // Each row weighed, and any on-demand file no row names.
@@ -544,7 +529,6 @@ function walk(dir, out) {
 function measure() {
     const allFiles = walk(ROOT, []);
     const images = allFiles.filter(isImage);
-    const audio = allFiles.filter(f => /\.(mp3|opus|wav|m4a)$/i.test(f));
 
     const critical = criticalAssets().map((rel) => ({ rel, raw: sizeOf(rel), wire: wireOf(rel) }));
     const onDemand = onDemandAssets().map((rel) => ({ rel, raw: sizeOf(rel), wire: wireOf(rel) }));
@@ -565,7 +549,6 @@ function measure() {
         notesWire: sitePages().filter(p => covers('notes/*.html', p)).reduce((n, p) => Math.max(n === null ? 0 : n, pageWire(p)), null),
         largestImage: images.reduce((n, f) => Math.max(n, sizeOf(f) || 0), 0),
         allImages: images.reduce((n, f) => n + (sizeOf(f) || 0), 0),
-        introAudio: audio.reduce((n, f) => n + (sizeOf(f) || 0), 0),
         // Uncompressed, because that is the number the footer quotes and the one a
         // reader can verify by saving the page.
         fieldReport: sizeOf('field-report.html'),

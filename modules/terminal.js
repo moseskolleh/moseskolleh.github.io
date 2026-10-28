@@ -24,9 +24,6 @@
 
     const COMMANDS = {
         help: () => {
-            // 'voice about' is suggested only where there is a voice to read it.
-            const fd = mks.narration, synth = window.speechSynthesis;
-            const voiced = fd ? fd.state().voiced : !!(synth && (synth.getVoices() || []).length);
             print('available commands:');
             [['journey', 'the route, Freetown to Amsterdam'],
              ['projects', 'list the six projects'],
@@ -36,7 +33,6 @@
              ['cv', 'download the CV (PDF)'],
              ['map', 'fly to the journey map'],
              ['eco', 'toggle low-energy mode'],
-             ['voice', 'read a section aloud' + (voiced ? ' — try \'voice about\'' : ', where the browser has a voice')],
              ['theme', 'toggle light/dark'],
              ['kushe', 'a greeting from Freetown'],
              ['clear', 'wipe the screen'],
@@ -71,17 +67,6 @@
             print(badge ? badge.textContent : 'the scale is still warming up — scroll to the footer.');
             print('methodology: Resource Timing API × Sustainable Web Design model.');
             print('this counts network transfer only — not the energy your device spends rendering it.');
-            // As the player's label: an offline voice adds nothing, a
-            // streamed one an amount no page can see.
-            const fd = mks.narration;
-            if (fd) {
-                const st = fd.state();
-                print(st.playing === 'intro'
-                    ? 'narration: Moses\'s own recording — one file, and the player printed its transfer weight before you pressed play.'
-                    : !st.voiced ? 'narration: this browser has no speech voice, so the sections are not read aloud, and add nothing.'
-                    : st.local ? 'narration: your browser\'s own voice, installed on your device. it transfers nothing, so it adds nothing to the figure above — though your device still does the work.'
-                    : 'narration: your browser\'s voice streams its audio from the vendor, in amounts this page cannot see — so the figure above leaves it out.');
-            }
         },
         drill: (args, done) => {
             const steps = [
@@ -123,48 +108,6 @@
             const b = document.getElementById('ecoModeToggle');
             if (b) b.click();
             print('low-energy mode: ' + (document.body.classList.contains('eco-mode') ? 'on' : 'off'));
-        },
-        voice: (args, done) => {
-            // The player is its own module; fetch it on the first `voice`.
-            if (!mks.narration && !mks.loaded.dispatch) {
-                print('loading the narration player…');
-                mks.load('dispatch').then(
-                    () => { COMMANDS.voice(args, () => {}); done(); },
-                    () => { print('the narration player could not be loaded.', 'ft-err'); done(); }
-                );
-                return true; // async
-            }
-            const fd = mks.narration;
-            if (!fd) { print('no speech engine in this browser — the page stays quiet.', 'ft-err'); return; }
-            const state = fd.state();
-            const arg = (args && args[0]) || '';
-
-            if (!arg) {
-                print('usage: voice <section> — one of: ' + state.ids.join(', '));
-                print('       voice moses     — Moses introduces himself, in his own voice, once he has recorded it');
-                print('       voice stop      — shut it up');
-                if (!state.voiced) {
-                    print('this browser has no speech voice, so the sections cannot be read aloud here.');
-                    return;
-                }
-                print(`sections are read by your browser's voice — ${state.voice}.`);
-                print(state.local
-                    ? 'that voice is installed on your device. it transfers nothing over the network.'
-                    : 'heads up: your browser has no offline voice, so it streams the audio from its vendor.');
-                return;
-            }
-            if (arg === 'stop') { fd.stop(); print('narration stopped.'); return; }
-            // The one recording on the site is Moses's own, so 'moses' now
-            // means exactly what it says. 'intro' and 'recorded' reach it too.
-            if (arg === 'moses' || arg === 'intro' || arg === 'recorded') {
-                fd.playIntro().then((ok) => {
-                    if (ok) close();
-                    else print('Moses has not recorded his introduction yet' + (state.voiced ? ' — try \'voice about\' for the browser voice.' : '.'), 'ft-err');
-                });
-                return;
-            }
-            if (fd.play(arg)) { close(); return; }
-            print(`no section called '${arg}'. try: ${state.ids.join(', ')}`, 'ft-err');
         },
         theme: () => {
             const b = document.querySelector('.theme-toggle');

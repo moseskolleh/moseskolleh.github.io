@@ -23,11 +23,10 @@
 //     field terminal, the Assay's evidence, the receipt, You Draw It, the
 //     coach's tips and the rest of what fills a host the scan skips, read
 //     from their source; or the footer's badge prints a fixed one;
-//   · a copy of the grams per MB (the narration player's, the build's)
-//     parts from the ledger's;
+//   · a copy of the grams per MB (the receipt's, the build's) parts from
+//     the ledger's;
 //   · a rule the open counts page states (30 counts a minute, nothing
 //     under 5) parts from the counter's code;
-//   · the narration says a number in words that no entry backs;
 //   · claims.html leaves an entry out, says it appears somewhere it does
 //     not, or links it to a place where it is folded away while the page
 //     shows it elsewhere, or into a fold the link neither opens nor names.
@@ -122,7 +121,7 @@ const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.doc
     refuses('"checkable from outside" with nowhere to check', { ...good, checkable: 'public' }, /says where/);
     refuses('a link on a figure no one can check', { ...good, check: 'carbon-ai.html' }, /reads as checkable/);
     refuses('an illustrative figure called checkable', { id: 'x', value: '30%', unit: 'baseline', basis: { illustrative: 'none' }, checkable: 'on-request' }, /illustrative/);
-    refuses('narration that says another number', { ...good, spoken: ['twenty-four people'] }, /does not say 23/);
+    refuses('another form that says another number', { ...good, forms: ['team of twenty-four'] }, /does not say 23/);
     refuses('a figure inside the unit', { ...good, unit: 'people, of 40 on site' }, /figure in it/);
     refuses('an unknown field', { ...good, source: 'x' }, /unknown field/);
     refuses('a derived figure from nothing', { id: 'x', value: '0.004', unit: 'g', basis: { derived: 'how', from: ['nope'] }, checkable: 'not-checkable' }, /not an entry/);
@@ -453,10 +452,6 @@ function between(src, from, to, file) {
 // The literals that read as words a person is shown, not an id, a class, a
 // colour or an SVG path: two letters together, and a space.
 const readAsWords = (list) => list.filter(t => /[A-Za-z]{2,}/.test(t) && /\s/.test(t.trim()));
-// Of a string of markup, what a reader is shown: its text and its labels,
-// not data-step="-1".
-const shownOf = (t) => (!/<[a-z]/i.test(t) ? t
-    : [t.replace(/<[^>]*>/g, ' ')].concat([...t.matchAll(/\b(?:aria-label|title|alt)="([^"]*)"/g)].map(m => m[1])).join(' '));
 
 // The Brief's rubric is data the page builds from (content/brief.json),
 // and so is where the homepage shows each tool, which the build writes into
@@ -513,15 +508,7 @@ const PRINTED = {
     // energy per token").
     coach: { what: 'the EcoPrompt Coach (carbon-ai.js)', texts: readAsWords(literals(read('carbon-ai.js'))), sure: /hidden output tokens/ },
     anatomy: { what: 'Anatomy of a Prompt (modules/anatomy.js)', texts: readAsWords(literals(read('modules/anatomy.js'))), sure: /Scope 2/ },
-    games: { what: 'the borehole and flood games (modules/dossier.js)', texts: readAsWords(literals(read('modules/dossier.js'))), sure: /STRIKE/ },
-    // The narration player is built when Listen is pressed, so no page's
-    // HTML holds it: its weight label's tooltip typed in "0.36 g CO₂e per
-    // MB", and nothing held that copy. It prints the badge's figure now; a
-    // figure typed in again is caught here. Its browser voice moves no
-    // bytes, and says so.
-    player: { what: 'the narration player (modules/dispatch.js)', texts: readAsWords(literals(read('modules/dispatch.js'))).map(shownOf),
-        sure: /Sustainable Web Design model/,
-        why: (text, a, b) => (/^browser voice · 0 KB transferred$/.test(text) && text.slice(a, b) === '0' ? 'nothing transferred: the browser voice moves no bytes' : null) }
+    games: { what: 'the borehole and flood games (modules/dossier.js)', texts: readAsWords(literals(read('modules/dossier.js'))), sure: /STRIKE/ }
 };
 {
     const hosts = Object.entries(RUNTIME).flatMap(([page, map]) => Object.entries(map).map(([sel, key]) => `${page} ${sel} → ${key}`));
@@ -553,7 +540,6 @@ const PRINTED = {
 // be a figure nobody holds.
 {
     const said = PAGES.map(p => docs[p].body.textContent + ' ' + docs[p].head.textContent)
-        .concat([data.narration.intro ? data.narration.intro.text : ''], data.narration.scripts.map(x => x.text))
         .concat(Object.values(PRINTED).flatMap(p => p.texts)).join(' ');
     const wrong = [];
     let checked = 0;
@@ -582,11 +568,9 @@ const PRINTED = {
 // ===================================================================
 // Every entry is somewhere, and its basis holds today
 // ===================================================================
-const narration = [data.narration.intro ? data.narration.intro.text : ''].concat(data.narration.scripts.map(s => s.text)).join(' ');
 {
-    const said = (c) => (c.spoken || []).some(s => narration.toLowerCase().includes(s.toLowerCase()));
-    const nowhere = CLAIMS.filter(c => !MARKS.has(c.id) && !said(c)).map(c => c.id);
-    assert(nowhere.length === 0, `Ledger: every entry is on a page or in the narration — none is left over from a figure that has gone (${nowhere.join(', ') || 'none'})`);
+    const nowhere = CLAIMS.filter(c => !MARKS.has(c.id)).map(c => c.id);
+    assert(nowhere.length === 0, `Ledger: every entry is on a page — none is left over from a figure that has gone (${nowhere.join(', ') || 'none'})`);
 
     // The site's own measurements, as npm run budget makes them today.
     const { measure, BUDGETS } = require('../scripts/check-budget.js');
@@ -609,51 +593,22 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
         `Ledger: the badge in script.js compares against the ledger's median page and weighs with its grams per MB (${constant('MEDIAN_PAGE_MB')}, ${constant('G_CO2_PER_MB')})`);
 
     // The grams per MB, wherever the site weighs a transfer. The badge
-    // shares its constant as mks.carbon, which the receipt and the
-    // narration player read; the player once typed in a copy of its own,
-    // and so did a note in the factor set, and moving the ledger's figure
-    // would have left both behind with every test passing. The build's
-    // copy weighs the recording and the PR receipt.
-    const dispatch = read('modules/dispatch.js');
+    // shares its constant as mks.carbon, which the receipt reads; a module
+    // once typed in a copy of its own, and so did a note in the factor set,
+    // and moving the ledger's figure would have left both behind with every
+    // test passing. The build's copy weighs the PR receipt.
     const build = constant('GRAMS_PER_MB', read('scripts/lib/carbon.js'));
     const typed = ['script.js', 'carbon-ai.js', 'ai-carbon-data.js'].concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`))
         .flatMap(f => literals(read(f)).flatMap(t => [...t.matchAll(/(\d+(?:\.\d+)?)\s*g CO₂e(?: per |\/)MB/g)].map(m => `${f}: ${m[1]}`)));
-    assert(/const \{ gramsPerMB \} = mks\.carbon;/.test(dispatch) && /\* gramsPerMB\b/.test(dispatch) && !/\d\.\d+ g CO₂e/.test(literals(dispatch).join(' '))
+    assert(/const carbon = window\.mks\.carbon;/.test(interactives) && /= carbon\.gramsPerMB;/.test(interactives)
         && figures.agrees(byId.get('web-carbon').value, build) && typed.every(t => figures.agrees(byId.get('web-carbon').value, t.split(': ')[1])),
-        `Ledger: every copy of the grams per MB is the ledger's ${byId.get('web-carbon').value}: the player weighs with the badge's (mks.carbon), the build's is ${build}, and a script that writes the figure writes it (${typed.join('; ') || 'none does'})`);
+        `Ledger: every copy of the grams per MB is the ledger's ${byId.get('web-carbon').value}: the receipt weighs with the badge's (mks.carbon), the build's is ${build}, and a script that writes the figure writes it (${typed.join('; ') || 'none does'})`);
 
     // The borehole game's scoreboard draws the two rates as rows of ten.
     const rows = Array.from(docs['case-studies.html'].querySelectorAll('.strike-waffle[data-row]')).filter(w => /^\d+$/.test(w.getAttribute('data-row')));
     const drawn = rows.map(w => [w.getAttribute('data-row'), w.parentElement.querySelector('[data-claim]')]);
     assert(drawn.length === 2 && drawn.every(([n, mark]) => mark && figures.agrees(byId.get(mark.getAttribute('data-claim')).value, `${n} in 10`)),
         `Ledger: the borehole game's scoreboard draws the field records' rate and the illustrative one as the ledger has them (${drawn.map(([n, mark]) => `${n} → ${mark && mark.getAttribute('data-claim')}`).join(', ')})`);
-}
-
-// ===================================================================
-// The narration: every number it says, in words, is an entry's
-// ===================================================================
-{
-    const texts = [['intro', data.narration.intro ? data.narration.intro.text : '']].concat(data.narration.scripts.map(s => [s.id, s.text]));
-    const unbacked = [];
-    let backed = 0;
-    texts.forEach(([id, text]) => {
-        const lower = text.toLowerCase();
-        const spans = [];
-        CLAIMS.forEach(c => (c.spoken || []).forEach((s) => {
-            for (let i = lower.indexOf(s.toLowerCase()); i > -1; i = lower.indexOf(s.toLowerCase(), i + 1)) spans.push([i, i + s.length, c.id]);
-        }));
-        figures.wordRuns(text).concat(figures.sizeRuns(text)).forEach((run) => {
-            if (figures.spokenExempt(text, run)) return;
-            const span = spans.find(([a, b]) => a <= run.index && b >= run.end);
-            if (span) backed++;
-            else unbacked.push(`${id}: "${run.text}" in "…${text.slice(Math.max(0, run.index - 40), run.end + 40)}…"`);
-        });
-    });
-    unbacked.forEach(u => console.log(`  unbacked: ${u}`));
-    assert(unbacked.length === 0, `Narration: every number said aloud is a ledger entry's spoken form (${backed} said; ${unbacked.length} with no entry${unbacked.length ? ', listed above' : ''})`);
-
-    const unused = CLAIMS.flatMap(c => (c.spoken || []).filter(s => !narration.toLowerCase().includes(s.toLowerCase())).map(s => `${c.id}: "${s}"`));
-    assert(unused.length === 0, `Narration: every spoken form in the ledger is something the narration says (${unused.join('; ') || 'all are'})`);
 }
 
 // ===================================================================
@@ -723,8 +678,6 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
         });
         const actual = Array.from(MARKS.get(c.id) || []).sort();
         if (JSON.stringify(listed) !== JSON.stringify(actual)) wrongWhere.push(`${c.id}: says ${listed.join(', ') || 'nowhere'}, marked on ${actual.join(', ') || 'none'}`);
-        const spoken = /the narration/.test(li.querySelector('.cl-where').textContent);
-        if (spoken !== (c.spoken || []).some(s => narration.toLowerCase().includes(s.toLowerCase()))) wrongWhere.push(`${c.id}: the narration ${spoken ? 'named but silent' : 'says it, unnamed'}`);
 
         const checkable = content.checkabilityOf(c, data.projects);
         const chip = li.querySelector('.cl-check');

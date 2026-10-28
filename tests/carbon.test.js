@@ -733,7 +733,7 @@ const ROUNDED_TO_NOTHING = /^0(\.0+)?$|\b0\.0+ /;
 
     // "Drag the grid" was never true: the grid is a dropdown (plan 2.7).
     {
-        const pages = ['carbon-ai.html', 'index.html', 'modules/anatomy.js', 'modules/interactives.js', 'content/narration.json'].map(read).join('\n');
+        const pages = ['carbon-ai.html', 'index.html', 'modules/anatomy.js', 'modules/interactives.js'].map(read).join('\n');
         assert(!/drag(ging)? the grid|slide the grid|grid slider/i.test(pages), 'Wording: nothing tells a reader to drag the grid');
         const doc = withAnatomy().doc;
         const tryIt = doc.querySelector('.ca-anatomy-try').textContent;

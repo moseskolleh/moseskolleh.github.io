@@ -1,8 +1,8 @@
 // Keeps the pages agreeing with content/profile.json.
 //
 // Employment dates, degrees, certifications and profile links were written out
-// by hand in index.html, its JSON-LD block, field-report.html, the narration
-// scripts and the README. Nothing kept those copies in step, and they had
+// by hand in index.html, its JSON-LD block, field-report.html and the README.
+// Nothing kept those copies in step, and they had
 // already drifted — field-report.html listed a certification the rest of the
 // site did not mention.
 //
@@ -190,25 +190,6 @@ const fieldText = plain(fieldReport);
     );
 }
 
-// --- Narration ----------------------------------------------------------
-// What the listener hears must say what the page says — and Moses's recorded
-// introduction cannot be fixed with an edit, only with another take.
-{
-    const { SCRIPTS, INTRO } = require('../voice-scripts.js');
-    const spoken = SCRIPTS.concat(INTRO ? [INTRO] : []).map(s => s.text).join(' ');
-
-    assert(
-        spoken.includes(profile.currentRole.organization),
-        'Narration: the current employer is named in the scripts'
-    );
-
-    // Any spelling of the employer other than the canonical one means the
-    // audio says something the page does not.
-    const strays = ['Digital Society Schools', 'Amsterdam University of Sciences']
-        .filter(s => spoken.includes(s));
-    assert(strays.length === 0, `Narration: no mis-spelled organisation names (${strays.join(', ') || 'none'})`);
-}
-
 // --- Sitemap ------------------------------------------------------------
 {
     const missing = profile.pages.filter(p => !sitemap.includes(p.loc)).map(p => p.path);
@@ -339,12 +320,10 @@ const fieldText = plain(fieldReport);
 // named here so that one coming back is a failure with its reason attached,
 // not something a reader has to notice.
 {
-    const { SCRIPTS } = require('../voice-scripts.js');
     const pages = {
         'index.html': indexText,
         'field-report.html': fieldText,
-        'case-studies.html': plain(read('case-studies.html')),
-        narration: SCRIPTS.map(s => s.text).join(' ')
+        'case-studies.html': plain(read('case-studies.html'))
     };
     const UNSUPPORTED = [
         { re: /10,000\+ (?:people|beneficiaries)|ten thousand people/i, why: 'no count of people reached exists in content/' },
@@ -365,11 +344,6 @@ const fieldText = plain(fieldReport);
         });
     });
     assert(found.length === 0, `Figures: no claim without a basis is back (${found.join('; ') || 'none'})`);
-
-    // The skills script reads out what the section only lists as a chip:
-    // nothing on the site is a life cycle assessment Moses did.
-    const skills = (SCRIPTS.find(x => x.id === 'skills') || { text: '' }).text;
-    assert(!/life cycle|\bLCA\b/i.test(skills), 'Figures: the skills narration names no skill without a project behind it (life cycle assessment)');
 }
 
 // --- Tools: the field report names none the homepage does not show -------
@@ -502,7 +476,7 @@ const fieldText = plain(fieldReport);
     // A repository link anywhere is one of the six, spelled exactly: GitHub
     // forgives the case, a reader comparing names does not.
     const shipped = ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', '404.html', 'stats.html', 'README.md']
-        .map(f => [f, read(f)]).concat(['projects', 'research', 'lenses', 'profile', 'narration'].map(n => [`content/${n}.json`, read(`content/${n}.json`)]));
+        .map(f => [f, read(f)]).concat(['projects', 'research', 'lenses', 'profile'].map(n => [`content/${n}.json`, read(`content/${n}.json`)]));
     const names = REPOS.map(r => r.name);
     const stray = [];
     shipped.forEach(([f, src]) => (src.match(/github\.com\/moseskolleh\/[\w.-]+/gi) || []).forEach((m) => {
@@ -556,7 +530,7 @@ const fieldText = plain(fieldReport);
     const KEEP_OUT = [/\bTimbo\b/, /\bACF\b/, /Living Water International/i, /\bWiNGiN\b/i,
         /\bMatthijs\b/, /\bThomas\b/, /\bJop\b/, /\bCora\b/, /\bMirai\b/, /\bZahra\b/, /\bAli\b/, /\bRezaei\b/];
     const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json')).map(f => `content/${f}`), ['voice-scripts.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json')).map(f => `content/${f}`));
     const named = [];
     pages.forEach((f) => {
         const src = read(f);
@@ -586,7 +560,7 @@ const fieldText = plain(fieldReport);
 // claim, and is not read.
 {
     const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json') && f !== 'brief.json').map(f => `content/${f}`), ['voice-scripts.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json') && f !== 'brief.json').map(f => `content/${f}`));
     const doc = new (require('jsdom').JSDOM)(index).window.document;
     const listed = Array.from(doc.querySelectorAll('#skills .toolkit-item')).filter(li => /power\s*bi/i.test(li.textContent));
     const proven = listed.every(li => li.querySelector('a.toolkit-proof[href^="http"], a.toolkit-proof[href^="case-studies.html#"]'));
@@ -707,7 +681,7 @@ const fieldText = plain(fieldReport);
         console.log(`NOTICE: content/profile.json was logged ${Math.floor(months)} months ago (${profile.meta.verifiedOn}).`);
         console.log(`        "${profile.currentRole.displayDates}" at ${profile.currentRole.organization} is still being`);
         console.log('        published as current. Confirm it, then set meta.confirmedOn and meta.verifiedOn — or close the role');
-        console.log('        in profile.json, index.html, field-report.html, the CV and the narration together.');
+        console.log('        in profile.json, index.html, field-report.html and the CV together.');
         console.log('');
     } else {
         console.log(`INFO: profile logged ${Math.floor(months)} month(s) ago; next review due after ${profile.meta.staleAfterMonths}.`);

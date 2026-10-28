@@ -5,9 +5,9 @@
 //     npm run build:content          write the generated files
 //     npm run build:content -- --check   fail if any of them is out of date
 //
-// The site's facts used to live in six places at once: index.html, its
-// JSON-LD block, field-report.html, the narration scripts, the README and the
-// CV. Nothing kept them in step and they had already drifted. Everything this
+// The site's facts used to live in several places at once: index.html, its
+// JSON-LD block, field-report.html, the README and the CV. Nothing kept
+// them in step and they had already drifted. Everything this
 // script writes is now derived from content/, and --check runs in CI so a
 // hand-edit to a generated file cannot survive a push.
 //
@@ -32,7 +32,6 @@
 //   feed.xml            every note, as an Atom feed
 //   sitemap.xml         every page and note, with a lastmod that is not in
 //                       the future
-//   voice-scripts.js    the narration module, from content/narration.json
 //   index.html          the JSON-LD block (the Person and the WebSite), the
 //                       hero's at-a-glance strip and the six project cards,
 //                       each between its markers; the links to the newest
@@ -298,9 +297,8 @@ const indentBlock = (block, indent) => block.split('\n').map(l => (l ? indent + 
 // tests/csp.test.js holds every page to it.
 //
 //   default-src 'self'   every file the site loads is its own: scripts,
-//                        stylesheets, fonts, images, the narration's audio,
-//                        the on-demand modules, assets/timezones.json, the
-//                        journey map
+//                        stylesheets, fonts, images, the on-demand modules,
+//                        assets/timezones.json, the journey map
 //   script-src           'self', and each inline script on the page by the
 //                        sha256 of its exact text, worked out here from the
 //                        page as written; never 'unsafe-inline', 'unsafe-eval'
@@ -1766,7 +1764,6 @@ function renderClaims(data, pages) {
 
     const named = claimPages(data.notes);
     const marked = Object.keys(named).filter(p => pages[p]).map(p => [p, marksIn(pages[p])]);
-    const spokenText = [data.narration.intro ? data.narration.intro.text : ''].concat(data.narration.scripts.map(s => s.text)).join(' ').toLowerCase();
 
     // A source file named once, so a reader of the repository knows where to look.
     const file = (what, name) => ` <span class="cl-file">${what} <code>${name}</code>.</span>`;
@@ -1817,7 +1814,6 @@ function renderClaims(data, pages) {
         const check = `<span class="cl-check cl-check-${checkable}">${esc(CHECK_GROUPS.find(g => g.key === checkable).title)}</span>${checkable === 'public' && href ? ` ${checkLink(href)}` : ''}`;
         const places = marked.filter(([, marks]) => marks.has(c.id))
             .map(([page, marks]) => `<a href="${page}${marks.get(c.id).place}">${esc(named[page])}${foldSaid(marks.get(c.id).fold)}</a>`);
-        if ((c.spoken || []).some(s => spokenText.includes(s.toLowerCase()))) places.push('the narration');
         return `
                 <li class="cl-item" id="claim-${esc(c.id)}">
                     <p class="cl-figure"><span class="cl-value" data-claim="${esc(c.id)}">${esc(c.value)}</span> ${prose(c.unit)}</p>
@@ -1852,8 +1848,7 @@ function renderClaims(data, pages) {
                 test fails the build if a page prints a number that is not here, or one that disagrees with its
                 entry, in its text, a label or a photo&rsquo;s caption. What the scripts print of their own is
                 read from their source and held to the same list: the field terminal, The Brief, the receipt,
-                the narration player, the coach&rsquo;s tips. So is what the narration says aloud. The open counts
-                page is held another way, below.
+                the coach&rsquo;s tips. The open counts page is held another way, below.
             </p>
         </section>
 ${groups}
@@ -2109,99 +2104,6 @@ ${entries}
 </urlset>
 `;
 }
-
-// ------------------------------------------------------------------
-// voice-scripts.js
-// ------------------------------------------------------------------
-function renderVoiceScripts(data) {
-    // JSON.stringify gives a correctly escaped JS string literal, which is
-    // what keeps the text byte-identical through the round trip — and the
-    // narration hashes with it.
-    const scripts = data.narration.scripts.map(s => `        {
-            id: ${JSON.stringify(s.id)},
-            label: ${JSON.stringify(s.label)},
-            text: ${JSON.stringify(s.text)}
-        }`).join(',\n');
-    // Moses's own introduction: the words of a recording, not a section the
-    // browser voice reads. Kept out of SCRIPTS so nothing iterates over it
-    // by accident; null when content/narration.json has none.
-    const intro = data.narration.intro;
-    const introLiteral = intro ? `{
-        id: ${JSON.stringify(intro.id)},
-        label: ${JSON.stringify(intro.label)},
-        readBy: ${JSON.stringify(intro.readBy)},
-        text: ${JSON.stringify(intro.text)}
-    }` : 'null';
-
-    return `// ===================================================================
-// GENERATED by ${GENERATED_BY} from content/narration.json.
-// Do not edit this file — your changes will be overwritten.
-// Edit content/narration.json, then run: npm run build:content
-// How the scripts are written, and why, is the $comment at its top: it
-// stays there rather than in every visitor's download.
-// ===================================================================
-(function (root, factory) {
-    const data = factory();
-    root.VoiceScripts = data;
-    if (typeof module !== 'undefined' && module.exports) module.exports = data;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-    // \`id\` is the section's element id (the hero's is #home), and the
-    // file name if anyone opts in to rendering it: assets/audio/<id>.mp3
-    // \`label\` is how the player names that section.
-    const SCRIPTS = [
-${scripts}
-    ];
-
-    // The captions for Moses's recorded introduction, which he reads from
-    // this text. Never spoken by the browser voice.
-    const INTRO = ${introLiteral};
-
-${SPLIT_SENTENCES}
-
-    const byId = {};
-    SCRIPTS.forEach(s => { byId[s.id] = s; });
-
-    return { SCRIPTS, byId, splitSentences, INTRO };
-});
-`;
-}
-
-// The sentence splitter is behaviour, not content, so it is not expressed as
-// data. It is carried here byte-for-byte from the hand-written file this
-// generator replaced — rewriting it would have quietly changed how the
-// narration is chunked, and tests/bugs.test.js exists because that has bitten
-// this repository before.
-//
-// Splitting naively on "." mangles these scripts, which are full of
-// spelled-out initialisms — A.I., E.S.G., Q.G.I.S., Arc.G.I.S. Those are
-// parked behind a sentinel before the split and restored after, so
-// "sustainable A.I. — making sure…" stays a single sentence. The sentinel is
-// deliberately non-numeric: the scripts are also full of real numbers (164
-// water points) that must survive the round trip untouched; bugs.test.js
-// asserts exactly that. Why is said here, as the scripts' rules are in
-// narration.json, rather than in every listener's download.
-const SPLIT_SENTENCES = String.raw`    // Sentence splitting, shared by the player (for utterances and captions)
-    // and the generator, which says why it parks initialisms (A.I.) first.
-    const INITIALISM = /[A-Za-z]+(?:\.[A-Za-z])+\./g;
-
-    function splitSentences(text) {
-        const parked = [];
-        const masked = String(text).replace(INITIALISM, (m) => {
-            parked.push(m);
-            return ` + '`@@${parked.length - 1}@@`' + String.raw`;
-        });
-        const restore = s => s.replace(/@@(\d+)@@/g, (_, i) => parked[Number(i)]);
-        const raw = masked.match(/[^.!?…]+[.!?…]+["'”’—]?\s*/g) || [masked];
-
-        // Fold very short fragments into the previous sentence — a two-word
-        // utterance reads as a stutter and costs an extra engine round-trip.
-        const out = [];
-        raw.map(s => restore(s).trim()).filter(Boolean).forEach(s => {
-            if (out.length && s.length < 40) out[out.length - 1] += ' ' + s;
-            else out.push(s);
-        });
-        return out.length ? out : [String(text)];
-    }`;
 
 // ------------------------------------------------------------------
 // brief.html — The Brief
@@ -2806,7 +2708,6 @@ function main() {
         ['research.html', renderResearch(data)],
         ['stats.html', renderStats(data)],
         ['sitemap.xml', renderSitemap(data)],
-        ['voice-scripts.js', renderVoiceScripts(data)],
         ['index.html', injectSecurity('index.html', injectHomeRegions(data, injectCorelog(data, injectProjectCards(data, injectAtAGlance(data, injectJsonLd(data))))))],
         ['carbon-ai.html', injectSecurity('carbon-ai.html', injectShell(data, 'carbon-ai.html'))],
         ['field-report.html', injectSecurity('field-report.html', injectShell(data, 'field-report.html'))],

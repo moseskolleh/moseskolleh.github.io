@@ -222,8 +222,7 @@ const facts = (d) => Array.from(d.querySelectorAll('.glance-fact')).map(f => [te
         /\.nav-link\.contact-btn:hover\s*\{[^}]*background: var\(--primary-green\)/.test(navCss),
         `Nav: Contact is an outline at rest, filled only on hover, so the hero's is the one filled button (${resting.map(r => r.trim().replace(/\s+/g, ' ')).join(' | ')})`);
     const bar = doc.querySelector('.nav-container');
-    assert(!!bar.querySelector(':scope > #themeToggle') && !!bar.querySelector(':scope > .nav-listen #listenBtn'),
-        'Nav: the theme switch and the one Listen control stay in the bar');
+    assert(!!bar.querySelector(':scope > #themeToggle'), 'Nav: the theme switch stays in the bar');
     const css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8');
     assert(!/@media \(max-width: 1279px\)/.test(css) && /@media \(max-width: 899px\) \{\s*\.nav-toggle \{\s*display: flex;/.test(css),
         'Nav: the menu button takes over below 900px, not 1280px: six links fit where twelve did not');

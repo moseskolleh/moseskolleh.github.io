@@ -179,7 +179,7 @@ PAGES.forEach((rel) => {
 // page reach, and the policy must reach nothing those scripts do not name
 // bar the redirect, which no script names: Apps Script sends it.
 {
-    const shipped = ['script.js', 'count.js', 'theme.js', 'carbon-ai.js', 'ai-carbon-data.js', 'voice-scripts.js', 'brief.js',
+    const shipped = ['script.js', 'count.js', 'theme.js', 'carbon-ai.js', 'ai-carbon-data.js', 'brief.js',
         ...fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`)].map(read);
     PAGES.forEach(rel => inspect(rel).inline.forEach(s => shipped.push(s.textContent)));
     const named = new Set(shipped.flatMap(text => (text.match(/['"`](?:https?:)?\/\/[^'"`\s$]*/g) || []).map(m => m.slice(1))));

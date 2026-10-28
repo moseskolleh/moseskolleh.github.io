@@ -236,14 +236,13 @@
 
   "reproducibility": {
     "heading": "Reproducing what is here",
-    "body": "The outputs that are part of this site run from its one clone, with no build step and no API key; each repository above says how to run it. The EcoPrompt Coach and the homepage's energy chart read one factor set, so they cannot disagree about a model. The chart shows each model's published figure for a 1,000-token answer; the coach multiplies it by data-centre overhead (PUE, 1.2 unless you change it), so for the same answer it prints 1.2 times the chart's figure. The map regenerates byte-identically from pinned dependencies. The narration is content-addressed, so re-rendering unchanged text costs nothing.",
+    "body": "The outputs that are part of this site run from its one clone, with no build step and no API key; each repository above says how to run it. The EcoPrompt Coach and the homepage's energy chart read one factor set, so they cannot disagree about a model. The chart shows each model's published figure for a 1,000-token answer; the coach multiplies it by data-centre overhead (PUE, 1.2 unless you change it), so for the same answer it prints 1.2 times the chart's figure. The map regenerates byte-identically from pinned dependencies.",
     "commands": [
       { "command": "npm install && npm test", "does": "runs every suite, the map check and the asset-weight budgets" },
       { "command": "npm run map:build", "does": "regenerates the journey map from Natural Earth data" },
       { "command": "npm run map:check", "does": "proves the committed SVG still matches its generator" },
       { "command": "npm run budget", "does": "measures what a first view actually costs, asset by asset" },
-      { "command": "npm run build:content", "does": "regenerates every page derived from content/" },
-      { "command": "npm run voice -- --dry-run", "does": "shows what re-rendering the narration would cost, and spends nothing" }
+      { "command": "npm run build:content", "does": "regenerates every page derived from content/" }
     ]
   }
 }

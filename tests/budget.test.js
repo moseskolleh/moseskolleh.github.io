@@ -155,8 +155,8 @@ try {
             if (next.LENGTH[page][vp] !== Math.min(was, budget.ratchetTarget(0.5, 'screens'))) lengthsWrong.push(`${page} ${vp}`);
         }));
         assert(lengthsWrong.length === 0, `Ratchet: lowers every length ceiling too (wrong: ${lengthsWrong.join(', ') || 'none'})`);
-        assert(BUDGETS.introAudio.hold && next.BUDGETS.introAudio.max === BUDGETS.introAudio.max && next.BUDGETS.statsWire.max === BUDGETS.statsWire.max,
-            'Ratchet: the audio budget (his recording) and the open counts (a full page) are held');
+        assert(BUDGETS.statsWire.hold && next.BUDGETS.statsWire.max === BUDGETS.statsWire.max,
+            'Ratchet: the open counts (sized for a full page) are held');
         assert(down.changes.length > 0 && down.changes.every(c => c.to < c.from), `Ratchet: reports each change, every one downwards (${down.changes.length})`);
 
         // Everything over its ceiling: nothing moves.
@@ -300,12 +300,12 @@ try {
 
     // --- The report and its hints ------------------------------------------
     {
-        const json = budget.budgetJson({ criticalWire: 200 * KB, onDemand: 71 * KB, introAudio: 0, statsWire: 10 * KB });
+        const json = budget.budgetJson({ criticalWire: 200 * KB, onDemand: Math.round(BUDGETS.onDemand.max * 0.95), statsWire: 10 * KB });
         const h = budget.hints(json);
         assert(h.includes(`you could lower ${BUDGETS.criticalWire.readme} from ${budget.fmtCeiling(BUDGETS.criticalWire.max)} to 210 KB`),
             `Hints: "you could lower <budget> from X to Y" (${h[0]})`);
         assert(!h.some(x => x.includes(BUDGETS.onDemand.readme)), 'Hints: not for a budget within 10% of its ceiling');
-        assert(!h.some(x => x.includes(BUDGETS.introAudio.readme) || x.includes(BUDGETS.statsWire.readme)), 'Hints: not for a held budget');
+        assert(!h.some(x => x.includes(BUDGETS.statsWire.readme)), 'Hints: not for a held budget');
         const report = run();
         assert(report.status === 0 && /All budgets met/.test(report.stdout), `Report: every budget met on this checkout (exit ${report.status})`);
         const said = (report.stdout.match(/you could lower [^\n]+/g) || []);

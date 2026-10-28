@@ -66,7 +66,7 @@ const SECTIONS = `
         <section id="one"><button type="button" data-analytics="cv-download-hero">CV</button><a href="#one" data-analytics="cv-download-nav">CV</a></section>
         <section id="two">
             <section id="inner">nested, not top-level</section>
-            <button type="button" data-analytics="listen"><svg><use href="#i-waveform"></use></svg><span>Listen</span></button>
+            <button type="button" data-analytics="theme"><svg><use href="#i-moon"></use></svg><span>Theme</span></button>
         </section>
         <div>no id</div>
         <section id="has space">an id the server would refuse</section>
@@ -247,13 +247,13 @@ function load(options = {}) {
     const p = load();
     p.click('[data-analytics="cv-download-hero"]');
     p.click('[data-analytics="cv-download-hero"]');
-    p.click('[data-analytics="listen"] use');
+    p.click('[data-analytics="theme"] use');
     p.window.mks.track('module-dossier');
     ['Bad Name', '', undefined, null, 42, 'x'.repeat(41), 'semi;colon'].forEach(n => p.window.mks.track(n));
     p.window.mks.track('brief-high');
     p.leave();
     const f = p.payload().features || [];
-    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'listen', 'module-dossier', 'brief-high']),
+    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'theme', 'module-dossier', 'brief-high']),
         `features: clicks on [data-analytics] (even on an icon inside one) and mks.track(), each once, in order (${f.join(', ')})`);
 
     // Every CV link has a name of its own, and a view that used any of them
@@ -268,7 +268,7 @@ function load(options = {}) {
     assert(JSON.stringify(t) === JSON.stringify(['cv-download-nav', 'cv-download', 'cv-download-hero']),
         `features: two CV links in one view send both names and "cv-download" once (${t.join(', ')})`);
     const none = load();
-    none.click('[data-analytics="listen"]');
+    none.click('[data-analytics="theme"]');
     none.leave();
     assert(!(none.payload().features || []).includes('cv-download'), 'features: a view with no CV link clicked does not carry "cv-download"');
     assert(!('trackEvent' in p.window), 'features: mks.track is the one name for it, with no window.trackEvent beside it');
@@ -411,8 +411,8 @@ function load(options = {}) {
 
 // --- What feeds it on the homepage -----------------------------------------
 // script.js runs before the deferred count.js, as it does in the browser. A
-// module fetched on demand, the Listen control and the player it fetches,
-// and the contact form being sent all land in the list.
+// module fetched on demand and the contact form being sent both land in
+// the list.
 {
     const calls = [];
     const dom = new JSDOM(INDEX, { runScripts: 'outside-only', pretendToBeVisual: true, url: SITE });
@@ -441,13 +441,7 @@ function load(options = {}) {
     const settled = (loading) => Promise.race([loading, new Promise((resolve) => setTimeout(resolve, 2000))]);
 
     const loaded = window.mks.load('terminal');
-    // The one Listen control in the nav fetches the player on its first
-    // press: its stylesheet, the scripts it reads, then the player.
-    const dispatchFiles = ['modules/dispatch.css', 'voice-scripts.js', 'modules/dispatch.js'];
-    const pending = serve(['modules/terminal.js']).then(() => settled(loaded)).then(() => {
-        window.document.getElementById('listenBtn').dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
-        return serve(dispatchFiles);
-    }).then(tick);
+    const pending = serve(['modules/terminal.js']).then(() => settled(loaded)).then(tick);
 
     const form = window.document.getElementById('contactForm');
     ['name', 'email', 'message'].forEach((id) => { window.document.getElementById(id).value = id === 'email' ? 'ada@example.com' : 'Ada'; });
@@ -460,8 +454,6 @@ function load(options = {}) {
         const features = count.length ? JSON.parse(count[0].opts.body).features : [];
         assert(served.includes('modules/terminal.js'), 'Homepage: mksLoad injects the module it was asked for');
         assert(features.includes('module-terminal'), `Homepage: a module fetched on demand is counted as module-<name> (${features.join(', ')})`);
-        assert(served.length === 1 + dispatchFiles.length && features.includes('listen') && features.includes('module-dispatch'),
-            `Homepage: pressing Listen counts the press and the player it fetches (${served.join(', ')})`);
         assert(features.includes('contact-form-submit'), 'Homepage: sending the contact form is counted');
         assert(features.includes('contact-hero'), 'Homepage: a [data-analytics] hook in the real page is counted');
         assert(count.length === 1, `Homepage: one count for the visit (${count.length})`);
@@ -544,10 +536,9 @@ function load(options = {}) {
     const bad = literal.filter(([, n]) => !/^[a-z0-9-]{1,40}$/.test(n));
     assert(distinct.size >= 23, `Hooks: at least the 23 data-analytics hooks the plan counted are found (${distinct.size} distinct names)`);
     assert(bad.length === 0, `Hooks: every name is one the counter keeps (${bad.map(b => b.join(': ')).join(', ') || 'all fine'})`);
-    // The one listen control in the nav, and the player's offer of Moses's
-    // own introduction, are features like any other.
-    assert(distinct.has('listen') && distinct.has('listen-intro') && ['brief-high', 'brief-workable', 'brief-marginal', 'brief-run', 'brief-shared'].every(n => distinct.has(n)),
-        `Hooks: the nav's Listen control, the player's introduction, the Brief's runs and its grades are among them (${[...distinct].filter(n => /^(listen|brief-)/.test(n)).join(', ')})`);
+    // The Brief's runs and its grades are features like any other.
+    assert(['brief-high', 'brief-workable', 'brief-marginal', 'brief-run', 'brief-shared'].every(n => distinct.has(n)),
+        `Hooks: the Brief's runs and its grades are among them (${[...distinct].filter(n => /^brief-/.test(n)).join(', ')})`);
 }
 
 // A message sent from a browser that asks not to be tracked says so, and

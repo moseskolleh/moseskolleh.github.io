@@ -404,7 +404,7 @@ const state = (doc) => {
         assert(JSON.stringify(bars) === JSON.stringify(['#f4f6f0', '#0a0a0a', '#0a0a0a', '#f4f6f0']),
             `Homepage: mks.theme on its own sets the bar to the theme it chose, stored or the system's, before script.js (${bars.join(', ')})`);
         const homeCss = read('style.css').replace(/\/\*[\s\S]*?\*\//g, '');
-        const bodyKeyed = (homeCss.match(/body\.light-mode[^{]*/g) || []).concat((read('modules/dispatch.css').match(/body\.light-mode[^{]*/g) || []));
+        const bodyKeyed = homeCss.match(/body\.light-mode[^{]*/g) || [];
         assert(bodyKeyed.length === 0 && /html\.light-mode\s*{/.test(homeCss),
             `Homepage: the light palette is keyed on html.light-mode, where mks.theme puts it (${bodyKeyed.join('; ') || 'nothing on body'})`);
         // Under reduced motion every element transitions for 0.01ms, so a

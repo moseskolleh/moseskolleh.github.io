@@ -113,7 +113,7 @@
             citation: 'Sustainable Web Design, "Estimating Digital Emissions" (model v3)',
             published: '2023',
             kind: 'methodology',
-            note: 'Its grams per MB weigh pages and audio elsewhere on this site too.'
+            note: 'Its grams per MB weigh pages elsewhere on this site too.'
         }
     };
 
@@ -327,8 +327,8 @@
         BOTTLE_WATER_ML:   { value: 500, range: [500, 500], unit: 'mL',       label: 'Standard water bottle',      source: null, updated: REVIEWED_ON, note: 'A definition, not an estimate.' }
     };
 
-    // The constant used for page and audio transfer weight elsewhere on the
-    // site. Kept here so there is exactly one of it.
+    // The constant used for page transfer weight elsewhere on the site.
+    // Kept here so there is exactly one of it.
     const TRANSFER = {
         gramsPerMB: { value: 0.36, range: [0.20, 0.60], unit: 'gCO₂e/MB', source: 'swd2023', vintage: '2023', updated: REVIEWED_ON,
                       note: 'Covers network transfer only — not the energy the receiving device spends rendering or playing what it received.' }

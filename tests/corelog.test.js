@@ -94,7 +94,7 @@ const label = (d) => `${d.top === d.base ? d.top : `${d.top}–${d.base}`} m`;
     const month = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][+m - 1];
     assert(head === `CORE LOG MKS-01 · LOGGED ${month} ${y} SCALE 10 m / YEAR`, `Page: the head says when the log was logged, and its scale, exactly (${head})`);
     assert(!/TODAY|≈/.test(head), 'Page: the head no longer claims the surface is today, or an approximate scale');
-    // Kept: the open role is at the surface, as the narration says.
+    // Kept: the open role is at the surface.
     assert(depths[0].top === 0 && profile.experience[0].end === null, 'Page: the open role\'s layer starts at the surface, 0 m');
 }
 

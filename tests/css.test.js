@@ -164,7 +164,7 @@ const pagesOf = Object.fromEntries(SHEETS.map(s => [s, PAGES.filter(p => loads(p
 // Everything a script could add to those pages: the scripts the pages
 // name, their inline scripts, and what script.js and the pages fetch on
 // demand. Not build-content.js: what it writes is the committed pages.
-const ON_DEMAND = ['voice-scripts.js', 'ai-carbon-data.js', 'assets/journey-map.svg']
+const ON_DEMAND = ['ai-carbon-data.js', 'assets/journey-map.svg']
     .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`));
 const scriptsOf = (page) => [...html[page].matchAll(/<script[^>]+src="([^"]+)"/g)]
     .map(m => path.posix.normalize(path.posix.join(path.posix.dirname(page), m[1])))

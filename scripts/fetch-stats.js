@@ -240,8 +240,8 @@ function parseSource(text) {
  * Pages, lenses, section ids and feature names, read from the site's own
  * source, so a made-up name posted to the public endpoint cannot reach the
  * public page. A feature is known if a page or a script names it in
- * data-analytics (a module writes some of its own controls, such as the
- * player's offer of the introduction), if it is an on-demand module (as
+ * data-analytics (a module writes some of its own controls, such as
+ * Anatomy of a Prompt's copy button), if it is an on-demand module (as
  * "module-" and its file name, the name the counter gives a module once it
  * has been fetched), if it is one of The Brief's grades (as "brief-" and the
  * grade's class, the name it sends), or if a script tracks it by a literal
