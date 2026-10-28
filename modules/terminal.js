@@ -54,7 +54,7 @@
             print('run \'map\' to fly the route.');
         },
         projects: () => {
-            ['Sustainable Generative AI — Digital Society School × Ministry of Finance',
+            ['Sustainable AI Framework — Digital Society School (2025–2026)',
              'Coastal Water Pollution — 10,226 sub-basins, futures for Africa\'s coasts',
              'Flood-Resilient Wuppertal — don\'t let the Schwebebahn become a boat',
              'UN Disaster Risk Reduction — Sendai Framework data, Bonn',

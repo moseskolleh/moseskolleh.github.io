@@ -555,6 +555,20 @@ const fieldText = plain(fieldReport);
     });
     assert(named.length === 0, `Partners: no client, partner or team member the repositories name is on the site (${named.join(', ') || 'none'})`);
 
+    // The Digital Society School's government partner has not agreed to be
+    // named (owner checklist D2): the site describes it, as profile.json
+    // does, on every page, in the notes and the feed, and in what the
+    // terminal prints. The CV names no partner (tests/cv.test.js).
+    const partnerRe = /Ministry of Finance|Ministerie|Financi[eë]n|finance ministry/i;
+    const notes = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`)
+        .concat(fs.readdirSync(path.join(ROOT, 'content/notes')).filter(f => f.endsWith('.md')).map(f => `content/notes/${f}`));
+    const ministry = pages.concat(notes, ['feed.xml', 'modules/terminal.js', 'script.js'])
+        .map(f => [f, read(f).match(partnerRe)]).filter(([, m]) => m).map(([f, m]) => `${f}: "${m[0]}"`);
+    assert(ministry.length === 0, `Partners: the government partner is described, not named, everywhere the site speaks (${ministry.join(', ') || 'named nowhere'})`);
+    const dss = profile.experience.find(r => r.organization === 'Digital Society School');
+    assert(!!dss && !!dss.partner && !partnerRe.test(dss.partner) && indexText.includes(dss.partner),
+        `Partners: the homepage describes the Digital Society School's partner as profile.json does ("${dss && dss.partner}")`);
+
     // The prototypes' README lists "success metrics" (a 25% CO2 cut, 4.2/5
     // stars, 70% improvement) that are targets. Wherever the site mentions
     // them it says so, and none of their figures appears.

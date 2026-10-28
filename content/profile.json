@@ -122,7 +122,8 @@
       "title": "Researcher — Sustainable Artificial Intelligence",
       "organization": "Digital Society School",
       "parentOrganization": "Amsterdam University of Applied Sciences",
-      "partner": "Ministry of Finance (Ministerie van Financiën)",
+      "partner": "a Dutch government partner",
+      "$partner": "Described, not named: no consent to name the organisation is recorded (owner checklist D2), so no page names it. The CV names no partner at all; tests/cv.test.js holds every role's partner off it.",
       "displayDates": "Sept 2025 — Feb 2026",
       "start": "2025-09",
       "end": "2026-02"
