@@ -2890,9 +2890,31 @@ async function axeHomepageStates(page, view, note, attempt) {
     });
 
     // The page's own carbon receipt, printed from the footer.
+    // The press builds it; the wait is for that, then for the receipt in
+    // sight. In Firefox, with four views at once, the receipt at the foot of
+    // the page was built but not yet visible after 5 s: the sections above
+    // it, drawn only near the screen, were still settling under the scroll.
+    // Brought to the middle of the screen, it is drawn; a wait that still
+    // fails says what state the receipt was in, not only that time ran out.
     await attempt(`${rel}: axe on the carbon receipt`, async () => {
         await page.click('#receiptBtn', within);
-        await page.waitForSelector('#receiptBody :first-child', within);
+        const state = () => page.evaluate(() => {
+            const p = document.getElementById('receiptPanel'), b = document.getElementById('receiptBody');
+            const r = p && p.getBoundingClientRect();
+            return `panel ${!p ? 'missing' : p.hidden ? 'hidden' : 'open'}, ${b ? b.childElementCount : 0} lines, ` +
+                `module ${(window.mks && window.mks.loaded && window.mks.loaded.interactives) ? 'in' : 'not in'}, ` +
+                `top ${r ? Math.round(r.top) : '-'}px of ${innerHeight}px, scrolled ${Math.round(scrollY)}px`;
+        });
+        try {
+            await page.waitForFunction(() => {
+                const p = document.getElementById('receiptPanel'), b = document.getElementById('receiptBody');
+                return !!(p && !p.hidden && b && b.childElementCount);
+            }, null, within);
+            await page.$eval('#receiptPanel', (el) => el.scrollIntoView({ block: 'center' }));
+            await page.waitForSelector('#receiptBody :first-child', within);
+        } catch (e) {
+            throw new Error(`${String(e.message || e).split('\n')[0]} (${await state().catch(() => 'state unreadable')})`);
+        }
         note(rel, 'the carbon receipt', view, await axeRun(page, '#receiptPanel'));
         await page.click('#receiptBtn', within);
     });
