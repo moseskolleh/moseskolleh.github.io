@@ -298,8 +298,7 @@ const formChecks = (async () => {
     // --- Bug 9: a copy button gets its icon back after "Copied ✓" ---
     // The homepage has no copy button now: Anatomy's, the first one
     // reported, is on carbon-ai.html with its own (tests/carbon.test.js),
-    // and the Assay's went with it to The Brief, whose Copy link is held
-    // to the same in tests/brief.test.js.
+    // and the Assay's went with it to The Brief, since retired.
 })();
 
 formChecks.then(() => {

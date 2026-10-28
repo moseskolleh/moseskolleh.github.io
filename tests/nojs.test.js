@@ -212,10 +212,6 @@ const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/\s([\w-]+)(?:=["']
         `carbon-ai.html: each script that fails to load brings the note back (${back.length} of ${tags.length})`);
     assert(markAfterError('carbon-ai.html', { src: 'count.js', defer: '' }) && markAfterError('carbon-ai.html', { src: 'theme.js' }),
         'carbon-ai.html: the counter or theme.js failing to load leaves the calculator be');
-    // The Brief's own script is the generated pages' case of the same.
-    const brief = (read('brief.html').match(/<script\b[^>]*\bsrc=["']brief\.js["'][^>]*>/) || [''])[0];
-    assert(!!brief && !markAfterError('brief.html', attrsOf(brief)) && markAfterError('brief.html', { src: 'count.js', defer: '' }),
-        'brief.html: brief.js failing to load takes the mark off; the counter failing does not');
     assert(/class="nojs-note"/.test(html), 'index.html: a note stands in for the section-05 calculators without JavaScript');
     // Without JavaScript the note sat flush on the coach's button, and both
     // led to the same page: two ways on, back to back. And the footnote

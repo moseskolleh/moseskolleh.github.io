@@ -9,10 +9,9 @@
     "certification the rest of the site did not.",
     "",
     "npm run build:content generates from this file: the JSON-LD block and the",
-    "at-a-glance strip in index.html, sitemap.xml (from `pages`), the facts",
-    "The Brief may state in brief.html (roles, degrees and `languages`, and its",
-    "dossier's at-a-glance facts), and the closing call to action on every page",
-    "but the homepage (the email, the CV and atAGlance.targetRoles); build:check",
+    "at-a-glance strip in index.html, sitemap.xml (from `pages`), and the",
+    "closing call to action on every page but the homepage (the email, the CV",
+    "and atAGlance.targetRoles); build:check",
     "fails in CI if any of them is behind. The rest of the editorial pages is not",
     "generated from it —",
     "index.html and field-report.html stay hand-authored outside those regions —",
@@ -56,7 +55,7 @@
     "GIS"
   ],
 
-  "$languages": "Optional and deliberately absent: add \"languages\": [{ \"language\": \"Dutch\", \"level\": \"B1\" }], named in English with a CEFR level (A1-C2) or \"native\", once Moses states them. Until then The Brief (brief.html) lists every non-English language a job ad asks for as a gap rather than guessing. npm run build:content copies it into brief.html, and into the at-a-glance strip below.",
+  "$languages": "Optional and deliberately absent: add \"languages\": [{ \"language\": \"Dutch\", \"level\": \"B1\" }], named in English with a CEFR level (A1-C2) or \"native\", once Moses states them. Until then the site states no language rather than guessing. npm run build:content copies it into the at-a-glance strip below and the JSON-LD (knowsLanguage).",
 
   "$atAGlance": [
     "The strip under the homepage hero's copy: what a recruiter checks first.",
@@ -65,7 +64,7 @@
     "and the validator refuses one written as a value. Only Moses can state",
     "seniority, availableFrom and rightToWork (docs/owner-checklist.md, F2 and",
     "F3). Two facts are read from elsewhere in this file rather than repeated:",
-    "languages (the top-level list above, the one The Brief reads) and the",
+    "languages (the top-level list above) and the",
     "location (person.locality and person.country).",
     "",
     "targetRoles   required; the hero's availability line, after 'Open to '",
@@ -220,13 +219,12 @@
 
   "$pages": "Drives sitemap.xml. lastmod is set by hand when a page's content changes — a build timestamp would claim every page changed on every deploy, which is the fastest way to teach a crawler to ignore the field.",
   "pages": [
-    { "path": "index.html", "loc": "https://moseskolleh.github.io/", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "1.0" },
+    { "path": "index.html", "loc": "https://moseskolleh.github.io/", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "1.0" },
     { "path": "case-studies.html", "loc": "https://moseskolleh.github.io/case-studies.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.9" },
     { "path": "research.html", "loc": "https://moseskolleh.github.io/research.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.8" },
     { "path": "carbon-ai.html", "loc": "https://moseskolleh.github.io/carbon-ai.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.8" },
-    { "path": "brief.html", "loc": "https://moseskolleh.github.io/brief.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.8" },
     { "path": "field-report.html", "loc": "https://moseskolleh.github.io/field-report.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.3" },
-    { "path": "claims.html", "loc": "https://moseskolleh.github.io/claims.html", "lastmod": "2026-10-18", "changefreq": "monthly", "priority": "0.5" },
-    { "path": "stats.html", "loc": "https://moseskolleh.github.io/stats.html", "lastmod": "2026-10-18", "changefreq": "weekly", "priority": "0.2" }
+    { "path": "claims.html", "loc": "https://moseskolleh.github.io/claims.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.5" },
+    { "path": "stats.html", "loc": "https://moseskolleh.github.io/stats.html", "lastmod": "2026-10-28", "changefreq": "weekly", "priority": "0.2" }
   ]
 }

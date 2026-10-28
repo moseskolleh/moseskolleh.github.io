@@ -4,9 +4,7 @@
 // The share helper, You Draw It and The Receipt: JavaScript that only
 // matters once someone scrolls to section 05 or opens the footer receipt.
 // You Draw It needs ai-carbon-data.js, which the loader fetches first. The
-// calculator and Anatomy of a Prompt that were here are on carbon-ai.html,
-// and the Assay that sat under the contact form grew into The Brief, a
-// page of its own (brief.html, brief.js).
+// calculator and Anatomy of a Prompt that were here are on carbon-ai.html.
 //
 // Loaded on demand by script.js (mks.load('interactives')), whose ON-DEMAND
 // MODULES section says when, and why it declares nothing at the top level.

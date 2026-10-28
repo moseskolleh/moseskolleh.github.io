@@ -208,18 +208,10 @@ const BUDGETS = {
         label: 'EcoPrompt Coach (carbon-ai.html), over the wire (with fonts)',
         max: 111 * KB,
         readme: 'EcoPrompt Coach (`carbon-ai.html`), over the wire (fonts included)'
-    },
-    // The Brief: the page, its stylesheet, its own script and its rubric,
-    // which the build writes into the page (no request for it later). Set
-    // when the page was made (October 2026) at its measure plus 5%, as the
-    // ratchet would set it: a new budget, not a raised one. Its script is
-    // its own, so neither the homepage's core nor its on-demand total
-    // carries it.
-    briefWire: {
-        label: 'The Brief (brief.html), over the wire (with fonts and its script)',
-        max: 113 * KB,
-        readme: 'The Brief (`brief.html`), over the wire (fonts and its script included)'
     }
+    // The Brief (brief.html) had a budget of its own, briefWire, until it was
+    // retired in October 2026. The note left at its address is about the
+    // size of the 404 page, and like it has a length budget only.
 };
 
 // The pages whose whole first view is budgeted, and the measurement that
@@ -231,7 +223,6 @@ const PAGE_BUDGETS = {
     'research.html': 'researchWire',
     'carbon-ai.html': 'carbonAiWire',
     'claims.html': 'claimsWire',
-    'brief.html': 'briefWire',
     // Every page the pattern matches, each measured in smoke against it.
     'notes/*.html': 'notesWire',
     'stats.html': 'statsWire',
@@ -269,8 +260,8 @@ const PHONE_BUDGETS = {
 // the wave that made it: on 3 October 2026 once its lanes had merged, and
 // set again the next day, before the wave closed, once the review had put
 // the figures written in words on the list (36 entries, not 30).
-// brief.html's too, on 17 October 2026, as it loads: every case study in
-// its dossier, no ad graded yet.
+// brief.html's was set on 17 October 2026 for The Brief; since its
+// retirement (October 2026) it holds the note left there to the 404 page's.
 // stats.html is held drawn full, as the smoke's fixture draws a busy
 // quarter: that is the page the weekly Action will commit, and the page as
 // committed today is shorter. The field notes share one, set in October
@@ -286,7 +277,7 @@ const LENGTH = {
     'case-studies.html': { '1440x900': 11.85, '390x844': 19.78 },
     'carbon-ai.html': { '1440x900': 7.07, '390x844': 13.38 },
     'claims.html': { '1440x900': 7.54, '390x844': 13.53 },
-    'brief.html': { '1440x900': 2.63, '390x844': 3.74 },
+    'brief.html': { '1440x900': 1.05, '390x844': 1.05 },
     'research.html': { '1440x900': 5.75, '390x844': 8.99 },
     'stats.html': { '1440x900': 10.97, '390x844': 16.25 },
     'field-report.html': { '1440x900': 4.4, '390x844': 7.44 },
@@ -544,7 +535,6 @@ function measure() {
         researchWire: pageWire('research.html'),
         carbonAiWire: pageWire('carbon-ai.html'),
         claimsWire: pageWire('claims.html'),
-        briefWire: pageWire('brief.html'),
         // The heaviest note; null with none.
         notesWire: sitePages().filter(p => covers('notes/*.html', p)).reduce((n, p) => Math.max(n === null ? 0 : n, pageWire(p)), null),
         largestImage: images.reduce((n, f) => Math.max(n, sizeOf(f) || 0), 0),

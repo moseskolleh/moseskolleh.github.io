@@ -16,7 +16,7 @@
     "section number, a standard's name, \"one\", a count of what the page",
     "shows in full and the like, a size said in words (\"a fifth\", \"twice\")",
     "that nothing holds, a figure a script prints of its own (the field",
-    "terminal, The Brief, the receipt, the coach's tips) that is not here.",
+    "terminal, the receipt, the coach's tips) that is not here.",
     "",
     "FIELDS (scripts/lib/content.js refuses anything else)",
     "",
@@ -198,9 +198,9 @@
     },
     {
       "id": "first-view",
-      "value": "257",
+      "value": "256",
       "unit": "KB over the wire: the homepage's first view on a desktop, fonts included",
-      "forms": ["~257"],
+      "forms": ["~256"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
       "check": "https://github.com/moseskolleh/moseskolleh.github.io#performance"

@@ -39,7 +39,7 @@ function assert(cond, msg) {
     }
 }
 
-// The stylesheets this holds. brief.css and modules/*.css are not (yet).
+// The stylesheets this holds. modules/*.css are not (yet).
 const SHEETS = ['style.css', 'carbon-ai.css', 'content.css', 'notes.css', 'stats.css', 'claims.css'];
 
 // A stylesheet as a flat list of rules: each selector list with the @media
@@ -305,7 +305,7 @@ const faces = PAGES.filter(p => loads(p).length).map((p) => {
     return { p, first: sheets[0], declaring };
 });
 const wrong = faces.filter(f => f.declaring.length !== 1 || f.declaring[0] !== f.first).map(f => `${f.p}: ${f.declaring.join(', ') || 'none'}`);
-assert(faces.length >= 10 && wrong.length === 0,
+assert(faces.length >= 9 && wrong.length === 0,
     `Fonts: each page's first stylesheet declares the typefaces, and no other it loads does (${faces.length} pages; ${wrong.join('; ') || 'all once'})`);
 
 if (failures > 0) {

@@ -454,16 +454,17 @@ inPageLinks.forEach((anchor, index) => {
 });
 
 // Links already shared to what moved off this page (the games, Anatomy of
-// a Prompt, and the Assay, which grew into The Brief) opened it at its top,
-// with no sign of what they were for. They go on to where it is now, with
-// the site that linked to them as ?via=: count.js would otherwise take
-// this page for the referrer.
+// a Prompt, and the Assay, which grew into The Brief, since retired) opened
+// it at its top, with no sign of what they were for. They go on to where
+// it is now, or to the note left where it was, with the site that linked
+// to them as ?via=: count.js would otherwise take this page for the
+// referrer.
 const MOVED = new Map([
     ['anatomy', 'carbon-ai.html#anatomy'],
     ['boreholeGame', 'case-studies.html#play-borehole'],
     ['strikeWidget', 'case-studies.html#play-borehole'],
     ['floodSim', 'case-studies.html#play-flood'],
-    ['assay', 'brief.html#grade']
+    ['assay', 'brief.html#retired']
 ]);
 const forwardMoved = () => {
     const id = location.hash.slice(1), to = MOVED.get(id);

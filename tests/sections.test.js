@@ -12,7 +12,7 @@
 //     More button named for its role;
 //   - the Assay under the contact form, its question and promise in view and
 //     its box behind one button, until it grew into The Brief, a page of
-//     its own: one line under the form leads there now.
+//     its own, since retired: the form is the section's last word now.
 //
 // A real browser measures the length and checks the same at 320, 390 and
 // 1280/1440px (scripts/smoke.js: exerciseSections, and checkLengths against
@@ -112,35 +112,23 @@ const profile = JSON.parse(read('content/profile.json'));
 }
 
 // ===================================================================
-// Contact: the form first, then one line to The Brief
+// Contact: the form, and no line to The Brief
 // ===================================================================
 // The Assay sat under the form, folded behind a button: 470px of a desktop
 // and 660 of a phone open, for the few who wanted it. It grew into The
-// Brief (brief.html), and the section keeps one line that leads there.
+// Brief (brief.html), with one line under the form leading there, and both
+// went when The Brief was retired: the homepage links to it nowhere.
 {
     const contact = bare.getElementById('contact');
     const form = bare.getElementById('contactForm');
-    const line = bare.querySelector('#contact .brief-line');
-    // Its id stays only inside <noscript>, which a browser builds only with
-    // scripts off: there script.js cannot send /#assay on to The Brief, and
-    // the address lands on the line that leads there instead.
-    const assay = bare.getElementById('assay');
-    assert(!!assay && assay.closest('noscript') && assay.closest('.brief-line') === line && !bare.querySelector('[class*="assay"], #assayInput, #assayResult'),
-        'Contact: the Assay\'s box has left the homepage, its id kept only for a reader without scripts, on the line to The Brief');
-    const link = line && line.querySelector('a[href="brief.html"]');
-    assert(!!line && !!(form.compareDocumentPosition(line) & bare.defaultView.Node.DOCUMENT_POSITION_FOLLOWING) && !line.closest('form'),
-        'Contact: one line under the form leads to The Brief');
-    assert(!!link && link.getAttribute('data-analytics') === 'brief-home', 'Contact: the link is counted when followed');
-    assert(/the ad is never sent/.test(text(line)) && !/nothing (?:is )?sent/.test(text(line)), `Contact: and says the ad is never sent ("${text(line)}")`);
+    assert(!bare.getElementById('assay') && !bare.querySelector('.brief-line, [class*="assay"], #assayInput, #assayResult'),
+        'Contact: neither the Assay nor the line to The Brief is left in the section');
+    assert(!bare.querySelector('a[href^="brief.html"], a[href="#assay"], [data-analytics^="brief-"]') && !/Hiring\?|job (?:ad|description)/i.test(text(bare.body)),
+        'Contact: the homepage links to The Brief nowhere, the play index included, and asks for no job ad');
     const firstField = contact.querySelector('input, textarea, select');
     assert(firstField && firstField.closest('form') === form, `Contact: the first field in the section is the form's (${firstField && firstField.id})`);
-    assert(!line.querySelector('.btn-primary, button'), 'Contact: a line, with no button to compete with Send');
-    assert(!/\.assay\b|assay-/.test(css), 'Contact: the Assay\'s rules have left style.css with it');
-    assert(!/assay/i.test(read('modules/interactives.js').replace(/^\s*\/\/.*$/gm, '')), 'Contact: and its code has left modules/interactives.js');
-
-    // "grade your job description" in the play index goes to The Brief.
-    assert(!!bare.querySelector('.play-index a[href="brief.html"]') && !bare.querySelector('a[href="#assay"]'),
-        'Contact: the play index\'s "grade your job description" goes to brief.html');
+    assert(!/\.assay\b|assay-|\.brief-line/.test(css), 'Contact: the rules for the Assay and the line to The Brief have left style.css');
+    assert(!/assay/i.test(read('modules/interactives.js').replace(/^\s*\/\/.*$/gm, '')), 'Contact: and the Assay\'s code has left modules/interactives.js');
 }
 
 // ===================================================================
@@ -211,7 +199,7 @@ const profile = JSON.parse(read('content/profile.json'));
     const kept = projects.caseStudies.filter(c => text(cs.querySelector(`#${c.id} .cs-card-sub`)) === c.subtitle.replace(/\s+/g, ' ').trim()).length;
     assert(kept === projects.caseStudies.length, `Projects: every subtitle is on its case study, one click away (${kept} of ${projects.caseStudies.length})`);
     assert(cards.every(c => c.querySelector('.project-tags > .project-lenses') && c.querySelector('.project-tags > .project-tech span')),
-        'Projects: each card keeps its lenses and its tools (The Brief reads them), on one run of small type');
+        'Projects: each card keeps its lenses and its tools, on one run of small type');
     const intro = bare.querySelector('#projects .section-description');
     const lensIds = JSON.parse(read('content/lenses.json')).lenses.map(l => l.id);
     const lensLinks = intro ? Array.from(intro.querySelectorAll('a[href^="case-studies.html?lens="]')).map(a => a.getAttribute('href').split('=')[1]) : [];
@@ -228,7 +216,7 @@ const profile = JSON.parse(read('content/profile.json'));
     const skillText = text(skills);
     const education = bare.getElementById('education');
     assert(!!education && education.closest('#skills') === skills && education.tagName !== 'SECTION',
-        'Skills & Education: one section; #education is a part of it, still an address for The Brief\'s links');
+        'Skills & Education: one section; #education is a part of it, still an address');
     assert(/Skills & Education/.test(text(skills.querySelector('.section-title'))), 'Skills & Education: the heading says both');
 
     const expertise = ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Life Cycle Assessment', 'Climate Risk Assessment',
@@ -245,25 +233,6 @@ const profile = JSON.parse(read('content/profile.json'));
             const outside = Array.from(bare.querySelectorAll('main > section')).filter(s => s.id !== 'skills' && re.test(text(s))).map(s => s.id);
             assert(outside.length > 0 && !re.test(skillText), `Skills: ${what} is not repeated here, and is still in ${outside.join(', ')}`);
         });
-
-    // The Brief reads a named tool's evidence from the homepage, these lists
-    // and the certificates' lines included, so the build has to know where
-    // they are (scripts/build-content.js, BRIEF_SOURCES).
-    const { briefToolEvidence } = require('../scripts/build-content.js');
-    const tools = JSON.parse(read('content/brief.json')).tools;
-    const ev = briefToolEvidence(tools, bare);
-    const lca = (ev['Life Cycle Assessment'] || [])[0];
-    // ...and names a heading the reader can find there: it said "Skills &
-    // Expertise" after the section became Skills & Education.
-    const heading = text(skills.querySelector('h2'));
-    assert(!!lca && lca.t === `Listed under ${heading}` && lca.href === 'index.html#skills',
-        `Skills: the Brief finds Life Cycle Assessment in the expertise list, under the section's own heading, "${heading}" (${lca ? lca.t : 'not found'})`);
-    const alone = new JSDOM(`<main>${education.outerHTML}</main>`).window.document;
-    const excel = (briefToolEvidence(tools, alone).Excel || [])[0];
-    assert(!!excel && /^Covered in Data Analytics Training: SQL, Python, Excel, Tableau/.test(excel.t) && excel.href === 'index.html#education',
-        `Education: the Brief reads a certificate's line, and names the certificate (${excel ? excel.t : 'not found'})`);
-    const page = JSON.parse(new JSDOM(read('brief.html')).window.document.getElementById('briefData').textContent);
-    assert(JSON.stringify(page.toolEvidence) === JSON.stringify(ev), 'Skills: brief.html carries where the homepage shows each tool, as the homepage shows it now');
 
     // Every certificate keeps its name, issuer, date and what it covered;
     // every degree its dates, institution and every line it had.

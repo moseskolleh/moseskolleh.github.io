@@ -228,7 +228,7 @@ const countScrolls = (window) => {
         const band = observers.filter(o => o.els.length).pop();
         const watched = (sel) => !!band && Array.from(doc.querySelectorAll(sel)).every(el => band.els.includes(el));
         const CONTROLS = ['.hero-availability', '.hero-cta a', '.contact-form input', '.contact-form textarea', '.btn-submit',
-            '.corelog-more', '.project-link', '#ydiReveal', '.brief-line a', 'a.toolkit-proof', '.carbon-badge', '.receipt-btn', '.eco-mode-toggle', '.terminal-toggle'];
+            '.corelog-more', '.project-link', '#ydiReveal', 'a.toolkit-proof', '.carbon-badge', '.receipt-btn', '.eco-mode-toggle', '.terminal-toggle'];
         const missing = CONTROLS.filter(sel => !doc.querySelector(sel) || !watched(sel));
         assert(!!band && missing.length === 0, `Back to top: it watches every control it could sit on, from the hero to the footer (not watched: ${missing.join(', ') || 'none'})`);
         assert(!!band && !band.els.some(el => el.classList.contains('footer') || el.classList.contains('contact-form')),
@@ -298,14 +298,12 @@ const countScrolls = (window) => {
         const moved = literal ? Function(`return ${literal}`)() : [];
         const page = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
         // An id inside <noscript> is built only with scripts off, when
-        // nothing forwards: /#assay lands on the line to The Brief then.
+        // nothing forwards.
         const home = page('index.html').replace(/<noscript>[\s\S]*?<\/noscript>/g, '');
         const stale = moved.filter(([id]) => new RegExp(`\\bid="${id}"`).test(home)).map(([id]) => id);
-        assert(/<p class="brief-line"><noscript><span id="assay"><\/span><\/noscript>/.test(page('index.html')),
-            'Moved: without scripts, /#assay lands on the homepage\'s line to The Brief, by an id inside <noscript>');
         const dead = moved.filter(([, to]) => { const [rel, id] = to.split('#'); return !new RegExp(`\\bid="${id}"`).test(page(rel)); }).map(([, to]) => to);
-        assert(moved.length >= 5 && moved.some(([id]) => id === 'strikeWidget') && moved.some(([id]) => id === 'anatomy') && moved.some(([id, to]) => id === 'assay' && to === 'brief.html#grade'),
-            `Moved: the old addresses of the games, Anatomy of a Prompt and the Assay (to The Brief's box) are forwarded (${moved.map(([id]) => `#${id}`).join(', ') || 'none'})`);
+        assert(moved.length >= 5 && moved.some(([id]) => id === 'strikeWidget') && moved.some(([id]) => id === 'anatomy') && moved.some(([id, to]) => id === 'assay' && to === 'brief.html#retired'),
+            `Moved: the old addresses of the games, Anatomy of a Prompt and the Assay (to the note left where The Brief was) are forwarded (${moved.map(([id]) => `#${id}`).join(', ') || 'none'})`);
         assert(stale.length === 0, `Moved: none of them is an id on the homepage again, which a forward would hide (${stale.join(', ') || 'none'})`);
         assert(dead.length === 0, `Moved: each goes to an id its page has (missing: ${dead.join(', ') || 'none'})`);
     }

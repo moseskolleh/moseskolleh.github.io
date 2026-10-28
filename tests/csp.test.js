@@ -1,7 +1,7 @@
 // The Content-Security-Policy and the referrer policy every page carries.
 //
-// The Brief renders parts of a stranger's paste back into its page, so every
-// page states, before any script or stylesheet, what may run and where it may
+// Should a bug ever let markup into a page, the policy is what stops it
+// running, so every page states, before any script or stylesheet, what may run and where it may
 // talk to (scripts/build-content.js writes it, and says why each directive
 // is what it is). A policy is only as good as its fit: an inline script
 // whose hash is stale stops running, quietly, and an allowance too broad
@@ -40,7 +40,7 @@ function assert(cond, msg) {
 }
 
 const PAGES = sitePages();
-const HAND = ['index.html', 'carbon-ai.html', 'field-report.html', '404.html'];
+const HAND = ['index.html', 'carbon-ai.html', 'field-report.html', '404.html', 'brief.html'];
 const GAS = (read('script.js').match(/const GOOGLE_APPS_SCRIPT_URL = '([^']+)'/) || [])[1] || '';
 const REDIRECT = 'https://script.googleusercontent.com';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -67,8 +67,8 @@ function allows(list, href) {
 }
 
 // A script element the browser would run: no src, and no type or a
-// JavaScript one. JSON-LD and The Brief's application/json are data blocks:
-// never run, so the policy has nothing to say about them.
+// JavaScript one. JSON-LD blocks are data: never run, so the policy has
+// nothing to say about them.
 const runs = (el) => !el.hasAttribute('src') && (!el.hasAttribute('type') || /^(text|application)\/(java|ecma)script$|^module$/i.test(el.getAttribute('type')));
 const hashOf = (text) => `'sha256-${crypto.createHash('sha256').update(text, 'utf8').digest('base64')}'`;
 
@@ -179,7 +179,7 @@ PAGES.forEach((rel) => {
 // page reach, and the policy must reach nothing those scripts do not name
 // bar the redirect, which no script names: Apps Script sends it.
 {
-    const shipped = ['script.js', 'count.js', 'theme.js', 'carbon-ai.js', 'ai-carbon-data.js', 'brief.js',
+    const shipped = ['script.js', 'count.js', 'theme.js', 'carbon-ai.js', 'ai-carbon-data.js',
         ...fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`)].map(read);
     PAGES.forEach(rel => inspect(rel).inline.forEach(s => shipped.push(s.textContent)));
     const named = new Set(shipped.flatMap(text => (text.match(/['"`](?:https?:)?\/\/[^'"`\s$]*/g) || []).map(m => m.slice(1))));

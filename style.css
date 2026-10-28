@@ -887,20 +887,6 @@ html.light-mode .ydi-hint { background: rgba(255, 255, 255, 0.85); }
     .ydi-real-line { transition: none; }
 }
 
-/* The Brief's line under the contact form: the paste-a-job-ad fit check
-   that sat here has a page of its own (brief.html). */
-.brief-line {
-    max-width: 820px;
-    margin: 32px auto 0;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    text-align: center;
-}
-.brief-line .mono-label { margin-right: 6px; color: var(--primary-green); }
-.brief-line a { color: var(--text-primary); text-underline-offset: 3px; }
-.brief-line a:hover { color: var(--primary-green); }
-
 /* Play index — signposts the interactive features, some on other pages */
 .play-index {
     background: var(--card-bg-alt);

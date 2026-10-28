@@ -121,10 +121,8 @@ PAGES.forEach((page) => {
         const cv = Array.from(el.querySelectorAll('a[download]')).map(a => where(a.getAttribute('href')));
         return hrefs.includes(`mailto:${profile.person.email}`) && hrefs.includes('index.html#contact') && cv.includes(profile.links.cv);
     };
-    // The smallest blocks that offer all three: one per page. The Brief's
-    // dossier carries the same three for paper, where the call to action is
-    // not printed; on screen the call to action is still the one.
-    const blocks = Array.from(main.querySelectorAll('section, p')).filter(el => offers(el) && !Array.from(el.children).some(offers) && !el.closest('.bf-dossier'));
+    // The smallest blocks that offer all three: one per page.
+    const blocks = Array.from(main.querySelectorAll('section, p')).filter(el => offers(el) && !Array.from(el.children).some(offers));
     assert(blocks.length === 1, `${page}: one call to action in <main> with profile.json's address, the contact form and the CV download (${blocks.length})`);
     const cta = blocks[0];
     if (!cta) return;
@@ -144,11 +142,10 @@ PAGES.forEach((page) => {
         const top = tail[1] && tail[1].querySelector('a');
         assert(!!top && top.getAttribute('href') === '#top' && doc.body.id === 'top' && text(top) === 'Back to top',
             `${page}: back to top goes to <body id="top">`);
-        // Beside it, for whoever is hiring, The Brief: on its line, which
-        // had the room, so it lengthens no page; not on The Brief itself.
-        const brief = tail[1] && Array.from(tail[1].querySelectorAll('a')).filter(a => /(^|\/)brief\.html$/.test(a.getAttribute('href')));
-        assert(page === 'brief.html' ? brief.length === 0 : brief.length === 1 && /^Hiring\?/.test(text(brief[0])),
-            `${page}: ${page === 'brief.html' ? 'no link to itself beside back to top' : 'beside back to top, "Hiring? Paste your job ad" goes to The Brief'}`);
+        // Back to top alone: "Hiring? Paste your job ad" sat beside it, to
+        // The Brief, until The Brief was retired.
+        assert(!!tail[1] && tail[1].querySelectorAll('a').length === 1 && !/Hiring|job ad/i.test(text(tail[1])),
+            `${page}: back to top is the line's only link, with no "Hiring?" line to The Brief beside it`);
     }
 });
 
@@ -186,7 +183,7 @@ PAGES.forEach((page) => {
 // ===================================================================
 // The hand-authored pages: the shell exactly as build-content.js writes it
 // ===================================================================
-['carbon-ai.html', 'field-report.html', '404.html'].forEach((page) => {
+['carbon-ai.html', 'field-report.html', '404.html', 'brief.html'].forEach((page) => {
     const src = read(page);
     const regions = shellRegions(page, shellFacts(profile));
     Object.entries(regions).forEach(([name, block]) => {
@@ -486,13 +483,13 @@ const state = (doc) => {
             `Palette: the light page is the colour of the homepage's light browser bar, and theme.js sets that bar (${bar})`);
 
         // Text follows the theme only if it takes its colour from a token.
-        const literal = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css', 'brief.css']
+        const literal = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css']
             .flatMap(f => (strip(read(f)).match(/(?<![-\w])color:(?!\s*var\()[^;]+/g) || []).map(d => `${f}: ${d}`));
         assert(literal.length === 0, `Palette: every text colour on these pages is a token (${literal.join('; ') || 'none fixed'})`);
         // A line drawn in white (or black) is there in one theme only: the
         // calculator's rows and the equivalence list lost their dividers on
         // the light page. A tinted line shows on both; a neutral one is a token.
-        const neutral = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css', 'brief.css']
+        const neutral = ['carbon-ai.css', 'content.css', 'stats.css', 'claims.css']
             .flatMap(f => (strip(read(f)).match(/(?<![-\w])border[\w-]*:[^;]*(?:rgba?\(\s*(?:255\s*,\s*255\s*,\s*255|0\s*,\s*0\s*,\s*0)\b|#f{3}\b|#f{6}\b|#0{3}\b|#0{6}\b|\bwhite\b|\bblack\b)[^;]*/gi) || []).map(d => `${f}: ${d}`));
         assert(neutral.length === 0, `Palette: no line on these pages is a fixed white or black, which one theme cannot see (${neutral.join('; ') || 'none'})`);
         // Anatomy of a Prompt's accents: carbon-ai.html has no html.light-mode.

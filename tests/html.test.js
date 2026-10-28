@@ -24,7 +24,7 @@ const PAGES = [
     'research.html',
     'stats.html',
     'claims.html',
-    'brief.html',
+    'brief.html',   // retired: a note at its address, so old links still answer
     'field-report.html',
     '404.html'
 ].concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).sort().map(f => `notes/${f}`));
@@ -286,7 +286,7 @@ PAGES.forEach((page) => {
     assert(attr(form, 'action') === GAS, 'Endpoint: the contact form without JavaScript posts to the same deployment');
 
     const shipped = [
-        'script.js', 'count.js', 'theme.js', 'carbon-ai.js', 'ai-carbon-data.js', 'brief.js',
+        'script.js', 'count.js', 'theme.js', 'carbon-ai.js', 'ai-carbon-data.js',
         ...fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`)
     ].map(rel => [rel, js(rel)]);
     PAGES.forEach((page) => {

@@ -100,7 +100,6 @@ const EMPTY = {
     suppressBelow: SUPPRESS_BELOW,
     period: null,
     week: null,
-    briefLive: false,
     headline: null,
     breakdown: null,
     bytes: null,
@@ -243,9 +242,7 @@ function parseSource(text) {
  * data-analytics (a module writes some of its own controls, such as
  * Anatomy of a Prompt's copy button), if it is an on-demand module (as
  * "module-" and its file name, the name the counter gives a module once it
- * has been fetched), if it is one of The Brief's grades (as "brief-" and the
- * grade's class, the name it sends), or if a script tracks it by a literal
- * name ("brief-run", the fifth of the five numbers, among them).
+ * has been fetched), or if a script tracks it by a literal name.
  */
 function knownNames(root = ROOT) {
     const rootFiles = fs.readdirSync(root);
@@ -270,15 +267,9 @@ function knownNames(root = ROOT) {
     scripts.forEach((file) => {
         const js = fs.readFileSync(file, 'utf8');
         for (const m of js.matchAll(/\bdata-analytics="([a-z0-9-]{1,40})"/g)) features.add(m[1]);
-        // A whole literal only: track('brief-' + a.cls) names no feature.
+        // A whole literal only: track('x-' + name) names no feature.
         for (const m of js.matchAll(/\btrack\(\s*['"]([a-z0-9-]{1,40})['"]\s*\)/g)) features.add(m[1]);
     });
-    // The Brief composes its name from the grade's class, so read the classes.
-    const brief = path.join(root, 'brief.js');
-    if (fs.existsSync(brief)) {
-        const classes = (fs.readFileSync(brief, 'utf8').match(/const GRADE_CLASS = \{([^}]*)\}/) || ['', ''])[1];
-        for (const m of classes.matchAll(/'([a-z0-9-]{1,33})'/g)) features.add(`brief-${m[1]}`);
-    }
 
     const lenses = JSON.parse(fs.readFileSync(path.join(root, 'content', 'lenses.json'), 'utf8'));
     const noteNames = notes.map(f => (fs.readFileSync(path.join(root, f), 'utf8').match(/<script[^>]*\bsrc="[^"]*count\.js"[^>]*\bdata-page="([a-z0-9-]{1,40})"/) || [])[1]).filter(Boolean);
@@ -432,8 +423,9 @@ const sum = (map, keep = () => true) => Array.from(map).reduce((n, [k, v]) => n 
 const CV = 'cv-download';
 
 /**
- * The five numbers from docs/plan.md, Phase 1 step 5, plus page views for
- * scale, as cells. Each is defined as closely as daily per-field totals allow:
+ * The four numbers from docs/plan.md, Phase 1 step 5, plus page views for
+ * scale, as cells (the fifth, Brief uses, went with The Brief in October
+ * 2026). Each is defined as closely as daily per-field totals allow:
  *
  *   contact       accepted contact-form submissions, bar those from a browser
  *                 that asked not to be tracked (Code.gs)
@@ -444,24 +436,19 @@ const CV = 'cv-download';
  *                 kept per field, not per visit, so lens and section cannot be
  *                 joined. This is the closest honest proxy — an upper bound —
  *                 and stats.html labels it as one.
- *   briefUses     the brief-run feature, which the Brief sends for an ad
- *                 someone pasted in and graded, never for a sample ad
- *                 (brief-sample) or a result come back to by Back or a
- *                 reload; null until the site has a Brief
  *
- * (The fifth, the share of homepage views that reached #contact, is made
+ * (The fourth, the share of homepage views that reached #contact, is made
  * once suppression is done: see transform.) `row(name)` hands back the
  * feature table's own cell where the same count is shown there too, so the
  * two can never disagree.
  */
-function figures(t, known, row = () => null) {
+function figures(t, row = () => null) {
     const feature = name => row(name) || cell(t.feature.get(name) || 0);
     return {
         visits: cell(sum(t.visits)),
         contact: cell(sum(t.contact)),
         cvDownloads: feature(CV),
-        lensVisits: cell(sum(t.lens, k => k !== 'other')),
-        briefUses: known.features.has('brief-run') ? feature('brief-run') : null
+        lensVisits: cell(sum(t.lens, k => k !== 'other'))
     };
 }
 
@@ -590,7 +577,7 @@ function bytes(rows, from, to) {
  * in the days before that Monday, or today, all time less the weeks would
  * be a part week's count, or a single day's.
  */
-function transform(rows, { today, known }) {
+function transform(rows, { today }) {
     if (!rows.length) return null;
 
     const counted = rows.reduce((d, r) => (r.date < d ? r.date : d), rows[0].date);
@@ -607,8 +594,8 @@ function transform(rows, { today, known }) {
     const all = totals(rows, first, last);
     const table = tables(all, spans[0].t);
     const row = col => name => (table.feature.find(r => r.key === name) || {})[col] || null;
-    const allFig = figures(all, known, row('all'));
-    const weekFig = spans.map((s, i) => figures(s.t, known, i === 0 ? row('week') : undefined));
+    const allFig = figures(all, row('all'));
+    const weekFig = spans.map((s, i) => figures(s.t, i === 0 ? row('week') : undefined));
 
     // Every sum a reader of the page can do (the same list checkStats makes
     // from the published file): each page view has one page and one window
@@ -646,8 +633,7 @@ function transform(rows, { today, known }) {
         contact: shown(f.contact),
         cvDownloads: shown(f.cvDownloads),
         lensVisits: shown(f.lensVisits),
-        contactShare,
-        briefUses: f.briefUses ? shown(f.briefUses) : null
+        contactShare
     });
     const weeks = spans.map((s, i) => Object.assign({ start: s.start, end: s.end },
         publishFigures(weekFig[i], reached(i === 0 ? 'week' : null, s.t))));
@@ -666,7 +652,6 @@ function transform(rows, { today, known }) {
         suppressBelow: SUPPRESS_BELOW,
         period: { first, last, days: daysBetween(first, last) },
         week: { start, end },
-        briefLive: known.features.has('brief-run'),
         headline: { week: lastWeek, all: publishFigures(allFig, reached('all')) },
         breakdown,
         bytes: { week: bytes(rows, weekStart, weekEnd), all: bytes(rows, first, last) },
@@ -770,7 +755,7 @@ async function main() {
             : skip(`${host} has no daily totals yet.`);
     }
 
-    const stats = transform(rows, { today, known });
+    const stats = transform(rows, { today });
     if (!stats) {
         return skip(`${host} has counts, but no full week of them, Monday to Sunday, has ended yet. ` +
             'Nothing is published until one has.');

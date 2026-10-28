@@ -146,12 +146,8 @@ const known = fetchStats.knownNames();
     const rows = fetchStats.cleanRows(notes.map(k => ['2026-09-10', 'page', k, 2]).concat(notes.map(k => ['2026-09-10', 'kb', k, 180])), known, TODAY).rows;
     assert(rows.length === notes.length * 2 && rows.every(r => r.key === 'notes'), 'Known: a note\'s page views and its kilobytes are both kept under "notes"');
 }
-// The fixture's totals are from before the site had The Brief, so its
-// "brief-run" is not among the names they are read with; the Brief live is
-// checked from the same rows below.
-const beforeBrief = Object.assign({}, known, { features: new Set(Array.from(known.features).filter(f => f !== 'brief-run')) });
-const cleaned = fetchStats.cleanRows(fixtureRows(), beforeBrief, TODAY);
-const stats = fetchStats.transform(cleaned.rows, { today: TODAY, known: beforeBrief });
+const cleaned = fetchStats.cleanRows(fixtureRows(), known, TODAY);
+const stats = fetchStats.transform(cleaned.rows, { today: TODAY, known });
 
 // Every string anywhere in a value, and every count-shaped value.
 function walk(value, visit, where = '') {
@@ -240,21 +236,15 @@ function walk(value, visit, where = '') {
     // The counter names a module fetched on demand "module-<name>"; the bare
     // name is not something it sends, so it is not a name the page may show.
     assert(!known.features.has('dossier'), 'Known: a module is known by the name the counter sends, not its bare file name');
-    // Hooks a script writes into the page, and the Brief's grades, which it
-    // sends as "brief-<class>": the Assay's were counted as "other" until the
-    // names were read from the scripts as well as the pages.
-    ['brief-copy', 'brief-contact', 'brief-run', 'brief-shared', 'brief-high', 'brief-workable', 'brief-marginal']
-        .forEach((f) => assert(known.features.has(f), `Known: feature "${f}"`));
-    assert(!known.features.has('brief-') && !known.features.has('assay-high'), 'Known: the start of a composed name (track(\'brief-\' + a.cls)) is not a feature, nor is a grade the site no longer gives');
-    assert(known.pages.has('brief'), 'Known: page "brief"');
+    // A hook a script writes into the page is read from the script.
+    assert(known.features.has('anatomy-copy'), 'Known: feature "anatomy-copy", which modules/anatomy.js writes');
+    // The Brief, retired, sends nothing now, so a name it used to send is
+    // counted as other; the note left at its address is still a page.
+    assert(!['brief-run', 'brief-high', 'brief-sample', 'brief-home', 'brief-shared'].some(f => known.features.has(f)) && !known.features.has('assay-high'),
+        'Known: no feature The Brief or the Assay sent is known now they are gone');
+    assert(known.pages.has('brief'), 'Known: page "brief", the note left at The Brief\'s address');
     ['water', 'climate-risk', 'sustainable-ai'].forEach(l => assert(known.lenses.has(l), `Known: lens "${l}"`));
     assert(known.ids.has('contact') && known.ids.has('groundwater'), 'Known: section ids from the homepage and the case studies');
-
-    // The Brief goes live when the site's own code names it, not before.
-    const siteNamesBrief = fs.readdirSync(ROOT).filter(f => /\.(html|js)$/.test(f))
-        .concat(fs.readdirSync(path.join(ROOT, 'modules')).map(f => `modules/${f}`))
-        .some(f => /data-analytics="brief-run"|track(?:Event)?\(\s*['"]brief-run['"]/.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
-    assert(known.features.has('brief-run') === siteNamesBrief, `Known: "brief-run" is known exactly when the site uses it (${siteNamesBrief})`);
 }
 
 // ===================================================================
@@ -268,28 +258,24 @@ function walk(value, visit, where = '') {
         `Transform: "last week" is the last complete Monday-to-Sunday week (${stats.week.start} to ${stats.week.end})`);
     assert(stats.asOf === TODAY, 'Transform: asOf is the day it ran');
 
-    // The five numbers, by hand. Last week: 7 days of the daily totals plus
+    // The four numbers, by hand. Last week: 7 days of the daily totals plus
     // the planted rows dated inside it. All time: 28 days, 7 September on.
     const w = stats.headline.week;
     const a = stats.headline.all;
-    assert(w.visits === 140 && a.visits === 579, `Five: page views for scale, today and the days before the first Monday left out (${w.visits}, ${a.visits})`);
-    assert(w.contact === SMALL, `Five: 3 contact messages last week are published as "${SMALL}" (${w.contact})`);
-    assert(a.contact === 6, `Five: 6 contact messages in all (${a.contact})`);
+    assert(w.visits === 140 && a.visits === 579, `Four: page views for scale, today and the days before the first Monday left out (${w.visits}, ${a.visits})`);
+    assert(w.contact === SMALL, `Four: 3 contact messages last week are published as "${SMALL}" (${w.contact})`);
+    assert(a.contact === 6, `Four: 6 contact messages in all (${a.contact})`);
     assert(w.cvDownloads === 7 && a.cvDownloads === 28,
-        `Five: CV downloads are page views with any CV link, so the view that used two counts once (${w.cvDownloads}, ${a.cvDownloads})`);
-    assert(w.lensVisits === 23 && a.lensVisits === 86, `Five: lens visits count known lenses and not "other" (${w.lensVisits}, ${a.lensVisits})`);
-    assert(w.contactShare === 0.25 && a.contactShare === 0.25, `Five: a quarter of homepage views reached Contact (${w.contactShare}, ${a.contactShare})`);
-    assert(w.briefUses === null && a.briefUses === null && stats.briefLive === false, 'Five: Brief uses are null while the site has no Brief');
-
-    // ...and once it has one, as it has now.
-    const withBrief = known;
-    assert(withBrief.features.has('brief-run'), 'Five: the site names "brief-run", so Brief uses are counted');
-    const briefRows = fetchStats.cleanRows(fixtureRows().concat([['2026-09-29', 'feature', 'brief-run', 6], ['2026-09-14', 'feature', 'brief-run', 2]]), withBrief, TODAY).rows;
-    const live = fetchStats.transform(briefRows, { today: TODAY, known: withBrief });
-    // 8 all time and 6 last week would give away the 2 before last week, a
-    // count under 5 shown nowhere, so last week's 6 is held.
-    assert(live.briefLive === true && live.headline.week.briefUses === 'held' && live.headline.all.briefUses === 8,
-        `Five: Brief uses are counted once the site has a Brief, and last week is held so the 2 before it cannot be worked out (${live.headline.week.briefUses}, ${live.headline.all.briefUses})`);
+        `Four: CV downloads are page views with any CV link, so the view that used two counts once (${w.cvDownloads}, ${a.cvDownloads})`);
+    assert(w.lensVisits === 23 && a.lensVisits === 86, `Four: lens visits count known lenses and not "other" (${w.lensVisits}, ${a.lensVisits})`);
+    assert(w.contactShare === 0.25 && a.contactShare === 0.25, `Four: a quarter of homepage views reached Contact (${w.contactShare}, ${a.contactShare})`);
+    // Brief uses, the fifth until The Brief was retired, are gone from the
+    // file, and a file that still carries them is refused.
+    assert(!('briefUses' in w) && !('briefUses' in a) && !('briefLive' in stats), 'Four: no Brief uses, and no Brief to be live');
+    const stale = JSON.parse(JSON.stringify(stats));
+    stale.briefLive = true;
+    stale.headline.all.briefUses = 8;
+    assert(content.checkStats(stale).filter(p => /briefLive|briefUses/.test(p)).length === 2, 'Four: checkStats refuses a file that still counts Brief uses');
 
     // The same for any breakdown row: all time less last week is a count too.
     const earlierRows = fetchStats.cleanRows(fixtureRows().concat([
@@ -312,7 +298,7 @@ function walk(value, visit, where = '') {
     // part week is not a line of its own: it is in no figure at all.
     assert(stats.weeks.length === 4, `Weeks: one line per whole week back to the first Monday (${stats.weeks.length})`);
     assert(stats.weeks[0].start === WEEK.start && stats.weeks[3].start === FIRST, 'Weeks: newest first, the oldest starting on the first Monday');
-    assert(stats.weeks.every(w => Object.keys(w).join() === 'start,end,visits,contact,cvDownloads,lensVisits,contactShare,briefUses'),
+    assert(stats.weeks.every(w => Object.keys(w).join() === 'start,end,visits,contact,cvDownloads,lensVisits,contactShare'),
         'Weeks: every line is a whole week, with no part-week marker');
     assert(stats.weeks[3].contact === SMALL && stats.weeks[2].contact === SMALL, 'Weeks: the weekly contact counts under 5 are suppressed too');
     const { start, end, ...newest } = stats.weeks[0];
@@ -482,8 +468,8 @@ function walk(value, visit, where = '') {
     const csv = ['date,metric,key,count'].concat(fixtureRows().map(r => r.map(esc).join(','))).join('\n');
     const fromCsv = fetchStats.parseSource(csv);
     const fromJson = fetchStats.parseSource(JSON.stringify({ v: 1, rows: fixtureRows() }));
-    const a = fetchStats.transform(fetchStats.cleanRows(fromCsv.rows, beforeBrief, TODAY).rows, { today: TODAY, known: beforeBrief });
-    const b = fetchStats.transform(fetchStats.cleanRows(fromJson.rows, beforeBrief, TODAY).rows, { today: TODAY, known: beforeBrief });
+    const a = fetchStats.transform(fetchStats.cleanRows(fromCsv.rows, known, TODAY).rows, { today: TODAY, known });
+    const b = fetchStats.transform(fetchStats.cleanRows(fromJson.rows, known, TODAY).rows, { today: TODAY, known });
     assert(JSON.stringify(a) === JSON.stringify(b) && JSON.stringify(b) === JSON.stringify(stats),
         'Source: CSV and JSON of the same rows give identical totals');
 }
@@ -602,7 +588,7 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
     assert(/a lone <5 would be the total less the rest, so the smallest figure beside it is held back as well/.test(text),
         'Privacy: says a figure is held back where subtraction would give a small one away');
     assert(/Every figure covers whole weeks/.test(text) && /No count for a single day is ever published/.test(text), 'Privacy: whole weeks, and no single day');
-    assert(/The Brief graded a job ad someone pasted in, the grade it gave\. Never the ad itself/.test(text), 'Privacy: says the Brief\'s grade is among the features, and the ad never is');
+    assert(!/Brief|job ad/.test(text), 'Privacy: says nothing of The Brief, which no longer sends anything');
     assert(/window/.test(doc.querySelector('.st-fields').textContent) && !/Screen width/.test(text), 'Privacy: vp is the window\'s width, not the screen\'s');
     assert(/Google Sheet in my own Google account/.test(text) && /a key that the scheduled job keeps as a secret/.test(text),
         'Privacy: says where the raw daily totals live, and that only the weekly job can read them');
@@ -615,7 +601,7 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
         const doc = new JSDOM(fs.readFileSync(path.join(ROOT, 'stats.html'), 'utf8')).window.document;
         const h2s = Array.from(doc.querySelectorAll('h2')).map(h => h.textContent.trim());
         assert(h2s.includes('Counting has not started yet'), 'Empty: the page says counting has not started');
-        assert(doc.querySelectorAll('.st-five .st-card').length === 5, 'Empty: the five numbers are still defined');
+        assert(doc.querySelectorAll('.st-measures .st-card').length === 4, 'Empty: the four numbers are still defined');
         assert(doc.querySelectorAll('.st-values, .st-table').length === 0, 'Empty: and no figure of any kind is shown');
         assert(/every Monday/.test(doc.querySelector('.st-empty').textContent), 'Empty: says when figures will appear');
     } else {
@@ -637,16 +623,13 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
 // --- the counting state, from the fixture ----------------------------------------
 {
     const doc = page(stats);
-    const cards = doc.querySelectorAll('.st-five .st-card');
-    assert(cards.length === 5, `Counting: five cards (${cards.length})`);
+    const cards = doc.querySelectorAll('.st-measures .st-card');
+    assert(cards.length === 4, `Counting: four cards (${cards.length})`);
     const values = Array.from(cards).map(c => Array.from(c.querySelectorAll('.st-values dd')).map(d => d.textContent));
     assert(JSON.stringify(values[0]) === JSON.stringify(['<5', '6']), `Counting: contact reads <5 last week, 6 in all (${values[0]})`);
     assert(JSON.stringify(values[3]) === JSON.stringify(['25%', '25%']), `Counting: the Contact share reads as a percentage (${values[3]})`);
-    assert(/not live yet/.test(cards[4].textContent), 'Counting: Brief uses say "not live yet" until there is a Brief');
-    const live = page(fetchStats.transform(fetchStats.cleanRows(fixtureRows().concat([['2026-09-29', 'feature', 'brief-run', 9]]), known, TODAY).rows, { today: TODAY, known }));
-    const briefCard = live.querySelectorAll('.st-five .st-card')[4];
-    assert(!/not live yet|not built yet/.test(briefCard.textContent) && briefCard.querySelectorAll('.st-values dd').length === 2 && !!briefCard.querySelector('a[href="brief.html"]'),
-        `Counting: with the Brief live, its card gives last week and all time, and links the Brief (${Array.from(briefCard.querySelectorAll('.st-values dd')).map(d => d.textContent).join(', ')})`);
+    assert(!/Brief/.test(Array.from(cards).map(c => c.textContent).join(' ')) && !doc.querySelector('a[href="brief.html"]'),
+        'Counting: no card, and no link, for The Brief, which is retired');
     assert(/a proxy/.test(cards[2].textContent) && /at most/.test(cards[2].textContent), 'Counting: the lens figure is labelled a proxy, and an upper bound');
     assert(/Week of 28 Sep – 4 Oct 2026/.test(cards[0].textContent), 'Counting: the week is named by its dates');
 

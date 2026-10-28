@@ -223,8 +223,8 @@ const SHOWN_IN_FULL = [
     { re: /\btwo ESRS lines quantified\b/g, what: 'Anatomy of a Prompt\'s Scope 2 and cooling water, named just before the count', named: true },
     { re: /\bfive things to try\b/gi, what: 'the links of the homepage\'s play index, after it',
       count: d => d.page('index.html').querySelectorAll('.play-index a').length },
-    { re: /\bfive numbers\b/gi, what: 'the open counts page\'s measures, a card each',
-      count: d => d.page('stats.html').querySelectorAll('.st-five > .st-card').length },
+    { re: /\bfour numbers\b/gi, what: 'the open counts page\'s measures, a card each',
+      count: d => d.page('stats.html').querySelectorAll('.st-measures > .st-card').length },
     { re: /\bthree classes\b/gi, what: 'the window-width classes a page view sends, s, m and l, each named on the page',
       count: d => (d.source('scripts/fetch-stats.js').match(/\bconst VIEWPORTS = \[([^\]]*)\]/) || ['', ''])[1].split(',').filter(s => s.trim()).length }
 ];

@@ -348,22 +348,21 @@ const fieldText = plain(fieldReport);
 
 // --- Tools: the field report names none the homepage does not show -------
 // The field report is "the same content" as text. It kept Power BI after
-// the homepage dropped it for want of evidence, so the Assay answered a
-// Power BI requirement "Not evidenced on this site" while this page listed
-// it. Every named tool The Brief knows is held to the Brief's own test:
-// shown on the homepage, or not listed here (owner checklist E4).
+// the homepage dropped it for want of evidence (owner checklist E4). Each
+// named software tool it lists is held to the homepage: named there too, or
+// not listed here. (The Brief, retired in October 2026, held them by its
+// own matcher; this is the same list of tools, bar R, which a bare letter
+// cannot be told apart from in text.)
 {
-    const { JSDOM } = require('jsdom');
-    const dom = new JSDOM(read('brief.html'), { runScripts: 'outside-only', url: 'https://example.com/brief.html' });
-    dom.window.eval(read('brief.js'));
-    const A = dom.window.mks.brief;
+    const TOOLS = ['Python', 'SQL', 'QGIS', 'ArcGIS', 'Tableau', 'Excel', 'Power BI', 'MATLAB', 'SPSS', 'Stata', 'SimaPro', 'openLCA',
+        'GaBi', 'JavaScript', 'SAP', 'Google Earth Engine', 'Workiva', 'Enablon', 'Sphera', 'Persefoni', 'Salesforce Net Zero Cloud',
+        'Microsoft Sustainability Manager'];
+    const said = (text, tool) => new RegExp(`(?:^|[^A-Za-z])${tool.replace(/ /g, '\\s+')}(?![A-Za-z])`, 'i').test(text);
     const toolkit = plain((read('field-report.html').match(/<h2>Toolkit<\/h2>\s*<p>([\s\S]*?)<\/p>/) || [])[1] || '');
-    const tools = A.RULES.tools.map(t => (typeof t === 'string' ? t : t.name));
-    const a = A.analyse(`Requirements: ${toolkit}`, { now: new Date(2026, 8, 26) });
-    const named = a.met.concat(a.gaps).map(x => x.label).filter(l => tools.includes(l));
-    const unshown = a.gaps.map(g => g.label).filter(l => tools.includes(l));
+    const named = TOOLS.filter(t => said(toolkit, t));
+    const unshown = named.filter(t => !said(indexText, t));
     assert(named.length >= 6, `Tools: the field report's toolkit is found and read (${named.join(', ')})`);
-    assert(unshown.length === 0, `Tools: every tool the field report lists is one the homepage shows, so the Brief matches it (not shown: ${unshown.join(', ') || 'none'})`);
+    assert(unshown.length === 0, `Tools: every tool the field report lists is one the homepage shows (not shown: ${unshown.join(', ') || 'none'})`);
 }
 
 // --- Figures: illustrative numbers say so --------------------------------
@@ -555,20 +554,16 @@ const fieldText = plain(fieldReport);
 
 // --- Power BI: a tool claimed only with its proof ------------------------
 // Nothing anywhere evidences Power BI, so it is named nowhere, unless the
-// homepage's toolkit lists it with a proof link (owner checklist E4). The
-// Brief's list of tools to detect in an ad (content/brief.json) is not a
-// claim, and is not read.
+// homepage's toolkit lists it with a proof link (owner checklist E4).
 {
     const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json') && f !== 'brief.json').map(f => `content/${f}`));
+        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json')).map(f => `content/${f}`));
     const doc = new (require('jsdom').JSDOM)(index).window.document;
     const listed = Array.from(doc.querySelectorAll('#skills .toolkit-item')).filter(li => /power\s*bi/i.test(li.textContent));
     const proven = listed.every(li => li.querySelector('a.toolkit-proof[href^="http"], a.toolkit-proof[href^="case-studies.html#"]'));
-    // The rubric brief.html carries, as content/brief.json has it, is left out.
-    const shown = (f) => (f === 'brief.html' ? read(f).replace(/<script type="application\/json" id="briefData">[\s\S]*?<\/script>/, '') : read(f));
     const elsewhere = pages.filter(f => /power\s*bi/i.test(f === 'index.html'
         ? read(f).replace(/<li class="toolkit-item">[\s\S]*?<\/li>/g, li => (/power\s*bi/i.test(li) && proven ? '' : li))
-        : shown(f)));
+        : read(f)));
     assert(proven && elsewhere.length === 0, `Power BI: claimed nowhere without a proof link (${elsewhere.join(', ') || 'none'})`);
 }
 
