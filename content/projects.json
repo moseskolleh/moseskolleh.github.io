@@ -248,7 +248,7 @@
     {
       "id": "coastal",
       "title": "Coastal Water Pollution Dynamics",
-      "subtitle": "What drives river-borne pollution, and what Africa's coasts look like by mid-century",
+      "subtitle": "What drives river-borne pollution, and how Africa's coasts could look by mid-century, as storylines",
       "period": "2023 — 2024",
       "location": "Wageningen, NL",
       "organization": "Wageningen University & Research",
@@ -275,10 +275,10 @@
       "problem": "Rivers carry whatever we put in them straight to the sea. How do income, urbanisation and agriculture shape the export of multiple pollutants across the world's sub-basins — and what does that mean for Africa's coasts by mid-century?",
 
       "method": [
-        "Modelled river export of multiple pollutants with the MARINA-Multi model across 10,226 sub-basins worldwide.",
+        "Analysed river export of multiple pollutants across 10,226 sub-basins worldwide, using the MARINA-Multi model developed by Wageningen's Water Systems & Global Change group.",
         "Identified the socioeconomic drivers behind the resulting pollution patterns statistically.",
         "Built qualitative future storylines for African coastal waters, including a deliberately pessimistic 'Dirty Delta' scenario.",
-        "Integrated climate-change scenarios into the projections."
+        "Framed the storylines within climate-change scenarios."
       ],
 
       "artifacts": [
@@ -298,18 +298,18 @@
 
       "results": [
         {
-          "claim": "10,226 sub-basins modelled",
-          "basis": "The sub-basin count of the MARINA-Multi model configuration used — a property of the model domain, not an estimate.",
-          "brief": "A property of the model domain used, not an estimate; the thesis is on request.",
+          "claim": "10,226 sub-basins analysed with MARINA-Multi",
+          "basis": "The sub-basin count of the MARINA-Multi model's global domain — a property of the model, not an estimate. The model is the Water Systems & Global Change group's, at Wageningen; the thesis analysed its output.",
+          "brief": "The size of the domain of MARINA-Multi, the Water Systems & Global Change group's model; the thesis is on request.",
           "verifiable": false
         },
         {
           "claim": "Identified the socioeconomic factors that dominate coastal pollution export",
-          "basis": "Statistical analysis of model output against socioeconomic drivers. The finding is in the thesis; effect sizes are not restated here because they cannot be checked without it.",
+          "basis": "Statistical analysis of MARINA-Multi output against socioeconomic drivers. The finding is in the thesis; effect sizes are not restated here because they cannot be checked without it.",
           "verifiable": false
         },
         {
-          "claim": "Scenario storylines that turn model output into policy conversation",
+          "claim": "Scenario storylines written to bring model output into policy conversation",
           "basis": "Qualitative scenario method. Written to be argued with, not to be scored.",
           "verifiable": false
         }
@@ -323,7 +323,7 @@
         },
         {
           "kind": "recommendation",
-          "text": "Write the storyline first and let it demand the numbers: model output rarely moves a policymaker, a story they can picture does.",
+          "text": "Write the storyline first and let it decide which questions the numbers must answer, never the answers. In my experience, a scenario people can picture moves a discussion further than model output alone.",
           "basis": "Field note 02, on the homepage, on the \"Dirty Delta\" scenario."
         }
       ],

@@ -55,7 +55,7 @@
         },
         projects: () => {
             ['Sustainable AI Framework — Digital Society School (2025–2026)',
-             'Coastal Water Pollution — 10,226 sub-basins, futures for Africa\'s coasts',
+             'Coastal Water Pollution — drivers across 10,226 sub-basins (MARINA-Multi, WUR); storylines for Africa\'s coasts',
              'Flood-Resilient Wuppertal — don\'t let the Schwebebahn become a boat',
              'UN Disaster Risk Reduction — Sendai Framework data, Bonn',
              'Soft Path Water Management — beyond cement, steel and pipes',

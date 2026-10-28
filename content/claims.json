@@ -100,7 +100,7 @@
     {
       "id": "sub-basins",
       "value": "10,226",
-      "unit": "river sub-basins modelled with the MARINA-Multi model",
+      "unit": "river sub-basins worldwide in the domain of the MARINA-Multi model, the Water Systems & Global Change group's, whose output the thesis analysed",
       "basis": { "result": "coastal" }
     },
     {
