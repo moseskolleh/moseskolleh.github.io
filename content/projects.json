@@ -438,8 +438,8 @@
           "fullCaption": "The UN Campus in Bonn, Germany — my base for five months working with the UN Office for Disaster Risk Reduction." },
         { "src": "assets/img/undrr-bonn-2.webp", "thumb": "assets/img/undrr-bonn-2-480.webp", "width": 900, "height": 675,
           "alt": "Moses at his desk in the UN Campus with two monitors showing disaster data",
-          "caption": "At the desk — auditing Caribbean disaster-loss records for the Sendai Framework Monitor.",
-          "fullCaption": "At the desk in the UN Campus — auditing Caribbean disaster-loss records for the Sendai Framework Monitor." },
+          "caption": "At the desk — reviewing Caribbean disaster-loss records for the Sendai Framework Monitor.",
+          "fullCaption": "At the desk in the UN Campus — reviewing Caribbean disaster-loss records for the Sendai Framework Monitor." },
         { "src": "assets/img/undrr-bonn-3.webp", "width": 900, "height": 675,
           "alt": "View over Bonn from the UN Campus tower",
           "caption": "Bonn from the UN Campus tower.",
@@ -449,10 +449,10 @@
       "problem": "UNDRR needed clean, comparable hazard information to support the Sendai Framework — especially for small island states, where one storm can erase years of development.",
 
       "method": [
-        "Audited Caribbean disaster-loss data against external datasets for the Sendai Framework Monitor and the Losses & Damages Tracking System.",
-        "Documented global hazard information systems, expanding regional and hazard-type coverage.",
+        "Reviewed and cross-checked Caribbean disaster-loss data against external datasets for the Sendai Framework Monitor and the Losses & Damages Tracking System.",
+        "Documented global hazard information systems for the organisation's catalogue.",
         "Standardised disaster-reporting terminology across sources, so economic loss and damage meant the same thing in each.",
-        "Built a risk-management factsheet for Trinidad and Tobago."
+        "Wrote a disaster and climate-risk factsheet for Trinidad and Tobago."
       ],
 
       "artifacts": [
@@ -464,11 +464,11 @@
           "note": "Contributed to the organisation's internal databases."
         },
         {
-          "name": "Risk-management factsheet — Trinidad and Tobago",
+          "name": "Disaster and climate-risk factsheet — Trinidad and Tobago",
           "kind": "report",
           "status": "internal",
           "heldBy": "UNDRR",
-          "note": "Produced for national policy use."
+          "note": "Written during the internship."
         }
       ],
 
@@ -478,11 +478,6 @@
           "basis": "A count of the systems catalogued during the internship, recorded in the deliverable. Countable, not estimated.",
           "brief": "A count recorded in the deliverable, which UNDRR holds.",
           "verifiable": false
-        },
-        {
-          "claim": "Regional and hazard-type coverage expanded by 25%",
-          "basis": "Measured against the size of the organisation's existing catalogue at the start of the internship. The baseline is internal to UNDRR, so an outside reader cannot check it — which is why it is stated with its basis rather than on its own.",
-          "verifiable": false
         }
       ],
 
@@ -490,11 +485,11 @@
         {
           "kind": "finding",
           "text": "Disaster risk is a data problem before it is an engineering one: you cannot reduce what you cannot compare, so loss and damage had to mean the same in every source.",
-          "basis": "The audit and the terminology work in the method above; the records are UNDRR's."
+          "basis": "The review and the terminology work in the method above; the records are UNDRR's."
         }
       ],
 
-      "caveat": "Internship deliverables sit inside the organisation. The counts are real and were recorded; the baselines they are measured against are not public."
+      "caveat": "Internship deliverables sit inside the organisation. The count is real and was recorded; the inventory itself is not public."
     },
 
     {

@@ -91,22 +91,22 @@
       "status": "internal",
       "heldBy": "UNDRR",
       "caseStudy": "un-disaster",
-      "summary": "Catalogued global hazard information systems, expanding the organisation's regional and hazard-type coverage, alongside a terminology standardisation for economic loss and damage reporting.",
+      "summary": "Catalogued global hazard information systems, alongside a terminology standardisation for economic loss and damage reporting.",
       "methods": ["Systematic source review", "Terminology harmonisation"],
       "note": "Contributed to UNDRR's internal databases in support of the Sendai Framework Monitor."
     },
     {
       "id": "undrr-tt-factsheet",
-      "title": "Risk-management factsheet — Trinidad and Tobago",
-      "type": "Policy brief",
+      "title": "Disaster and climate-risk factsheet — Trinidad and Tobago",
+      "type": "Factsheet",
       "venue": "UN Office for Disaster Risk Reduction",
       "year": "2023",
       "status": "internal",
       "heldBy": "UNDRR",
       "caseStudy": "un-disaster",
-      "summary": "National-level risk-management factsheet produced to inform policy, drawing on the audited Caribbean disaster-loss data.",
-      "methods": ["Disaster-loss data audit", "Cross-dataset validation"],
-      "note": "Produced for national policy use."
+      "summary": "A disaster and climate-risk factsheet for Trinidad and Tobago, drawing on the reviewed Caribbean disaster-loss data.",
+      "methods": ["Disaster-loss data review", "Cross-dataset checks"],
+      "note": "Written during the internship."
     },
     {
       "id": "waterproject",

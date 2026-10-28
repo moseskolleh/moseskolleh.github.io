@@ -111,12 +111,6 @@
       "basis": { "result": "un-disaster" }
     },
     {
-      "id": "coverage-gain",
-      "value": "25%",
-      "unit": "more regional and hazard-type coverage in UNDRR's catalogue of those systems",
-      "basis": { "result": "un-disaster" }
-    },
-    {
       "id": "gaia-checks",
       "value": "3,984",
       "unit": "cross-engine checks passing in GAIA: its workbook, web estimator and reference code giving the same answers",

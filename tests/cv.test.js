@@ -148,6 +148,7 @@ function assert(cond, msg) {
             { re: /\d\+ years/i, why: 'years of experience is not a figure the site states' },
             { re: /certified across|highly sought|mastered/i, why: 'wording the site dropped' },
             { re: /advised the (?:UN|United Nations)/i, why: 'the UN role was an internship' },
+            { re: /coverage by 25%|25% (?:more )?regional|\baudited\b|for national policy use/i, why: 'the UNDRR wording the site dropped: an unsourced coverage gain, an audit, a policy use nothing records' },
             { re: /Ministry of Finance|Ministerie/i, why: 'naming the partner on the CV waits on the owner (consent)' },
             { re: /Dr\.? Timbo|\bACF\b|Living Water International|WiNGiN|Matthijs|\bJop\b|Rezaei/i, why: 'a client or partner named in the repositories, not cleared' }
         ];
