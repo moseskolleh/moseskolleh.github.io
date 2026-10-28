@@ -7,14 +7,14 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Open counts — Moses Kolleh Sesay</title>
-    <meta name="description" content="What this portfolio counts about its own page views and why: five numbers, small counts held back, and the exact payload a page view sends. No cookies, no ids, no analytics service.">
+    <meta name="description" content="What this portfolio counts about its own page views and why: four numbers, small counts held back, and the exact payload a page view sends. No cookies, no ids, no analytics service.">
     <meta name="author" content="Moses Kolleh Sesay">
     <link rel="canonical" href="https://moseskolleh.github.io/stats.html">
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <meta name="theme-color" content="#0a0a0a">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Open counts — Moses Kolleh Sesay">
-    <meta property="og:description" content="What this portfolio counts about its own page views and why: five numbers, small counts held back, and the exact payload a page view sends. No cookies, no ids, no analytics service.">
+    <meta property="og:description" content="What this portfolio counts about its own page views and why: four numbers, small counts held back, and the exact payload a page view sends. No cookies, no ids, no analytics service.">
     <meta property="og:url" content="https://moseskolleh.github.io/stats.html">
     <meta property="og:image" content="https://moseskolleh.github.io/assets/og/stats.png">
     <meta property="og:image:width" content="1200">
@@ -63,9 +63,9 @@
         <section class="st-block" aria-labelledby="st-why-h">
             <h2 id="st-why-h">Why count at all</h2>
             <p>
-                Every change I plan for this site is a bet about what a recruiter does on it: that the evidence
-                should come sooner, that a shorter homepage gets read further, that a link framed for one kind of
-                role lands better than a general one. Without counts none of those bets can be checked. The first
+                Every change I plan for this site is a bet about what a reader does on it: that the evidence
+                should come sooner, that a shorter homepage gets read further, that a link framed for one field of
+                work lands better than a general one. Without counts none of those bets can be checked. The first
                 <span data-rule="baselineWeeks">four</span> weeks of these numbers are the baseline every change after them is judged against.
             </p>
             <p>
@@ -87,19 +87,19 @@
             </p>
             <p>What will appear here, with every figure under <span data-rule="suppressBelow">5</span> held back:</p>
             <ul class="st-list">
-                <li>the five numbers below, for the last week, for all time, and week by week;</li>
-                <li>page views by page, by role lens and by window width;</li>
+                <li>the four numbers below, for the last week, for all time, and week by week;</li>
+                <li>page views by page, by lens and by window width;</li>
                 <li>the sites readers came from, by host name only;</li>
                 <li>which features were used, and how far down a page readers got;</li>
                 <li>the kilobytes transferred per page view.</li>
             </ul>
         </section>
 
-        <section class="st-block" aria-labelledby="st-five-h">
-            <h2 id="st-five-h">The five numbers</h2>
+        <section class="st-block" aria-labelledby="st-numbers-h">
+            <h2 id="st-numbers-h">The four numbers</h2>
             <p>The measures that say whether the site is doing its job, chosen before any of them was counted.</p>
 
-            <ul class="st-five">
+            <ul class="st-measures">
                 <li class="st-card">
                     <h3>Messages through the contact form</h3>
                     <p class="st-def">Submissions the form&rsquo;s endpoint accepted, bar those sent with JavaScript on from a browser that asks not to be tracked. Email sent straight to my address is not in this figure: a click on the address shows up under features, but whether a message followed cannot be known.</p>
@@ -110,15 +110,11 @@
                 </li>
                 <li class="st-card">
                     <h3>Lens-link visits, a proxy</h3>
-                    <p class="st-def">Page views that arrived through a role link such as <code>case-studies.html?lens=water</code>. What I want to know is how many of those go on to read a case study, but the totals are kept field by field, not visit by visit, so the lens and how far the reader got cannot be joined. This counts the arrivals, so the real figure is at most this.</p>
+                    <p class="st-def">Page views that arrived through a lens link such as <code>case-studies.html?lens=water</code>. What I want to know is how many of those go on to read a case study, but the totals are kept field by field, not visit by visit, so the lens and how far the reader got cannot be joined. This counts the arrivals, so the real figure is at most this.</p>
                 </li>
                 <li class="st-card">
                     <h3>Homepage views that reached Contact</h3>
                     <p class="st-def">The share of homepage views whose furthest section was <code>#contact</code>, the last one on the page. Given only when both counts are <span data-rule="suppressBelow">5</span> or more.</p>
-                </li>
-                <li class="st-card">
-                    <h3>Brief uses</h3>
-                    <p class="st-def">Page views in which <a href="brief.html">The Brief</a> graded a job ad someone pasted in (its sample ads are not counted): it turns the ad into an honest fit and a dossier tailored to it.</p>
                 </li>
             </ul>
         </section>
@@ -147,11 +143,10 @@
 }</code></pre>
             <dl class="st-fields">
                 <dt><code>page</code>, <code>lens</code>, <code>deepest</code></dt>
-                <dd>The page, the role lens in its address if there was one, and the id of the furthest section reached.</dd>
+                <dd>The page, the lens in its address if there was one, and the id of the furthest section reached.</dd>
                 <dt><code>features</code></dt>
                 <dd>
-                    Up to <span data-rule="featuresMax">20</span> names of things used on the page, such as a CV link or the carbon receipt, and, if
-                    The Brief graded a job ad someone pasted in, the grade it gave. Never the ad itself.
+                    Up to <span data-rule="featuresMax">20</span> names of things used on the page, such as a CV link or the carbon receipt.
                 </dd>
                 <dt><code>ref</code></dt>
                 <dd>The host name of the site you came from; empty if there was none, or if it was this site. An old homepage address for something that has since moved sends you on to its new page with that host name, so the visit is not counted as direct.</dd>
@@ -167,7 +162,7 @@
                 <li>
                     No cookie, and no browser storage: the count neither reads nor writes any, so nothing it sends can
                     be tied to your device. (The site itself remembers a few of your choices in your browser &mdash; the
-                    theme, low-energy mode, the reading speed, whether you have seen the intro &mdash; and sends none
+                    theme, low-energy mode and whether you have seen the intro &mdash; and sends none
                     of them anywhere.)
                 </li>
                 <li>No id of any kind, so page views cannot be tied to each other, or to you.</li>
@@ -216,13 +211,13 @@
 
         <section class="ca-cta" aria-labelledby="ctaTitle">
             <h2 id="ctaTitle">Get in touch</h2>
-            <p>Open to sustainability, climate-risk, ESG and sustainable-AI roles and consulting: write to me at <a href="mailto:moseskollehsesay@gmail.com" data-analytics="email-page-cta">moseskollehsesay@gmail.com</a>.</p>
+            <p>Open to research collaborations on climate and flood risk, water and ESG: write to me at <a href="mailto:moseskollehsesay@gmail.com" data-analytics="email-page-cta">moseskollehsesay@gmail.com</a>.</p>
             <p class="ca-cta-go">
                 <a class="ca-btn ca-btn-primary" href="index.html#contact" data-analytics="contact-page-cta">Send a message</a>
                 <a class="ca-btn" href="assets/Moses_Kolleh_Sesay_CV.pdf" download data-analytics="cv-download-page-cta">Download CV</a>
             </p>
         </section>
-        <p class="ca-top"><a href="#top">Back to top</a> &middot; <a href="brief.html">Hiring? Paste your job ad</a></p>
+        <p class="ca-top"><a href="#top">Back to top</a></p>
     </main>
     <footer class="ca-foot">
         <p><a href="stats.html" aria-current="page">Open counts</a>: what this site counts about its visits, and what it never collects.</p>

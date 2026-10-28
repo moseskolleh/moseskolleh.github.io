@@ -125,7 +125,8 @@ const stops = [
     { id: 'changsha',   name: 'Changsha',   lon: 112.9388, lat: 28.2282 },
     { id: 'bonn',       name: 'Bonn',       lon: 7.0982,   lat: 50.7374 },
     { id: 'wageningen', name: 'Wageningen', lon: 5.6654,   lat: 51.9692 },
-    { id: 'amsterdam',  name: 'Amsterdam',  lon: 4.9041,   lat: 52.3676 }
+    { id: 'amsterdam',  name: 'Amsterdam',  lon: 4.9041,   lat: 52.3676 },
+    { id: 'pavia',      name: 'Pavia',      lon: 9.1582,   lat: 45.1847 }
 ];
 for (const s of stops) {
     const [x, y] = projection([s.lon, s.lat]);
@@ -152,13 +153,15 @@ const stopLabels = {
     changsha:   { dx: 0,   dy: 26,  anchor: 'middle' },
     bonn:       { dx: 14,  dy: 14,  anchor: 'start' },
     wageningen: { dx: 16,  dy: 0,   anchor: 'start' },
-    amsterdam:  { dx: -13, dy: -8,  anchor: 'end' }
+    amsterdam:  { dx: -13, dy: -8,  anchor: 'end' },
+    pavia:      { dx: 14,  dy: 4,   anchor: 'start' }
 };
 // Wuppertal sits between the Bonn-Wageningen leg and the arc in from
 // Changsha: its long name has room only to the west, clear of the leg (at
-// -12 it ended on it).
+// -12 it ended on it), and west of the Amsterdam-Pavia leg too, which runs
+// past it to the south (at -22 that leg crossed its last letters).
 const siteLabels = {
-    wuppertal:  { dx: -22, dy: 4,   anchor: 'end' }
+    wuppertal:  { dx: -32, dy: 4,   anchor: 'end' }
 };
 
 // Projection constants for runtime use (script.js places the visitor's
@@ -167,7 +170,7 @@ const k = projection.scale().toFixed(2);
 const [ptx, pty] = projection.translate().map(v => +v.toFixed(2));
 const rot = -(WEST + EAST) / 2;
 
-let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map tracing the journey from Freetown to Changsha, Bonn, Wageningen and Amsterdam, with fieldwork in Wuppertal" data-proj-k="${k}" data-proj-tx="${ptx}" data-proj-ty="${pty}" data-proj-rot="${rot}" data-crop="${WEST} ${SOUTH} ${EAST} ${NORTH}">
+let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map tracing the journey from Freetown to Changsha, Bonn, Wageningen, Amsterdam and Pavia, with fieldwork in Wuppertal" data-proj-k="${k}" data-proj-tx="${ptx}" data-proj-ty="${pty}" data-proj-rot="${rot}" data-crop="${WEST} ${SOUTH} ${EAST} ${NORTH}">
 <g id="mapScene">
 <path class="map-graticule" d="${graticulePath}"/>
 <path class="map-land" d="${landPath}"/>

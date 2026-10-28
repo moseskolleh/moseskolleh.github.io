@@ -20,7 +20,7 @@ const ROOT = path.join(__dirname, '..');
 const FIX = path.join(__dirname, 'fixtures', 'receipt');
 const load = (name) => JSON.parse(fs.readFileSync(path.join(FIX, name), 'utf8'));
 const { receipt, MARKER, signed, fmtByteChange, fmtBytes, fmtMgChange, mgOf } = require('../scripts/receipt.js');
-const { GRAMS_PER_MB } = require('../scripts/lib/voice-signature.js');
+const { GRAMS_PER_MB } = require('../scripts/lib/carbon.js');
 
 let failures = 0;
 function assert(cond, msg) {
@@ -66,8 +66,8 @@ const cells = (line) => line.split('|').slice(1, -1).map(s => s.trim());
     assert(index[3] === `+${(want(281718) - want(280899)).toFixed(1)} mg`, `CO₂e: its change, signed (${index[3]})`);
     const cs = cells(row('`case-studies.html`', 'mg'));
     assert(cs[3] === `−${(want(98522) - want(86522)).toFixed(1)} mg`, `CO₂e: a lighter page shows a fall (${cs[3]})`);
-    assert(/Network transfer only/.test(md) && /0\.36 g CO₂e per MB/.test(md) && /estimate, not a measurement/.test(md),
-        'CO₂e: says it is network transfer only, at 0.36 g CO₂e per MB, and an estimate');
+    assert(/Sustainable Web Design \(v3\)/.test(md) && /0\.36 g CO₂e per MB/.test(md) && /allocates data-centre, network and device energy per byte/.test(md) && /estimate, not a measurement/.test(md),
+        'CO₂e: names the model (v3), at 0.36 g CO₂e per MB, says what it allocates per byte, and that it is an estimate');
     const pagesInCarbon = lines.filter(l => /^\| `[^`]+` \| [\d.]+ mg|^\| `[^`]+` \| — \|/.test(l) && /mg/.test(l)).map(l => cells(l)[0]);
     assert(pagesInCarbon.join() === '`index.html`,`case-studies.html`,`fresh.html`',
         `CO₂e: one row for each budget that is a page's first view, and only those (${pagesInCarbon.join(', ')})`);
@@ -82,8 +82,8 @@ const cells = (line) => line.split('|').slice(1, -1).map(s => s.trim());
     assert(cs[3] === '−11.7 KB' && cs[4] === '✓ 110 KB (was 120 KB)', `Bytes: a fall, and a ceiling the branch lowered (${cs.join(' | ')})`);
     const od = cells(row('Everything a full visit adds on demand (modules, scripts, map)'));
     assert(od[4] === '✗ over 72 KB', `Bytes: a budget over its ceiling says so (${od[4]})`);
-    const audio = cells(row("Recorded narration: Moses's introduction (sized for his 60–90 s take)"));
-    assert(audio[1] === '0 KB' && audio[3] === '0', `Bytes: no change is 0 (${audio.join(' | ')})`);
+    const held = cells(row('A budget held for later (sized for what is not there yet)'));
+    assert(held[1] === '0 KB' && held[3] === '0', `Bytes: no change is 0 (${held.join(' | ')})`);
     const gone = cells(row('A page this branch removes, over the wire'));
     const fresh = cells(row('A page new on this branch, over the wire'));
     assert(gone[2] === '—' && gone[3] === '—' && gone[4] === 'none (was 8 KB)', `Bytes: a budget only main has shows a dash for the branch, and the ceiling it had (${gone.join(' | ')})`);
@@ -121,7 +121,7 @@ const cells = (line) => line.split('|').slice(1, -1).map(s => s.trim());
     assert(could.includes('- Case studies page, over the wire (fonts included): 110 KB → 89 KB'),
         `Could come down: a byte budget with more than 10% headroom (${could.join('; ')})`);
     assert(could.includes('- `stats.html` at 390×844: 15.66 → 12.6 screens'), 'Could come down: a length with more than 10% headroom, from the drawn-full length');
-    assert(!could.some(l => /Recorded narration/.test(l)), 'Could come down: never a held budget');
+    assert(!could.some(l => /A budget held for later/.test(l)), 'Could come down: never a held budget');
 }
 
 // --- The Markdown's shape ----------------------------------------------------

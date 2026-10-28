@@ -24,11 +24,8 @@
 
     const COMMANDS = {
         help: () => {
-            // 'voice about' is suggested only where there is a voice to read it.
-            const fd = mks.narration, synth = window.speechSynthesis;
-            const voiced = fd ? fd.state().voiced : !!(synth && (synth.getVoices() || []).length);
             print('available commands:');
-            [['journey', 'the route, Freetown to Amsterdam'],
+            [['journey', 'the route, Freetown to Pavia'],
              ['projects', 'list the six projects'],
              ['drill', 'spud in a borehole right here'],
              ['co2', 'how much this visit weighed'],
@@ -36,7 +33,6 @@
              ['cv', 'download the CV (PDF)'],
              ['map', 'fly to the journey map'],
              ['eco', 'toggle low-energy mode'],
-             ['voice', 'read a section aloud' + (voiced ? ' — try \'voice about\'' : ', where the browser has a voice')],
              ['theme', 'toggle light/dark'],
              ['kushe', 'a greeting from Freetown'],
              ['clear', 'wipe the screen'],
@@ -45,43 +41,33 @@
         },
         whoami: () => {
             print('Moses Kolleh Sesay — geologist by training, sustainability analyst by conviction.');
-            print('currently: Amsterdam, NL (52.3676° N, 4.9041° E). previously: see \'journey\'.');
+            print('currently: Pavia, IT (45.1847° N, 9.1582° E). previously: see \'journey\'.');
         },
         journey: () => {
             [['2013–2019', 'Freetown, SL', '8.4657° N, 13.2317° W', 'BSc Geology · 164 water points'],
              ['2019–2021', 'Changsha, CN', '28.2282° N, 112.9388° E', 'MSc Industrial Engineering'],
              ['2023', 'Bonn, DE', '50.7374° N, 7.0982° E', 'UNDRR · 54 hazard systems'],
              ['2021–2024', 'Wageningen, NL', '51.9692° N, 5.6654° E', 'MSc Env. Sciences · 10,226 sub-basins'],
-             ['2025–now', 'Amsterdam, NL', '52.3676° N, 4.9041° E', 'Sustainable AI research']
+             ['2025–2026', 'Amsterdam, NL', '52.3676° N, 4.9041° E', 'Sustainable AI research'],
+             ['2026–now', 'Pavia, IT', '45.1847° N, 9.1582° E', 'PhD · urban flood risk']
             ].forEach(s => print(`  ${s[0].padEnd(10)} ${s[1].padEnd(16)} ${s[2].padEnd(24)} ${s[3]}`));
             print('run \'map\' to fly the route.');
         },
         projects: () => {
-            ['Sustainable Generative AI — Digital Society School × Ministry of Finance',
-             'Coastal Water Pollution — 10,226 sub-basins, futures for Africa\'s coasts',
+            ['Sustainable AI Framework — Digital Society School (2025–2026)',
+             'Coastal Water Pollution — drivers across 10,226 sub-basins (MARINA-Multi, WUR); storylines for Africa\'s coasts',
              'Flood-Resilient Wuppertal — don\'t let the Schwebebahn become a boat',
              'UN Disaster Risk Reduction — Sendai Framework data, Bonn',
              'Soft Path Water Management — beyond cement, steel and pipes',
-             'Groundwater Potential Mapping — geophysics with a 70% strike rate'
+             'Groundwater Potential Mapping — survey-sited holes: 70% struck water'
             ].forEach((p, i) => print(`  [${i + 1}] ${p}`));
             print('cards in section 04 — PROJECTS. the whole of each: case-studies.html');
         },
         co2: () => {
             const badge = document.getElementById('carbonBadgeText');
             print(badge ? badge.textContent : 'the scale is still warming up — scroll to the footer.');
-            print('methodology: Resource Timing API × Sustainable Web Design model.');
-            print('this counts network transfer only — not the energy your device spends rendering it.');
-            // As the player's label: an offline voice adds nothing, a
-            // streamed one an amount no page can see.
-            const fd = mks.narration;
-            if (fd) {
-                const st = fd.state();
-                print(st.playing === 'intro'
-                    ? 'narration: Moses\'s own recording — one file, and the player printed its transfer weight before you pressed play.'
-                    : !st.voiced ? 'narration: this browser has no speech voice, so the sections are not read aloud, and add nothing.'
-                    : st.local ? 'narration: your browser\'s own voice, installed on your device. it transfers nothing, so it adds nothing to the figure above — though your device still does the work.'
-                    : 'narration: your browser\'s voice streams its audio from the vendor, in amounts this page cannot see — so the figure above leaves it out.');
-            }
+            print('methodology: Resource Timing API × Sustainable Web Design model v3.');
+            print('it weighs the bytes transferred, with a model that allocates data-centre, network and device energy per byte.');
         },
         drill: (args, done) => {
             const steps = [
@@ -90,7 +76,7 @@
                 '── 26 m  saprolite, weathered gabbro',
                 '── 38 m  fractured gabbro — conductivity rising',
                 'STRIKE 💧 water at 38 m. static level −6 m, yield looks good.',
-                '(odds are 7/10 when you read the resistivity curve first — try it on the groundwater case study.)'
+                '(in the field records, 7/10 of the holes sited from the resistivity curve struck water — try reading one on the groundwater case study.)'
             ];
             if (!mks.motionOK()) { steps.forEach(s => print(s)); return; }
             let i = 0;
@@ -124,48 +110,6 @@
             if (b) b.click();
             print('low-energy mode: ' + (document.body.classList.contains('eco-mode') ? 'on' : 'off'));
         },
-        voice: (args, done) => {
-            // The player is its own module; fetch it on the first `voice`.
-            if (!mks.narration && !mks.loaded.dispatch) {
-                print('loading the narration player…');
-                mks.load('dispatch').then(
-                    () => { COMMANDS.voice(args, () => {}); done(); },
-                    () => { print('the narration player could not be loaded.', 'ft-err'); done(); }
-                );
-                return true; // async
-            }
-            const fd = mks.narration;
-            if (!fd) { print('no speech engine in this browser — the page stays quiet.', 'ft-err'); return; }
-            const state = fd.state();
-            const arg = (args && args[0]) || '';
-
-            if (!arg) {
-                print('usage: voice <section> — one of: ' + state.ids.join(', '));
-                print('       voice moses     — Moses introduces himself, in his own voice, once he has recorded it');
-                print('       voice stop      — shut it up');
-                if (!state.voiced) {
-                    print('this browser has no speech voice, so the sections cannot be read aloud here.');
-                    return;
-                }
-                print(`sections are read by your browser's voice — ${state.voice}.`);
-                print(state.local
-                    ? 'that voice is installed on your device. it transfers nothing over the network.'
-                    : 'heads up: your browser has no offline voice, so it streams the audio from its vendor.');
-                return;
-            }
-            if (arg === 'stop') { fd.stop(); print('narration stopped.'); return; }
-            // The one recording on the site is Moses's own, so 'moses' now
-            // means exactly what it says. 'intro' and 'recorded' reach it too.
-            if (arg === 'moses' || arg === 'intro' || arg === 'recorded') {
-                fd.playIntro().then((ok) => {
-                    if (ok) close();
-                    else print('Moses has not recorded his introduction yet' + (state.voiced ? ' — try \'voice about\' for the browser voice.' : '.'), 'ft-err');
-                });
-                return;
-            }
-            if (fd.play(arg)) { close(); return; }
-            print(`no section called '${arg}'. try: ${state.ids.join(', ')}`, 'ft-err');
-        },
         theme: () => {
             const b = document.querySelector('.theme-toggle');
             if (b) b.click();
@@ -181,7 +125,7 @@
 
     const runCommand = (raw) => {
         const cmd = raw.trim().toLowerCase();
-        print('moses@sustaintheworld:~$ ' + raw, 'ft-echo');
+        print('moses@field:~$ ' + raw, 'ft-echo');
         if (!cmd) return;
         history.push(raw);
         histIdx = history.length;
@@ -202,12 +146,12 @@
         overlay.innerHTML = `
             <div class="ft-panel">
                 <div class="ft-bar">
-                    <span class="mono-label">field terminal — sustaintheworld</span>
+                    <span class="mono-label">field terminal — moseskolleh.github.io</span>
                     <button class="ft-close" aria-label="Close terminal">×</button>
                 </div>
                 <div class="ft-screen" aria-live="polite"></div>
                 <form class="ft-line">
-                    <label class="ft-prompt" for="ftInput">moses@sustaintheworld:~$</label>
+                    <label class="ft-prompt" for="ftInput">moses@field:~$</label>
                     <input id="ftInput" class="ft-input" type="text" aria-label="Terminal command" autocomplete="off" spellcheck="false" autocapitalize="off">
                 </form>
             </div>`;
@@ -249,7 +193,7 @@
                 e.preventDefault();
             }
         });
-        print('SUSTAINTHEWORLD field terminal');
+        print('FIELD TERMINAL');
         print('from bedrock to cloud. type \'help\' to see what\'s down here.');
         print('');
     };

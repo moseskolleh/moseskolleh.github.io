@@ -12,7 +12,7 @@ follows them says how.
 
 - [ ] **Publish one note.** One Field Note a month (owner checklist L2).
 - [ ] **Read `stats.html`.** The open counts, rebuilt each Monday from the
-  week before: which pages, role views and features are used, and the five
+  week before: which pages, lenses and features are used, and the four
   numbers.
 - [ ] **Answer every contact within two days.** Messages land in the
   sheet's Responses tab and in the `OWNER_EMAIL` inbox.
@@ -31,7 +31,7 @@ follows them says how.
 - [ ] **Ratchet budgets down.** `npm run budget` ends with "you could lower
   X from A to B" wherever a ceiling has room: lower each one, then run
   `node scripts/check-budget.js --readme`.
-- [ ] **Review the five numbers against the baseline.** `stats.html`
+- [ ] **Review the four numbers against the baseline.** `stats.html`
   against the four-week baseline in `docs/plan.md` ("Progress", Phase 1,
   step 5; owner checklist S6). A change that has not moved its number
   within a quarter is cut.
@@ -43,6 +43,7 @@ follows them says how.
 - [ ] **Regenerate the CV.** `npm run cv`, and commit
   `assets/Moses_Kolleh_Sesay_CV.pdf` with `assets/cv.hash`. The weekly
   health check says when `content/` has moved on since it was printed.
-- [ ] **Review the lenses against the roles he is going for.**
+- [ ] **Review the lenses against the work he is open to.**
   `content/lenses.json` against `atAGlance.targetRoles` in
-  `content/profile.json`.
+  `content/profile.json` (research collaborations since October 2026; owner
+  checklist U11 asks whether the lenses should still speak of roles).

@@ -17,7 +17,7 @@
 .st-list { padding-left: 20px; line-height: 1.7; }
 .st-key { font-size: 0.85rem; color: var(--text-secondary); }
 
-.st-five {
+.st-measures {
     list-style: none;
     padding: 0;
     display: grid;

@@ -12,7 +12,7 @@
 //     More button named for its role;
 //   - the Assay under the contact form, its question and promise in view and
 //     its box behind one button, until it grew into The Brief, a page of
-//     its own: one line under the form leads there now.
+//     its own, since retired: the form is the section's last word now.
 //
 // A real browser measures the length and checks the same at 320, 390 and
 // 1280/1440px (scripts/smoke.js: exerciseSections, and checkLengths against
@@ -112,35 +112,23 @@ const profile = JSON.parse(read('content/profile.json'));
 }
 
 // ===================================================================
-// Contact: the form first, then one line to The Brief
+// Contact: the form, and no line to The Brief
 // ===================================================================
 // The Assay sat under the form, folded behind a button: 470px of a desktop
 // and 660 of a phone open, for the few who wanted it. It grew into The
-// Brief (brief.html), and the section keeps one line that leads there.
+// Brief (brief.html), with one line under the form leading there, and both
+// went when The Brief was retired: the homepage links to it nowhere.
 {
     const contact = bare.getElementById('contact');
     const form = bare.getElementById('contactForm');
-    const line = bare.querySelector('#contact .brief-line');
-    // Its id stays only inside <noscript>, which a browser builds only with
-    // scripts off: there script.js cannot send /#assay on to The Brief, and
-    // the address lands on the line that leads there instead.
-    const assay = bare.getElementById('assay');
-    assert(!!assay && assay.closest('noscript') && assay.closest('.brief-line') === line && !bare.querySelector('[class*="assay"], #assayInput, #assayResult'),
-        'Contact: the Assay\'s box has left the homepage, its id kept only for a reader without scripts, on the line to The Brief');
-    const link = line && line.querySelector('a[href="brief.html"]');
-    assert(!!line && !!(form.compareDocumentPosition(line) & bare.defaultView.Node.DOCUMENT_POSITION_FOLLOWING) && !line.closest('form'),
-        'Contact: one line under the form leads to The Brief');
-    assert(!!link && link.getAttribute('data-analytics') === 'brief-home', 'Contact: the link is counted when followed');
-    assert(/the ad is never sent/.test(text(line)) && !/nothing (?:is )?sent/.test(text(line)), `Contact: and says the ad is never sent ("${text(line)}")`);
+    assert(!bare.getElementById('assay') && !bare.querySelector('.brief-line, [class*="assay"], #assayInput, #assayResult'),
+        'Contact: neither the Assay nor the line to The Brief is left in the section');
+    assert(!bare.querySelector('a[href^="brief.html"], a[href="#assay"], [data-analytics^="brief-"]') && !/Hiring\?|job (?:ad|description)/i.test(text(bare.body)),
+        'Contact: the homepage links to The Brief nowhere, the play index included, and asks for no job ad');
     const firstField = contact.querySelector('input, textarea, select');
     assert(firstField && firstField.closest('form') === form, `Contact: the first field in the section is the form's (${firstField && firstField.id})`);
-    assert(!line.querySelector('.btn-primary, button'), 'Contact: a line, with no button to compete with Send');
-    assert(!/\.assay\b|assay-/.test(css), 'Contact: the Assay\'s rules have left style.css with it');
-    assert(!/assay/i.test(read('modules/interactives.js').replace(/^\s*\/\/.*$/gm, '')), 'Contact: and its code has left modules/interactives.js');
-
-    // "grade your job description" in the play index goes to The Brief.
-    assert(!!bare.querySelector('.play-index a[href="brief.html"]') && !bare.querySelector('a[href="#assay"]'),
-        'Contact: the play index\'s "grade your job description" goes to brief.html');
+    assert(!/\.assay\b|assay-|\.brief-line/.test(css), 'Contact: the rules for the Assay and the line to The Brief have left style.css');
+    assert(!/assay/i.test(read('modules/interactives.js').replace(/^\s*\/\/.*$/gm, '')), 'Contact: and the Assay\'s code has left modules/interactives.js');
 }
 
 // ===================================================================
@@ -156,8 +144,8 @@ const profile = JSON.parse(read('content/profile.json'));
         ['164 water points across Sierra Leone', () => /164 water points/.test(text(about.querySelector('.about-text p:nth-of-type(2)'))), 'About\'s own paragraph'],
         ['Python, SQL, GIS & ML', () => ['Python', 'SQL', 'QGIS & ArcGIS', 'Machine Learning'].every(t => Array.from(bare.querySelectorAll('#skills .toolkit-name')).some(n => text(n).startsWith(t))), 'the toolkit, each with its proof'],
         ['ESG Specialist Program, Corporate Finance Institute (2024)', () => /^ESG Specialist Program Corporate Finance Institute · Sep 2024/.test(text(bare.querySelector('#education .certification'))), 'the certificates'],
-        ['the six chips', () => ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Life Cycle Assessment', 'Climate Risk Assessment', 'Water Resource Management'].every(s => text(bare.querySelector('.skills-checklist')).includes(s)) &&
-            ['IFRS S1&S2', 'SASB', 'GRI', 'CSRD'].every(s => text(bare.querySelector('.frameworks-list')).includes(s)), 'Skills\' two lists']
+        ['the six chips', () => ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Climate Risk Assessment', 'Water Resource Management'].every(s => text(bare.querySelector('.skills-checklist')).includes(s)) &&
+            ['IFRS S1&S2', 'GRI', 'CSRD'].every(s => text(bare.querySelector('.frameworks-list')).includes(s)), 'Skills\' two lists']
     ];
     said.forEach(([what, where, name]) => assert(where(), `About: "${what}" is still on the page, in ${name}`));
 
@@ -211,7 +199,7 @@ const profile = JSON.parse(read('content/profile.json'));
     const kept = projects.caseStudies.filter(c => text(cs.querySelector(`#${c.id} .cs-card-sub`)) === c.subtitle.replace(/\s+/g, ' ').trim()).length;
     assert(kept === projects.caseStudies.length, `Projects: every subtitle is on its case study, one click away (${kept} of ${projects.caseStudies.length})`);
     assert(cards.every(c => c.querySelector('.project-tags > .project-lenses') && c.querySelector('.project-tags > .project-tech span')),
-        'Projects: each card keeps its lenses and its tools (The Brief reads them), on one run of small type');
+        'Projects: each card keeps its lenses and its tools, on one run of small type');
     const intro = bare.querySelector('#projects .section-description');
     const lensIds = JSON.parse(read('content/lenses.json')).lenses.map(l => l.id);
     const lensLinks = intro ? Array.from(intro.querySelectorAll('a[href^="case-studies.html?lens="]')).map(a => a.getAttribute('href').split('=')[1]) : [];
@@ -228,42 +216,27 @@ const profile = JSON.parse(read('content/profile.json'));
     const skillText = text(skills);
     const education = bare.getElementById('education');
     assert(!!education && education.closest('#skills') === skills && education.tagName !== 'SECTION',
-        'Skills & Education: one section; #education is a part of it, still an address for The Brief\'s links');
+        'Skills & Education: one section; #education is a part of it, still an address');
     assert(/Skills & Education/.test(text(skills.querySelector('.section-title'))), 'Skills & Education: the heading says both');
 
-    const expertise = ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Life Cycle Assessment', 'Climate Risk Assessment',
-        'Water Resource Management', 'Disaster Risk Reduction', 'Carbon Markets', 'Circular Economy'];
-    const frameworks = ['SBTi', 'CDP', 'GHG Protocol', 'TCFD', 'TNFD', 'ISO 14000', 'IFRS S1&S2', 'SASB', 'GRI', 'CSRD'];
+    // Life Cycle Assessment, Carbon Markets, Circular Economy and SASB were
+    // listed too, under "every tool comes with the receipt", with nothing on
+    // the site behind them; they went in October 2026 (content.test.js keeps
+    // them off the homepage and the field report).
+    const expertise = ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Climate Risk Assessment',
+        'Water Resource Management', 'Disaster Risk Reduction'];
+    const frameworks = ['SBTi', 'CDP', 'GHG Protocol', 'TCFD', 'TNFD', 'ISO 14000', 'IFRS S1&S2', 'GRI', 'CSRD'];
     const listed = (sel) => Array.from(skills.querySelectorAll(sel)).map(text);
-    assert(JSON.stringify(listed('.skills-checklist li')) === JSON.stringify(expertise), `Skills: all eight areas of expertise are listed (${listed('.skills-checklist li').length})`);
-    assert(JSON.stringify(listed('.frameworks-list li')) === JSON.stringify(frameworks), `Skills: all ten frameworks are listed (${listed('.frameworks-list li').length})`);
+    assert(JSON.stringify(listed('.skills-checklist li')) === JSON.stringify(expertise), `Skills: every area of expertise is listed (${listed('.skills-checklist li').length})`);
+    assert(JSON.stringify(listed('.frameworks-list li')) === JSON.stringify(frameworks), `Skills: every framework is listed (${listed('.frameworks-list li').length})`);
     assert(skills.querySelectorAll('.toolkit-item .toolkit-proof').length === 6, 'Skills: the six tools keep their proof links');
 
     // What left Skills was said elsewhere on the page too, and still is.
-    [['70%', /70% aquifer/], ['10,226 sub-basins', /10,226 sub-basins/], ['54 hazard information systems', /54 global hazard information systems/], ['a team of 23', /team of 23/]]
+    [['70%', /70% of those drilled struck water/], ['10,226 sub-basins', /10,226 sub-basins/], ['54 hazard information systems', /54 global hazard information systems/], ['a team of 23', /team of 23/]]
         .forEach(([what, re]) => {
             const outside = Array.from(bare.querySelectorAll('main > section')).filter(s => s.id !== 'skills' && re.test(text(s))).map(s => s.id);
             assert(outside.length > 0 && !re.test(skillText), `Skills: ${what} is not repeated here, and is still in ${outside.join(', ')}`);
         });
-
-    // The Brief reads a named tool's evidence from the homepage, these lists
-    // and the certificates' lines included, so the build has to know where
-    // they are (scripts/build-content.js, BRIEF_SOURCES).
-    const { briefToolEvidence } = require('../scripts/build-content.js');
-    const tools = JSON.parse(read('content/brief.json')).tools;
-    const ev = briefToolEvidence(tools, bare);
-    const lca = (ev['Life Cycle Assessment'] || [])[0];
-    // ...and names a heading the reader can find there: it said "Skills &
-    // Expertise" after the section became Skills & Education.
-    const heading = text(skills.querySelector('h2'));
-    assert(!!lca && lca.t === `Listed under ${heading}` && lca.href === 'index.html#skills',
-        `Skills: the Brief finds Life Cycle Assessment in the expertise list, under the section's own heading, "${heading}" (${lca ? lca.t : 'not found'})`);
-    const alone = new JSDOM(`<main>${education.outerHTML}</main>`).window.document;
-    const excel = (briefToolEvidence(tools, alone).Excel || [])[0];
-    assert(!!excel && /^Covered in Data Analytics Training: SQL, Python, Excel, Tableau/.test(excel.t) && excel.href === 'index.html#education',
-        `Education: the Brief reads a certificate's line, and names the certificate (${excel ? excel.t : 'not found'})`);
-    const page = JSON.parse(new JSDOM(read('brief.html')).window.document.getElementById('briefData').textContent);
-    assert(JSON.stringify(page.toolEvidence) === JSON.stringify(ev), 'Skills: brief.html carries where the homepage shows each tool, as the homepage shows it now');
 
     // Every certificate keeps its name, issuer, date and what it covered;
     // every degree its dates, institution and every line it had.
@@ -282,109 +255,12 @@ const profile = JSON.parse(read('content/profile.json'));
             !!d.querySelector('.specialization') && d.querySelectorAll('li').length >= 2,
             `Education: ${e.degree} keeps its dates, institution, distinction and lines`);
     });
-    ['Wageningen African Scholarship Programme scholar', 'GPA 7.8/10 (Dutch scale)', 'Full Chinese Government MOFCOM Scholarship',
-        'First Class Honours — graduated top of class', 'Human-Environment Interaction · Water Systems & Global Change',
+    ['Wageningen African Scholarship Programme scholar', 'Average grade 7.8/10 (Dutch scale)', 'Full Chinese Government (MOFCOM) Scholarship',
+        'First Class Honours', 'Human-Environment Interaction · Water Systems & Global Change',
         'Thesis: socioeconomic drivers of river export of pollutants worldwide', 'Thesis: soft path water management — Freetown case study',
         'Dissertation: groundwater potential mapping, geophysical approach', 'Project management, operations research, systems analysis',
         'Hydrogeology, geophysics, environmental geology']
         .forEach(line => assert(plain.includes(line), `Education: "${line}" is still on the page`));
-}
-
-// ===================================================================
-// The narration reads what the sections now say
-// ===================================================================
-{
-    const { SCRIPTS } = require('../voice-scripts.js');
-    const byId = Object.fromEntries(SCRIPTS.map(s => [s.id, s]));
-    // A sentence ends at a stop and a capital, but not after an initialism
-    // the narration spells for the voice: "Sustainable A.I. Prototypes" is
-    // one name.
-    const sentences = (t) => t.split(/(?<=[.!?])(?<!\b(?:[A-Z]\.)+)\s+(?=[A-Z])/);
-    assert(!byId.notes && !byId.education, 'Narration: no script for a section that is now part of another');
-    assert(/field notes/i.test(byId.about.label) && /what a hundred and sixty-four water points taught me about data/.test(byId.about.text),
-        'Narration: About reads its field notes');
-    assert(/education/i.test(byId.skills.label) && ['Wageningen', 'Hunan', 'University of Sierra Leone', 'Masterschool', 'U.N. System Staff College']
-        .every(s => byId.skills.text.includes(s)), 'Narration: Skills & Education reads the degrees and the certificates');
-    assert(/sustainable A\.I\./.test(byId.contact.text) && !/intersection of climate, water or A\.I\./.test(byId.contact.text),
-        'Narration: Contact says what the section says: the four fields, and no sentence the page no longer has');
-
-    // Every sentence of the contact script, and where the section says it.
-    // Checking for one retired sentence let another outlive its source: the
-    // Assay's lede (the Brief's line now) lost "doing this in a few
-    // kilobytes … is the whole point of my work" and the script went on
-    // saying it. A sentence with no entry
-    // here fails, and so does one whose words the section no longer has.
-    const section = text(bare.getElementById('contact'));
-    const SAID = [
-        [/^I'm open to roles and consulting in sustainability, climate risk, E\.S\.G\. and sustainable A\.I\. — in Amsterdam and the E\.U\., and remote-friendly\.$/,
-            ['Open to roles & consulting in sustainability, climate risk, ESG and sustainable AI', 'Amsterdam / EU, remote-friendly']],
-        [/^I usually reply within a couple of days\.$/, ['I usually reply within a couple of days.']],
-        [/^And if you're hiring, paste your job ad into The Brief, on a page of its own: an honest fit, gaps included, and a dossier to forward\.$/,
-            ['Hiring?', 'Paste your job ad into The Brief', 'an honest fit, gaps included, and a dossier to forward']],
-        [/^It runs in your browser, and the ad is never sent\.$/, ['It runs in your browser', 'the ad is never sent']]
-    ];
-    sentences(byId.contact.text).forEach((sentence) => {
-        const entry = SAID.find(([re]) => re.test(sentence));
-        const missing = entry ? entry[1].filter(words => !section.includes(words)) : null;
-        assert(!!entry && !missing.length,
-            `Narration: Contact's "${sentence.slice(0, 48)}…" is in the section (${!entry ? 'no entry says where' : missing.length ? `the section no longer says "${missing.join('", "')}"` : 'it is'})`);
-    });
-
-    // The projects script, held the same way. It opened with the section's
-    // promise, "each with its headline result and how I know it", and then
-    // read the dossier-era descriptions: no card's result, and not one of
-    // the bases ("Not checkable from outside…") that make the cards honest.
-    const cards = text(bare.getElementById('projects'));
-    const PROJECTS_SAID = [
-        [/^Six projects, each with its headline result and how I know it\.$/, ['Six projects, each with its headline result and how I know it.']],
-        [/^One, the sustainable A\.I\. framework: a working decision-support prototype, not a slide deck\.$/,
-            ['Sustainable AI Framework', 'A working decision-support prototype, not a slide deck']],
-        [/^You can check that: the team's prototypes are public on GitHub, as Sustainable A\.I\. Prototypes, with my role in its README\.$/,
-            ['Checkable from outside The team\'s prototypes are public on GitHub as Sustainable AI Prototypes, with my role in its README.']],
-        [/^Two, coastal water pollution dynamics: ten thousand two hundred and twenty-six sub-basins modelled\.$/,
-            ['Coastal Water Pollution Dynamics', '10,226 sub-basins modelled']],
-        [/^You cannot check that from outside: it is a property of the model domain used, not an estimate, and the thesis is on request\.$/,
-            ['Not checkable from outside A property of the model domain used, not an estimate; the thesis is on request.']],
-        [/^Three, a flood-resilient Wuppertal: a complete flood-risk management framework, delivered to the municipality\.$/,
-            ['Flood-Resilient Wuppertal', 'A complete flood-risk management framework delivered to the municipality']],
-        [/^You cannot check that either: the client holds the deliverable, and nothing here claims it was implemented\.$/,
-            ['Not checkable from outside The deliverable is held by the client; nothing here claims it was implemented.']],
-        [/^Four, disaster risk reduction with the United Nations in Bonn: fifty-four global hazard information systems, identified and documented\.$/,
-            ['UN Disaster Risk Reduction', 'Bonn, DE', '54 global hazard information systems identified and documented']],
-        [/^You cannot check that either: it is a count recorded in the deliverable, which the United Nations office holds\.$/,
-            ['Not checkable from outside A count recorded in the deliverable, which UNDRR holds.']],
-        [/^Five, soft path water management: successfully defended at Hunan University, in May twenty twenty-one\.$/,
-            ['Soft Path Water Management', 'Successfully defended at Hunan University, May 2021']],
-        [/^You cannot check that from outside either: the degree was awarded, a master's in industrial engineering, and its certificate is on request\.$/,
-            ['Not checkable from outside Degree awarded: MSc Industrial Engineering, 2021; the certificate is on request.']],
-        [/^And six, groundwater potential mapping: a seventy per cent aquifer strike rate in the drilling that followed\.$/,
-            ['Groundwater Potential Mapping', '70% aquifer strike rate in subsequent drilling']],
-        [/^You cannot check that either: it comes from the field records of the boreholes sited with the survey, not a controlled trial\.$/,
-            ['Not checkable from outside From the field records of the boreholes sited with the survey, not a controlled trial.']],
-        [/^The whole of each is in the case studies, and two of them you can play with there: site a borehole, or flood a river\.$/,
-            ['The whole of each, with the basis for every number, is in the case studies']]
-    ];
-    const projectSentences = sentences(byId.projects.text);
-    projectSentences.forEach((sentence) => {
-        const entry = PROJECTS_SAID.find(([re]) => re.test(sentence));
-        const missing = entry ? entry[1].filter(words => !cards.includes(words)) : null;
-        assert(!!entry && !missing.length,
-            `Narration: Projects' "${sentence.slice(0, 48)}…" is in the section (${!entry ? 'no entry says where' : missing.length ? `the section no longer says "${missing.join('", "')}"` : 'it is'})`);
-    });
-    const cardCount = bare.querySelectorAll('#projects .project-card').length;
-    const basesRead = projectSentences.filter(s => /check/.test(s)).length;
-    assert(cardCount === 6 && basesRead === cardCount, `Narration: Projects reads every card's basis, one for each of its ${cardCount} cards (${basesRead})`);
-
-    // The chart's script offers the calculator as the page does, and no more:
-    // it said "any model, any electricity grid" of a tool with ten models
-    // and thirteen grids, and a caveat that newer models are left out.
-    const footnote = text(bare.querySelector('#ecoprompt .eco-footnote'));
-    assert(/^The full calculator, and where one answer lands on a CSRD report, are there\./.test(footnote) &&
-        /The full calculator, and where one answer lands on a sustainability report, are on their own page: the EcoPrompt Coach\.$/.test(byId.ecoprompt.text) &&
-        !/\bany (?:model|electricity grid|grid)\b/.test(byId.ecoprompt.text),
-        'Narration: the A.I. chart offers the full calculator in the words the page uses, not "any model, any grid"');
-    assert(/Press More on any layer/.test(byId.experience.text) && !/research in Wageningen/.test(byId.experience.text),
-        'Narration: the experience log names the layers it has, and the button that opens each');
 }
 
 if (failures > 0) {

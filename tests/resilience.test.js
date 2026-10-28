@@ -1,6 +1,6 @@
 // Regression tests for the ways the page is expected to degrade rather than
-// break: storage the browser refuses to hand over, keyboard shortcuts firing
-// while a form control has focus, and narration with no engine to play it.
+// break: storage the browser refuses to hand over, and keyboard shortcuts
+// firing while a form control has focus.
 //
 // Run with: node tests/resilience.test.js
 
@@ -23,8 +23,8 @@ function assert(cond, msg) {
 // ===================================================================
 // `localStorage.getItem('theme')` used to sit at module scope. With storage
 // blocked the property access throws SecurityError, and everything defined
-// after it — the theme toggle, low-energy mode, the narration player, the
-// terminal — never initialised at all.
+// after it — the theme toggle, low-energy mode, the terminal — never
+// initialised at all.
 {
     const { window, errors } = run('dark', { storage: 'blocked' });
     const doc = window.document;
@@ -39,10 +39,7 @@ function assert(cond, msg) {
     // throw aborted the file, the later ones are the ones that go missing.
     // The switch is in the markup, hidden until the script shows it.
     assert(doc.querySelector('.theme-toggle').hidden === false, 'Storage blocked: the script still shows the theme toggle');
-    assert(!!doc.getElementById('dispatchBar'), 'Storage blocked: the narration player still mounts (defined late in the file)');
-    assert(doc.querySelectorAll('.listen-btn').length === 1, 'Storage blocked: the listen control is still there');
     assert(!!doc.getElementById('terminalToggle'), 'Storage blocked: the field terminal is still wired');
-    assert(typeof window.mks.narration === 'object' && window.mks.narration !== null, 'Storage blocked: the narration player is still exported (mks.narration)');
 
     // The adapter itself must be usable and honest about what it can promise.
     const store = window.mks.storage;
@@ -167,55 +164,6 @@ function assert(cond, msg) {
     assert(press('C', doc.body).length === 1, 'Shortcut: the uppercase form still works');
 }
 
-// ===================================================================
-// Narration must not leave a dead player
-// ===================================================================
-// A failed recording used to switch into synth mode unconditionally. On a
-// browser with no speech engine — headless Chrome, Linux without
-// speech-dispatcher — that meant a player showing "playing" and no audio,
-// with no way back.
-{
-    const { window, errors } = run('dark', { speech: 'none' });
-    const doc = window.document;
-
-    const speechErrors = errors.filter((e) => /speechSynthesis|SpeechSynthesisUtterance/.test(String((e && e.message) || e)));
-    assert(speechErrors.length === 0, `No speech engine: nothing throws on load (${speechErrors.map(String).join('; ')})`);
-
-    // Without an engine and without a manifest fetch resolving in jsdom, the
-    // listen control must stay hidden rather than offering a dead button.
-    const wrap = doc.getElementById('navListen');
-    assert(!!wrap, 'No speech engine: the listen control is in the page');
-    assert(wrap.hidden, 'No speech engine and no recording: the listen control stays hidden');
-
-    const bar = doc.getElementById('dispatchBar');
-    assert(!!bar && bar.hidden, 'No speech engine: the player is not left showing');
-}
-
-// The source-level guarantee: the failure path may not call into the speech
-// engine without first checking that one exists.
-{
-    const src = fs.readFileSync(path.join(ROOT, 'modules/dispatch.js'), 'utf8');
-    const start = src.indexOf('const runSynth =');
-    const body = src.slice(start, src.indexOf('const speakHuman', start));
-    assert(start > -1, 'Fallback setup: found runSynth in modules/dispatch.js');
-    assert(
-        /if \(!canSpeak\(\)\)/.test(body) || /if \(!canSynth\)/.test(body),
-        'Fallback: runSynth refuses to run when there is no speech engine'
-    );
-
-    // Moses's recording is his words in his voice. If it will not load, the
-    // browser voice does not stand in for him: the player says so and
-    // offers a retry.
-    const at = src.indexOf("audioEl.addEventListener('error'");
-    const errorHandler = src.slice(at, src.indexOf('});', at));
-    assert(at > -1 && /failPlayback\(/.test(errorHandler) && !/runSynth/.test(errorHandler),
-        'Fallback: a recording that fails is reported with a retry, never replaced by the browser voice');
-}
-
-// The behaviour itself: ask for narration on a browser with no speech engine
-// and no recording, and see what the player actually does. play() awaits the
-// manifest fetch, so the result lands a tick later — on the harness's fake
-// clock, so the 150 ms below cost nothing.
 function finish() {
     if (failures > 0) {
         console.log(`\n${failures} assertion(s) failed`);
@@ -227,40 +175,4 @@ function finish() {
     process.exit(0);
 }
 
-{
-    const { window, clock } = run('dark', { speech: 'none', clock: true });
-    const doc = window.document;
-    const fd = window.mks.narration;
-
-    fd.play('hero');
-
-    clock.tick(150).then(() => {
-        const bar = doc.getElementById('dispatchBar');
-
-        assert(!bar.hidden, 'Dead player: the bar stays up to explain itself rather than vanishing');
-        assert(bar.classList.contains('dispatch-failed'), 'Dead player: the failure is visually distinct from being paused');
-
-        const caption = bar.querySelector('.dispatch-caption').textContent;
-        assert(/no speech voice|no recording|would not load/.test(caption), `Dead player: the caption says what failed ("${caption.slice(0, 60)}")`);
-
-        assert(
-            /again/i.test(bar.querySelector('.dispatch-play').getAttribute('aria-label') || ''),
-            'Dead player: the play button offers a retry, not a resume'
-        );
-        assert(
-            doc.querySelectorAll('.listen-btn.is-playing').length === 0,
-            'Dead player: no listen button is left stuck in the playing state'
-        );
-
-        // Pressing the retry must not throw, whatever state it lands in.
-        let threw = null;
-        try {
-            bar.querySelector('.dispatch-play').dispatchEvent(
-                new window.MouseEvent('click', { bubbles: true, cancelable: true })
-            );
-        } catch (err) { threw = err; }
-        assert(!threw, `Dead player: pressing retry does not throw (${threw && threw.message})`);
-
-        finish();
-    });
-}
+finish();

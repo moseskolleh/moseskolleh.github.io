@@ -67,8 +67,7 @@ const MB = 1024 * 1024;
 // report over the wire) to 96% (the on-demand total: the wave-1 review's
 // fixes filled it to within 100 bytes, until the journey map shed 1.6 KB of
 // path points that drew nothing, then 3.6 KB more written as steps, which
-// paid for the time-zone table moving here out of script.js), with the
-// audio budget at 0% until Moses records his introduction. To make room,
+// paid for the time-zone table moving here out of script.js). To make room,
 // remove something of equal weight rather than raise a ceiling
 // (docs/plan.md, "Stop doing"); `--ratchet` lowers them. The README's
 // table is written from these (`readme` is the row's name there) by
@@ -102,12 +101,13 @@ const BUDGETS = {
         readme: 'First view of the homepage on a phone, over the wire (fonts included)'
     },
     // What a visit fetches after arriving, if it uses everything: the
-    // on-demand modules, the narration scripts and AI data behind them, the
-    // journey map, the narration manifest. Bounded so "on demand" cannot
-    // become the place where weight goes to hide.
+    // on-demand modules, the AI data behind them, the journey map and its
+    // time-zone table. Bounded so "on demand" cannot become the place where
+    // weight goes to hide. Lowered from 61 KB to what it measured plus 5%
+    // when the Listen player and its scripts were removed (October 2026).
     onDemand: {
         label: 'Everything a full visit adds on demand (modules, scripts, map — gzipped)',
-        max: 61 * KB,
+        max: 44 * KB,
         readme: 'Everything a full visit adds on demand (modules, scripts, map)'
     },
     // Lowered from 210 KB when the photos were re-encoded (October 2026):
@@ -132,17 +132,6 @@ const BUDGETS = {
         label: 'Every image in the repository',
         max: 3.5 * MB,
         readme: 'Every image in the repository'
-    },
-    // The only audio the site ships is Moses's own recorded introduction:
-    // one 60–90 s take, and 90 s of mono MP3 at 64 kbps is about 720 KB.
-    // Every audio file in the repository counts against it, so the ten
-    // stock-voice section tracks this replaced (4.13 MB, retired with their
-    // 4.5 MB budget) cannot drift back in unbudgeted. 0 KB until he records.
-    introAudio: {
-        label: "Recorded narration: Moses's introduction, the one audio file the site ships",
-        max: 800 * KB,
-        readme: "Recorded narration: Moses's introduction (sized for his 60–90 s take)",
-        hold: 'sized for his recording, which is not made yet'
     },
     // The footer calls it "the whole portfolio in 11 KB" (10 until every
     // page took a Content-Security-Policy, in October 2026); this is what
@@ -219,18 +208,10 @@ const BUDGETS = {
         label: 'EcoPrompt Coach (carbon-ai.html), over the wire (with fonts)',
         max: 111 * KB,
         readme: 'EcoPrompt Coach (`carbon-ai.html`), over the wire (fonts included)'
-    },
-    // The Brief: the page, its stylesheet, its own script and its rubric,
-    // which the build writes into the page (no request for it later). Set
-    // when the page was made (October 2026) at its measure plus 5%, as the
-    // ratchet would set it: a new budget, not a raised one. Its script is
-    // its own, so neither the homepage's core nor its on-demand total
-    // carries it.
-    briefWire: {
-        label: 'The Brief (brief.html), over the wire (with fonts and its script)',
-        max: 113 * KB,
-        readme: 'The Brief (`brief.html`), over the wire (fonts and its script included)'
     }
+    // The Brief (brief.html) had a budget of its own, briefWire, until it was
+    // retired in October 2026. The note left at its address is about the
+    // size of the 404 page, and like it has a length budget only.
 };
 
 // The pages whose whole first view is budgeted, and the measurement that
@@ -242,7 +223,6 @@ const PAGE_BUDGETS = {
     'research.html': 'researchWire',
     'carbon-ai.html': 'carbonAiWire',
     'claims.html': 'claimsWire',
-    'brief.html': 'briefWire',
     // Every page the pattern matches, each measured in smoke against it.
     'notes/*.html': 'notesWire',
     'stats.html': 'statsWire',
@@ -280,8 +260,8 @@ const PHONE_BUDGETS = {
 // the wave that made it: on 3 October 2026 once its lanes had merged, and
 // set again the next day, before the wave closed, once the review had put
 // the figures written in words on the list (36 entries, not 30).
-// brief.html's too, on 17 October 2026, as it loads: every case study in
-// its dossier, no ad graded yet.
+// brief.html's was set on 17 October 2026 for The Brief; since its
+// retirement (October 2026) it holds the note left there to the 404 page's.
 // stats.html is held drawn full, as the smoke's fixture draws a busy
 // quarter: that is the page the weekly Action will commit, and the page as
 // committed today is shorter. The field notes share one, set in October
@@ -297,7 +277,7 @@ const LENGTH = {
     'case-studies.html': { '1440x900': 11.85, '390x844': 19.78 },
     'carbon-ai.html': { '1440x900': 7.07, '390x844': 13.38 },
     'claims.html': { '1440x900': 7.54, '390x844': 13.53 },
-    'brief.html': { '1440x900': 2.63, '390x844': 3.74 },
+    'brief.html': { '1440x900': 1.05, '390x844': 1.05 },
     'research.html': { '1440x900': 5.75, '390x844': 8.99 },
     'stats.html': { '1440x900': 10.97, '390x844': 16.25 },
     'field-report.html': { '1440x900': 4.4, '390x844': 7.44 },
@@ -481,7 +461,7 @@ function onDemandAssets() {
         fs.readdirSync(modulesDir).filter(f => /\.(js|css)$/.test(f)).sort()
             .forEach(f => files.push(`modules/${f}`));
     }
-    ['voice-scripts.js', 'ai-carbon-data.js', 'assets/journey-map.svg', 'assets/timezones.json', 'assets/audio/voice-manifest.json']
+    ['ai-carbon-data.js', 'assets/journey-map.svg', 'assets/timezones.json']
         .forEach((rel) => { if (sizeOf(rel) !== null) files.push(rel); });
     return files;
 }
@@ -496,8 +476,6 @@ function onDemandAssets() {
 const MODULE_TABLE = [
     { module: '`modules/interactives.js` (+ `ai-carbon-data.js`)', files: ['modules/interactives.js', 'ai-carbon-data.js'],
         when: 'section 05 or the footer receipt comes within a screen of the viewport, or a deep link lands there' },
-    { module: '`modules/dispatch.js` (+ `dispatch.css`, `voice-scripts.js`)', files: ['modules/dispatch.js', 'modules/dispatch.css', 'voice-scripts.js'],
-        when: 'the first press of Listen, or `voice` in the terminal' },
     { module: '`modules/dossier.js` (+ `dossier.css`)', files: ['modules/dossier.js', 'modules/dossier.css'],
         when: 'on `case-studies.html`, a game\'s host comes within a screen of view (the page\'s own loader, not `script.js`)' },
     { module: '`modules/terminal.js`', files: ['modules/terminal.js'],
@@ -507,9 +485,7 @@ const MODULE_TABLE = [
     { module: '`assets/journey-map.svg`', files: ['assets/journey-map.svg'],
         when: 'the first sign a reader is heading down the page: a scroll, a key, a touch, or a deep link' },
     { module: '`assets/timezones.json`', files: ['assets/timezones.json'],
-        when: 'the journey map arrives, for its "you?" mark (the zone is looked up in the page, never sent)' },
-    { module: '`assets/audio/voice-manifest.json`', files: ['assets/audio/voice-manifest.json'],
-        when: '1.5 s after load, only where the browser has no voice to read aloud with: whether a recording can stand in' }
+        when: 'the journey map arrives, for its "you?" mark (the zone is looked up in the page, never sent)' }
 ];
 
 // Each row weighed, and any on-demand file no row names.
@@ -544,7 +520,6 @@ function walk(dir, out) {
 function measure() {
     const allFiles = walk(ROOT, []);
     const images = allFiles.filter(isImage);
-    const audio = allFiles.filter(f => /\.(mp3|opus|wav|m4a)$/i.test(f));
 
     const critical = criticalAssets().map((rel) => ({ rel, raw: sizeOf(rel), wire: wireOf(rel) }));
     const onDemand = onDemandAssets().map((rel) => ({ rel, raw: sizeOf(rel), wire: wireOf(rel) }));
@@ -560,12 +535,10 @@ function measure() {
         researchWire: pageWire('research.html'),
         carbonAiWire: pageWire('carbon-ai.html'),
         claimsWire: pageWire('claims.html'),
-        briefWire: pageWire('brief.html'),
         // The heaviest note; null with none.
         notesWire: sitePages().filter(p => covers('notes/*.html', p)).reduce((n, p) => Math.max(n === null ? 0 : n, pageWire(p)), null),
         largestImage: images.reduce((n, f) => Math.max(n, sizeOf(f) || 0), 0),
         allImages: images.reduce((n, f) => n + (sizeOf(f) || 0), 0),
-        introAudio: audio.reduce((n, f) => n + (sizeOf(f) || 0), 0),
         // Uncompressed, because that is the number the footer quotes and the one a
         // reader can verify by saving the page.
         fieldReport: sizeOf('field-report.html'),

@@ -39,7 +39,7 @@
 //   - a page without exactly one Content-Security-Policy, ahead of every
 //     script and stylesheet; anything on any page the policy refuses (a
 //     console error, in Firefox as well as Chromium); an inline script or an
-//     on…="" attribute put into The Brief that the policy lets run; a link
+//     on…="" attribute put into a page that the policy lets run; a link
 //     off the site that sends a Referer, or one between the site's own
 //     pages that does not
 //   - a page whose theme does not follow the reader's choice (or, with none,
@@ -55,16 +55,6 @@
 //     lightbox that will not step through them (buttons, arrow keys, "2 of
 //     5"), lets Tab out, or does not hand focus back on Escape, in either
 //     theme, with motion or without
-//   - more than one listen control, a nav bar that moves when it appears,
-//     a player that covers more than 20% of a phone screen or the send
-//     button, or a recording fetched unasked
-//   - a Brief that grades a mismatched ad well, sends anything, or lets a
-//     word of the ad into a request or its link; that keys alone cannot
-//     use; whose shared link does not rebuild the same fit and dossier;
-//     that takes the reader's own result, reloaded or come back to, for a
-//     link someone sent; whose dossier prints to more than one A4 page for
-//     a sample or an ordinary ad, or without the contact line and its
-//     address on the first; or that scrolls sideways on a phone
 //   - an experience card that is not short, or whose More sits on its text;
 //     a core-log layer whose depths wrap or run onto the core
 //   - a case-study game fetched before a reader nears it, that will not
@@ -159,7 +149,7 @@ const REPORT_REFUSED = () => addEventListener('securitypolicyviolation', (e) =>
 const TYPES = {
     '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
     '.json': 'application/json', '.svg': 'image/svg+xml', '.xml': 'application/xml', '.txt': 'text/plain',
-    '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg',
+    '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg',
     '.woff2': 'font/woff2', '.pdf': 'application/pdf'
 };
 const server = http.createServer((req, res) => {
@@ -329,7 +319,6 @@ async function visit(context, page, rel, origin) {
         else bad(`${csp.n} Content-Security-Policy meta(s)${csp.head ? '' : ', not in <head>'}${csp.before ? '' : ', after a script or stylesheet it should govern'}`);
 
         if (rel === 'index.html') await exerciseHomepage(page, r, origin);
-        if (rel === 'brief.html') await exerciseBrief(page, r);
         if (rel === 'carbon-ai.html') await exerciseCarbonTool(page, r);
         if (rel === 'case-studies.html') await exerciseCaseStudyGames(page, r);
 
@@ -339,7 +328,6 @@ async function visit(context, page, rel, origin) {
 
     await checkWithoutJs(browser, origin);
     await exerciseShell(browser, origin);
-    await exerciseBriefPage(browser, origin);
     await exerciseSecurity(browser, origin);
 
     // Each budgeted page's measured first view against the budget's
@@ -414,7 +402,6 @@ async function visit(context, page, rel, origin) {
         await page.close();
     }
 
-    await exerciseNarration(browser, origin);
     await exerciseCounter(openContext, origin, results['index.html'].arrivalBytes);
 
     await accessibilityPass(browser, origin);
@@ -520,7 +507,7 @@ async function quietNetwork(page, quietMs = 800, maxMs = 8000) {
 // estimate until it nears the screen) and whatever is fetched on the way
 // (the journey map, section 05, the case studies' games, Anatomy of a
 // Prompt) arrives and is drawn; then walked again until the height holds.
-// Nothing is opened (the player, the terminal, an experience card's More).
+// Nothing is opened (the terminal, an experience card's More).
 // Reduced motion, so no reveal is caught half-way. A length is scrollHeight over innerHeight, to
 // two places. stats.html is measured drawn full as well (drawStats, a busy
 // quarter), and its budget holds whichever is longer.
@@ -645,221 +632,19 @@ async function checkLengths(browser, origin) {
 }
 
 // ------------------------------------------------------------------
-// The Brief: grades an ad in the page, and nothing that leaves it carries
-// a word of the ad
-// ------------------------------------------------------------------
-// The ad the Assay was reported for: fluent Dutch, five years at a Big
-// Four firm, SAP. Graded honestly it is not the top grade, and each of the
-// four is a gap a reader can see. A line no rule reads rides along, so a
-// request or a link that carried any of the ad would carry it.
-const BRIEF_AD = [
-    'Senior ESG Reporting Consultant. Help clients prepare for CSRD and ESRS reporting.',
-    '- Fluent Dutch and English',
-    '- 5+ years of experience at a Big Four firm',
-    '- Hands-on experience with SAP',
-    '- Strong knowledge of GHG accounting and stakeholder engagement',
-    'Quote reference ZEBRA-4471 to Quetzalcoatl Recruitment.'
-].join('\n');
-const BRIEF_MARKS = /zebra|4471|quetzalcoatl/i;
-// Ads to print, as long as ordinary ones run: an ESG reporting ad of nine
-// requirements (eighteen rows, five case studies), which printed on two
-// pages, and the tests' ad with every rule in it (twenty-two rows). And one
-// longer than any page holds (twenty-nine rows, every case study), which
-// may run on, but not with the contact line or the address off its first.
-const BRIEF_PRINTED = {
-    'the ESG reporting ad': ['ESG Reporting Analyst', 'Requirements:', '- 3+ years of experience in ESG reporting (CSRD, ESRS, GRI)',
-        '- Experience with Workiva or Sphera', '- Strong Python, SQL, Power BI and Excel skills', '- GHG accounting across Scope 1, 2 and 3',
-        '- Experience with SAP', '- Fluent Dutch and English', '- Right to work in the Netherlands', '- Life Cycle Assessment (LCA)',
-        '- Climate risk scenario analysis, GIS'].join('\n'),
-    'the ad with every rule': ['Head of ESG — Director level. Minimum of 7 years of relevant experience.',
-        'Native German speaker, business-level French, B2 Spanish.', 'Experience with Workiva, Enablon and Salesforce Net Zero Cloud.',
-        'Background in management consulting; Deloitte or KPMG alumni welcome.',
-        'Financial modelling and valuation skills. PhD in economics required. Law degree an advantage.',
-        'You must hold the right to work in the EU; no visa sponsorship. Security clearance and a driving licence required. Willing to relocate.',
-        'CSRD, GHG accounting, climate risk and stakeholder engagement.'].join('\n')
-};
-const BRIEF_LONG = ['Sustainability Data Lead', 'Requirements:', '- 5+ years of experience in ESG reporting (CSRD, ESRS, GRI, TCFD)',
-    '- 3+ years hands-on with Workiva, Enablon or Sphera', '- Strong Python, SQL, Power BI and Excel skills; R a plus',
-    '- GHG accounting across Scope 1, 2 and 3; SBTi target setting', '- Experience with SAP and Salesforce Net Zero Cloud',
-    '- Fluent Dutch and English; German or French an advantage', '- Big Four experience preferred',
-    '- Right to work in the Netherlands; no visa sponsorship', '- Life Cycle Assessment (LCA) with SimaPro or openLCA',
-    '- Climate risk scenario analysis and TNFD, water quality, groundwater, GIS mapping, sustainable AI'].join('\n');
-
-async function exerciseBrief(page, r) {
-    const sent = [];
-    const onRequest = (q) => sent.push({ method: q.method(), url: q.url(), body: q.postData() || '' });
-    await page.waitForFunction(() => (window.mks || {}).brief && window.mks.brief.analyse, null, { timeout: 5000 }).catch(() => null);
-    // Only the grading is watched: the page has settled first.
-    await quietNetwork(page);
-    page.on('request', onRequest);
-    await page.fill('#briefAd', BRIEF_AD);
-    await page.click('#briefRun');
-    await page.waitForTimeout(300);
-    await page.click('#briefCopy');
-    await page.waitForTimeout(200);
-    page.off('request', onRequest);
-
-    const out = await page.evaluate(() => {
-        const tag = document.querySelector('#briefResult .bf-grade-tag');
-        const gaps = Array.from(document.querySelectorAll('#briefResult .bf-gaps .bf-row')).filter(el => el.getBoundingClientRect().height > 0);
-        return { grade: tag && tag.textContent, gaps: gaps.length, url: location.href };
-    });
-    if (out.grade && out.grade !== 'High-grade match' && out.gaps >= 4) ok(`the Brief grades the Dutch / Big Four / SAP ad "${out.grade}" with ${out.gaps} visible gaps`);
-    else bad(`the Brief graded the Dutch / Big Four / SAP ad "${out.grade}" with ${out.gaps} visible gaps`);
-    // A new address (the link it leaves) may have the browser ask for the
-    // page's icon again: a GET for a file of the site's own, carrying
-    // nothing. Anything else is the ad leaving the page.
-    const origin = new URL(page.url()).origin;
-    const leaving = sent.filter(q => q.method !== 'GET' || q.body || !q.url.startsWith(origin) || BRIEF_MARKS.test(decodeURIComponent(q.url)));
-    if (!leaving.length) ok(`the Brief sent nothing while grading, nor when its link was copied${sent.length ? ` (the browser asked again for ${sent.map(q => new URL(q.url).pathname).join(', ')} for the new address)` : ''}`);
-    else bad(`the Brief made requests while grading: ${leaving.map(q => `${q.method} ${q.url} ${q.body}`).join(', ')}`);
-    if (/\?focus=[a-z0-9.:,-]+$/.test(out.url) && !BRIEF_MARKS.test(decodeURIComponent(out.url))) ok(`its address carries ids and no word of the ad (${out.url.split('?')[1]})`);
-    else bad(`its address after grading is ${out.url}`);
-    if (r.errors.length) r.errors.forEach(e => bad(e));
-}
-
-// What the page shows of a result: the grade, the gaps, the matches and
-// the dossier's case studies, in order.
-const briefShown = (page) => page.evaluate(() => ({
-    grade: (document.querySelector('#briefResult .bf-grade-tag') || {}).textContent || '',
-    gaps: Array.from(document.querySelectorAll('#briefResult .bf-gaps .bf-req')).map(el => el.textContent),
-    matches: Array.from(document.querySelectorAll('#briefResult .bf-matches .bf-req')).map(el => el.textContent),
-    cases: Array.from(document.querySelectorAll('#briefCases > li')).filter(li => li.getClientRects().length).map(li => li.id)
-}));
-
-// The rest of what a reader does with it: by keys alone, the link opened
-// by whoever it is sent to, the dossier printed, and a phone.
-async function exerciseBriefPage(browser, origin) {
-    console.log('  brief.html — keys, the shared link, paper, a phone');
-    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
-    const page = await context.newPage();
-    const errors = [];
-    page.on('pageerror', e => errors.push(e.message));
-    await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
-
-    // By keys: from the box, Tab to "Grade this ad" and press Enter; a
-    // sample by Space; the link copied by Enter.
-    await page.focus('#briefAd');
-    await page.keyboard.insertText(BRIEF_AD);
-    await page.keyboard.press('Tab');
-    const onRun = await page.evaluate(() => document.activeElement.id);
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(200);
-    const byEnter = await briefShown(page);
-    if (onRun === 'briefRun' && byEnter.grade && byEnter.gaps.length >= 4) ok(`by keys: Tab from the box reaches "Grade this ad", and Enter grades ("${byEnter.grade}")`);
-    else bad(`by keys: Tab from the box went to #${onRun}, and Enter gave "${byEnter.grade}" with ${byEnter.gaps.length} gaps`);
-    await page.focus('.bf-sample[data-sample="water"]');
-    await page.keyboard.press('Space');
-    await page.waitForTimeout(200);
-    const bySpace = await briefShown(page);
-    if (/match/.test(bySpace.grade) && bySpace.cases.length) ok(`by keys: Space on a sample grades it ("${bySpace.grade}", ${bySpace.cases.length} case studies)`);
-    else bad(`by keys: Space on the WASH sample gave "${bySpace.grade}"`);
-    await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin }).catch(() => null);
-    await page.focus('#briefCopy');
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(200);
-    const copied = await page.evaluate(() => document.getElementById('briefCopy').textContent);
-    if (/Copied/.test(copied)) ok('by keys: Enter on "Copy link" copies it'); else bad(`by keys: "Copy link" said "${copied}"`);
-
-    // The link, opened by the person it was sent to: the same grade, gaps,
-    // matches and dossier, and no ad in the box.
-    await page.fill('#briefAd', BRIEF_AD);
-    await page.click('#briefRun');
-    await page.waitForTimeout(200);
-    const here = await briefShown(page);
-    const link = page.url();
-    const other = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
-    const there = await other.newPage();
-    await there.goto(link, { waitUntil: 'load' });
-    await there.waitForTimeout(200);
-    const rebuilt = await briefShown(there);
-    const box = await there.evaluate(() => document.getElementById('briefAd').value);
-    if (JSON.stringify(rebuilt) === JSON.stringify(here) && box === '' && here.cases.length) ok(`the shared link rebuilds the same fit and dossier elsewhere (${rebuilt.grade}; ${rebuilt.gaps.length} gaps; ${rebuilt.cases.join(', ')}), with no ad in it`);
-    else bad(`the shared link rebuilt ${JSON.stringify(rebuilt)} from ${JSON.stringify(here)}${box ? ', with text in the box' : ''}`);
-    await other.close();
-
-    // The reader's own result, come back to by a reload or by Back from a
-    // case study, is theirs: it said "The ad itself was not shared" beside
-    // the ad in the box. With the ad given back to the box it is graded from
-    // it again; without, rebuilt from the address, said as such.
-    const said = () => page.evaluate(() => ({
-        blurb: (document.querySelector('#briefResult .bf-grade p') || {}).textContent || '',
-        box: document.getElementById('briefAd').value
-    }));
-    await page.reload({ waitUntil: 'load' });
-    await page.waitForTimeout(200);
-    const reloaded = await said();
-    await page.fill('#briefAd', BRIEF_AD);
-    await page.click('#briefRun');
-    await page.click('#briefCases > li:not([hidden]) h4 a');
-    await page.waitForLoadState('load');
-    await page.goBack({ waitUntil: 'load' });
-    await page.waitForTimeout(300);
-    const back = await said();
-    const own = (r) => r.blurb && !/shared|sender/i.test(r.blurb) && (r.box ? !/^Rebuilt/.test(r.blurb) : /^Rebuilt from this page's address/.test(r.blurb));
-    if (own(reloaded) && own(back)) ok(`the reader's own result, reloaded and come back to by Back, is not taken for a shared link (${[reloaded, back].map(r => (r.box ? 'graded from the ad in the box' : 'rebuilt from the address')).join('; ')})`);
-    else bad(`the reader's own result came back as "${reloaded.blurb.slice(0, 60)}…" on a reload and "${back.blurb.slice(0, 60)}…" on Back`);
-
-    // On paper: the dossier and the address that rebuilds it, none of the
-    // screen's furniture; the contact line and the address on the first
-    // page, whatever the ad; and one A4 page for the samples and ordinary
-    // ads. page.pdf is headless Chromium's.
-    if (!CHROMIUM) ok(`the dossier printed: not printed in ${BROWSER} (page.pdf is headless Chromium's) — the Chromium run counts its pages`);
-    else {
-        const { pdfText } = require('./lib/pdf-text.js');
-        const email = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'profile.json'), 'utf8')).person.email;
-        const alnum = (s) => s.replace(/[^A-Za-z0-9]/g, '');
-        const ads = [['esg'], ['climate'], ['water'], [null, 'the Dutch / Big Four / SAP ad', BRIEF_AD]]
-            .concat(Object.entries(BRIEF_PRINTED).map(([what, ad]) => [null, what, ad]), [[null, 'an ad longer than a page holds', BRIEF_LONG, true]]);
-        for (const [sample, name, ad, long] of ads) {
-            await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
-            if (sample) await page.click(`.bf-sample[data-sample="${sample}"]`);
-            else { await page.fill('#briefAd', ad); await page.click('#briefRun'); }
-            await page.waitForTimeout(200);
-            const url = page.url();
-            const printed = pdfText(await page.pdf({ format: 'A4' }));
-            const text = printed.pages.join(' ').replace(/\s+/g, ' ');
-            const first = alnum(printed.pages[0] || '');
-            const what = sample ? `the ${sample} sample` : name;
-            const furniture = ['Paste a job ad', 'Grade this ad', 'Get in touch', 'Copy link', 'Back to top'].filter(w => text.includes(w));
-            const missing = [[email, 'the contact line'], [url.split('://')[1], 'the address']].filter(([t]) => !first.includes(alnum(t))).map(([, w]) => w);
-            if ((long || printed.pages.length === 1) && !missing.length && !furniture.length) {
-                ok(`printed, ${what} is ${printed.pages.length === 1 ? 'one A4 page' : `${printed.pages.length} A4 pages`}: the dossier, with the contact line and the address that rebuilds it on the first`);
-            } else bad(`printed, ${what} is ${printed.pages.length} page(s)${missing.length ? `, without ${missing.join(' or ')} on the first` : ''}${furniture.length ? `, with ${furniture.join(', ')}` : ''}`);
-        }
-    }
-
-    // A phone, 320 to 430px, before and after a grade: nothing sideways.
-    const wide = [];
-    for (const width of [320, 360, 375, 390, 414, 430]) {
-        await page.setViewportSize({ width, height: 800 });
-        await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
-        await page.evaluate(() => document.fonts.ready);
-        if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) wide.push(`${width}px`);
-        await page.fill('#briefAd', BRIEF_AD);
-        await page.click('#briefRun');
-        await page.waitForTimeout(150);
-        if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) wide.push(`${width}px graded`);
-    }
-    if (wide.length) bad(`brief.html scrolls sideways at ${wide.join(', ')}`);
-    else ok('brief.html at 320-430px: nothing scrolls sideways, before a grade or after');
-    if (errors.length) errors.forEach(e => bad(`brief.html: uncaught ${e}`));
-    await context.close();
-}
-
-// ------------------------------------------------------------------
 // The policy, live; and the referrer policy
 // ------------------------------------------------------------------
-// The Brief renders parts of a stranger's paste back into its page. If a
-// bug ever let markup through, the Content-Security-Policy is what stops it
-// running. Shown on The Brief itself: served with an inline script and an
-// on…="" attribute in it, as a bug would put them there, and given the same
-// again by script once it has loaded. None may run, and each is refused,
-// while the page's own inline script (the html.js mark) and brief.js run as
-// ever: the policy is live and fits the page, not merely present. Then the
-// referrer policy: a move between the site's own pages carries the address
-// it came from (count.js needs its host to believe ?via=), and a link off
-// the site carries none.
+// If a bug ever let markup into a page, the Content-Security-Policy is
+// what stops it running. Shown on the EcoPrompt Coach, the page with the
+// most script of its own (The Brief, which put a stranger's paste back
+// into its page, was shown until it was retired): served with an inline
+// script and an on…="" attribute in it, as a bug would put them there, and
+// given the same again by script once it has loaded. None may run, and
+// each is refused, while the page's own inline script (the html.js mark)
+// and carbon-ai.js run as ever: the policy is live and fits the page, not
+// merely present. Then the referrer policy: a move between the site's own
+// pages carries the address it came from (count.js needs its host to
+// believe ?via=), and a link off the site carries none.
 async function exerciseSecurity(browser, origin) {
     console.log('  the Content-Security-Policy, live, and the referrer policy');
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
@@ -869,12 +654,12 @@ async function exerciseSecurity(browser, origin) {
     });
     const INJECTED = '<script>window.__ran = "a script in the markup"</script>' +
         '<img src="data:," alt="" onerror="window.__ran = \'a handler in the markup\'">';
-    const html = fs.readFileSync(path.join(ROOT, 'brief.html'), 'utf8').replace(/<main\b[^>]*>/, m => m + INJECTED);
-    await context.route(`${origin}/brief.html`, route => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: html }));
+    const html = fs.readFileSync(path.join(ROOT, 'carbon-ai.html'), 'utf8').replace(/<main\b[^>]*>/, m => m + INJECTED);
+    await context.route(`${origin}/carbon-ai.html`, route => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: html }));
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.goto(`${origin}/brief.html`, { waitUntil: 'load' });
+    await page.goto(`${origin}/carbon-ai.html`, { waitUntil: 'load' });
     const r = await page.evaluate(async () => {
         const script = document.createElement('script');
         script.textContent = 'window.__ran = "a script added later"';
@@ -885,17 +670,15 @@ async function exerciseSecurity(browser, origin) {
         await new Promise(res => setTimeout(res, 300));
         return { ran: window.__ran || null, refused: window.__refused.slice(), marked: document.documentElement.classList.contains('js') };
     });
-    await page.fill('#briefAd', BRIEF_AD);
-    await page.click('#briefRun');
-    await page.waitForTimeout(200);
-    const graded = (await briefShown(page)).grade;
+    // carbon-ai.js ran if the calculator has replaced its placeholder.
+    const worked = await page.evaluate(() => (document.getElementById('outCarbon') || {}).textContent || '');
     const scripts = r.refused.filter(d => /^script-src/.test(d));
-    if (!r.ran && scripts.length === 4 && scripts.length === r.refused.length && r.marked && graded) {
-        ok(`an inline script and an on…="" attribute in The Brief, in its markup or added later, are refused, all ${scripts.length} (${[...new Set(scripts)].join(', ')}), while its own mark and brief.js run (graded "${graded}")`);
+    if (!r.ran && scripts.length === 4 && scripts.length === r.refused.length && r.marked && /\d/.test(worked)) {
+        ok(`an inline script and an on…="" attribute in a page, in its markup or added later, are refused, all ${scripts.length} (${[...new Set(scripts)].join(', ')}), while its own mark and carbon-ai.js run (${worked} g)`);
     } else {
-        bad(`The Brief with markup injected: ${r.ran ? `${r.ran} ran` : 'nothing ran'}; refused ${r.refused.join(', ') || 'nothing'}; html.js ${r.marked}; graded "${graded}"`);
+        bad(`carbon-ai.html with markup injected: ${r.ran ? `${r.ran} ran` : 'nothing ran'}; refused ${r.refused.join(', ') || 'nothing'}; html.js ${r.marked}; the calculator shows "${worked}"`);
     }
-    if (errors.length) errors.forEach(e => bad(`brief.html, injected: uncaught ${e}`));
+    if (errors.length) errors.forEach(e => bad(`carbon-ai.html, injected: uncaught ${e}`));
 
     // The referrer: off the site, the origin alone (no path, no query);
     // between the site's own pages, the address. The off-site page is a stand-in, answered here.
@@ -1270,7 +1053,7 @@ async function playGames(page) {
         if (/STRIKE/.test(await page.textContent('#drillResult'))) break;
         for (let k = 0; k < 6; k++) await page.keyboard.press('ArrowRight');   // past this dip
     }
-    // The river raised to July 2021 by keyboard, as the slider allows.
+    // The river raised to a severe flood by keyboard, as the slider allows.
     await page.focus('#floodSlider');
     await page.keyboard.press('End');
     await page.waitForTimeout(800);   // the water rises over 650 ms
@@ -1304,7 +1087,7 @@ async function exerciseCaseStudyGames(page, r) {
     const rig = await sliderKeys(page, '#boreholeStage');
     if (rig.length) bad(`the rig's slider keys: ${rig.join('; ')}`);
     else ok('the rig takes a slider\'s keys (Home, End, Page Up/Down, Up/Down), and none scrolls the page');
-    if (played.level === 'July 2021' && played.water < 200) ok(`the flood slider raises the Wupper to July 2021 (water line at ${played.water})`);
+    if (played.level === 'severe flood' && played.water < 200) ok(`the flood slider raises the Wupper to a severe flood (water line at ${played.water})`);
     else bad(`the flood slider: level "${played.level}", water line at ${played.water}`);
 
     // Every label a reader needs, drawn at 11px or more and whole (the
@@ -1612,7 +1395,8 @@ async function exerciseJourneyAndChart(browser, origin) {
         const where = `journey band at ${width}x${height}`;
         const trouble = [];
         const small = new Set();
-        for (let i = 0; i < 5; i++) {
+        const stopCount = await page.evaluate(() => document.querySelectorAll('.journey-stop').length);
+        for (let i = 0; i < stopCount; i++) {
             // Met as a reader meets each stop: its top just under the band.
             await page.evaluate((i) => {
                 const map = document.getElementById('journeyMap');
@@ -1659,7 +1443,7 @@ async function exerciseJourneyAndChart(browser, origin) {
             r.labels.filter(([, px]) => px < LABEL_MIN_PX - 0.05).forEach(([name, px]) => small.add(`${name} ${px.toFixed(1)}px`));
         }
         if (trouble.length) trouble.forEach(t => bad(`${where}, ${t}`));
-        else ok(`${where}: pinned on screen at each of the five stops, showing that stop, over none of its text`);
+        else ok(`${where}: pinned on screen at each of the ${stopCount} stops, showing that stop, over none of its text`);
         if (small.size) bad(`${where}: names under ${LABEL_MIN_PX}px (${Array.from(small).join(', ')})`);
         else ok(`${where}: every name on it ${LABEL_MIN_PX}px or more`);
 
@@ -1701,17 +1485,19 @@ async function exerciseJourneyAndChart(browser, origin) {
     }
 
     // The Rhine delta on a desktop, every name showing, for a visitor in
-    // Amsterdam (their mark on the Amsterdam stop) and in Brussels (theirs
-    // beside Wuppertal's name): no name on another or cut by the frame, and
-    // no stop's or site's name across the route.
-    for (const zone of ['Europe/Amsterdam', 'Europe/Brussels']) {
+    // Amsterdam (their mark on the Amsterdam stop), in Brussels (theirs
+    // beside Wuppertal's name) and in Rome (theirs south of Pavia): no name
+    // on another or cut by the frame, and no stop's or site's name across
+    // the route, at the delta's two stops and at Pavia, where the last leg
+    // runs south past Wuppertal's name.
+    for (const zone of ['Europe/Amsterdam', 'Europe/Brussels', 'Europe/Rome']) {
         const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce', timezoneId: zone });
         const page = await context.newPage();
         await page.goto(`${origin}/index.html`, { waitUntil: 'load' });
         await mapReady(page);
         const clash = [];
         let count = 0;
-        for (const i of [3, 4]) {
+        for (const i of [3, 4, 5]) {
             await page.evaluate((i) => document.querySelector(`.journey-stop[data-stop="${i}"]`).scrollIntoView({ block: 'center', behavior: 'instant' }), i);
             await page.waitForFunction((i) => document.querySelector(`#mapStop${i}.active`) && document.querySelector('.map-you'), i, { timeout: 5000 }).catch(() => null);
             await page.waitForTimeout(300);
@@ -1908,7 +1694,9 @@ async function exerciseNavigation(browser, origin) {
     const next = await page.evaluate(() => {
         const a = document.activeElement;
         const main = document.querySelector('main');
-        const r = a.getBoundingClientRect();
+        // The first line's box: a link that wraps has a bounding box whose
+        // top-left corner is on the line's other words, not on the link.
+        const r = a.getClientRects()[0] || a.getBoundingClientRect();
         const hit = document.elementFromPoint(r.left + Math.min(r.width, 16) / 2, r.top + Math.min(r.height, 16) / 2);
         return { inside: a !== main && main.contains(a), seen: !!hit && (hit === a || a.contains(hit)), what: a.textContent.trim().slice(0, 40) || a.tagName };
     });
@@ -2001,8 +1789,8 @@ async function exerciseNavigation(browser, origin) {
     // growth inside that frame was never landed for: /#assay and /#anatomy
     // stopped 250-440px short on about one visit in three, the cache warm
     // from an earlier page. Each is opened a few times. (Anatomy is on
-    // carbon-ai.html now, and the Assay grew into The Brief; You Draw It
-    // is the homepage's section-05 widget.)
+    // carbon-ai.html now, and the Assay grew into The Brief, since retired;
+    // You Draw It is the homepage's section-05 widget.)
     for (const id of ['ydi']) {
         const misses = [];
         for (let run = 0; run < 3; run++) {
@@ -2027,9 +1815,9 @@ async function exerciseNavigation(browser, origin) {
 
     // The addresses shared for what moved off the homepage go on to where
     // it is now: they opened the homepage at its top, the feature nowhere
-    // on it. The Assay's goes to The Brief's box.
+    // on it. The Assay's goes to the note left where The Brief was.
     const moved = [['anatomy', '/carbon-ai.html#anatomy'], ['boreholeGame', '/case-studies.html#play-borehole'],
-        ['strikeWidget', '/case-studies.html#play-borehole'], ['floodSim', '/case-studies.html#play-flood'], ['assay', '/brief.html#grade']];
+        ['strikeWidget', '/case-studies.html#play-borehole'], ['floodSim', '/case-studies.html#play-flood'], ['assay', '/brief.html#retired']];
     const lost = [];
     const fwd = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
     for (const [id, to] of moved) {
@@ -2075,23 +1863,6 @@ async function exerciseNavigation(browser, origin) {
     await bare.goto(`${origin}/index.html`, { waitUntil: 'load' });
     if (await bare.isVisible('#themeToggle')) bad('theme switch: shows with JavaScript off, where it cannot work');
     else ok('theme switch: absent with JavaScript off');
-    // Nor can script.js send /#assay on to The Brief: it lands on the line
-    // that leads there, by an id inside <noscript>, built only then.
-    await bare.goto(`${origin}/index.html#assay`, { waitUntil: 'load' });
-    // style.css scrolls smoothly, and only once the page has laid out, so
-    // the jump takes a moment: a second at least, then until it stops.
-    for (let i = 0, was = -1, y = 0; i < 40 && (i < 5 || y !== was); i++) {
-        was = y;
-        await bare.waitForTimeout(200);
-        y = await bare.evaluate(() => scrollY);
-    }
-    const assay = await bare.evaluate(() => {
-        const line = document.querySelector('#contact .brief-line');
-        const r = line ? line.getBoundingClientRect() : null;
-        return { at: location.pathname, inLine: !!(document.getElementById('assay') && document.getElementById('assay').closest('.brief-line')), seen: !!r && r.top >= 0 && r.bottom <= innerHeight };
-    });
-    if (assay.at.endsWith('/index.html') && assay.inLine && assay.seen) ok('/#assay with JavaScript off: lands on the homepage\'s line to The Brief');
-    else bad(`/#assay with JavaScript off: ${JSON.stringify(assay)}`);
     await noScript.close();
 
     // Back to top on a 390x844 phone: not before one full screen, and never
@@ -2118,8 +1889,8 @@ async function exerciseNavigation(browser, origin) {
     // The controls in between used to be sat on: the calculator's selects
     // (on carbon-ai.html now), a sample chip, the dossier titles (now the
     // project cards' links), the toolkit's proof links. The experience
-    // cards' More buttons are new, and the line to The Brief under the form.
-    const GUARDED = ['.hero-availability', '.hero-cta .btn', '.corelog-more', '#ydiReveal', '.brief-line a', '.project-link', 'a.toolkit-proof',
+    // cards' More buttons are new.
+    const GUARDED = ['.hero-availability', '.hero-cta .btn', '.corelog-more', '#ydiReveal', '.project-link', 'a.toolkit-proof',
         '.btn-submit', '.carbon-badge', '.receipt-btn', '.footer-fieldreport a', '.eco-mode-toggle', '.terminal-toggle'];
     const covered = [];
     let passes = 0;
@@ -2268,7 +2039,7 @@ async function checkClaimMarks(browser, origin) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await context.newPage();
     // And every field note: a note need not hold a figure, but one it holds is marked.
-    for (const rel of ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'brief.html', 'field-report.html', 'claims.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
+    for (const rel of ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', 'claims.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
         await page.goto(`${origin}/${rel}`, { waitUntil: 'load' });
         if (rel === 'index.html') {
             await page.waitForFunction(() => !document.querySelector('.hero-stat-number[aria-hidden]')
@@ -2281,7 +2052,7 @@ async function checkClaimMarks(browser, origin) {
         else if (wrong.length) bad(`${rel}: once its scripts have run, ${wrong.length} marked figure(s) disagree with the ledger: ${wrong.join(', ')}`);
         else ok(`${rel}: once its scripts have run, all ${marks.length} marked figures say what the ledger says`);
         // A mark is an element, so in a flex or grid row it becomes an item
-        // of its own: "Seven in ten: what reading the ground is worth" split
+        // of its own: the borehole game's "Seven in ten: …" heading split
         // into two columns on a phone, the mark one and the words after it
         // the other. A mark sits in running text, never beside a loose line
         // of words in a flex or grid box.
@@ -2421,10 +2192,8 @@ async function printPalette(browser, origin) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
     await context.addInitScript(() => { try { localStorage.setItem('theme', 'dark'); } catch (e) { /* the system's dark stands */ } });
     const page = await context.newPage();
-    for (const rel of ['index.html', 'case-studies.html', 'claims.html', 'carbon-ai.html', 'brief.html', 'research.html', 'stats.html', 'field-report.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
+    for (const rel of ['index.html', 'case-studies.html', 'claims.html', 'carbon-ai.html', 'research.html', 'stats.html', 'field-report.html'].concat(PAGES.filter(p => p.startsWith('notes/')))) {
         await page.goto(`${origin}/${rel}`, { waitUntil: 'load' });
-        // The Brief is printed as a hiring manager gets it: a grade in it.
-        if (rel === 'brief.html') { await page.fill('#briefAd', BRIEF_AD); await page.click('#briefRun'); }
         await page.emulateMedia({ media: 'print', colorScheme: 'dark' });
         // Switching media here starts the colour transitions a card has on
         // screen (the journey's cards ease every property over 0.3 s), and
@@ -2456,19 +2225,19 @@ async function printPalette(browser, origin) {
 }
 
 // ------------------------------------------------------------------
-// The shorter sections: experience as short cards, one line to The Brief
-// under the form
+// The shorter sections: experience as short cards, and the contact form
+// on its own
 // ------------------------------------------------------------------
 // The experience log was 5.3 screens on a 390px phone and 2.6 on a
 // desktop. Each role is now its dates, title, organisation and first line,
 // the rest a press away, at every width; a desktop keeps the core log's
 // depths and draws a shut card as one row. The contact form comes first in
-// #contact, then one line that leads to The Brief, which grew out of the
-// Assay that sat there. body's overflow-x:hidden hides a card that runs off
+// #contact, and nothing follows it there now: the line to The Brief (which
+// grew out of the Assay that sat there) went with it. body's overflow-x:hidden hides a card that runs off
 // the side, so the cards themselves are measured. Reduced motion
 // throughout: nothing the cards show may wait on a transition.
 async function exerciseSections(browser, origin) {
-    console.log('  index.html — experience as short cards, the line to The Brief under the form');
+    console.log('  index.html — experience as short cards, the contact form on its own');
     for (const [width, height] of [[320, 700], [390, 844], [700, 900], [1280, 800]]) {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce' });
         const page = await ctx.newPage();
@@ -2545,23 +2314,20 @@ async function exerciseSections(browser, origin) {
         if (open.all && open.expanded === 'true' && shut === 'false' && /Researcher/.test(open.name)) ok(`${tag}: "More" opens the whole card and "Less" folds it (named "${open.name.trim()}")`);
         else bad(`${tag}: More showed the whole card ${open.all}, aria-expanded ${open.expanded} then ${shut}, name "${open.name}"`);
 
-        // The contact form first, the line to The Brief under it, whole and
-        // on the screen.
+        // The contact form first, whole on the screen, and no line to The
+        // Brief (or the Assay before it) left in the section.
         const c = await page.evaluate(() => {
             const form = document.getElementById('contactForm');
-            const line = document.querySelector('#contact .brief-line');
             const first = document.querySelector('#contact input, #contact textarea');
-            const r = line && line.getBoundingClientRect();
+            const r = form.getBoundingClientRect();
             return {
-                after: !!line && !!(form.compareDocumentPosition(line) & Node.DOCUMENT_POSITION_FOLLOWING),
-                below: !!line && r.top >= form.getBoundingClientRect().bottom,
-                inside: !!line && r.left >= 0 && r.right <= innerWidth,
+                inside: r.left >= 0 && r.right <= innerWidth,
                 first: !!first && first.closest('form') === form,
-                assay: !!document.getElementById('assay')
+                gone: !document.querySelector('#contact .brief-line, #contact a[href*="brief.html"]') && !document.getElementById('assay')
             };
         });
-        if (c.after && c.below && c.inside && c.first && !c.assay) ok(`contact at ${width}px: the form comes first, the line to The Brief below it`);
-        else bad(`contact at ${width}px: the line after the form ${c.after}, below it ${c.below}, on screen ${c.inside}, the form's fields first ${c.first}, the Assay still there ${c.assay}`);
+        if (c.inside && c.first && c.gone) ok(`contact at ${width}px: the form comes first, on the screen, and no line to The Brief is left`);
+        else bad(`contact at ${width}px: the form on screen ${c.inside}, its fields first ${c.first}, the Brief's line and the Assay gone ${c.gone}`);
         await ctx.close();
     }
 }
@@ -2573,7 +2339,7 @@ async function exerciseHomepage(page, r, origin) {
     const loadedNow = () => page.evaluate(() => Object.assign({}, window.mks.loaded));
 
     const before = await loadedNow();
-    ['interactives', 'terminal', 'dispatch'].forEach((m) => {
+    ['interactives', 'terminal'].forEach((m) => {
         if (before[m]) bad(`module "${m}" loaded on arrival — it should wait to be needed`);
     });
     if (!Object.values(before).some(Boolean)) ok('no on-demand module loaded on arrival');
@@ -2583,21 +2349,6 @@ async function exerciseHomepage(page, r, origin) {
     await page.waitForTimeout(800);
     const mapSvg = await page.$('#journeyMapFrame svg');
     if (mapSvg) ok(`journey map arrived on first scroll${r.measured ? ` (+${fmt(r.bytesSince())})` : ''}`); else bad('journey map did not load after scrolling');
-
-    // The manifest lists no recording, so the listen control is there only
-    // if this browser has a speech voice. Headless Chromium has none; a
-    // branded Chrome may. Either way it must not offer a button that says
-    // nothing. (It is exercised with a stand-in voice in exerciseNarration.)
-    const listening = await page.evaluate(() => {
-        const wrap = document.getElementById('navListen');
-        const voices = window.speechSynthesis ? (window.speechSynthesis.getVoices() || []).length : 0;
-        return { state: wrap ? (wrap.hidden ? 'hidden' : 'shown') : 'missing', voices };
-    });
-    if (listening.state === (listening.voices ? 'shown' : 'hidden')) {
-        ok(listening.voices
-            ? `listen control shown: this browser has ${listening.voices} speech voice(s)`
-            : 'no voice and no recording: the listen control stays hidden');
-    } else bad(`listen control is ${listening.state} in a browser with ${listening.voices} speech voice(s) and no recording`);
 
     // The projects are six cards now, and the games live on the case
     // studies: reading past them fetches no game, and each card leads out.
@@ -2630,329 +2381,6 @@ async function exerciseHomepage(page, r, origin) {
 
     if (r.errors.length) r.errors.forEach(e => bad(e)); else ok('still no errors after using every feature');
     if (r.measured) ok(`using every feature above fetched ${fmt(r.bytesSince())} more — modules, the map, and every image scrolled past`);
-}
-
-// ------------------------------------------------------------------
-// The spoken page: one listen control, docked in the nav
-// ------------------------------------------------------------------
-// Headless Chromium has no speech voice, and the player rightly will not
-// offer to read with none, so these pages get a stand-in engine that
-// accepts every utterance and never finishes one: the player stays open to
-// be measured. What is checked is what a listener would meet:
-//
-//   - exactly one control, on screen at every width, without the menu
-//   - pressing it reads with the browser voice and fetches no audio at all
-//   - the open player is small on a phone (it used to cover ~45% of one)
-//     and never sits over the contact form's button
-//   - Moses's recorded introduction, once the manifest lists it, is offered
-//     with its weight and fetched only when pressed
-const STAND_IN_VOICE = () => {
-    const spoken = (window.__spoken = []);
-    const synth = {
-        getVoices: () => [{ name: 'Smoke', lang: 'en-GB', localService: true, default: true, voiceURI: 'smoke' }],
-        speak(u) { spoken.push(u.text); },
-        cancel() {}, pause() {}, resume() {},
-        get speaking() { return spoken.length > 0; }, get paused() { return false; }, get pending() { return false; },
-        addEventListener() {}, removeEventListener() {}
-    };
-    Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true });
-    window.SpeechSynthesisUtterance = function (text) { this.text = text; };
-};
-
-// Silent MPEG-1 Layer III frames (mono, 64 kbps, 44.1 kHz): a real,
-// decodable MP3 of about five seconds, standing in for Moses's take.
-const silentMp3 = () => {
-    const frame = Buffer.alloc(208);
-    frame[0] = 0xff; frame[1] = 0xfb; frame[2] = 0x50; frame[3] = 0xc4;
-    return Buffer.concat(Array.from({ length: 192 }, () => frame));
-};
-
-// The opposite: a speech engine with no voices, as headless Chromium and
-// Linux builds without speech-dispatcher have — made certain here, since a
-// branded Chrome may bring voices of its own.
-const NO_VOICE = () => {
-    const synth = {
-        getVoices: () => [], speak() {}, cancel() {}, pause() {}, resume() {},
-        speaking: false, paused: false, pending: false, addEventListener() {}, removeEventListener() {}
-    };
-    Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true });
-};
-
-// Voices that turn up after the first paint, as Chrome's routinely do: none
-// until voiceschanged, 1.2 s after load.
-const LATE_VOICE = () => {
-    const heard = [];
-    let voices = [];
-    const synth = {
-        getVoices: () => voices, speak() {}, cancel() {}, pause() {}, resume() {},
-        speaking: false, paused: false, pending: false,
-        addEventListener(type, fn) { if (type === 'voiceschanged') heard.push(fn); }, removeEventListener() {}
-    };
-    Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true });
-    window.SpeechSynthesisUtterance = function (text) { this.text = text; };
-    window.addEventListener('load', () => setTimeout(() => {
-        voices = [{ name: 'Late', lang: 'en-GB', localService: true, default: true, voiceURI: 'late' }];
-        heard.forEach((fn) => fn(new Event('voiceschanged')));
-    }, 1200));
-};
-
-// Where each thing in the nav bar sits: what must not move when Listen shows.
-const barPlaces = (page) => page.evaluate(() => ['.nav-logo', '#themeToggle', '#navToggle', '.nav-menu .nav-link', '.nav-menu .contact-btn'].map((sel) => {
-    const el = document.querySelector(sel);
-    const r = el && getComputedStyle(el).display !== 'none' ? el.getBoundingClientRect() : null;
-    return `${sel} ${r && r.width ? Math.round(r.left) : '-'}`;
-}).join(', '));
-
-const PLAYER_CEILING = 0.20;   // share of a 390×844 viewport the open player may cover
-
-async function exerciseNarration(browser, origin) {
-    console.log('  narration (a stand-in speech voice)');
-    const errors = [];
-    const watch = (page) => {
-        page.on('console', (m) => { if (m.type() === 'error') errors.push(`console.error: ${m.text()}`); });
-        page.on('pageerror', (e) => errors.push(`uncaught: ${e.message}`));
-    };
-    const coverage = (page) => page.evaluate(() => {
-        const r = document.getElementById('dispatchBar').getBoundingClientRect();
-        return (r.width * r.height) / (innerWidth * innerHeight);
-    });
-
-    // --- the browser voice ------------------------------------------------
-    {
-        const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-        await context.addInitScript(STAND_IN_VOICE);
-        const page = await context.newPage();
-        watch(page);
-        const audio = [];
-        page.on('request', (req) => { if (req.resourceType() === 'media' || /\.(mp3|wav|ogg|opus|m4a)(\?|$)/.test(req.url())) audio.push(req.url()); });
-        await page.goto(`${origin}/index.html`, { waitUntil: 'load' });
-
-        const count = await page.$$eval('.listen-btn', (els) => els.length);
-        if (count === 1) ok('exactly one listen control on the page'); else bad(`${count} listen controls — there should be one`);
-
-        // On screen at every width, inside the bar, and clear of the logo,
-        // the theme switch and the menu button. The tightest width is the
-        // first with the full menu, so that one is found and checked too:
-        // the bar used to run 14px past its edge there.
-        const settle = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-        const fullMenu = async (w) => {
-            await page.setViewportSize({ width: w, height: 844 });
-            await settle();
-            return page.evaluate(() => getComputedStyle(document.getElementById('navToggle')).display === 'none');
-        };
-        let lo = 600, hi = 1920;
-        while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (await fullMenu(mid)) hi = mid; else lo = mid; }
-        const off = [];
-        for (const w of new Set([320, 360, 390, 430, 768, lo, hi].concat(Array.from({ length: 52 }, (_, i) => 900 + i * 20)))) {
-            await page.setViewportSize({ width: w, height: 844 });
-            // Two frames, so anything the breakpoint change set moving has settled.
-            await settle();
-            const r = await page.evaluate(() => {
-                const box = (el) => (el && getComputedStyle(el).display !== 'none' ? el.getBoundingClientRect() : null);
-                const b = box(document.getElementById('listenBtn'));
-                if (!b || !b.width) return 'not shown';
-                const hit = (o) => o && o.width && !(o.right <= b.left || o.left >= b.right || o.bottom <= b.top || o.top >= b.bottom);
-                if (b.left < 0 || b.right > innerWidth) return 'off screen';
-                const bar = document.querySelector('.nav-container');
-                const edge = bar.getBoundingClientRect().right - parseFloat(getComputedStyle(bar).paddingRight);
-                if (b.right > edge + 0.5) return `${Math.round(b.right - edge)}px past the bar's edge`;
-                if (hit(box(document.querySelector('.nav-logo'))) || hit(box(document.getElementById('navToggle')))) return 'overlapping the logo or menu button';
-                if (hit(box(document.getElementById('themeToggle')))) return 'overlapping the theme switch';
-                const last = box(document.querySelector('.nav-menu .contact-btn'));
-                if (getComputedStyle(document.getElementById('navToggle')).display === 'none' && hit(last)) return 'overlapping Contact';
-                // It sits first in the right-hand group, so what it costs shows at the far end.
-                const end = getComputedStyle(document.getElementById('navToggle')).display === 'none' ? last : box(document.getElementById('navToggle'));
-                if (end && end.right > edge + 0.5) return `pushing ${end === last ? 'Contact' : 'the menu button'} ${Math.round(end.right - edge)}px past the bar's edge`;
-                return null;
-            });
-            if (r) off.push(`${w}px: ${r}`);
-        }
-        if (off.length) off.forEach((o) => bad(`listen control ${o}`));
-        else ok('listen control visible in the nav at every width, 320–1920px, without opening the menu');
-
-        await page.setViewportSize({ width: 390, height: 844 });
-        await page.evaluate(() => document.getElementById('about').scrollIntoView({ behavior: 'instant' }));
-        await page.click('#listenBtn');
-        const opened = await page.waitForFunction(() => window.mks.loaded.dispatch &&
-            !document.getElementById('dispatchBar').hidden, null, { timeout: 5000 }).then(() => true, () => false);
-        if (!opened) { bad('pressing Listen did not open the player'); await context.close(); return; }
-
-        const st = await page.evaluate(() => ({
-            playing: window.mks.narration.state().playing,
-            spoke: window.__spoken.length,
-            weight: document.querySelector('.dispatch-weight').textContent,
-            styled: getComputedStyle(document.getElementById('dispatchBar')).position,
-            expanded: document.getElementById('listenBtn').getAttribute('aria-expanded')
-        }));
-        if (st.playing === 'about' && st.spoke > 0) ok('Listen reads the section in view with the browser voice');
-        else bad(`Listen should read the section in view (#about) — got ${st.playing}, ${st.spoke} utterances`);
-        if (!audio.length && /0 KB transferred/.test(st.weight)) ok(`the browser voice fetched no audio — "${st.weight}"`);
-        else bad(`the browser voice fetched audio: ${audio.join(', ') || st.weight}`);
-        if (st.styled === 'absolute') ok('the player\'s stylesheet arrived with it'); else bad('the player is unstyled — modules/dispatch.css did not load');
-        if (st.expanded === 'true') ok('the control reports the player open'); else bad('aria-expanded did not follow the player');
-
-        const share = await coverage(page);
-        if (share <= PLAYER_CEILING) ok(`open player covers ${(share * 100).toFixed(1)}% of a 390×844 screen (ceiling ${PLAYER_CEILING * 100}%)`);
-        else bad(`open player covers ${(share * 100).toFixed(1)}% of a 390×844 screen — ceiling ${PLAYER_CEILING * 100}%`);
-
-        // The contact form's button, reached the way a reader reaches it.
-        const covered = [];
-        for (const block of ['end', 'center']) {
-            const r = await page.evaluate((b) => {
-                const submit = document.querySelector('#contactForm [type="submit"]');
-                submit.scrollIntoView({ block: b, behavior: 'instant' });
-                const s = submit.getBoundingClientRect();
-                const p = document.getElementById('dispatchBar').getBoundingClientRect();
-                return !(p.bottom <= s.top || p.top >= s.bottom || p.right <= s.left || p.left >= s.right);
-            }, block);
-            if (r) covered.push(block);
-        }
-        if (covered.length) bad(`the open player covers the contact form's submit button (scrolled to ${covered.join(', ')})`);
-        else ok('the open player never sits over the contact form\'s submit button');
-
-        // A nav link followed with the player open lands its heading below
-        // the player: style.css pads jumps for the nav bar alone.
-        // Where it settles: the sections it passes swap their estimated
-        // heights for real ones, and script.js re-aims the jump as they do
-        // (Firefox was still moving at 400 ms, with the heading at 21px).
-        await page.emulateMedia({ reducedMotion: 'reduce' });
-        await page.evaluate(() => document.querySelector('.nav-menu a[href="#experience"]').click());
-        const landed = await page.evaluate(() => new Promise((resolve) => {
-            const at = () => ({
-                heading: Math.round(document.querySelector('#experience .section-title').getBoundingClientRect().top),
-                player: Math.round(document.getElementById('dispatchBar').getBoundingClientRect().bottom)
-            });
-            let last = at();
-            let still = 0;
-            const started = performance.now();
-            const poll = () => {
-                const now = at();
-                still = now.heading === last.heading ? still + 1 : 0;
-                last = now;
-                if (still >= 3 || performance.now() - started > 5000) resolve(now);
-                else setTimeout(poll, 100);
-            };
-            setTimeout(poll, 100);
-        }));
-        if (landed.heading >= landed.player) ok(`a nav jump with the player open lands its heading below it (${landed.heading}px, player ends at ${landed.player}px)`);
-        else bad(`a nav jump with the player open hides its heading under the player (${landed.heading}px, player ends at ${landed.player}px)`);
-        await page.emulateMedia({ reducedMotion: null });
-
-        // The keyboard: the player is next in Tab order, and Escape hands
-        // focus back to the control.
-        await page.focus('#listenBtn');
-        await page.keyboard.press('Tab');
-        const into = await page.evaluate(() => document.activeElement && document.activeElement.className);
-        await page.keyboard.press('Escape');
-        const back = await page.evaluate(() => ({ id: document.activeElement && document.activeElement.id, hidden: document.getElementById('dispatchBar').hidden }));
-        if (/dispatch-play/.test(into || '') && back.hidden && back.id === 'listenBtn') ok('Tab goes from Listen into the player; Escape closes it and returns focus');
-        else bad(`keyboard: Tab reached "${into}", Escape left focus on #${back.id} (player hidden: ${back.hidden})`);
-
-        await context.close();
-    }
-
-    // --- Moses's recorded introduction ------------------------------------
-    // Served in place of the real manifest, as if he had run voice:intro.
-    const mp3 = silentMp3();
-    const manifest = { tracks: { intro: {
-        file: 'assets/audio/intro.mp3', bytes: mp3.length, grams: 0.013, seconds: 5, voiceKind: 'recorded', voiceTitle: 'Moses Kolleh Sesay'
-    } } };
-    const withIntro = async (voice, latency = 0) => {
-        const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-        await context.addInitScript(voice ? STAND_IN_VOICE : NO_VOICE);
-        const hits = [];
-        await context.route('**/assets/audio/voice-manifest.json', async (route) => {
-            if (latency) await new Promise((r) => setTimeout(r, latency));
-            route.fulfill({ json: manifest });
-        });
-        await context.route('**/assets/audio/intro.mp3', (route) => { hits.push(route.request().url()); route.fulfill({ contentType: 'audio/mpeg', body: mp3 }); });
-        const page = await context.newPage();
-        watch(page);
-        await page.goto(`${origin}/index.html`, { waitUntil: 'load' });
-        return { context, page, hits };
-    };
-
-    {
-        const { context, page, hits } = await withIntro(true);
-        await page.click('#listenBtn');
-        const offered = await page.waitForFunction(() => {
-            const o = document.querySelector('.dispatch-offer');
-            return o && !o.hidden && document.querySelector('.dispatch-intro').textContent;
-        }, null, { timeout: 5000 }).then((h) => h.jsonValue(), () => null);
-        const kb = Math.round(mp3.length / 1024);
-        if (offered === `Hear Moses introduce himself · ${kb} KB`) ok(`the player offers "${offered}"`);
-        else bad(`with an intro in the manifest, the offer read "${offered}"`);
-
-        const share = await coverage(page);
-        if (share <= PLAYER_CEILING) ok(`…and with the offer showing, still covers only ${(share * 100).toFixed(1)}% of the screen`);
-        else bad(`with the intro offer, the player covers ${(share * 100).toFixed(1)}% — ceiling ${PLAYER_CEILING * 100}%`);
-
-        if (hits.length === 0) ok('the recording is not fetched before it is asked for');
-        else bad(`the recording was fetched before anyone asked (${hits.length} requests)`);
-        await page.click('.dispatch-intro');
-        const fetched = await page.waitForFunction(() => window.mks.narration.state().playing === 'intro', null, { timeout: 5000 })
-            .then(() => page.waitForTimeout(500)).then(() => hits.length > 0, () => false);
-        if (fetched) ok('pressing it fetches assets/audio/intro.mp3 and plays Moses');
-        else bad('pressing the offer did not fetch the recording');
-        await context.close();
-    }
-
-    // No voice at all, but a recording: the control appears for him alone.
-    // Then pressed by keyboard, with the manifest slow to answer the player:
-    // the player used to hide the control while it waited, focus and all.
-    {
-        const { context, page, hits } = await withIntro(false, 300);
-        const before = await barPlaces(page);
-        const shown = await page.waitForFunction(() => !document.getElementById('navListen').hidden, null, { timeout: 6000 })
-            .then(() => true, () => false);
-        if (shown && hits.length === 0) ok('no voice but a recording: the control appears (and still fetches nothing)');
-        else bad(`no voice but a recording: the control ${shown ? 'appeared but fetched audio early' : 'never appeared'}`);
-        const after = await barPlaces(page);
-        if (before === after) ok('no voice but a recording: the control appears 1.5 s after load, and nothing else in the bar moves');
-        else bad(`no voice but a recording: the bar moved when the control appeared (${before} → ${after})`);
-        if (shown) {
-            await page.evaluate(() => {
-                window.__listenHidden = 0;
-                new MutationObserver(() => { if (document.getElementById('navListen').hidden) window.__listenHidden++; })
-                    .observe(document.getElementById('navListen'), { attributes: true, attributeFilter: ['hidden'] });
-            });
-            await page.focus('#listenBtn');
-            await page.keyboard.press('Enter');
-            const played = await page.waitForFunction(() => window.mks.narration && window.mks.narration.state().playing === 'intro', null, { timeout: 5000 })
-                .then(() => page.waitForTimeout(500)).then(() => true, () => false);
-            const after = await page.evaluate(() => ({
-                focus: document.activeElement === document.getElementById('listenBtn') || document.getElementById('dispatchBar').contains(document.activeElement),
-                on: document.activeElement.id || document.activeElement.tagName,
-                blinked: window.__listenHidden
-            }));
-            if (played && after.focus && !after.blinked) ok('no voice but a recording: Enter on Listen plays him, and the control and focus stay put');
-            else bad(`no voice but a recording, Enter on Listen: playing ${played}, focus on ${after.on}, the control hid ${after.blinked} time(s)`);
-        }
-        await context.close();
-    }
-
-    // --- Listen shows late, and nothing else in the bar moves -----------------
-    // It used to be the last thing in the bar: shown when the voices came,
-    // it pushed the theme switch and the menu button 56px left and took the
-    // menu button's spot, so a tap meant for the menu opened the player.
-    for (const width of [390, 1440]) {
-        const context = await browser.newContext({ viewport: { width, height: 844 } });
-        await context.addInitScript(LATE_VOICE);
-        const page = await context.newPage();
-        watch(page);
-        await page.goto(`${origin}/index.html`, { waitUntil: 'load' });
-        const before = await barPlaces(page);
-        const hidden = await page.evaluate(() => document.getElementById('navListen').hidden);
-        const shown = await page.waitForFunction(() => !document.getElementById('navListen').hidden, null, { timeout: 5000 }).then(() => true, () => false);
-        await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-        const after = await barPlaces(page);
-        if (!hidden || !shown) bad(`late voices at ${width}px: the control was ${hidden ? 'never shown' : 'shown before any voice'}`);
-        else if (before === after) ok(`late voices at ${width}px: Listen appears and nothing else in the bar moves`);
-        else bad(`late voices at ${width}px: the bar moved when Listen appeared (${before} → ${after})`);
-        await context.close();
-    }
-
-    if (errors.length) errors.forEach((e) => bad(e)); else ok('no console errors, no uncaught exceptions');
 }
 
 // ------------------------------------------------------------------
@@ -3288,15 +2716,13 @@ async function checkWithoutJs(browser, origin) {
 // (so nothing leaves this origin), and any violation fails the run. The
 // homepage is also checked scrolled through — the only time section 05's
 // interactives, the journey map and every reveal are in the page — and in
-// the states a visitor opens: the carbon receipt, the docked narration
-// player, the menu on a phone and the terminal, each checked on its own.
-// The homepage, carbon-ai.html and brief.html are checked once more with
-// their scripts blocked, which is the layout a reader without JavaScript
-// gets (every nav link on show, the calculator's note in place of the
-// calculator, the whole dossier and no box to paste into). The case
-// studies are checked with both games loaded and played, with a row of
-// photos open, and with the lightbox open on one; The Brief with its
-// verdict on an ad it finds gaps in, and as a shared link rebuilds it.
+// the states a visitor opens: the carbon receipt, the menu on a phone and
+// the terminal, each checked on its own.
+// The homepage and carbon-ai.html are checked once more with their
+// scripts blocked, which is the layout a reader without JavaScript gets
+// (every nav link on show, the calculator's note in place of the
+// calculator). The case studies are checked with both games loaded and
+// played, with a row of photos open, and with the lightbox open on one.
 //
 // Each size and theme gets its own browser context with reduced motion, so
 // axe judges what a reader settles on rather than an element halfway
@@ -3312,14 +2738,7 @@ const AXE_VIEWS = [];
 // without JavaScript gets is checked as well. (With its scripts blocked the
 // homepage still takes its theme from mks.theme, inline in its <head>;
 // carbon-ai.css follows the system's setting by itself.)
-const AXE_NO_SCRIPT = ['index.html', 'carbon-ai.html', 'brief.html'];
-
-// What the player offers once Moses has recorded his introduction (see
-// exerciseNarration): served in place of today's empty manifest, so the
-// player is checked with the offer it will carry. Nothing is played.
-const AXE_MANIFEST = { tracks: { intro: {
-    file: 'assets/audio/intro.mp3', bytes: silentMp3().length, grams: 0.013, seconds: 5, voiceKind: 'recorded', voiceTitle: 'Moses Kolleh Sesay'
-} } };
+const AXE_NO_SCRIPT = ['index.html', 'carbon-ai.html'];
 
 async function axeRun(page, scope) {
     if (!(await page.evaluate(() => !!window.axe))) await page.addScriptTag({ path: AXE_PATH });
@@ -3367,10 +2786,6 @@ async function axeView(browser, origin, view, note, trouble) {
     await context.addInitScript((theme) => {
         try { localStorage.setItem('theme', theme); } catch (e) { /* storage blocked */ }
     }, view.theme);
-    // A speech voice, as nearly every real browser has and headless ones do
-    // not, so the nav shows its listen control and the player can open.
-    await context.addInitScript(STAND_IN_VOICE);
-    await context.route('**/assets/audio/voice-manifest.json', (route) => route.fulfill({ json: AXE_MANIFEST }));
     // Four more visits to every page: none of them may reach a real endpoint
     // (the contact form's, or anything added later), whatever the page does.
     await context.route((url) => !url.href.startsWith(origin), (route) => route.abort());
@@ -3393,19 +2808,6 @@ async function axeView(browser, origin, view, note, trouble) {
                     await page.evaluate(() => document.getElementById('anatomy').scrollIntoView());
                     await page.waitForSelector('#anatomyDraw:not([hidden])', { timeout: 5000 });
                     note(rel, 'Anatomy drawn', view, await axeRun(page, '#anatomy'));
-                });
-            }
-            // The Brief's verdict, with rows for what matched and for the
-            // gaps, and the link it leaves, opened as its reader would.
-            if (rel === 'brief.html') {
-                await attempt(`${rel}: axe on the Brief's verdict`, async () => {
-                    await page.fill('#briefAd', BRIEF_AD);
-                    await page.click('#briefRun');
-                    await page.waitForSelector('#briefResult .bf-row-gap', { timeout: 5000 });
-                    note(rel, 'the Brief\'s verdict', view, await axeRun(page));
-                    await page.goto(page.url(), { waitUntil: 'load' });
-                    await page.waitForSelector('#briefResult .bf-row-gap', { timeout: 5000 });
-                    note(rel, 'a shared link', view, await axeRun(page));
                 });
             }
             if (rel === 'case-studies.html') {
@@ -3490,20 +2892,33 @@ async function axeHomepageStates(page, view, note, attempt) {
     });
 
     // The page's own carbon receipt, printed from the footer.
+    // The press builds it; the wait is for that, then for the receipt in
+    // sight. In Firefox, with four views at once, the receipt at the foot of
+    // the page was built but not yet visible after 5 s: the sections above
+    // it, drawn only near the screen, were still settling under the scroll.
+    // Brought to the middle of the screen, it is drawn; a wait that still
+    // fails says what state the receipt was in, not only that time ran out.
     await attempt(`${rel}: axe on the carbon receipt`, async () => {
         await page.click('#receiptBtn', within);
-        await page.waitForSelector('#receiptBody :first-child', within);
+        const state = () => page.evaluate(() => {
+            const p = document.getElementById('receiptPanel'), b = document.getElementById('receiptBody');
+            const r = p && p.getBoundingClientRect();
+            return `panel ${!p ? 'missing' : p.hidden ? 'hidden' : 'open'}, ${b ? b.childElementCount : 0} lines, ` +
+                `module ${(window.mks && window.mks.loaded && window.mks.loaded.interactives) ? 'in' : 'not in'}, ` +
+                `top ${r ? Math.round(r.top) : '-'}px of ${innerHeight}px, scrolled ${Math.round(scrollY)}px`;
+        });
+        try {
+            await page.waitForFunction(() => {
+                const p = document.getElementById('receiptPanel'), b = document.getElementById('receiptBody');
+                return !!(p && !p.hidden && b && b.childElementCount);
+            }, null, within);
+            await page.$eval('#receiptPanel', (el) => el.scrollIntoView({ block: 'center' }));
+            await page.waitForSelector('#receiptBody :first-child', within);
+        } catch (e) {
+            throw new Error(`${String(e.message || e).split('\n')[0]} (${await state().catch(() => 'state unreadable')})`);
+        }
         note(rel, 'the carbon receipt', view, await axeRun(page, '#receiptPanel'));
         await page.click('#receiptBtn', within);
-    });
-
-    // The docked player, opened from the nav, offering the introduction.
-    await attempt(`${rel}: axe on the narration player`, async () => {
-        await page.click('#listenBtn', within);
-        await page.waitForSelector('#dispatchBar .dispatch-offer', { state: 'visible', ...within });
-        note(rel, 'the narration player', view, await axeRun(page, '#dispatchBar'));
-        await page.click('#listenBtn', within);   // a second press stops and closes
-        await page.waitForSelector('#dispatchBar', { state: 'hidden', ...within });
     });
 
     // On a phone the nav's links sit behind the menu button.
@@ -3652,8 +3067,7 @@ async function exerciseShell(browser, origin) {
                 const nav = document.querySelector('nav[aria-label="Main"]');
                 const links = nav ? Array.from(nav.querySelectorAll('a')).filter(a => /^(Home|Case studies|Research|CV|Contact)$/.test(a.textContent.trim())) : [];
                 const touching = links.slice(1).filter((a, i) => box(a).top === box(links[i]).top && box(a).left < box(links[i]).right).length;
-                // The call to action is the last thing in <main>; The Brief's
-                // dossier carries the address too, for paper.
+                // The call to action is the last thing in <main>.
                 const mail = Array.from(document.querySelectorAll('main a[href^="mailto:"]')).pop();
                 const cta = mail && mail.closest('section, p');
                 const sw = document.getElementById('themeToggle');
@@ -3869,8 +3283,8 @@ async function exerciseCpu(browser, origin) {
             return page.evaluate(() => document.getElementById('journeyMapReadout').textContent.split('—').pop().trim());
         };
         const early = await readAt(1);
-        const late = await readAt(4);
-        if (late === 'Amsterdam' && early !== late) ok(`the journey map flies with the stops (${early}, then ${late})`);
+        const late = await readAt(5);
+        if (late === 'Pavia' && early !== late) ok(`the journey map flies with the stops (${early}, then ${late})`);
         else bad(`the journey map did not follow the stops (${early}, then ${late})`);
         await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
         await page.click('#navToggle');
@@ -4009,7 +3423,7 @@ async function quietCounter(context) {
 // The visit counter: what one visit sends, and when it sends nothing
 // ------------------------------------------------------------------
 // The privacy promise is that the count holds only the documented fields,
-// and this is the test that enforces it: a real visit, three features used,
+// and this is the test that enforces it: a real visit, two features used,
 // the page left, and the request that leaves the browser taken apart.
 // openContext is the browser's own newContext, without the quietening.
 async function exerciseCounter(openContext, origin, arrivalBytes) {
@@ -4021,8 +3435,6 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         await route.fulfill({ status: 204, body: '' });
     });
     const context = await openContext({ viewport: { width: 1280, height: 800 } });
-    // A voice, so the Listen control shows, as it does for most visitors.
-    await context.addInitScript(STAND_IN_VOICE);
     await record(context);
     const counts = (page) => sent.filter((s) => { try { return JSON.parse(s.body).page === page; } catch (e) { return false; } });
     const settle = async (page, n) => {
@@ -4049,15 +3461,12 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
     page.on('request', (r) => { if (!r.url().startsWith(origin) && r.url() !== COUNT_URL && !r.url().startsWith('about:')) foreign.push(r.url()); });
     page.on('pageerror', (e) => errors.push(e.message));
 
-    // Arrive from LinkedIn on a lens link, use three features, read to the end.
+    // Arrive from LinkedIn on a lens link, use two features, read to the end.
     await page.goto(`${origin}/index.html?lens=water`, { waitUntil: 'load', referer: 'https://www.linkedin.com/feed/' });
     await page.click('#receiptBtn');                          // data-analytics="receipt-open"; fetches the interactives
     await page.waitForFunction(() => window.mks && window.mks.loaded && window.mks.loaded.interactives, null, { timeout: 5000 }).catch(() => null);
     await page.keyboard.press('`');                           // fetches the terminal
     await page.waitForFunction(() => window.mks && window.mks.loaded && window.mks.loaded.terminal, null, { timeout: 5000 }).catch(() => null);
-    await page.keyboard.press('Escape');
-    await page.click('#listenBtn');                           // data-analytics="listen"; fetches the player
-    await page.waitForFunction(() => window.mks && window.mks.loaded && window.mks.loaded.dispatch, null, { timeout: 5000 }).catch(() => null);
     await page.keyboard.press('Escape');
     await page.evaluate(() => document.getElementById('contact').scrollIntoView({ behavior: 'instant' }));
     await page.waitForTimeout(400);
@@ -4092,7 +3501,7 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
             if (wrong.length) bad(`the count got the visit wrong: ${wrong.map(k => `${k}=${JSON.stringify(body[k])}`).join(', ')}`);
             else ok(`it says what the visit did: ${Object.keys(want).map(k => `${k} ${want[k]}`).join(', ')}`);
 
-            const used = ['receipt-open', 'module-interactives', 'module-terminal', 'listen', 'module-dispatch'];
+            const used = ['receipt-open', 'module-interactives', 'module-terminal'];
             const missing = used.filter(f => !(body.features || []).includes(f));
             if (missing.length) bad(`features used but not counted: ${missing.join(', ')} (got ${(body.features || []).join(', ')})`);
             else ok(`features: ${body.features.join(', ')}`);
@@ -4199,54 +3608,23 @@ async function exerciseCounter(openContext, origin, arrivalBytes) {
         }
     }
 
-    // The Brief: the count says it was run and the grade it gave, and no
-    // request at all carries a word of the ad, the count's included.
+    // A link to The Brief sent before it was retired, ?focus= and all,
+    // answers with the note left there, not a 404: counted once, as
+    // "brief", and nothing of its address in the count.
     {
         const p = await context.newPage();
         p.on('pageerror', (e) => errors.push(e.message));
-        const carried = [];
-        p.on('request', (q) => { if (BRIEF_MARKS.test(`${decodeURIComponent(q.url())} ${q.postData() || ''}`)) carried.push(q.url()); });
         const before = sent.length;
-        await p.goto(`${origin}/brief.html`, { waitUntil: 'load' });
-        await p.fill('#briefAd', BRIEF_AD);
-        await p.click('#briefRun');
-        await p.waitForTimeout(200);
+        const res = await p.goto(`${origin}/brief.html?focus=marginal.esg-reporting.dutch`, { waitUntil: 'load' });
+        const note = await p.evaluate(() => !!document.getElementById('retired') && !!document.querySelector('#retired a[href="case-studies.html"]'));
         await leave(p);
         await settle(p, before + 1);
         const got = sent.slice(before);
         let body = null;
         try { body = JSON.parse(got[0].body); } catch (e) { /* reported below */ }
-        if (got.length === 1 && body && body.page === 'brief' && body.features.includes('brief-run') && body.features.includes('brief-marginal') &&
-            !got.some(s => BRIEF_MARKS.test(s.body)) && !carried.length) {
-            ok(`brief.html: one count, saying the Brief was run and the grade it gave (${body.features.join(', ')}), and no request carries a word of the ad`);
-        } else bad(`brief.html: ${got.length} count(s) ${got.map(s => s.body).join(' | ')}; requests with the ad: ${carried.join(', ') || 'none'}`);
-        await p.close();   // its count has gone, so closing cannot send another
-    }
-
-    // A sample is counted as a sample, not a use and not a grade; and the
-    // reader's own result, reloaded, is not a shared link opened. One press
-    // of the WASH sample sent brief-run and brief-high, and its reload
-    // brief-shared.
-    {
-        const p = await context.newPage();
-        p.on('pageerror', (e) => errors.push(e.message));
-        const features = (from) => sent.slice(from).map((s) => { try { return JSON.parse(s.body).features.join('+'); } catch (e) { return '?'; } });
-        const before = sent.length;
-        await p.goto(`${origin}/brief.html`, { waitUntil: 'load' });
-        await p.click('.bf-sample[data-sample="water"]');
-        await p.waitForTimeout(200);
-        await leave(p);
-        await settle(p, before + 1);
-        const sample = features(before);
-        const mid = sent.length;
-        await p.reload({ waitUntil: 'load' });
-        await p.waitForTimeout(200);
-        await leave(p);
-        await settle(p, mid + 1);
-        const reloaded = features(mid);
-        if (JSON.stringify(sample) === '["brief-sample"]' && reloaded.length === 1 && !/brief-(?:run|shared|high)/.test(reloaded[0])) {
-            ok(`brief.html: a sample is counted as brief-sample alone, and its reload as no shared link (${sample[0]}; "${reloaded[0]}")`);
-        } else bad(`brief.html: a sample counted ${JSON.stringify(sample)}, and its reload ${JSON.stringify(reloaded)}`);
+        if (res && res.status() === 200 && note && got.length === 1 && body && body.page === 'brief' && !/focus|marginal|dutch/.test(got[0].body)) {
+            ok('an old link to The Brief, ?focus= and all, answers with the note left there, counted once as "brief", and its address is not in the count');
+        } else bad(`brief.html?focus=…: status ${res && res.status()}, the note ${note}; ${got.length} count(s) ${got.map(s => s.body).join(' | ')}`);
         await p.close();
     }
 

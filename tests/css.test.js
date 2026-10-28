@@ -39,7 +39,7 @@ function assert(cond, msg) {
     }
 }
 
-// The stylesheets this holds. brief.css and modules/*.css are not (yet).
+// The stylesheets this holds. modules/*.css are not (yet).
 const SHEETS = ['style.css', 'carbon-ai.css', 'content.css', 'notes.css', 'stats.css', 'claims.css'];
 
 // A stylesheet as a flat list of rules: each selector list with the @media
@@ -164,7 +164,7 @@ const pagesOf = Object.fromEntries(SHEETS.map(s => [s, PAGES.filter(p => loads(p
 // Everything a script could add to those pages: the scripts the pages
 // name, their inline scripts, and what script.js and the pages fetch on
 // demand. Not build-content.js: what it writes is the committed pages.
-const ON_DEMAND = ['voice-scripts.js', 'ai-carbon-data.js', 'assets/journey-map.svg']
+const ON_DEMAND = ['ai-carbon-data.js', 'assets/journey-map.svg']
     .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`));
 const scriptsOf = (page) => [...html[page].matchAll(/<script[^>]+src="([^"]+)"/g)]
     .map(m => path.posix.normalize(path.posix.join(path.posix.dirname(page), m[1])))
@@ -305,7 +305,7 @@ const faces = PAGES.filter(p => loads(p).length).map((p) => {
     return { p, first: sheets[0], declaring };
 });
 const wrong = faces.filter(f => f.declaring.length !== 1 || f.declaring[0] !== f.first).map(f => `${f.p}: ${f.declaring.join(', ') || 'none'}`);
-assert(faces.length >= 10 && wrong.length === 0,
+assert(faces.length >= 9 && wrong.length === 0,
     `Fonts: each page's first stylesheet declares the typefaces, and no other it loads does (${faces.length} pages; ${wrong.join('; ') || 'all once'})`);
 
 if (failures > 0) {

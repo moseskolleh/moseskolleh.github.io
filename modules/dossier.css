@@ -47,8 +47,7 @@
 
 /* Sized in drawing units times --k (set by dossier.js), so a label renders
    at 12px, 11 for the small print, at any width: not ~5px on a phone. */
-.bh-label,
-.fl-label {
+.bh-label {
     font-family: var(--dw-mono);
     font-size: calc(12px * var(--k, 1));
     fill: var(--text-secondary);
@@ -167,13 +166,6 @@
 .fl-car { fill: var(--primary-green); opacity: 0.85; }
 .fl-car-window { fill: var(--darker-bg); opacity: 0.8; }
 .fl-water { fill: rgba(63, 155, 224, 0.55); }
-.fl-refline { stroke: var(--dw-water); stroke-width: 1; stroke-dasharray: 5 6; opacity: 0.7; }
-/* The water's blue drawn towards the text colour: a label on a dark page
-   or a light one, where the plain blue is 3:1 on white. */
-.fl-label {
-    fill: var(--dw-water);
-    fill: color-mix(in srgb, var(--dw-water) 65%, var(--text-primary));
-}
 
 .flood-controls { margin-top: 14px; }
 .dw-label { display: block; margin-bottom: 6px; }

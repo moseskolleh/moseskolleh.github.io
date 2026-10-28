@@ -1,8 +1,8 @@
 {
   "$comment": [
-    "ROLE-SPECIFIC PORTFOLIO VIEWS.",
+    "PORTFOLIO VIEWS, ONE FIELD OF WORK AT A TIME.",
     "",
-    "A hiring manager for a water utility and one for an AI governance team are",
+    "A reader from a water utility and one from an AI governance team are",
     "looking for different things, and both currently get the same undifferentiated",
     "list of six projects in reverse-chronological order. A lens reorders the",
     "portfolio around one of them and says, in one paragraph, what the through-line",
@@ -22,7 +22,7 @@
     "id": "all",
     "label": "Everything",
     "shortLabel": "All",
-    "summary": "Seven case studies, joined by one question: what does the data actually say, and who is it for? Water first, then climate risk, now the footprint of the tools themselves, and how to report it."
+    "summary": "Seven case studies, joined by one question: what does the data actually say, and who is it for? Water first, then climate risk, later the footprint of the tools themselves, and how to report it."
   },
 
   "lenses": [
@@ -31,12 +31,12 @@
       "label": "Water resources & WASH",
       "shortLabel": "Water",
       "tagline": "From the drill bit to the river mouth",
-      "summary": "I started underground. A geology degree, then electrical-resistivity surveying to find water in hard rock, then drilling crews delivering 164 water points across Sierra Leone. Later the same question at basin scale: what reaches the coast, and who put it there. The through-line is that water problems are rarely only hydraulic — the borehole that works is the one the community can maintain.",
-      "bestFor": "Roles in water resource management, WASH programming, hydrogeology, or utility planning — especially where field delivery and analysis have to meet.",
+      "summary": "I started underground. A geology degree, then electrical-resistivity surveying to find water in hard rock, then supervising crews on drilling projects that delivered 164 water points across Sierra Leone. Later the same question at basin scale: what reaches the coast, and who put it there. The through-line is that water problems are rarely only hydraulic — the borehole that works is the one the community can maintain.",
+      "bestFor": "Collaborations on water resource management, WASH programming, hydrogeology, or utility planning — especially where field delivery and analysis have to meet.",
       "evidence": [
-        "164 water points delivered — 100 wells rehabilitated, 50 boreholes, 14 solar-powered",
-        "70% aquifer strike rate on survey-sited boreholes, from field records",
-        "10,226 sub-basins modelled for river pollution export",
+        "164 water points delivered — 100 wells rehabilitated, 50 boreholes constructed, 14 solar-powered",
+        "70% of the boreholes drilled at survey-selected sites struck water, from field records",
+        "River pollution export analysed across 10,226 sub-basins, with Wageningen's MARINA-Multi model",
         "MSc thesis proposing soft-path alternatives to hard water infrastructure"
       ]
     },
@@ -45,12 +45,12 @@
       "label": "Climate adaptation & disaster risk",
       "shortLabel": "Climate & DRR",
       "tagline": "Planning for the year the river wins",
-      "summary": "Disaster risk is a data problem before it is an engineering one — you cannot reduce what you cannot compare. At UNDRR that meant auditing Caribbean loss data and standardising the terminology behind it. In Wuppertal it meant asking a municipality what it would take to keep a suspended railway out of a flood, and turning climate projections into a roadmap somebody could act on.",
-      "bestFor": "Roles in climate adaptation, disaster risk reduction, resilience planning, or climate-risk analysis — particularly where frameworks like Sendai, CSRD or TCFD are in play.",
+      "summary": "Disaster risk is a data problem before it is an engineering one — you cannot reduce what you cannot compare. At UNDRR that meant reviewing Caribbean loss data and standardising the terminology behind it. In Wuppertal it meant asking a municipality what it would take to keep a suspended railway out of a flood, and turning climate projections into a roadmap somebody could act on.",
+      "bestFor": "Collaborations on climate adaptation, disaster risk reduction, resilience planning, or climate-risk analysis — particularly where frameworks like Sendai, CSRD or TCFD are in play.",
       "evidence": [
         "54 global hazard information systems documented for UNDRR",
-        "Caribbean disaster-loss data audited for the Sendai Framework Monitor",
-        "National risk-management factsheet for Trinidad and Tobago",
+        "Caribbean disaster-loss data reviewed for the Sendai Framework Monitor",
+        "A disaster and climate-risk factsheet for Trinidad and Tobago",
         "Six-person flood-resilience consultancy for the Municipality of Wuppertal"
       ]
     },
@@ -59,13 +59,13 @@
       "label": "Sustainable AI & AI governance",
       "shortLabel": "Sustainable AI",
       "tagline": "Every prompt has a footprint",
-      "summary": "The newest thread, and the one that made the rest make sense: the tools we now use to analyse environmental problems have environmental costs of their own, and almost nobody is measuring them. At the Digital Society School I am building the framework and the decision-support tooling for a finance ministry adopting generative AI — mapping Scope 2 electricity, Scope 3 hardware and data-centre water, in a reporting language the organisation already speaks.",
-      "bestFor": "Roles in sustainable AI, AI governance, green software, or ESG where digital footprint is in scope — and anywhere the job is to make an environmental claim survive scrutiny.",
+      "summary": "A thread I followed from 2025 into 2026, and the one that made the rest make sense: the tools we now use to analyse environmental problems have environmental costs of their own, and almost nobody is measuring them. At the Digital Society School I was part of a team building the framework and the decision-support tooling for a Dutch government partner adopting generative AI — mapping Scope 2 electricity, Scope 3 hardware and data-centre water, in a reporting language the organisation already speaks.",
+      "bestFor": "Collaborations on sustainable AI, AI governance, green software, or ESG where digital footprint is in scope — and anywhere an environmental claim has to survive scrutiny.",
       "evidence": [
-        "Sustainable-AI framework and prototype for the Dutch Ministry of Finance",
+        "Sustainable-AI framework and prototype, built in a team for a Dutch government partner",
         "EcoPrompt Coach — a public tool with a full evidence ledger behind every factor",
         "Framework framed against CSRD/ESRS disclosure logic",
-        "This site: a first view of ~259 KB with its fonts, budgeted and enforced in CI"
+        "This site: a first view of ~257 KB with its fonts, budgeted and enforced in CI"
       ]
     },
     {
@@ -73,8 +73,8 @@
       "label": "ESG & CSRD reporting",
       "shortLabel": "ESG & CSRD",
       "tagline": "The right number on the right disclosure line",
-      "summary": "A sustainability report doesn't want one number: it wants the right number on the right line, with its range and its source. GAIA, the open framework I wrote and maintain, is a method for doing that with an organisation's AI use: Scope 2 location- and market-based and never blended, Scope 3 for what it buys, water under ESRS E3, every figure a low, central and high value, and every output mapped to GRI, ESRS, IFRS S2, CDP and SBTi. Anatomy of a Prompt draws the same split for one query. The accounting underneath, Scope 1 to 3, materiality and transition planning, I worked through in the OnePointFive sustainability consulting accelerator. This is method and tooling; no client's assessment is claimed.",
-      "bestFor": "Roles in ESG and sustainability reporting, CSRD/ESRS readiness, GHG accounting or sustainability consulting — especially where an organisation's digital or AI footprint is in scope.",
+      "summary": "A sustainability report doesn't want one number: it wants the right number on the right line, with its range and its source. GAIA, the open framework I wrote, is a method for doing that with an organisation's AI use: Scope 2 location- and market-based and never blended, Scope 3 for what it buys, water under ESRS E3, every figure a low, central and high value, and every output mapped to GRI, ESRS, IFRS S2, CDP and SBTi. Anatomy of a Prompt draws the same split for one query. The accounting underneath, Scope 1 to 3, materiality and transition planning, I worked through in the OnePointFive sustainability consulting accelerator. This is method and tooling; no client's assessment is claimed.",
+      "bestFor": "Collaborations on ESG and sustainability reporting, CSRD/ESRS readiness or GHG accounting — especially where an organisation's digital or AI footprint is in scope.",
       "evidence": [
         "GAIA Framework 2.2: an open (MIT) specification, Excel workbook and web estimator",
         "Outputs mapped to GRI 302/303/305, ESRS E1 and E3, IFRS S2, CDP and SBTi — a mapping, not an assurance",

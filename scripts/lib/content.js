@@ -40,6 +40,8 @@ const TRUSTED_HOSTS = [
     'moseskolleh.github.io',
     'linkedin.com',
     'www.linkedin.com',
+    // His ORCID record (profile.json links.orcid), the iD Moses gave.
+    'orcid.org',
     // Where two issuers publish a certificate's verification page (see
     // VERIFY_HOSTS below): Coursera for the Google certificate, and the
     // Corporate Finance Institute's own credential site.
@@ -154,7 +156,7 @@ function checkCard(at, cs) {
         if (!cs[field]) problems.push(`${at}: missing ${field} (the homepage card prints it)`);
     });
     if (!Array.isArray(cs.tags) || !cs.tags.length || !cs.tags.every(t => typeof t === 'string' && t.trim())) {
-        problems.push(`${at}: tags must be a list of tools and topics (the homepage card shows them, The Brief reads them)`);
+        problems.push(`${at}: tags must be a list of tools and topics (the homepage card shows them)`);
     }
 
     // The first result is the headline. Its brief stands in for the basis
@@ -265,16 +267,15 @@ function checkGallery(at, cs) {
     return problems;
 }
 
-// A language level The Brief can compare with what a job ad asks for.
-// "Good" or "fluent" means different things to different readers; a CEFR
-// level (or "native") means the same thing to all of them.
+// A language level: "good" or "fluent" means different things to
+// different readers; a CEFR level (or "native") means the same thing to
+// all of them.
 const LANGUAGE_LEVEL = /^(?:[ABC][12]|native)$/;
 
 /**
- * profile.languages is optional: absent or null, The Brief treats every
- * non-English language an ad asks for as a gap. Present, each entry must
- * say which language and at what level, or it would be a claim the Brief
- * cannot weigh.
+ * profile.languages is optional: absent or null, the site states no
+ * language. Present, each entry must say which language and at what level,
+ * or it would be a claim no reader can weigh.
  */
 function checkLanguages(languages) {
     if (languages === undefined || languages === null) return [];
@@ -417,9 +418,9 @@ function counterRules() {
 const STATS_STATUSES = ['not-collecting', 'collecting'];
 const STATS_MIN_SUPPRESSION = 5;
 const STATS_HELD = 'held';
-const STATS_COUNTS = ['visits', 'contact', 'cvDownloads', 'lensVisits', 'briefUses'];
+const STATS_COUNTS = ['visits', 'contact', 'cvDownloads', 'lensVisits'];
 const STATS_BREAKDOWNS = ['page', 'lens', 'vp', 'ref', 'feature', 'deepest'];
-const STATS_KEYS = ['$comment', 'v', 'status', 'asOf', 'suppressBelow', 'period', 'week', 'briefLive',
+const STATS_KEYS = ['$comment', 'v', 'status', 'asOf', 'suppressBelow', 'period', 'week',
     'headline', 'breakdown', 'bytes', 'weeks'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const dayOfWeek = (d) => new Date(`${d}T00:00:00Z`).getUTCDay();    // 0 is Sunday
@@ -465,7 +466,7 @@ function peel(sums, known) {
  * lens-link visits; and while the week-by-week table reaches back to the
  * start, its lines add up to all time. Last week's headline and the newest
  * week-by-week line are the same figures, as are CV downloads and the
- * feature row "cv-download", and Brief uses and "brief-run".
+ * feature row "cv-download".
  */
 function publishedSums(stats) {
     const fig = (v) => ({ v: v === undefined ? null : v });
@@ -478,11 +479,9 @@ function publishedSums(stats) {
         const cells = (metric, keep) => rows(metric, keep).map(r => fig(r[col]));
         sums.push({ label: `page views by page (${when})`, cells: [h.visits, ...cells('page')] });
         sums.push({ label: `page views by window width (${when})`, cells: [h.visits, ...cells('vp')] });
-        sums.push({ label: `page views by role lens (${when})`, cells: [h.lensVisits, ...cells('lens', k => k !== 'other')] });
-        [['cv-download', 'cvDownloads'], ['brief-run', 'briefUses']].forEach(([key, name]) => {
-            const same = rows('feature', k => k === key)[0];
-            if (same) sums.push({ label: `${name} and the "${key}" feature (${when})`, cells: [h[name], fig(same[col])] });
-        });
+        sums.push({ label: `page views by lens (${when})`, cells: [h.lensVisits, ...cells('lens', k => k !== 'other')] });
+        const cv = rows('feature', k => k === 'cv-download')[0];
+        if (cv) sums.push({ label: `cvDownloads and the "cv-download" feature (${when})`, cells: [h.cvDownloads, fig(cv[col])] });
     });
     // All time is last week plus everything before it. What came before is
     // never shown, but it is a count all the same: 12 page views all time
@@ -587,7 +586,6 @@ function checkStats(stats) {
         if (stats.period.days !== daysBetween(stats.period.first, stats.period.last)) problems.push(`${at}: period.days does not match period.first and period.last`);
         if (!(stats.period.last < stats.asOf)) problems.push(`${at}: period.last is not before asOf — the day the file was made is still being counted`);
     }
-    if (typeof stats.briefLive !== 'boolean') problems.push(`${at}: briefLive must be true or false`);
 
     // A weekly figure needs a week, and a week needs its figures: the page
     // reads one to label the other.
@@ -755,6 +753,58 @@ function checkMeta(meta) {
 }
 
 // ------------------------------------------------------------------
+// research.now — the doctorate under way, at the top of research.html
+//
+// A degree in progress (profile.education, inProgress) is said on the
+// research page only as what it sets out to do, dated, with what it does
+// not claim yet, and its thesis listed as planned: never as a result. The
+// block goes with the degree: none while no degree is in progress, and one
+// that names the institution the degree is at. `asOf` is the month it is
+// written as of, which cannot be later than the record (meta.verifiedOn).
+// ------------------------------------------------------------------
+const NOW_TEXT = ['question', 'why', 'position'];
+
+// An aside (coursework, this site's own pages and scripts) is listed after
+// the theses, reports and code, folded: something a reader can open, so
+// public, and true or left out.
+function checkAside(at, o) {
+    return o.aside !== undefined && (o.aside !== true || o.status !== 'public')
+        ? [`${at}: aside is true or left out, and only on a public output`] : [];
+}
+
+function checkNow(now, outputs, profile) {
+    const degree = ((profile && profile.education) || []).find(e => e.inProgress);
+    if (now === undefined) return degree ? [`research.json: ${degree.degree} is in progress (profile.json), so the research page needs its "now" block — what it sets out to do, and what it does not claim yet`] : [];
+    if (!degree) return ['research.json: "now" describes a degree in progress, and profile.json has none — retire the block, or list the thesis as what it now is'];
+    const problems = [];
+    const at = 'research.json now';
+    NOW_TEXT.forEach((f) => {
+        if (typeof now[f] !== 'string' || !now[f].trim()) problems.push(`${at}: missing ${f}`);
+    });
+    ['will', 'notYet'].forEach((f) => {
+        if (!Array.isArray(now[f]) || !now[f].length || now[f].some(x => typeof x !== 'string' || !x.trim())) {
+            problems.push(`${at}: ${f} must be a list of short lines`);
+        }
+    });
+    const month = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(String(now.asOf));
+    const logged = String((profile.meta || {}).verifiedOn || '').slice(0, 7);
+    if (!month) problems.push(`${at}: asOf must be a month, as YYYY-MM (got ${JSON.stringify(now.asOf)})`);
+    else if (logged && now.asOf > logged) problems.push(`${at}: asOf ${now.asOf} is after the record's own date (meta.verifiedOn ${profile.meta.verifiedOn})`);
+    if (typeof now.position === 'string' && !now.position.includes(degree.institution)) {
+        problems.push(`${at}: position should name where the degree is, ${degree.institution}`);
+    }
+    const thesis = (outputs || []).find(o => o.id === now.thesis);
+    if (!thesis) problems.push(`${at}: thesis "${now.thesis}" is not a research output`);
+    else {
+        if (thesis.status !== 'planned') problems.push(`${at}: its thesis, "${thesis.id}", is "${thesis.status}" — a thesis still to be written is planned`);
+        if (thesis.venue !== degree.institution) problems.push(`${at}: its thesis's venue is "${thesis.venue}", not ${degree.institution}`);
+        if (thesis.caseStudy || thesis.lenses) problems.push(`${at}: its thesis has no case study or lens to sit in until there is work to show`);
+        if (thesis.aside) problems.push(`${at}: its thesis is not an aside`);
+    }
+    return problems;
+}
+
+// ------------------------------------------------------------------
 // profile.certifications — each with what it covered, and optionally
 // where the issuer says so
 //
@@ -892,17 +942,21 @@ function checkQuotedFigures({ testimonials, certifications }, claims) {
 //              keeps to the counter's page-name rule (NOTE_PAGE)
 //   date       the day it was first published on this site, a real day
 //              and not one still to come
+//   updated    optional: the day it was last changed after that (a dated
+//              correction, say), a real day no earlier than its date and not
+//              one still to come; the sitemap, the feed and the Article's
+//              dateModified carry it, so readers and crawlers fetch it again
 //   tag        the topic the homepage shows ("Water", "Scenarios")
 //   summary    one line, plain text: the homepage's line under the title,
 //              the page's description and the feed's summary
-//   caseStudy  or lens, one of the two: the case study or role view it is
+//   caseStudy  or lens, one of the two: the case study or lens it is
 //              tied to, which has to exist, and which the note links
 //
 // A figure in a note is held to the claims ledger like any other: one the
 // ledger does not hold as written is refused here, by name.
 // ------------------------------------------------------------------
 const NOTES_DIR = path.join(CONTENT_DIR, 'notes');
-const NOTE_KEYS = ['number', 'title', 'slug', 'date', 'tag', 'summary', 'caseStudy', 'lens'];
+const NOTE_KEYS = ['number', 'title', 'slug', 'date', 'updated', 'tag', 'summary', 'caseStudy', 'lens'];
 const NOTE_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 // The counter's page-name rule: count.js sends a page only under a name
 // that passes it, and Code.gs (BEACON_NAME) accepts nothing else.
@@ -927,6 +981,7 @@ function loadNotes(dir = NOTES_DIR) {
             title: m.title,
             slug: m.slug,
             date: m.date,
+            updated: m.updated,
             tag: m.tag,
             summary: m.summary,
             caseStudy: m.caseStudy,
@@ -969,6 +1024,11 @@ function checkNotes(notes, { projects, lenses, claims }) {
 
         if (!realDay(String(n.date))) problems.push(`${at}: date must be a day, as YYYY-MM-DD (got ${JSON.stringify(n.date)})`);
         else if (n.date > latest) problems.push(`${at}: date ${n.date} is still to come; a note is dated the day it was first published on this site`);
+        if (n.updated !== undefined) {
+            if (!realDay(String(n.updated))) problems.push(`${at}: updated must be a day, as YYYY-MM-DD (got ${JSON.stringify(n.updated)})`);
+            else if (n.updated > latest) problems.push(`${at}: updated ${n.updated} is still to come; it is the day the note was last changed`);
+            else if (realDay(String(n.date)) && n.updated < n.date) problems.push(`${at}: updated ${n.updated} is before its date ${n.date}; a note cannot change before it is published`);
+        }
 
         const ties = ['caseStudy', 'lens'].filter(k => n[k] !== undefined);
         if (ties.length !== 1) problems.push(`${at}: ties to one case study or one lens (caseStudy or lens, not ${ties.length ? 'both' : 'neither'})`);
@@ -1014,14 +1074,14 @@ function checkNotes(notes, { projects, lenses, claims }) {
 // ------------------------------------------------------------------
 const CHECKABLE = ['public', 'on-request', 'not-checkable'];
 const BASIS_KINDS = ['result', 'profile', 'factor', 'source', 'budget', 'derived', 'illustrative'];
-const CLAIM_KEYS = ['id', 'value', 'unit', 'forms', 'spoken', 'basis', 'checkable', 'check'];
+const CLAIM_KEYS = ['id', 'value', 'unit', 'forms', 'basis', 'checkable', 'check'];
 const BASIS_EXTRA = { factor: ['url', 'note', 'count', 'own'], source: ['url', 'note'], derived: ['from'], profile: ['note'], budget: ['note'] };
 const CLAIM_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** The calculators' inputs, as the pages load them. */
 const loadFactors = () => require(path.join(ROOT, 'ai-carbon-data.js'));
 
-/** A value at a dotted path ("experience.4.teamSize"), or undefined. */
+/** A value at a dotted path ("experience.5.teamSize"), or undefined. */
 const atPath = (obj, dotted) => String(dotted).split('.').reduce((o, k) => (o === null || o === undefined ? undefined : o[k]), obj);
 
 /**
@@ -1109,16 +1169,14 @@ function checkClaims(ledger, { profile, projects, factors }) {
         }
 
         // Every other way of writing it has to come to the same thing.
-        ['forms', 'spoken'].forEach((key) => {
-            if (c[key] === undefined) return;
-            if (!Array.isArray(c[key]) || !c[key].length || c[key].some(s => typeof s !== 'string' || !s.trim())) {
-                problems.push(`${where}: ${key} must be a list of phrases`);
-                return;
+        if (c.forms !== undefined) {
+            if (!Array.isArray(c.forms) || !c.forms.length || c.forms.some(s => typeof s !== 'string' || !s.trim())) {
+                problems.push(`${where}: forms must be a list of phrases`);
+            } else {
+                c.forms.filter(s => !figures.agrees(value, s))
+                    .forEach(s => problems.push(`${where}: the form "${s}" does not say ${c.value}`));
             }
-            c[key].filter(s => !figures.agrees(value, s))
-                .forEach(s => problems.push(`${where}: ${key === 'spoken' ? 'the narration\'s' : 'the form'} "${s}" does not say ${c.value}`));
-            if (key === 'spoken') c[key].filter(s => /\d/.test(s)).forEach(s => problems.push(`${where}: "${s}" is spoken, so it is written in words`));
-        });
+        }
         // The marker finds a figure in content/ by how it is written (a bare
         // pair of digits with its unit's first word); two entries written
         // alike would leave it guessing.
@@ -1212,7 +1270,7 @@ function checkClaims(ledger, { profile, projects, factors }) {
 }
 
 /**
- * The public work a role view holds as its own: the public artifacts of the
+ * The public work a lens holds as its own: the public artifacts of the
  * case studies it is home to (those that list it first, and so lead the
  * view), and the public research outputs of those case studies or placed in
  * the view by their own `lenses`, which its panel lists (renderCaseStudies,
@@ -1242,170 +1300,6 @@ function checkLensWork(lensList, projects, research) {
         .map(l => `lens "${l.id}": no public work beyond this site's own pages belongs to it — a lens needs an artifact or research output a reader can open elsewhere`);
 }
 
-// ------------------------------------------------------------------
-// content/brief.json — The Brief's rubric and evidence
-//
-// The Assay kept these as code in modules/interactives.js, where nothing
-// held them to the case studies. Here they are held:
-//
-//   · every evidence line links to a case study, a public artifact, a
-//     research output or a place on the homepage that exists, named by
-//     the page it is on (the Brief is a page of its own: "#experience"
-//     would point into itself);
-//   · a strength's caseStudies (what the dossier selects when it
-//     matches) exist, and include every case study its evidence links to;
-//   · every figure an evidence line, a gap or a label prints is one the
-//     claims ledger holds as written, and every gap sends the reader to
-//     Moses;
-//   · every id is kebab-case and unique across the file (a shared link
-//     carries them, and a bare one could otherwise mean two things), and
-//     every pattern compiles.
-// ------------------------------------------------------------------
-const BRIEF_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const BRIEF_GRADES = ['high', 'workable', 'marginal', 'field'];
-const briefSlug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-/** Where an evidence link goes: the case studies it shows, or null when it goes nowhere this site has. */
-function briefTarget(href, { projects, research, homeIds }) {
-    const cases = projects.caseStudies;
-    const holders = cases.filter(cs => (cs.artifacts || []).some(a => a.status === 'public' && a.url === href)).map(cs => cs.id);
-    if (holders.length) return holders;
-    let m = String(href).match(/^index\.html#([\w-]+)$/);
-    if (m) return homeIds.has(m[1]) ? [] : null;
-    m = String(href).match(/^case-studies\.html#([\w-]+)$/);
-    if (m) return cases.some(cs => cs.id === m[1]) ? [m[1]] : null;
-    m = String(href).match(/^research\.html(?:#([\w-]+))?$/);
-    if (m) return !m[1] || research.outputs.some(o => o.id === m[1]) ? [] : null;
-    const output = research.outputs.find(o => o.status === 'public' && o.url === href);
-    return output ? [] : null;
-}
-
-function checkBrief(brief, { projects, research, claims, indexHtml }) {
-    const at = 'content/brief.json';
-    if (!brief || typeof brief !== 'object' || Array.isArray(brief)) return [`${at}: is not an object`];
-    const problems = [];
-    const say = (m) => problems.push(`${at}: ${m}`);
-    const list = (v) => Array.isArray(v) && v.length > 0 && v.every(x => typeof x === 'string' && x.trim());
-    const pattern = (where, re, flags) => {
-        try { new RegExp(re, flags || ''); } catch (err) { say(`${where}: the pattern does not compile (${err.message})`); }
-    };
-    // A figure the page prints is one the ledger holds, as it writes it.
-    const held = (where, text) => figures.unheld(text, claims).forEach((n) => {
-        say(`${where}: "${n}" is a figure the claims ledger does not hold as written; give it an entry in content/claims.json, or reword the line`);
-    });
-    const homeIds = new Set((String(indexHtml || '').match(/\sid="([^"]+)"/g) || []).map(m => m.slice(5, -1)));
-    const caseIds = projects.caseStudies.map(cs => cs.id);
-
-    if (!(Number.isInteger(brief.minWords) && brief.minWords > 0)) say('minWords must be a whole number of words');
-    const grades = brief.grades || {};
-    if (JSON.stringify(Object.keys(grades)) !== JSON.stringify(BRIEF_GRADES) || !BRIEF_GRADES.every(k => typeof grades[k] === 'string' && grades[k].trim())) {
-        say(`grades must name each of ${BRIEF_GRADES.join(', ')}, in that order`);
-    }
-    [['high', ['areas', 'domain', 'coverage']], ['workable', ['areas', 'domain', 'coverage', 'hardGaps']]].forEach(([key, fields]) => {
-        if (!brief[key] || !fields.every(f => typeof brief[key][f] === 'number')) say(`${key} needs ${fields.join(', ')} as numbers`);
-    });
-    ['requirementCues', 'softCues', 'languageCues', 'applyIn', 'nationalStems', 'notCountedAsYears']
-        .forEach((key) => { if (!list(brief[key])) say(`${key} must be a list of phrases`); });
-    ['softHeading', 'hardHeading'].forEach(key => pattern(key, brief[key]));
-
-    // Ids, across the file: the strengths, the tools and languages (by
-    // name), the gap rules, the facts to confirm and the grades. "years"
-    // is the years rule's, and "more" the shared link's own, for the rows
-    // an ad too long for it leaves out (brief.js).
-    const ids = new Map([['years', 'the years rule'], ['more', 'the shared link\'s count of rows left out']]);
-    const claimId = (id, what) => {
-        if (!BRIEF_ID.test(id || '')) say(`${what}: id "${id}" must be kebab-case`);
-        else if (ids.has(id)) say(`${what}: id "${id}" is ${ids.get(id)}'s too`);
-        else ids.set(id, what);
-    };
-    BRIEF_GRADES.forEach(id => claimId(id, `grade ${id}`));
-
-    if (!Array.isArray(brief.strengths) || !brief.strengths.length) say('strengths must be a list');
-    (Array.isArray(brief.strengths) ? brief.strengths : []).forEach((s, i) => {
-        const what = `strength ${s && s.id ? `"${s.id}"` : i + 1}`;
-        claimId(s.id, what);
-        if (typeof s.label !== 'string' || !s.label.trim()) say(`${what}: no label`);
-        else held(`${what}'s label`, s.label);
-        if (!list(s.syn)) say(`${what}: syn must be a list of phrases`);
-        if (s.general !== undefined && s.general !== true) say(`${what}: general is true or left out`);
-        if (!Array.isArray(s.ev) || !s.ev.length) { say(`${what}: no evidence`); return; }
-        const linked = new Set();
-        s.ev.forEach((e, j) => {
-            const line = `${what}, evidence ${j + 1}`;
-            if (!e || typeof e.t !== 'string' || !e.t.trim()) return say(`${line}: no text`);
-            held(line, e.t);
-            const goes = typeof e.href === 'string' ? briefTarget(e.href, { projects, research, homeIds }) : null;
-            if (!goes) return say(`${line}: "${e.href}" is not a case study, a public artifact, a research output or a place on the homepage (write it as index.html#id)`);
-            goes.forEach(id => linked.add(id));
-        });
-        if (!Array.isArray(s.caseStudies)) return say(`${what}: caseStudies must be a list of case-study ids (empty selects none)`);
-        s.caseStudies.filter(id => !caseIds.includes(id)).forEach(id => say(`${what}: caseStudies names "${id}", which is not a case study`));
-        if (new Set(s.caseStudies).size !== s.caseStudies.length) say(`${what}: caseStudies names one twice`);
-        Array.from(linked).filter(id => !s.caseStudies.includes(id))
-            .forEach(id => say(`${what}: its evidence links to "${id}", so caseStudies must include it`));
-    });
-
-    // Tools and languages: a bare name, or { name, syn, re, flags }.
-    [['tools', 'tool'], ['languages', 'language']].forEach(([key, noun]) => {
-        if (!Array.isArray(brief[key]) || !brief[key].length) return say(`${key} must be a list`);
-        brief[key].forEach((x, i) => {
-            const name = typeof x === 'string' ? x : x && x.name;
-            const what = `${noun} ${name ? `"${name}"` : i + 1}`;
-            if (typeof name !== 'string' || !name.trim()) return say(`${what}: no name`);
-            claimId(briefSlug(name), what);
-            if (typeof x === 'object') {
-                if (x.syn !== undefined && !list(x.syn)) say(`${what}: syn must be a list of phrases`);
-                if (x.re !== undefined) pattern(what, x.re, x.flags);
-                if (x.syn === undefined && x.re === undefined) say(`${what}: give it syn or re`);
-                if (x.confirm !== undefined && (typeof x.confirm !== 'string' || !x.confirm.trim())) say(`${what}: confirm is a label`);
-            }
-        });
-    });
-
-    if (!Array.isArray(brief.levels) || !brief.levels.length) say('levels must be a list');
-    else {
-        const levelIds = new Set();
-        brief.levels.forEach((l, i) => {
-            const what = `level ${l && l.id ? `"${l.id}"` : i + 1}`;
-            if (!/^[a-z0-9]{1,8}$/.test(l.id || '') || levelIds.has(l.id)) say(`${what}: id must be short, lower case and unique`);
-            levelIds.add(l.id);
-            if (!Number.isInteger(l.level) || typeof l.label !== 'string') say(`${what}: needs a level number and a label`);
-            pattern(what, l.re, l.flags);
-            if (i && l.level >= brief.levels[i - 1].level) say(`${what}: levels go highest first`);
-        });
-        if (!brief.levels.some(l => l.level === brief.defaultLevel)) say('defaultLevel must be one of the levels');
-    }
-
-    const y = brief.years || {};
-    pattern('years', y.re, 'gi');
-    ['cue', 'not', 'we', 'you'].forEach((key) => { if (!list(y[key])) say(`years.${key} must be a list of phrases`); });
-    if (!y.words || !Object.values(y.words).every(n => Number.isInteger(n) && n > 0)) say('years.words must map words to whole numbers');
-
-    (Array.isArray(brief.gaps) ? brief.gaps : []).forEach((g, i) => {
-        const what = `gap ${g && g.id ? `"${g.id}"` : i + 1}`;
-        claimId(g.id, what);
-        if (typeof g.label !== 'string' || typeof g.text !== 'string') return say(`${what}: needs a label and a text`);
-        held(`${what}'s label`, g.label);
-        held(what, g.text);
-        if (!/(?:ask|confirm with) Moses/i.test(g.text)) say(`${what}: a gap sends the reader to Moses ("Ask Moses.")`);
-        if (g.re !== undefined) pattern(what, g.re, g.flags);
-        if (g.re === undefined && !list(g.syn)) say(`${what}: give it syn or re`);
-        ['cue', 'not'].forEach((key) => { if (g[key] !== undefined && !list(g[key])) say(`${what}: ${key} must be a list of phrases`); });
-    });
-    (Array.isArray(brief.confirm) ? brief.confirm : []).forEach((c, i) => {
-        const what = `confirm ${c && c.id ? `"${c.id}"` : i + 1}`;
-        claimId(c.id, what);
-        if (typeof c.label !== 'string' || !c.label.trim() || !list(c.syn)) say(`${what}: needs a label and syn`);
-    });
-    if (!Array.isArray(brief.samples) || !brief.samples.length) say('samples must be a list');
-    else brief.samples.forEach((s, i) => {
-        const what = `sample ${s && s.id ? `"${s.id}"` : i + 1}`;
-        if (!BRIEF_ID.test(s.id || '') || typeof s.label !== 'string' || typeof s.text !== 'string') return say(`${what}: needs an id, a label and a text`);
-        if ((s.text.match(/[A-Za-z0-9À-ÿ][\w'’&+-]*/g) || []).length < brief.minWords) say(`${what}: shorter than minWords, so it would not be graded`);
-    });
-    return problems;
-}
-
 /**
  * Reads everything and returns it validated, or throws with every problem
  * listed at once — one run of the build should tell you all of them.
@@ -1415,12 +1309,10 @@ function loadAll() {
     const projects = load('projects');
     const research = load('research');
     const lenses = load('lenses');
-    const narration = load('narration');
     const stats = load('stats');
     const testimonials = load('testimonials');
     const claims = load('claims');
     const notes = loadNotes();
-    const brief = load('brief');
 
     const problems = checkStats(stats);
     problems.push(...checkClaims(claims, { profile, projects, factors: loadFactors() }));
@@ -1506,12 +1398,16 @@ function loadAll() {
             if (!lensIds.includes(l)) problems.push(`${at}: unknown lens "${l}"`);
         });
 
+        problems.push(...checkAside(at, o));
+
         // A venue that looks like a journal without a DOI is the exact shape
         // of an overclaim, so anything asserting peer review has to prove it.
         if (/journal|proceedings|conference/i.test(o.venue || '') && !o.doi) {
             problems.push(`${at}: names a publication venue but has no DOI — do not imply peer review without one`);
         }
     });
+
+    problems.push(...checkNow(research.now, research.outputs, profile));
 
     // --- lenses -----------------------------------------------------------
     lenses.lenses.forEach((l) => {
@@ -1533,25 +1429,6 @@ function loadAll() {
     });
     problems.push(...checkLensWork(lenses.lenses, projects, research));
 
-    // --- narration ---------------------------------------------------------
-    narration.scripts.forEach((s) => {
-        if (!s.id || !s.label || !s.text) problems.push(`narration "${s.id || '?'}": missing id, label or text`);
-    });
-    // The introduction is read by Moses himself, so it has a shape to keep:
-    // one 60-90 second take, which at a measured pace is 150-220 words, and
-    // it opens with the greeting the recording is known by.
-    const intro = narration.intro;
-    if (intro) {
-        if (intro.id !== 'intro' || !intro.label || !intro.readBy || !intro.text) {
-            problems.push('narration intro: needs id "intro", a label, readBy and text');
-        } else {
-            const words = intro.text.trim().split(/\s+/).length;
-            if (words < 150 || words > 220) problems.push(`narration intro: ${words} words; a 60-90 s take is 150-220`);
-            if (!/^Kushe\b/.test(intro.text)) problems.push('narration intro: must open with "Kushe"');
-            if (intro.readBy !== profile.person.name) problems.push(`narration intro: readBy "${intro.readBy}" is not ${profile.person.name}`);
-        }
-    }
-
     // --- the record's dates ---------------------------------------------
     problems.push(...checkMeta(profile.meta));
 
@@ -1568,14 +1445,12 @@ function loadAll() {
 
     // --- the field notes -----------------------------------------------
     problems.push(...checkNotes(notes, { projects, lenses, claims: claims.claims }));
-    // --- The Brief: its rubric held to the case studies and the ledger ---
-    problems.push(...checkBrief(brief, { projects, research, claims: claims.claims, indexHtml: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8') }));
 
     if (problems.length) {
         throw new Error(`content failed validation:\n  - ${problems.join('\n  - ')}`);
     }
 
-    return { profile, projects, research, lenses, narration, stats, testimonials, claims, notes: notesNewestFirst(notes), brief, lensIds };
+    return { profile, projects, research, lenses, stats, testimonials, claims, notes: notesNewestFirst(notes), lensIds };
 }
 
 /**
@@ -1622,6 +1497,8 @@ module.exports = {
     publicWorkFor,
     checkLensWork,
     checkMeta,
+    checkNow,
+    checkAside,
     VERIFY_HOSTS,
     checkCertifications,
     TESTIMONIAL_LIMITS,
@@ -1633,8 +1510,6 @@ module.exports = {
     loadNotes,
     notesNewestFirst,
     checkNotes,
-    checkBrief,
-    briefTarget,
     CHECKABLE,
     BASIS_KINDS,
     checkClaims,

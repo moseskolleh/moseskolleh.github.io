@@ -1,46 +1,50 @@
 # What only Moses can do or supply
 
 The single list of everything the site needs from Moses: facts only he can
-state, evidence only he holds, a recording only he can make, and checks on
-accounts only he can open. It grows from the "What only Moses can supply" table
-in [docs/plan.md](plan.md) and from what each wave of work found. An item is
+state, evidence only he holds, and checks on accounts only he can open. It
+grows from the "What only Moses can supply" table in [docs/plan.md](plan.md)
+and from what each wave of work found. An item is
 ticked only once it can be seen to be done: in the repository, on the live
 site, or by Moses saying so. One item is ticked, S7, because the repository
 shows it done; nothing else is yet.
 
 Each item says what is needed, where it goes, what it unlocks, and how to
-check it. A path such as `content/profile.json` → `experience[4].teamSize`
+check it. A path such as `content/profile.json` → `experience[5].teamSize`
 means that file, then that field (lists count from 0). After editing anything
 in `content/`, run `npm run build:content` and then `npm test`.
 
-Last updated with wave 6 of the plan, 2026-10-18. Waves 1 to 5 are on
-`main` (pull requests #48 to #53): Phase 0, the narration steps of 2.5 and
-4.3, Phase 1, Phase 2, Phase 3, The Brief, the notes as articles with a
-feed and preview cards, structured data, the weekly health and quarterly
-review issues, and Phase 6 steps 3, 6, 7 and 8. Wave 5's items are the
-group headed "wave 5" below (H1, H2, B1, B2, L5). Wave 6 (lighter images,
-a Content-Security-Policy, CSS hygiene, The Brief's review fixes, and the
-move to the root of `moseskolleh.github.io`, which you began by renaming
-the repository) is in its own pull request until it is merged; it adds
-nothing for you to supply, and half of L3 is done.
+Last updated with the PhD update, 2026-10-28. Waves 1 to 6 of the plan are
+on `main` (pull requests #48 to #54). The PhD update is in its own pull
+request until it is merged, which must not be before 2 November 2026 (U1).
+It opens your PhD at IUSS Pavia, closes the Digital Society School role
+(it ended in February 2026), moves the site to Pavia, offers research
+collaborations only, removes the narration and retires The Brief. Where a
+claim had no record behind it, the update applied the safe default and
+dropped or softened it; each can come back with its evidence. Its questions
+are the group headed "The PhD update" (U1 to U12) and new or rewritten
+items in the other groups: F1 to F5, E1, E5 and E7 to E12, K1, K3, K5 and
+K7 to K11, G1 to G4, R5, R8, N1, N2, N4, D1, D2, D4, H2, L1, L4 and L5.
+Five items went with what was removed: V1 and V2 with the narration, and
+S4, B1 and B2 with The Brief.
 
-**Start here.** Of the items below, these unlock the most, and take under
-an hour together. Everything else can wait for them.
+**Start here.** Of the items below, these unlock the most. Everything else
+can wait for them.
 
-1. **C1, C2, C3** — prove the contact form works on the live site. Nobody
+1. **U1** — merge the PhD update on or after 2 November 2026, not before.
+   Until that day it would call a PhD that has not begun "Present".
+2. **C1, C2, C3** — prove the contact form works on the live site. Nobody
    has yet, and every page's visit counter posts to the same deployment.
    The 2025 versions of the script would record each page view as a
    message and email it to you; if the one-line check at the top of S1
    says the live script might be one of those, do C2 at once.
-2. **S1, S2** — switch on the visit counts. Until then the open-counts job
+3. **S1, S2** — switch on the visit counts. Until then the open-counts job
    runs each Monday and finds nothing, the four-week baseline every later
    change is judged by (S6) cannot start, and the sustainability statement
    (Phase 4.2) has no data.
-3. **F1, F2, F3** — your languages and Dutch level, right to work, target
-   roles, seniority and available-from date. They are what a recruiter
-   asks first. Until they are stated, the at-a-glance strip and The Brief's
-   dossier leave them out, and The Brief lists every non-English language
-   an ad asks for as a gap.
+4. **U2, U3, D2** — read what the site now says about the PhD, check
+   IUSS's rules on paid outside work, and say whether the Digital Society
+   School's government partner may be named. Each is a default the update
+   chose for you.
 
 Once a week the "Site health" issue on GitHub (from wave 5) lists which of
 these are still open, beside anything on the site that has broken.
@@ -269,24 +273,9 @@ README under "The visit counter and privacy".
   - *Check:* after S1, `curl -L "<the URL above>?action=stats"`, without a
     token, prints `{"status":"refused",...}` and no `rows`.
 
-- [ ] **S4. Decide whether The Brief's grade should be counted at all.**
-  - *What:* when The Brief (`brief.html`, the Assay's successor since wave
-    5) grades a pasted job ad, that page view's count carries the grade:
-    `brief-high`, `brief-workable` or `brief-marginal`, as the Assay's did
-    (`assay-…`), beside `brief-run` (the fifth of the five numbers). The ad
-    itself never leaves the page, but the grade is derived from it. The
-    page says "the ad is never sent", which is true either way.
-    `stats.html` names the grade among the features a page view can carry.
-  - *Where:* if it should not be counted, say so: it is one line in
-    `brief.js` (the `mks.track('brief-' + …)` call for the grade), and
-    `tests/count.test.js`, `tests/stats.test.js` and `scripts/fetch-stats.js`
-    (which reads the grade names from `brief.js`) would change with it.
-  - *Check:* once removed, `brief.js` tracks no grade name, and `npm test`
-    passes.
-
 - [ ] **S5. Confirm the wording of `stats.html`.**
   - *What:* it speaks in the first person: "Every change I plan for this
-    site is a bet about what a recruiter does on it…" and "kept in a Google
+    site is a bet about what a reader does on it…" and "kept in a Google
     Sheet in my own Google account".
   - *Where:* the page is generated; its text is in `scripts/build-content.js`
     (`renderStats` and the functions around it). Edit there, then run
@@ -295,7 +284,7 @@ README under "The visit counter and privacy".
     once live, reads the way you would say it.
 
 - [ ] **S6. After four full weeks of counting, record the baseline for the
-  five numbers.**
+  four numbers.**
   - *When:* the weeks run Monday to Sunday, Amsterdam time, and each Monday's
     run adds the week just ended. Counting starts once S1 is done and this
     branch is live; the days before the first Monday are in no figure, so
@@ -305,8 +294,8 @@ README under "The visit counter and privacy".
     (a proxy, and an upper bound: arrivals through a role link, since the
     totals cannot say whether that reader went on to a case study), the
     share of homepage views that reached Contact, and page views for scale.
-    Brief uses stays empty until Phase 4.1 builds The Brief. Record a `<5`
-    or a `held` as it stands, not a guess.
+    (Brief uses, the fifth, went with The Brief.) Record a `<5` or a `held`
+    as it stands, not a guess.
   - *Where:* `docs/plan.md` → "Progress" → Phase 1, step 5: the four weeks'
     Monday dates and their figures. Every weekly version is also kept in git
     (`git log -p content/stats.json`).
@@ -332,21 +321,260 @@ README under "The visit counter and privacy".
 
 ---
 
+## The PhD update: what only you can settle (October 2026)
+
+The PhD update rewrote the record on 2026-10-28 from what you confirmed on
+27 and 28 October: the PhD at Scuola Universitaria Superiore IUSS Pavia
+from November 2026, co-funded by BrianzAcque, described only as the public
+call describes it; the Digital Society School role, September 2025 to
+February 2026, in the past tense and credited to the team; Pavia as where
+you are; research collaborations as all the site offers; and your ORCID iD.
+These are what it could not settle for you.
+
+- [ ] **U1. Merge the PhD update on or after 2 November 2026.**
+  - *Why:* the update logs the record as of 2 November 2026, the PhD's
+    first working day (`meta.verifiedOn` is `2026-11-02`). From that day
+    the site says "Nov 2026 — Present" for the PhD, "2026 — Now" at the
+    Pavia stop, "LOGGED NOV 2026" at the head of the core log, and "As of
+    November 2026" over the research page's "Now researching" block.
+    Merged earlier, each says something that is not yet true. The build
+    refuses a role that starts after `meta.verifiedOn`, and the research
+    page's block may not be dated later than it, so none of them can be
+    dated earlier without moving the PhD's start.
+  - *Where:* the pull request; nothing to edit. If the start moves, these
+    change together: `content/profile.json` → `meta.verifiedOn`,
+    `experience[0]` (its dates and `start`) and `education[0]`;
+    `content/research.json` → `now.asOf` and the `phd-thesis` summary
+    ("begun in November 2026"); then `npm run build:content` and
+    `npm run cv`.
+  - *Check:* the merge is dated 2 November 2026 or later, and the live
+    homepage's core log reads "LOGGED NOV 2026".
+
+- [ ] **U2. Read what the site now says about the PhD and Pavia, and
+  approve it or change it.**
+  - *What:* the update's own words, each from the public call or from what
+    the site already said:
+    - the hero's value line, "I study what climate risk costs, and what
+      adapting to it is worth." (it must stay on one line at 1366px wide,
+      so a replacement has about 66 characters), and the end of the
+      description under it, "— and now my PhD is on urban flood risk.";
+    - About: "Today my focus is urban flood risk — a PhD at IUSS Pavia on
+      extreme rainfall and the drainage of Monza and Brianza.";
+    - the availability line, "Open to research collaborations on climate
+      and flood risk, water and ESG", and the contact section's "— based
+      in Pavia, Italy" after it;
+    - the Pavia stop: "Back to water: a PhD at IUSS Pavia on urban flood
+      risk, co-funded by BrianzAcque.";
+    - the core log's PhD layer: its title, "Co-funded by BrianzAcque, a
+      water utility" (the longer "the water utility of Monza and Brianza"
+      wraps to a second line there and makes the homepage too long), and
+      its three lines from the call, written as aims ("To assess …", "To
+      estimate …", "To weigh …"), since none of the work has been done yet;
+    - the PhD's degree card: "In progress, expected 2029" and "Topic:
+      urban flood risk and drainage adaptation";
+    - the research page's "Now researching" block: the question; why it
+      matters, in the call's own words ("highly urbanised and exposed to
+      pluvial flooding"; a line on how the drainage was designed was
+      dropped, since the call says nothing of it); the four things the
+      work will do; and the four things it does not claim yet. The call's line about
+      building on existing hydrological and hydraulic modelling results is
+      left out, since it could read as a model or data already in hand;
+      add it if you want it;
+    - the planned thesis: the topic title of the funded position, "expected
+      2029" and "begun in November 2026". When the thesis has a title of
+      its own, it replaces this one.
+  - *Where:* `index.html`, by hand (the hero, About, the journey, the core
+    log, the degree card and the contact section), and `field-report.html`,
+    which repeats them; `content/profile.json` → `atAGlance.targetRoles`,
+    `experience[0]` and `education[0]`; `content/research.json` → `now`
+    and the `phd-thesis` output. Then `npm run build:content`, `npm run cv`
+    and `npm run og`.
+  - *Room:* the homepage is 9.70 of its 9.74 screens on a desktop and the
+    field report 4.38 of 4.40, so a longer line needs a shorter one beside
+    it.
+  - *Check:* `npm test` passes, and so does `npm run smoke`'s length check.
+
+- [ ] **U3. Check IUSS's rules on paid outside work before "consulting"
+  comes back.**
+  - *What:* whether the PhD's rules allow paid outside work. Until you have
+    checked, the site offers research collaborations and nothing else: no
+    consulting, no roles, no job search.
+  - *Where:* `content/profile.json` → `atAGlance.targetRoles` (the build
+    writes "Open to " before it, on the homepage, in every other page's
+    closing call to action, on the CV and on the homepage's preview card),
+    and the contact section's line in `index.html`, by hand.
+    `tests/firstview.test.js` holds both to offering no consulting and no
+    roles, so it changes in the same commit.
+  - *Unlocks:* a line such as "and consulting where my PhD allows", on
+    flood risk, water and climate risk.
+  - *Check:* `npm test` passes; then `npm run cv` and `npm run og`.
+
+- [ ] **U4. Whether your supervisor may be named, once appointed.**
+  - *What:* the site names nobody at IUSS: neither the person the call
+    named for the position nor a supervisor. Once the doctoral board has
+    formally appointed your supervisor, say whether they may be named, and
+    how.
+  - *Where:* `content/research.json` → `now.position`, one clause. The
+    repository is public, its comments, docs and commit messages included,
+    so until then nothing about the PhD goes in it beyond what the public
+    call says.
+  - *Check:* the clause reads as your supervisor would want it.
+
+- [ ] **U5. Your ORCID record, an IUSS email and an Italian number.**
+  - *What:* the site now links your ORCID iD,
+    <https://orcid.org/0009-0002-9429-1672>, in the contact section, on the
+    CV, in the field report and in the structured data. Make the record
+    public, and add IUSS Pavia as your affiliation there (your degrees too,
+    if you like), so the link shows what the site says. When IUSS gives you
+    an email address, and when you have an Italian or IUSS phone number,
+    send them: the site keeps `+31 659 361 423` until then.
+  - *Where:* the record is on orcid.org, signed in as you. The email and
+    the phone are `content/profile.json` → `person.email` and
+    `person.phone`, and the homepage's contact card in `index.html`, by
+    hand (a test holds the card's number to `person.phone`).
+  - *Check:* signed out, the ORCID link shows your record with IUSS on it;
+    `npm test` passes, then `npm run cv`.
+
+- [ ] **U6. Consent for the photos that show other people.**
+  - *What:* whether the people in these photos agreed to appear on your
+    site, or which photos to swap or crop:
+    - the drilling crew: the hero's first slide
+      (`groundwater-mapping-1-hero`), and `groundwater-mapping-2`, `-3`
+      and `-4` on the groundwater case study;
+    - the Wuppertal consultancy team: the hero's second slide
+      (`wuppertal-resilience-1-hero`), and `wuppertal-resilience-1` and
+      `-5`;
+    - the Digital Society School team: `sustainable-ai-4` and `-5`;
+    - the seminar room at Wageningen: `coastal-pollution-2`;
+    - Hunan: the graduates in `soft-path-5`, and the colleague in
+      `soft-path-6`.
+  - *Where:* the photos are in `assets/img/`; each case study's `photo`
+    and `gallery` are in `content/projects.json`; the hero's slides are in
+    `style.css` (`.hero-bg-1` to `.hero-bg-4`) and `index.html`. Keep the
+    consents themselves to yourself: the repository is public, and a
+    photo's entry takes no field for them.
+  - *Cost:* the hero's first slide is preloaded and counts in the
+    homepage's first view. Swapping it changes the preload, the captions
+    in `script.js`, `tests/images.test.js` and the first-view figure
+    (`first-view` in `content/claims.json`, which the footer quotes).
+  - *Check:* `npm test` and `npm run smoke` pass with the new photos.
+
+- [ ] **U7. Bring LinkedIn and older copies of your CV in line with the
+  site.**
+  - *What:* for want of a record, the site no longer says "10,000+
+    beneficiaries", a "95% project completion rate", "efficiency by 15%",
+    "3+ years", "directly informed national policy", Power BI, "top of
+    class", a 25% gain in UNDRR's coverage, a 30% rate for drilling blind,
+    or LCA, carbon markets, circular economy and SASB. It dates the Digital
+    Society School role September 2025 to February 2026, and the PhD from
+    November 2026. Look for those figures and dates on LinkedIn and in any
+    CV or application you have sent since 2025, and change them there too,
+    or send the evidence and they come back here (E1 to E9 say where).
+  - *Where:* off the site: LinkedIn, and your own files. Nothing in this
+    repository.
+  - *Check:* LinkedIn says what the CV the site prints
+    (`assets/Moses_Kolleh_Sesay_CV.pdf`) says.
+
+- [ ] **U8. Confirm the corrections to the three notes.**
+  - *What:* each note was changed after it was published, and says so in
+    a dated last line:
+    - Note 01, "What 164 water points taught me about data": "In hard
+      rock…", "The boreholes we sited from resistivity surveys struck
+      water 70% of the time…", "every analysis I do now" (it said "every
+      AI framework I build now"), and "*Corrected October 2026: the 70% is
+      a share of the holes drilled, not a gain over drilling blind.*";
+    - Note 02, "Why I wrote a pessimistic future on purpose": "Model
+      output alone seldom moves a decision; a story people can picture
+      often does.", "it rarely counts", "I now write the storyline first
+      and let it set the questions for the numbers, never the answers.",
+      and "*Wording softened in October 2026.*";
+    - Note 03, "Every prompt has a footprint — so what?": "I helped
+      build…", "a Dutch government partner", and "*Corrected October 2026:
+      this first said "I'm building"; that work ended in February 2026.*"
+  - *Where:* `content/notes/*.md`, then `npm run build:content`,
+    `npm run og` and `npm test`. Each note is close to its length ceiling
+    on a phone (Note 03 is 2.04 of 2.06 screens), so a longer line needs a
+    shorter one in the same note.
+  - *Check:* the three notes, and `feed.xml`, read as you would put it.
+
+- [ ] **U9. The note at The Brief's old address, and when to delete it.**
+  - *What:* `brief.html` now reads: "This address held The Brief, which set
+    a job ad against the work on this site. I am not looking for a job
+    now, so I have taken it down; a link to one of its fits now opens this
+    note instead. The work it drew on is all still here." Change it if you
+    would put it differently. Visits to it are still counted, as "The
+    Brief (retired)" on `stats.html`; once they stop, the address can be
+    deleted outright.
+  - *Where:* `brief.html`, by hand (the build writes only its nav, its call
+    to action, its footer and its policy). Deleting it takes the file, its
+    length ceiling in `scripts/check-budget.js`, its name in
+    `scripts/build-content.js`, the `/#assay` forward in `script.js`, and
+    the smoke and test checks that ask for it, in one commit.
+  - *Check:* `npm test` and `npm run smoke` pass.
+
+- [ ] **U10. Clear away what the narration left outside the repository.**
+  - *What:* revoke your Fish Audio API key, and disconnect the Fish Audio
+    connector in your claude.ai settings; the site no longer uses either.
+    If you have a local `.env` file or `.voice-auditions/` folder from the
+    old pipeline, delete them: git ignores both, so the repository never
+    held them.
+  - *Where:* your Fish Audio account, your claude.ai settings and your own
+    computer.
+  - *Check:* Fish Audio lists the key as revoked.
+
+- [ ] **U11. Approve the lenses' new wording.**
+  - *What:* the lenses spoke to someone hiring ("Best fit for: Roles in …",
+    the ESG lens offering sustainability consulting, and the homepage's
+    "read them as a water role"). Since the site offers research
+    collaborations only, each lens now reads "Best fit for: Collaborations
+    on …", the ESG lens no longer names consulting, and the homepage reads
+    them "for water". Change the wording if you would put it differently;
+    consulting comes back only after U3.
+  - *Where:* `content/lenses.json` → each lens's `bestFor`; the label
+    "Best fit for:" in `scripts/build-content.js`; the projects section's
+    line in `index.html`, by hand. The quarterly review checks the lenses
+    against `atAGlance.targetRoles`.
+  - *Check:* `npm run build:content`, then `npm test`.
+
+- [ ] **U12. Which outputs the research page folds away.**
+  - *What:* the research page now lists the theses and reports before your
+    coursework and this site's own scripts, which are folded under "Also
+    public", behind "Coursework, and this site's own pages and scripts":
+    the EcoPrompt Coach page and its factor set, the GloBox A/B test, the
+    Field Notes and the journey-map generator. Nothing was removed. You
+    may want some of them out of the list altogether, or the EcoPrompt
+    Coach pair back among the public work; unfolded, they would take the
+    page past its length ceiling on a phone. The groups by availability
+    (public, on request, held by the client, planned) stay as they were, so
+    public code still comes before the theses.
+  - *Where:* `content/research.json` → each output's `aside`.
+  - *Check:* `npm test` passes, and `npm run smoke` measures the page.
+
+---
+
 ## Facts about you the site cannot state yet
 
 **The at-a-glance strip (Phase 2.1).** Wave 3 put a strip of facts under the
 homepage hero's copy, written by `npm run build:content` from
 `content/profile.json` into `index.html` between the `AT-A-GLANCE` markers.
-Today it shows two: the roles you are open to and your location. The four a
-recruiter checks next are missing, and a missing fact is left out rather
-than shown as "TBC":
+Today it shows two: what you are open to (research collaborations, U3) and
+where you are (Pavia). It was built for a job search, and it can show four
+more facts. Three of them, seniority, a start date and a right to work,
+are what an employer asks; while you are not looking for work they stay
+unstated, and they are out of the table below, so the weekly health issue
+does not ask for them in public (F2 and F3 say where each would go). The
+fourth, your languages, a research collaborator may still want. A missing
+fact is left out rather than shown as "TBC":
 
 | Fact | Where it goes in `content/profile.json` | Today | Item |
 |---|---|---|---|
-| Seniority | `atAGlance.seniority` | `null`, not shown | F3 |
-| Available from | `atAGlance.availableFrom` | `null`, not shown | F3 |
-| Languages, with your Dutch level | a top-level `languages` list | absent, not shown | F1 |
-| Right to work in the NL and the EU (and whether a visa needs sponsoring) | `atAGlance.rightToWork` | `null`, not shown | F2 |
+| Languages, with your Italian and Dutch levels | a top-level `languages` list | absent, not shown | F1 |
+
+The weekly health issue lists each fact in this table as waiting on you
+while it is unstated. If you look for work again and want it to ask for the
+other three, add a row for each (`atAGlance.seniority` and
+`atAGlance.availableFrom` on F3, `atAGlance.rightToWork` on F2), and change
+`tests/health.test.js` with it in the same commit.
 
 Each is a short phrase, and "short" is a number: `npm test` refuses a
 seniority over 32 characters, a right to work over 48, or languages that
@@ -365,140 +593,138 @@ limits allow.
 
 - [ ] **F1. Languages and levels.**
   - *What:* every language you work in, named in English, with a CEFR level
-    (A1 to C2) or "native". Dutch matters most: the job market is Amsterdam.
+    (A1 to C2) or "native": Italian, now that you live and work in Italy,
+    and Dutch among them.
   - *Where:* `content/profile.json`, a new top-level `languages` list (the
     `$languages` note in the file shows the shape):
     `"languages": [{ "language": "Dutch", "level": "B1" }]`.
-  - *Unlocks:* the Assay stops treating every non-English language as a gap.
-    Today every such requirement reads "Not evidenced on this site. Ask
-    Moses.", and an English requirement is listed as "Level of English" to
-    confirm with you; with English in the list it is matched instead. The
-    same list fills "Languages" in the homepage's at-a-glance strip (Phase
-    2.1), which leaves the line out until then; later, `knowsLanguage` in the
-    structured data (Phase 5.4).
-  - *Check:* `npm run build:content` copies it into `modules/interactives.js`
-    and into the at-a-glance strip in `index.html`; `npm test` rejects a
-    level that is not A1–C2 or "native". Paste an ad of 20 words or more
-    (shorter text is not graded) that asks for "fluent Dutch" into the
-    Assay: the Dutch row shows your level.
+  - *Unlocks:* "Languages" in the homepage's at-a-glance strip, which leaves
+    the line out until then, and `knowsLanguage` in the structured data.
+  - *Check:* `npm run build:content` copies it into the at-a-glance strip in
+    `index.html` and the structured data; `npm test` rejects a level that is
+    not A1–C2 or "native".
 
-- [ ] **F2. Right to work, visa sponsorship, driving licence, security clearance.**
-  - *What:* whether you have the right to work in the Netherlands and the EU,
-    whether an employer would need to sponsor a visa, whether you hold a
-    driving licence (and where it is valid), and any security clearance. No
-    document numbers.
+- [ ] **F2. Right to work, visa sponsorship, driving licence, security
+  clearance: only if you look for work again.**
+  - *What:* whether you have the right to work in Italy and the EU, whether
+    an employer would need to sponsor a visa, whether you hold a driving
+    licence (and where it is valid), and any security clearance. No
+    document numbers. While you are not looking for work, none of it is
+    needed: leave it unstated.
   - *Where:* right to work and sponsorship: `content/profile.json` →
     `atAGlance.rightToWork`, one short phrase covering both (it is `null`
-    today). Driving licence and security clearance have no field yet: no
-    page shows them, so give them to whoever next works on the Assay.
+    today). Driving licence and security clearance have no field, and no
+    page asks for them now that The Brief is retired.
   - *Unlocks:* "Right to work" in the homepage's at-a-glance strip, which
-    leaves the line out while the field is `null`. Today the Assay only
-    lists these, and relocation, under "Confirm with Moses — not stated on
-    this site"; it does not read the strip's facts yet.
+    leaves the line out while the field is `null`.
   - *Check:* after `npm run build:content`, the strip under the hero shows
     it. `npm test` refuses a stand-in such as "TBC" or "n/a": leave the
     field `null` until you can state it.
 
-- [ ] **F3. Target roles, seniority and available-from date** (Phase 2.1).
+- [ ] **F3. What you are open to; and, only if you look for work again,
+  seniority and an available-from date** (Phase 2.1).
   - *Where:* `content/profile.json` → `atAGlance`:
-    - `targetRoles`: "sustainability, climate-risk, ESG and sustainable-AI
-      roles and consulting". The site's availability line said
-      "sustainability, climate-risk & ESG roles and consulting"; wave 3
-      added sustainable AI, your current field, because plan step 2.1 asks
-      for it. That addition is the site's wording, not yours yet: confirm
-      it, or correct it. The same words open the hero's "Open to …" line
-      and the closing call to action on the case studies, research, open
-      counts and EcoPrompt Coach pages ("Open to …: write to me at …"). The
-      homepage's Contact section says the same in its own words, written
-      by hand in `index.html` ("Open to roles & consulting in
-      sustainability, climate risk, ESG and sustainable AI"), and so does
-      its narration (the `contact` script in `content/narration.json`): if
-      you correct the field, correct those two lines too.
-    - `seniority`: `null` today. One short phrase for the level of role
-      you are looking for.
-    - `availableFrom`: `null` today. `"now"`, or a date as `YYYY-MM` or
-      `YYYY-MM-DD`; the strip shows it as "Now", "Jan 2027" or
+    - `targetRoles`: "research collaborations on climate and flood risk,
+      water and ESG" since the PhD update (it said "sustainability,
+      climate-risk, ESG and sustainable-AI roles and consulting"). The
+      build writes "Open to " before it, in the hero's line and in the
+      closing call to action on every other page. The homepage's Contact
+      section says the same in its own words, written by hand in
+      `index.html` ("Open to research collaborations on climate and flood
+      risk, water and ESG — based in Pavia, Italy"): if you correct the
+      field, correct that line too. Whether consulting may join it is U3.
+    - `seniority`: `null` today, and only wanted if you look for work.
+    - `availableFrom`: `null` today, likewise. `"now"`, or a date as
+      `YYYY-MM` or `YYYY-MM-DD`; the strip shows it as "Now", "Jan 2027" or
       "15 Jan 2027". A past date does not fail the build (`npm test`
-      prints a notice), so update it when you check `meta.verifiedOn`.
-    - The location line comes from `person.locality` and `person.country`.
-      `atAGlance.workArea` (`["EU", "remote-friendly"]`, as the page already
-      said) follows the roles on the "Open to …" line, where it reads as the
-      preference it is rather than as a right to work.
-  - *Unlocks:* the first view saying which job you want and when you can
-    start. A `null` field is left out of the strip entirely.
+      prints a notice), so update it when you check the record (F5).
+    - The location line comes from `person.locality` and `person.country`,
+      Pavia, IT. The old `workArea` ("EU, remote-friendly") is gone: it
+      read as a job search.
+  - *Unlocks:* the first view saying, in your words, what you are open to.
+    A `null` field is left out of the strip entirely.
   - *Check:* after `npm run build:content`, the strip under the hero shows
     each one, and `npm run build:check` passes.
 
-- [ ] **F4. Which roles count as paid professional experience.**
-  - *What:* for each role in `content/profile.json` → `experience`, whether it
-    was paid employment. In particular: is the Digital Society School
-    researcher role (`experience[0]`) employment?
-  - *Where:* today the Assay counts years from every role whose title does not
-    say intern, cohort, accelerator, trainee, volunteer or student (the
-    `notCountedAsYears` list in `modules/interactives.js`). That counts the
-    Digital Society School role and the two Sierra Leone roles (`experience[3]`
-    and `experience[4]`). If a role was not paid, the cleanest fix is a field
-    on its profile entry that the build copies into the Assay; that is a small
-    code change, so say which roles and it can be made.
-  - *Unlocks:* an honest "N+ years of experience" line in the Assay.
-  - *Check:* paste an ad of 20 words or more that asks for "3+ years of
-    experience": the gap row lists exactly the roles you count, and "Not
-    counted" names the rest.
+- [ ] **F4. The Digital Society School role: employment or a programme
+  placement, and how big the team was.**
+  - *What:* were you employed under the title "Researcher — Sustainable
+    Artificial Intelligence" (by the Amsterdam University of Applied
+    Sciences, the school's parent), or did you take part in one of the
+    school's programmes? How many people were on the team? The answer
+    should match the CVs you have sent.
+  - *Where:* `content/profile.json` → `experience[1]`: its `title`, and the
+    team's size if you give it (a figure needs its entry in
+    `content/claims.json`, as `team-size` has). The homepage's core log and
+    `field-report.html` repeat the title by hand, and the case study's
+    `role` is in `content/projects.json` → `sustainable-ai`. Until you say,
+    every page keeps the title and credits the work to the team ("As a
+    team, mapped…", "I was part of a team building…").
+  - *Unlocks:* a title you can stand behind anywhere it is read, on the
+    site and on the CV it prints.
+  - *Check:* `npm test` names a page that disagrees with the profile; then
+    `npm run cv`.
 
-- [ ] **F5. Is the Digital Society School role still current?** (Phase 3.10;
-  wave 4 made it matter more)
-  - *Why ask:* the site says "Present", and the public record has gone
-    quiet. The `SustainableAIPrototypes` repository, whose README is titled
-    for the Ministry of Finance initiative, was last changed on 2025-11-26.
-    The `promptcoach` README says the "original prototype [was] developed
-    at the Digital Society School with Ministry of Finance (NL) partners",
-    and its `docs/legacy/` holds the EcoPrompt Coach handover document,
-    dated January 2026. A handover reads like an ending; only you can say.
-  - *Where:* `content/profile.json` → `meta.confirmedOn` (now `null`) and
-    `meta.verifiedOn` (now `2026-08-05`). Set both to the day you confirm.
+- [ ] **F5. Confirm the record once the PhD has begun.** (Phase 3.10; its
+  first question, whether the Digital Society School role was still
+  current, was answered on 2026-10-28)
+  - *Why ask:* the site's one open-ended fact is now the PhD, "Nov 2026 —
+    Present". The question this item used to ask is settled: the Digital
+    Society School role ended in February 2026, and every page now says
+    so. What only you can do is say, once you have started at IUSS, that
+    the record holds.
+  - *Where:* `content/profile.json` → `meta.confirmedOn` (now `null`): set
+    it to the day you confirm, on or after your first day at IUSS.
     `confirmedOn` is yours alone: it is your word that the facts still
-    hold, and nobody else sets it. `verifiedOn` was set when this file was
-    written, not by you, so it is only the day the record is logged as of. If the role has ended, say when: its end
-    month goes in `currentRole` and `experience[0]`, and the pages that call
-    it current change with them, by hand, in one commit: "Sept 2025 —
-    Present" in `index.html`'s experience card, "Sep 2025–now" and
-    "2025–now" in `field-report.html`, and "At the surface, as last logged,
-    I'm a researcher…" in the experience script of `content/narration.json`
-    (the notice `npm test` prints names the same places).
+    hold, and nobody else sets it. `meta.verifiedOn` is `2026-11-02`, set
+    by the update as the day the record is logged as of (U1); move it with
+    `confirmedOn` whenever you re-check the facts. If the start date
+    moves, U1 lists what changes with it. When the PhD ends, its end month
+    goes in `currentRole` and `experience[0]`, `inProgress` comes off
+    `education[0]`, and the research page's "Now researching" block
+    (`content/research.json` → `now`) comes out: the build refuses the
+    block once no degree is in progress.
   - *Then:* `npm run build:content`, then `npm run cv`, and commit
     `content/profile.json`, `index.html`, `assets/Moses_Kolleh_Sesay_CV.pdf`
-    and `assets/cv.hash` together. Since wave 4 the day you set is also the
+    and `assets/cv.hash` together. The day in `meta.verifiedOn` is also the
     surface of the core log: every layer's depth is measured from it, and
-    its head reads "LOGGED" and that month (today "LOGGED AUG 2026"). Once
+    its head reads "LOGGED" and that month (now "LOGGED NOV 2026"). Once
     `confirmedOn` is set, the CV ends "Facts last confirmed" and that day;
-    until then it makes no such claim (it used to print "Facts last
-    verified" and the logged day, which nobody had confirmed).
-    `tests/cv.test.js` fails until the CV is printed again.
-  - *Unlocks:* the one open-ended fact on the site stays true. `npm test`
-    prints a notice once `verifiedOn` is more than six months old (from
-    early February 2027 as it stands).
+    until then it makes no such claim. `tests/cv.test.js` fails until the
+    CV is printed again.
+  - *Unlocks:* the one open-ended fact on the site stays true. The weekly
+    health issue asks for a re-verification once `meta.verifiedOn` is more
+    than a quarter old (from 2027-02-01 as it stands), and `npm test`
+    prints a notice once it is more than six months old (from early May
+    2027).
   - *Check:* `npm test` passes and prints no staleness notice; the core
     log's head shows the month you set.
 
 ---
 
-## Evidence behind figures that are off the site or labelled illustrative
+## Evidence behind figures and claims the site dropped, softened or cannot source
 
-- [ ] **E1. A source for the ~30% blind-siting strike rate** (Freetown hard-rock geology).
-  - *What:* whose records, how many boreholes, when.
-  - *Where:* `content/claims.json` → the `blind-siting` entry, whose basis
-    is `illustrative` and checkability `not-checkable` since wave 4 (it says
-    no source is recorded): give it a `source` basis with the reference, and
-    a URL if there is one. `content/projects.json` → the `groundwater` case
-    study → `results[0].basis` says the same and changes with it.
-  - *Unlocks:* the "illustrative — not a measured figure" labels on the Seven
-    in Ten widget (the borehole game and its scoreboard, on the groundwater
-    case study; its copy is `WIDGET_HOSTS.borehole` in
-    `scripts/build-content.js`) can be replaced by the basis, and
-    `claims.html` lists the 30% as sourced. Without one, the labels stay
-    (`tests/widgets.test.js` requires them).
-  - *Check:* the basis names the source; the labels are changed in the same
-    commit, and `npm test` passes.
+- [ ] **E1. The 70%: how many holes, how many struck water, and what
+  counted as a strike.**
+  - *What:* in the Team & Team International fieldwork of 2019, how many
+    boreholes were drilled at sites selected by resistivity survey, how
+    many struck water, and what yield counted as a strike. Were they in
+    the Freetown Complex, and were they sited from your dissertation's
+    maps, or with its method elsewhere in Sierra Leone? Did the
+    dissertation itself drill anything?
+  - *Why:* the site now gives the 70% one meaning everywhere, "70% success
+    rate in later drilling at survey-selected sites", from field records,
+    not a controlled trial. Its defaults: the survey method, not the maps;
+    the number of holes not recorded. The ~30% rate for drilling blind,
+    which this item used to ask a source for, is gone: no record gave it,
+    so the Seven in Ten game no longer sets the 70% against it, and its
+    ledger entry (`blind-siting`) was deleted.
+  - *Where:* `content/projects.json` → `groundwater` → `results[0].basis`
+    (it says the number of holes and the yield "are not recorded here"),
+    and `content/claims.json` → `strike-rate`, whose basis is that result.
+  - *Unlocks:* the 70% with its denominator.
+  - *Check:* the basis names the count and the definition, and `npm test`
+    passes.
 
 - [ ] **E2. How many people the 164 water points serve, and how that was counted.**
   - *What:* a count and its method, e.g. design population per water point
@@ -513,8 +739,8 @@ limits allow.
     the figure cites it.
 
 - [ ] **E3. Method and denominator for the 95% project completion rate (Sierra Drilling) and the 15% efficiency gain (Team & Team).**
-  - *Where:* `content/profile.json` → `experience[4]` (Operations Supervisor,
-    Sierra Drilling) and `experience[3]` (Field Operations Manager, Team &
+  - *Where:* `content/profile.json` → `experience[5]` (Operations Supervisor,
+    Sierra Drilling) and `experience[4]` (Field Operations Manager, Team &
     Team International), each with its method and denominator. The file's
     `$figures` note explains why: an outcome rate is not a record fact like
     `teamSize`, so it needs a method before it goes back on a page. The field
@@ -527,24 +753,29 @@ limits allow.
 - [ ] **E4. Evidence for Power BI** (a project, certificate or public repository).
   - *Why:* wave 1 dropped Power BI from the homepage's proof-attached toolkit
     because nothing on the site supports it; Tableau stays, backed by the
-    Masterschool training. It is off `field-report.html`'s skills line too,
-    and the Assay lists a Power BI requirement as a gap.
+    Masterschool training. It is off `field-report.html`'s skills line and
+    the CV too.
   - *Where:* the evidence goes in `content/research.json` (an output) or on
     the education entry it belongs to; then the homepage toolkit can link it.
   - *Unlocks:* Power BI back in the toolkit, on the field report's skills
-    line, and matched in the Assay. `tests/content.test.js` fails if the field
-    report names a tool the homepage does not show, so the two go back
-    together.
+    line and on the CV. `tests/content.test.js` fails if the field report
+    names a tool the homepage does not show, so the two go back together.
   - *Check:* the toolkit's Power BI proof links somewhere that shows it.
 
-- [ ] **E5. Evidence that the Trinidad and Tobago factsheet informed national policy.**
-  - *Why:* the CV says it "directly informed national policy"; the site now
-    says "produced for national policy use", which is what the case study
-    supports.
-  - *Where:* `content/projects.json` → `un-disaster` → the factsheet artifact's
-    `note`, and `content/research.json` (the same output's `note`).
-  - *Unlocks:* the stronger wording, with its basis.
-  - *Check:* the note cites the evidence; the homepage and case study match it.
+- [ ] **E5. Was the Trinidad and Tobago factsheet published?**
+  - *Why:* the old CV said it "directly informed national policy", and the
+    site said "produced for national policy use". Neither had a record
+    behind it. The site now calls it "a disaster and climate-risk factsheet
+    for Trinidad and Tobago", written during the internship and held by
+    UNDRR, and says no more; `tests/content.test.js` and `tests/cv.test.js`
+    refuse "for national policy use".
+  - *What:* if UNDRR published it, its address; and, if anything shows it
+    was used in national policy, that.
+  - *Where:* `content/projects.json` → `un-disaster` → the factsheet
+    artifact (`status`, `url`, `note`), and `content/research.json` →
+    `undrr-tt-factsheet`. A new host goes in `TRUSTED_HOSTS` in
+    `scripts/lib/content.js` once someone has opened the link.
+  - *Check:* the artifact links the factsheet, and `npm test` passes.
 
 - [ ] **E6. A per-query embodied-carbon factor, if you want Scope 3 quantified.**
   - *What:* a sourced factor, for example from the GAIA framework work, with a
@@ -558,26 +789,122 @@ limits allow.
   - *Check:* `npm test` passes and the calculator and Anatomy show the same
     figure.
 
+- [ ] **E7. UNDRR's catalogue counts, for the coverage gain the site
+  dropped.**
+  - *What:* the catalogue's counts before and after your internship, how
+    many of the 54 systems were new, and whether the 25% was a share of
+    systems, regions or hazard types.
+  - *Why:* "regional and hazard-type coverage expanded by 25%" did not
+    close: its basis could not say what was counted. The site now keeps
+    "54 documented" and nothing more. The gain is off every page and the
+    CV, its ledger entry (`coverage-gain`) is deleted, and
+    `tests/content.test.js` and `tests/cv.test.js` refuse it.
+  - *Where:* `content/projects.json` → `un-disaster` → a new result with its
+    `basis`; an entry in `content/claims.json`; the two guards relaxed in
+    the same commit.
+  - *Check:* `npm test` passes with the figure and its basis back.
+
+- [ ] **E8. A document for "top of class".**
+  - *What:* a transcript, prize letter or class-rank letter that says you
+    ranked first in Geology at the University of Sierra Leone; and whether
+    "First Class" is the degree's classification, not the dissertation's
+    mark.
+  - *Why:* the site said "graduated top of class" in several places, with
+    nothing behind it. It now says "First Class Honours" alone, as the
+    degree's classification (`content/profile.json` →
+    `education[3].classification`), and `tests/content.test.js` refuses
+    "top of class".
+  - *Where:* the BSc's entry in `content/profile.json`, the pages that
+    describe the degree, and the guard relaxed in the same commit.
+  - *Check:* `npm test` passes, and the page says where the document is.
+
+- [ ] **E9. Receipts for the four skills taken off: LCA, carbon markets,
+  circular economy and SASB.**
+  - *What:* where you learned each (a course module, the CFI programme, a
+    project or a certificate), and something a reader can check.
+  - *Why:* the Skills section says every tool comes with the receipt of
+    where it earned its place, and these four had none. They are off the
+    homepage, the field report and the CV, and `tests/content.test.js` and
+    `tests/cv.test.js` refuse them.
+  - *Where:* the homepage's Skills lists in `index.html`, by hand; the field
+    report's toolkit; the two guards. Then `npm run cv`.
+  - *Check:* `npm test` passes, and each skill points at its receipt.
+
+- [ ] **E10. Whose output the 164 water points are.**
+  - *What:* were the 100 hand-dug wells and the 50 boreholes delivered by
+    the team you supervised at Sierra Drilling while you were there, or are
+    they the company's totals for that period? And the 14 solar-powered
+    boreholes at Team & Team International? Which record holds each?
+  - *Why:* the counts now sit on the jobs that delivered them, not on the
+    BSc dissertation, and the site credits the 100 and the 50 to "the team
+    I supervised", its default.
+  - *Where:* `content/profile.json` → `experience[5].wellsRehabilitated`,
+    `experience[5].boreholesConstructed` and `experience[4].solarBoreholes`;
+    their units and notes in `content/claims.json` (`wells-rehabilitated`,
+    `boreholes-constructed` and `solar-boreholes`; `water-points` is their
+    sum).
+  - *Check:* each unit says whose output it is, and `npm test` passes.
+
+- [ ] **E11. Where the EcoPrompt Coach's per-token figures came from.**
+  - *What:* which version of Jegham et al. (2025, arXiv:2505.09598), which
+    table and which prompt and answer configuration each model's figure per
+    1,000 tokens comes from, how you converted it, and whether each [low,
+    high] range is yours. The site now says, as its default, that the
+    figures are "my own conversion of them, at a 50/50 input:output mix,
+    and the ranges my own judgement", and that the 2–8× weight of an output
+    token is your judgement, since no published source gives it. While you
+    are there, two sources to confirm: the "Industry typical (~1.8 L/kWh)"
+    water figure, cited to the Uptime Institute (2023), which may be from
+    LBNL's 2016 report (Shehabi et al.); and the title of the Sustainable
+    Web Design model v3 page, cited as "Estimating Digital Emissions",
+    which may have been "Calculating Digital Emissions".
+  - *Where:* `ai-carbon-data.js`: `SOURCES.jegham2025`, `SOURCES.own`, each
+    model's note, the water-use entries and `SOURCES.swd2023`.
+  - *Check:* each figure matches the version you name, before
+    `REVIEWED_ON` next moves; `npm test` (`tests/carbon.test.js`) passes.
+
+- [ ] **E12. The month and device for the median page weight.**
+  - *What:* the HTTP Archive's page-weight report, read again: the month and
+    device (desktop or mobile) the ≈2.5 MB median is for, or the new median
+    if it has moved.
+  - *Where:* `content/claims.json` → `median-page` (its basis says the month
+    and device are not recorded), and `MEDIAN_PAGE_MB` in `script.js`; the
+    two change together.
+  - *Check:* `npm test` passes.
+
 ---
 
 ## Confirm what the site now says
 
-Wave 1 recorded these where the tests can hold the pages to them. Each is
-already on the site; confirm it or give the right value.
+Wave 1 recorded these where the tests can hold the pages to them, and the
+PhD update added K7 to K11. Each is already on the site; confirm it or give
+the right value.
 
-- [ ] **K1. Wageningen GPA 7.8/10 (Dutch scale).** On the site since its first
-  commit but not on the 2025 CV. Now in `content/profile.json` →
-  `education[0].grade`.
+- [ ] **K1. Wageningen: "Average grade 7.8/10", and the specialisation.**
+  The site now says "Average grade 7.8/10 (Dutch scale)", not "GPA", and
+  names the specialisation "Human-Environment Interaction · Water Systems &
+  Global Change" everywhere (it was not on the 2025 CV). Confirm the
+  transcript's label for the 7.8 (a weighted average grade, not the
+  thesis's), and whether that is the specialisation your diploma supplement
+  names, or whether its second half is the chair group.
+  `content/profile.json` → `education[1].grade` and
+  `education[1].specialisation`.
 - [ ] **K2. Sierra Drilling team of 23 and the 8-week OnePointFive programme.**
-  `content/profile.json` → `experience[4].teamSize` and
-  `experience[1].programmeWeeks`.
-- [ ] **K3. Wuppertal: did you formally lead the six-person team?** The case
-  study's role says "Interdisciplinary team of six", and the CV claims
-  neither way. Until you say, every page says "Worked in a six-person
-  interdisciplinary team": the field report, the case study's `role`, and
-  `content/projects.json` → `wuppertal` → `method[0]`. (The homepage badge
-  and dossier bullet went with the dossiers; the homepage card is drawn from
-  the case study.) If you led it, all three can say so again.
+  `content/profile.json` → `experience[5].teamSize` and
+  `experience[2].programmeWeeks`.
+- [ ] **K3. Wuppertal: your own part, and what the team delivered.** The
+  case study's role says "Interdisciplinary team of six", which is not a
+  role, and the CV claims nothing either way. Until you say, every page
+  says "Worked in a six-person interdisciplinary team": the field report,
+  the case study's `role`, and `content/projects.json` → `wuppertal` →
+  `method[0]`. Say what your own part was, and whether you formally led the
+  team; if you did, all three can say so again. Also: did the municipality
+  commission the work (the case keeps "the problem the municipality handed
+  us" and the partner line)? Did the report cost its measures? The case no
+  longer calls them cost-effective. And is there a source for the July 2021
+  peak of the Wupper near the Schwebebahn (a Wupperverband gauge, or the
+  report)? Without one, the flood drawing shows stages, not metres, and no
+  dated line.
 - [ ] **K4. Thesis periods.** The site now uses, everywhere: coastal thesis
   2023–2024 (Wageningen) and soft-path thesis 2020–2021 (Hunan, defended May
   2021). `content/projects.json` → `coastal.period` and
@@ -587,11 +914,11 @@ already on the site; confirm it or give the right value.
   says its Scope 2 and Scope 3 (capital goods) lines are those of whoever
   runs the model, and that an organisation buying answers from a hosted
   model reports the carbon as Scope 3, category 1 (purchased services). The
-  Ministry of Finance project is still described, in your words, as mapping
-  "Scope 2 electricity, Scope 3 hardware, and data-centre water"
-  (`content/projects.json` → `sustainable-ai` → `method[0]`, the homepage
-  experience entry, the field report). If the ministry's own
-  boundary was the hosted-service one, say so and those lines can name it.
+  Digital Society School project is still described as having mapped
+  "Scope 2 electricity, Scope 3 hardware, and data-centre water", as a team
+  (`content/projects.json` → `sustainable-ai` → `method[0]`, the homepage's
+  core log, the field report). If the government partner's own boundary was
+  the hosted-service one, say so and those lines can name it.
 
 - [ ] **K6. The soft-path thesis title.** The site now spells it one way
   everywhere: "Approach to soft path water management: thinking beyond
@@ -600,11 +927,43 @@ already on the site; confirm it or give the right value.
   defence photo's caption, which said "Approach for"). If the title on the
   thesis is different, change all three.
 
-*Check for K1, K2, K4 and K6:* change the value in `content/`, run
+- [ ] **K7. The scholarships' exact names.** The site now names each one way:
+  "Chinese Government (MOFCOM) Scholarship" for Hunan and "Wageningen
+  African Scholarship Programme" for Wageningen (`content/profile.json` →
+  `education[2].scholarship` and `education[1].scholarship`), and
+  `npm test` holds every page to them. If your award letters say otherwise,
+  change the field, and `npm test` names the pages that still disagree.
+- [ ] **K8. MARINA-Multi: did you run it, or analyse its output?** The site
+  now credits the model to Wageningen's Water Systems & Global Change group
+  and says the thesis "analysed" river pollution with it, never "modelled".
+  Say whether you ran MARINA-Multi yourself or analysed runs the group had
+  already produced, which MARINA-Multi reference the thesis cites, and
+  whether you used its SSP-RCP scenario runs; if you did, "Framed the
+  storylines within climate-change scenarios" can say so.
+  `content/projects.json` → `coastal` (`method`, `results`), the
+  `sub-basins` entry in `content/claims.json`, the Wageningen journey stop
+  in `index.html` and entry [3] of `field-report.html`.
+- [ ] **K9. The Hunan conference-table photo.** Its caption said
+  "representing graduate researchers"; it now says "At a conference table at
+  Hunan University". Confirm it, or say what the meeting was.
+  `content/projects.json` → `water-management` → that photo's `caption` and
+  `fullCaption`.
+- [ ] **K10. The BSc dissertation: examined, or defended too?** The site now
+  counts "two MSc theses examined and defended, and a BSc dissertation
+  examined". If the dissertation was defended orally, say so, and the
+  `$comment` lines in `content/projects.json` and `content/research.json`
+  and the README can say three were defended.
+- [ ] **K11. Was the UNDRR internship part of the Wageningen MSc?** The
+  journey puts Bonn (2023) before Wageningen (2021–2024), ordered by the
+  year each stop ended, and does not say whether the internship was the
+  MSc's. If it was, the Bonn stop (`index.html`, by hand) and the
+  internship's entry (`content/profile.json` → `experience[3]`) can say so.
+
+*Check for K1, K2, K4, K6 and K7:* change the value in `content/`, run
 `npm run build:content`, and `npm test` names every page that still disagrees.
-K3 has no test behind it: the field report and the case study's `role` and
-`method[0]` are changed together, by hand. K1's and K2's figures are also in
-the claims ledger since wave 4; N1 and N2 ask for the evidence behind them.
+K3, K8 and K9 have no test behind them: the pages they name are changed
+together, by hand. K1's and K2's figures are also in the claims ledger since
+wave 4; N1 and N2 ask for the evidence behind them.
 
 ---
 
@@ -621,7 +980,8 @@ anything.
     photo in that case study's `gallery` will do; one without a 480px
     `thumb` needs one made (`cwebp -resize 480 0 -q 72`), and every image in
     the repository counts against a 3.5 MB budget with about 140 KB free.
-    Then `npm run build:content`.
+    Then `npm run build:content`. Whether the people in them agreed to
+    appear is U6.
   - *Unlocks:* the cards show the pictures you would pick.
   - *Check:* `npm test` passes (`tests/portfolio.test.js` holds each card's
     stated size to its file), and the homepage's Projects section shows them.
@@ -635,11 +995,10 @@ anything.
     `npm run build:content`.
   - *Cost:* open, the six rows make `case-studies.html` about 940px longer
     than folded at 1440×900 (1,288px against 348px), about a screen, which
-    takes it past its length ceiling (11.55 screens measured with wave 4's
-    seventh case study and findings, 11.85 allowed),
-    and a reader who only scrolls would fetch up to 2.2 MB of photos.
-    Something of equal length would have to come off the page first, since
-    ceilings are not raised.
+    takes it past its length ceiling (11.56 screens measured, 11.85
+    allowed), and a reader who only scrolls would fetch up to 2.2 MB of
+    photos. Something of equal length would have to come off the page
+    first, since ceilings are not raised.
   - *Check:* nothing to check while they stay folded. Opened, each case
     study shows its photos without a press, and `npm run smoke` passes its
     length check once something of equal length has gone.
@@ -652,27 +1011,40 @@ Wave 4 added a seventh case study, GAIA, behind a new ESG & CSRD lens, and
 a "Findings & recommendations" stage to every case study. Each sentence is
 drawn from the GAIA repository or from what the site already said.
 
-- [ ] **G1. GAIA and the ministry's framework.**
+- [ ] **G1. Where GAIA and promptcoach began, and whether the Digital
+  Society School agreed to their release.**
   - *What:* the sustainable-AI case study lists its "Sustainability
-    assessment framework for AI use cases" as held by the client ("not mine
-    to publish unilaterally"); GAIA, public under your own MIT licence,
-    answers a related question. The GAIA case names no partner and does
-    not say where GAIA began. Confirm GAIA is yours to publish, and whether
-    it is that framework; if it is, the sustainable-AI artifact should say
-    so rather than "held by the client".
+    assessment framework for AI use cases" as held by the Digital Society
+    School and its government partner ("not mine to publish
+    unilaterally"). GAIA, public under your own MIT licence, answers a
+    related question; promptcoach is "Version 2 of the Digital Society
+    School prototype", and holds the school's EcoPrompt Coach handover
+    document, dated January 2026, in its `docs/legacy/`. Say whether GAIA
+    is derived from the school's prototype or framework, and whether the
+    school agreed to the MIT release of GAIA and promptcoach and to the
+    handover document being public.
   - *Where:* `content/projects.json` → `gaia` and `sustainable-ai` →
-    `artifacts`.
-  - *Why it matters:* the notes this wave worked from say GAIA began as
-    "Prototype E" in the prototype deck of the Digital Society School's
-    ministry project, so a reader who knows both could take the public one
-    for the held one. When the lanes merged,
-    GAIA was taken off the sustainable-AI case study's artifacts and kept
-    only on its own case, so that case no longer implies the answer.
-  - *Also:* whether the ministry may be named at all is D2.
-- [ ] **G2. The GAIA case's own facts.** Your role ("Author and
-  maintainer"), its period ("2025 — 2026"), and that the web estimator at
+    `artifacts`. With your answer, the GAIA case can carry a line on where
+    it began. The release and the handover document are settled in those
+    two repositories, not here.
+  - *Why it matters:* the notes this site was built from say GAIA began as
+    "Prototype E" in the prototype deck of the school's project with its
+    government partner, so a reader who knows both could take the public
+    one for the held one. GAIA is kept off the sustainable-AI case study's
+    artifacts, on its own case only, so that case does not imply the
+    answer.
+  - *Also:* whether the partner may be named at all is D2.
+- [ ] **G2. The GAIA case's own facts, and whether you will keep the tools
+  up to date.** Your role, now "Author" (it said "Author and maintainer"),
+  its period ("2025 — 2026"), and that the web estimator at
   moseskolleh.github.io/GAIA-Framework-/ is live (it could not be reached
-  from where this was built). `content/projects.json` → `gaia`.
+  from where this was built). Will you keep GAIA and promptcoach updated
+  during the PhD? The site no longer calls either maintained: promptcoach is
+  "the newer tool". GAIA has no tags, so the ledger's links for its figures
+  now point at commit `f039e73`, where its roadmap says version 2.2.0; tag
+  it `v2.2.0` if you like, and `gaia-modelled` and `gaia-models` in
+  `content/claims.json` can point at the tag. `content/projects.json` →
+  `gaia`.
 - [ ] **G3. The findings.** Confirm each, and say more where you can. The
   plan names three that the site does not yet state:
   - which socioeconomic drivers dominated in the coastal thesis (and their
@@ -681,10 +1053,10 @@ drawn from the GAIA repository or from what the site already said.
   - which interventions the Wuppertal report recommended (if the
     municipality agrees). Today the Wuppertal case has no recommendation:
     one that named no measure came off;
-  - the decision criteria the sustainable-AI framework gives the ministry,
-    if the framework, which the client holds, may be quoted and the ministry
-    may be named (D2). Today the case gives the five design principles
-    instead.
+  - the decision criteria the sustainable-AI framework gives its government
+    partner, if the framework, which the client holds, may be quoted and the
+    partner may be named (D2). Today the case gives the five design
+    principles instead.
   `content/projects.json` → `caseStudies[i].findings`; one to four each,
   and `npm test` refuses a figure without a basis.
 - [ ] **G4. The method, folded.** Each case study's method now opens on a
@@ -693,23 +1065,24 @@ drawn from the GAIA repository or from what the site already said.
   about 3.3 screens on a phone and 1.2 on a desktop, past the ceiling, so
   something of equal length would have to come off first. For the same
   reason the page's closing note, "Why it is laid out like this", keeps its
-  heading and folds its two paragraphs. Today the page is 11.55 screens at
-  1440×900 and 19.67 at 390×844, against ceilings of 11.85 and 19.78.
+  heading and folds its two paragraphs. Today the page is 11.56 screens at
+  1440×900 and 19.42 at 390×844, against ceilings of 11.85 and 19.78.
   - *Where:* to show the methods open, `renderCaseStudies` in
     `scripts/build-content.js`; then `npm run build:content`, and
     `npm run smoke` says whether the page still fits.
 
 ---
 
-## Your public repositories, as the site shows them (Phase 3.1 and 3.4, wave 4)
+## Your public repositories and theses, as the site shows them (Phase 3.1 and 3.4, wave 4)
 
 Wave 4 put your six public repositories on the site, each described only as
 far as the repository itself shows: WaterProject, GAIA-Framework-,
 climatematch-pipeline, A-B-Testing-at-Globox, SustainableAIPrototypes and
 promptcoach (`content/research.json`, and as artifacts in
 `content/projects.json`). The homepage toolkit's proof links point at them.
-The coach has one name, EcoPrompt Coach, and the site links its maintained
-app as the canonical tool. These are the questions only you can answer.
+The coach has one name, EcoPrompt Coach, and the site links its newer app,
+promptcoach, as a separate tool with its own method. These are the
+questions only you can answer, and one about the theses (R8).
 
 - [ ] **R1. WaterProject names third-party clients.** Its examples name a
   private client and three organisations it worked for or with, in
@@ -737,9 +1110,8 @@ app as the canonical tool. These are the questions only you can answer.
   - *What:* a public notebook or repository of yours that shows it.
   - *Where:* a new public output in `content/research.json` (a `github.com`
     URL is already trusted), then the toolkit's machine-learning row in
-    `index.html` becomes a link to it, as the others are; the skills
-    narration in `content/narration.json` says "no public project yet" and
-    changes with it. R7 asks the same of GIS.
+    `index.html` becomes a link to it, as the others are. R7 asks the same
+    of GIS.
   - *Check:* `npm test` passes; `npm run cv` again.
 - [ ] **R4. Is the Tableau Public dashboard still live?** Tableau's only
   evidence is the GloBox README's link to it
@@ -751,7 +1123,7 @@ app as the canonical tool. These are the questions only you can answer.
 - [ ] **R5. Are the apps the site points to live?**
   - *The EcoPrompt Coach app,* <https://moseskolleh.github.io/promptcoach/>:
     `carbon-ai.html` and the homepage's section 05 link it directly, as the
-    maintained version. It could not be reached from where this was built.
+    newer version. It could not be reached from where this was built.
   - *WaterProject's standalone web app:* its README says GitHub Pages has
     to be pointed at its `docs/` folder once, so the site says only "the
     repo links a browser app" and links the repository, not the app. If it
@@ -777,11 +1149,27 @@ app as the canonical tool. These are the questions only you can answer.
   - *Where:* a public artifact on the groundwater case study in
     `content/projects.json` whose name or note says it is QGIS or ArcGIS
     work (or a new output in `content/research.json`); then the row in
-    `index.html` drops "on request; no public GIS project yet", and the
-    skills narration in `content/narration.json` with it.
+    `index.html` drops "on request; no public GIS project yet".
   - *Check:* `npm test` passes (`tests/content.test.js` accepts a case
     study as a proof only when a public artifact of it names the tool);
     `npm run cv` again.
+- [ ] **R8. The theses: deposit them, or confirm you can send them.**
+  - *What:* the two MSc theses and the BSc dissertation are listed as "on
+    request" ("ask and I will send it"). Is the Wageningen thesis in WUR's
+    library, and does it carry a clause that needs the chair group's
+    consent to share it? Is the Hunan thesis in CNKI or Hunan University's
+    library? Would you, with your former supervisors' agreement, deposit
+    them on Zenodo, each with a DOI? If none of these, confirm that you can
+    send each one when asked.
+  - *Where:* `content/research.json` (each thesis's `status`, `url` and
+    `note`) and the thesis artifacts in `content/projects.json`. A deposit
+    needs `zenodo.org` (and `doi.org`) in `TRUSTED_HOSTS` in
+    `scripts/lib/content.js`, and the sentence saying no entry has a DOI
+    (the research page's key, in `scripts/build-content.js`, and the
+    README) rewritten. Where sharing needs consent, the note says so ("with
+    the chair group's consent").
+  - *Check:* `npm test` passes, and `research.html` says where each thesis
+    is.
 
 ---
 
@@ -794,12 +1182,12 @@ numbers", lists them all. Some of those labels are promises only you can
 keep, and some figures could move to "public" with a link only you have.
 
 - [ ] **N1. Will you send the evidence for the four "on request" figures?**
-  The two master's degrees, the three continents, the four countries and the
-  Wageningen GPA of 7.8/10 (K1) are marked on request, on the understanding
-  that you will send the degree certificates and the transcript when a
-  reader asks. For Germany, one of the four countries, the evidence is the
-  UNDRR internship, as you record it, not a degree: say if you hold a
-  document for it.
+  The two master's degrees, the three continents, the five countries and the
+  Wageningen average grade of 7.8/10 (K1) are marked on request, on the
+  understanding that you will send the degree certificates, the transcript
+  and, for Italy, your PhD enrolment when a reader asks. For Germany, one of
+  the five countries, the evidence is the UNDRR internship, as you record
+  it, not a degree: say if you hold a document for it.
   - *Where:* `content/claims.json` → the `masters-degrees`, `continents`,
     `countries` and `wur-grade` entries → `checkable`. If you would not send
     them, each becomes `not-checkable`.
@@ -811,13 +1199,16 @@ keep, and some figures could move to "public" with a link only you have.
     (K2): `content/claims.json` → `team-size` and `programme-weeks`;
   - the six people in the Wuppertal consultancy team and the five months
     with UNDRR, which the site writes in words and which are entries now:
-    `wuppertal-team` (from `education[0].consultancyTeamSize` in
+    `wuppertal-team` (from `education[1].consultancyTeamSize` in
     `content/profile.json`) and `undrr-months` (counted from the
     internship's dates; the build fails if the two disagree). Confirm both;
-  - the 164 water points (100 wells rehabilitated, 50 boreholes, 14 solar)
-    and the 70% strike rate, from the field records: these are the
-    groundwater case study's results, so their checkability is set there,
-    in `content/projects.json` → `groundwater` → `results[i].verifiable`
+  - the 164 water points, now the sum of three counts held on the jobs
+    that delivered them (E10): `content/claims.json` →
+    `wells-rehabilitated`, `boreholes-constructed` and `solar-boreholes`,
+    each with its own `checkable`;
+  - the 70% success rate (E1), from the field records: a result of the
+    groundwater case study, so its checkability is set there, in
+    `content/projects.json` → `groundwater` → `results[0].verifiable`
     (true or false), and the ledger follows it.
   - *What:* a public link, or a document you will send on request.
   - *Unlocks:* the team size and the programme's length move to "public"
@@ -838,12 +1229,13 @@ keep, and some figures could move to "public" with a link only you have.
   - *What:* confirm the corrected line, or say what the 25 came from.
   - *Check:* nothing to change if you confirm it.
 - [ ] **N4. Two results that were labelled checkable, with nowhere to
-  check them.** The coastal case's "10,226 sub-basins modelled" and the
-  soft-path case's "Successfully defended at Hunan University, May 2021"
-  said "Checkable from outside" on the homepage cards, the case studies,
-  the CV and in the narration, while the site cited no source for the
-  count, and `claims.html` filed the same degree certificate under "on
-  request". Both now say "not checkable from outside".
+  check them.** The coastal case's count of sub-basins (now "10,226
+  sub-basins analysed with MARINA-Multi", K8) and the soft-path case's
+  "Successfully defended at Hunan University, May 2021" said "Checkable
+  from outside" on the homepage cards, the case studies and the CV, while
+  the site cited no source for the count, and `claims.html` filed the same
+  degree certificate under "on request". Both now say "not checkable from
+  outside".
   - *What:* for the count, open Wageningen University's MARINA page,
     `https://www.wur.nl/en/research/products-services/marina-model-assess-river-inputs-pollutants-seas`.
     A web search shows it saying the model "is applicable for 10,226
@@ -855,46 +1247,9 @@ keep, and some figures could move to "public" with a link only you have.
     `results[0]`: add `"check": "<the address>"` and set `verifiable` to
     `true`; add the host to `TRUSTED_HOSTS` in `scripts/lib/content.js`,
     with a line saying you opened it. Then `npm run build:content` and
-    `npm run cv`, and in `content/narration.json` the projects script's
-    "You cannot check that…" line for it.
+    `npm run cv`.
   - *Check:* `npm test` passes; the card says "Checkable from outside", and
     `claims.html` links the address.
-
----
-
-## Your own voice (Phase 4.3)
-
-- [ ] **V1. Approve the wording of the introduction.**
-  - *What:* the `intro` script in `content/narration.json`: 193 words, first
-    person, opening with "Kushe". Every fact in it is from the hero narration,
-    `content/profile.json` or `content/projects.json`; it states no dates,
-    availability, languages or right to work.
-  - *Where:* edit `content/narration.json` → `intro.text` to sound like you,
-    keeping it to 150–220 words, opening with "Kushe", and to facts the site
-    already states. `npm run build:content` checks the length and the
-    opening; the facts are for you and a reviewer to check.
-  - *Unlocks:* V2.
-
-- [ ] **V2. Record one clean 60–90 second take of the introduction.**
-  - *How:* a phone voice memo in a quiet, soft-furnished room is enough.
-    Then, with [ffmpeg](https://ffmpeg.org), make it a mono 64 kbps MP3 and
-    install it:
-
-    ```bash
-    ffmpeg -i take.m4a -ac 1 -b:a 64k take.mp3
-    npm run voice:intro -- take.mp3
-    ```
-
-    If you changed words while recording, first edit `intro.text` to match
-    what you said and run `npm run build:content`, then run
-    `npm run voice:intro`. Full steps are in section 0 of
-    [docs/narration-setup.md](narration-setup.md).
-  - *Unlocks:* the Listen player offers "Hear Moses introduce himself · N KB".
-    Until then the site plays no recording at all, and the browser voice reads
-    the sections.
-  - *Check:* `npm test` passes (manifest, captions and the 800 KB audio
-    budget); locally, press **Listen** in the nav and the player offers the
-    recording.
 
 ---
 
@@ -905,49 +1260,43 @@ keep, and some figures could move to "public" with a link only you have.
     project completion rate", "efficiency by 15%", "3+ years" and Power BI.
     Since wave 4, `npm run cv` prints `assets/Moses_Kolleh_Sesay_CV.pdf` from
     `content/` and the homepage, so it says only what the site says, and the
-    tests fail if it falls behind. Two things on the old one are not on it:
-    the Ministry of Finance as the partner (D2), and the relevant courses
-    under each degree, which the site does not list. Your phone number is on
-    it, because the homepage's contact card publishes it; it is
-    `person.phone` in `content/profile.json`, and a test holds the homepage
-    to it.
+    tests fail if it falls behind. Since the PhD update it opens with the
+    PhD, closes the Digital Society School role in February 2026, and links
+    your ORCID iD. Two things on the old one are not on it: the Digital
+    Society School's partner, by name (D2), and the relevant courses under
+    each degree, which the site does not list. Your phone number is on it,
+    because the homepage's contact card publishes it; it is `person.phone`
+    in `content/profile.json`, and a test holds the homepage to it.
   - *Where:* anything you want on it goes on the site first (`content/profile.json`
     or the homepage), then `npm run cv`. If you would rather not publish the
     phone number, take it off both: the contact card in `index.html` and
     `person.phone`.
   - *Check:* `npm test` passes (`tests/cv.test.js`), and the PDF reads as you
-    would want a recruiter to read it.
-- [ ] **D2. May the site and the CV name the Ministry of Finance as the partner?**
-  - *Why:* the plan says partner names stay out without their consent, and
-    the site has named the ministry since before this plan. The old CV did
-    too. The new CV leaves it off until you confirm the ministry has agreed
-    to be named, and wave 4 added no new mention anywhere on the site.
-  - *Where it is named today:*
-    - `carbon-ai.html`'s hero tag, "DIGITAL SOCIETY SCHOOL · MINISTRY OF
-      FINANCE (NL)";
-    - the sustainable-AI case study: `content/projects.json` →
-      `sustainable-ai` → `partner`, and its held framework's `heldBy`
-      ("Digital Society School / Ministry of Finance"), on
-      `case-studies.html`;
-    - `content/lenses.json` → the `sustainable-ai` lens's first evidence
-      line;
-    - `content/profile.json` → `currentRole.partner`, and on the homepage
-      (`index.html`, written by hand) the journey's Amsterdam stop, Field
-      Note 03 and the experience card's "Partner" line;
-    - the narration's introduction and experience scripts
-      (`content/narration.json`);
-    - the field terminal's projects list (`modules/terminal.js`) and the
-      Assay's evidence line (`modules/interactives.js`);
-    - three times in `field-report.html`.
+    would want a reader or a collaborator to read it. Copies you sent before
+    it are U7.
+- [ ] **D2. May the site and the CV name the Digital Society School's
+  government partner?**
+  - *Why:* the plan says partner names stay out without their consent. The
+    site named the ministry from before this plan until the PhD update,
+    which applied the default: no consent is recorded, so no name.
+    Everywhere it was named (the EcoPrompt Coach page's hero tag, the
+    sustainable-AI case study's partner and its held framework, the
+    sustainable-AI lens, the homepage's core log, Note 03 and the feed,
+    the field report and the field terminal) now says "a Dutch government
+    partner" or "its government partner", and `tests/content.test.js`
+    fails if the name comes back. The CV names no partner at all
+    (`tests/cv.test.js`).
   - *Off the site:* the `SustainableAIPrototypes` repository's README is
-    titled "Ministry of Finance - Sustainable AI Initiative", and the
-    `promptcoach` README names "Ministry of Finance (NL) partners"; the site
-    now links both.
-  - *Where:* tell us yes or no. Yes: the CV can name it, from
-    `currentRole.partner`, and the two checks in `tests/cv.test.js` that
-    keep it off the CV go. No: every mention above comes off in one commit
-    ("a ministry", or the Digital Society School alone), and the two
-    READMEs are yours to change.
+    titled for the ministry's initiative, and the `promptcoach` README
+    names the ministry's partners; the site links both. Only you can
+    change those.
+  - *Where:* tell us yes or no. Yes, with the ministry's agreement in
+    writing: the name goes back in `content/profile.json` →
+    `experience[1].partner` (its `$partner` note says why it is not there
+    now), in `content/projects.json` → `sustainable-ai`, the lens and the
+    pages above, and the guard in `tests/content.test.js` comes off in the
+    same commit. No: nothing on the site changes, and the two READMEs are
+    yours to change.
 - [ ] **D3. A verification link for each certificate** (Phase 3.8).
   - *Why:* four certificates are listed with nothing a reader can check them
     against. Each can link the issuer's own page for it, on the homepage and
@@ -967,6 +1316,17 @@ keep, and some figures could move to "public" with a link only you have.
       and its host is added to `VERIFY_HOSTS` and `TRUSTED_HOSTS` in
       `scripts/lib/content.js` once someone has opened it.
   - *Check:* `npm test` passes, and each Verify link opens the certificate.
+- [ ] **D4. Climatematch Academy: completed, and when?**
+  - *What:* the climatematch-pipeline output says it was built for a
+    Climatematch Academy course, but neither your certificates nor your
+    education list it. Which course and year, and do you hold a completion
+    certificate?
+  - *Where:* only with a certificate: `content/profile.json` →
+    `certifications`, a new entry (`name`, `issuer`, `displayDate`, `year`,
+    `covered`, and a `verifyUrl` if there is one), and the field report's
+    certificates (`npm test` holds each to `name — issuer, year`). Then
+    `npm run build:content` and `npm run cv`.
+  - *Check:* `npm test` passes, and the CV lists it.
 - [ ] **L1. Two or three testimonials, with permission** (Phase 3.5; its
   number is from when it was listed under later phases).
   - *What:* two or three people you have worked with, each agreeing to be
@@ -990,26 +1350,25 @@ keep, and some figures could move to "public" with a link only you have.
     quote writes it: "164 water points" is fine, and is marked like any
     other; "a team of 23" needs a form, `"team of 23"`, on the team-size
     entry in `content/claims.json` (the build names the figure).
-  - *Room:* none yet, at full length. The homepage is 9.42 of 9.79 screens
-    at 1440×900 and 16.49 of 17.09 at 390×844. Measured on this branch when
-    it was 16.46 on a phone, with stand-in quotes of 200 characters, one
-    takes it to 9.80 on a desktop,
-    just over (on a phone, 16.86, within), and two to 9.80 and 17.18, over
-    both. So before the first goes in, about a hundredth of a desktop screen
-    has to come off the homepage, and for two, about a tenth of
-    a phone screen as well; shorter quotes cost less. `npm run smoke`
-    measures it and fails a page over its ceiling, which only moves down.
+  - *Room:* none, at full length. The homepage is 9.70 of its 9.74 screens
+    at 1440×900 and 16.83 of 17.03 at 390×844. Measured in wave 4, one
+    stand-in quote of 200 characters added about 0.38 of a desktop screen
+    and 0.40 of a phone screen, so before the first goes in, about a third
+    of a desktop screen and a fifth of a phone screen has to come off the
+    homepage; shorter quotes cost less. `npm run smoke` measures it and
+    fails a page over its ceiling, which only moves down.
   - *Check:* `npm test` passes and the homepage shows each quote with who
     said it and where to check it.
 
 ---
 
-## The Brief, the notes and the health checks (Phase 4.1, 5 and 6.9, wave 5)
+## The notes and the health checks (Phase 5 and 6.9, wave 5)
 
-Wave 5 moved the Assay to a page of its own, The Brief (`brief.html`),
-made the Field Notes dated articles with a feed and a preview card each,
-and added a weekly "Site health" issue. These are the choices it made for
-you, and one switch for the health check.
+Wave 5 moved the Assay to a page of its own, The Brief (`brief.html`,
+retired on 2026-10-28, which took B1 and B2 with it), made the Field
+Notes dated articles with a feed and a preview card each, and added a
+weekly "Site health" issue. These are the choices it made for you, and
+one switch for the health check.
 
 - [ ] **H1. Give the health check its token: `HEALTH_TOKEN`, then the
   repository secret `HEALTH_URL`** (after C2).
@@ -1031,30 +1390,10 @@ you, and one switch for the health check.
 
 - [ ] **H2. An X profile, if you want one listed** (Phase 5.4). The plan
   named "the missing X profile in `sameAs`", but `content/profile.json` →
-  `links` has none, so the structured data lists GitHub and LinkedIn only.
-  If you use one and want it there, add its address as `links.x` and say
-  so; `personLd` in `scripts/build-content.js` takes one line to list it.
-  If not, tick this as "none".
-
-- [ ] **B1. Which case studies The Brief shows for each strength.**
-  - *What:* when a job ad matches a strength, the dossier shows the case
-    studies that strength picks. Wave 5 chose them: ESG analysis,
-    reporting, GHG and sustainable AI pick GAIA and the sustainable-AI
-    case; climate risk picks the UN disaster-risk case and Wuppertal;
-    water picks the groundwater and soft-path cases; GIS picks groundwater
-    and Wuppertal; water quality picks the coastal case; stakeholders picks
-    Wuppertal and sustainable AI; data, delivery, international work and
-    research pick none of their own.
-  - *Where:* `content/brief.json` → `strengths[n].caseStudies`. The
-    validator refuses an id that is not a case study, or a list that leaves
-    out a case study the strength's evidence links to.
-  - *Check:* paste an ad of the kind you are going for into `brief.html`;
-    the dossier shows the cases you would show.
-
-- [ ] **B2. Your phone number in The Brief's dossier?** The homepage's
-  contact card publishes it, and so does the CV; the dossier, the page a
-  recruiter forwards, gives the email, the CV and the contact form only.
-  Say if it should carry the phone too.
+  `links` has none, so the structured data lists GitHub, LinkedIn and, since
+  the PhD update, ORCID. If you use one and want it there, add its address
+  as `links.x` and say so; `personLd` in `scripts/build-content.js` takes
+  one line to list it. If not, tick this as "none".
 
 - [ ] **L5. The notes as articles: their dates, their summaries and one
   changed line.**
@@ -1066,10 +1405,9 @@ you, and one switch for the health check.
     if you want your own.
   - *One line:* note 3 pointed at the homepage chart as "further down"; on
     a page of its own it says "on the homepage", linked.
-  - *The ministry:* note 3 names "the Dutch Ministry of Finance", as the
-    homepage's note always has, while the CV leaves it unnamed (D2). It now
-    has a permalink and an entry in the feed. If D2's answer is no, the
-    note's sentence changes with it.
+  - *The partner:* note 3 named the ministry, as the homepage's note always
+    had; since the PhD update it says "a Dutch government partner" (D2).
+    The corrections made to all three notes in October 2026 are U8.
   - *Where:* `content/notes/*.md`, then `npm run build:content`,
     `npm run og` and `npm test`.
 
@@ -1100,5 +1438,8 @@ you, and one switch for the health check.
   repository's Pages settings, then change `links.site` in
   `content/profile.json` and run `npm run build:content`, `npm run og`
   and `npm run cv`.
-- [ ] **L4. A native-speaker review of the Dutch pages** (Phase 5.6), once
-  they exist.
+- [ ] **L4. A second-language edition, only if you want one** (Phase 5.6).
+  The plan's Dutch pages were for a job search in Amsterdam; none was
+  built, and none is planned now. If you want one, in Dutch or Italian, it
+  needs a native speaker's review before it goes live, and it has to state
+  your real level in that language (F1). If not, tick this as "none".

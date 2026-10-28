@@ -1,8 +1,8 @@
 // Keeps the pages agreeing with content/profile.json.
 //
 // Employment dates, degrees, certifications and profile links were written out
-// by hand in index.html, its JSON-LD block, field-report.html, the narration
-// scripts and the README. Nothing kept those copies in step, and they had
+// by hand in index.html, its JSON-LD block, field-report.html and the README.
+// Nothing kept those copies in step, and they had
 // already drifted — field-report.html listed a certification the rest of the
 // site did not mention.
 //
@@ -59,7 +59,7 @@ const fieldText = plain(fieldReport);
 // One wrong LinkedIn URL on one page is a dead end for whoever clicks it.
 {
     const files = ['index.html', 'field-report.html', 'carbon-ai.html', '404.html', 'README.md'];
-    ['linkedin', 'github'].forEach((key) => {
+    ['linkedin', 'github', 'orcid'].forEach((key) => {
         const canonical = profile.links[key];
         const host = canonical.replace(/^https?:\/\//, '').split('/')[0];
         const handlePath = canonical.replace(/^https?:\/\/[^/]+/, '');
@@ -82,6 +82,11 @@ const fieldText = plain(fieldReport);
     assert(
         index.includes(profile.person.email) && fieldReport.includes(profile.person.email),
         'Links: the contact email matches profile.json on both editions'
+    );
+    // The ORCID iD a researcher is found by, in both editions' contact links.
+    assert(
+        !!profile.links.orcid && index.includes(`href="${profile.links.orcid}"`) && fieldReport.includes(`href="${profile.links.orcid}"`),
+        `Links: both editions link the ORCID record profile.json holds (${profile.links.orcid})`
     );
     // The phone number the CV prints is the one the homepage publishes.
     const tel = (index.match(/href="tel:([^"]+)"[\s\S]*?<p>([^<]+)<\/p>/) || []).slice(1);
@@ -107,30 +112,43 @@ const fieldText = plain(fieldReport);
         assert(ld.email === `mailto:${profile.person.email}`, `JSON-LD: email matches profile.json (${ld.email})`);
         assert(ld.url === profile.links.site, `JSON-LD: url matches profile.json (${ld.url})`);
 
-        // worksFor has to name the employer the rest of the page names, and
-        // its parent organisation — the reason it is spelled out here rather
-        // than left as a bare string.
+        // Where he is now has to name the organisation the rest of the page
+        // names, and its parent organisation where it has one — the reason
+        // it is spelled out here rather than left as a bare string. An
+        // employer is worksFor; a university he is enrolled at as a doctoral
+        // researcher, on a scholarship and not a contract
+        // (currentRole.enrolled), is his affiliation, and no employer is
+        // named at all.
+        const role = profile.currentRole;
+        const [is, isNot] = role.enrolled ? ['affiliation', 'worksFor'] : ['worksFor', 'affiliation'];
+        const org = ld[is];
         assert(
-            ld.worksFor && ld.worksFor.name === profile.currentRole.organization,
-            `JSON-LD: worksFor names the current employer (${ld.worksFor && ld.worksFor.name})`
+            !!org && org['@type'] === 'Organization' && org.name === role.organization && !(isNot in ld),
+            `JSON-LD: ${is} names the current organisation, and there is no ${isNot} (${org && org.name})`
         );
         assert(
-            ld.worksFor && ld.worksFor.parentOrganization === profile.currentRole.parentOrganization,
-            `JSON-LD: worksFor records the parent organisation (${ld.worksFor && ld.worksFor.parentOrganization})`
+            !!org && org.parentOrganization === role.parentOrganization,
+            `JSON-LD: ${is} records the parent organisation, where profile.json gives one (${org && org.parentOrganization})`
         );
 
         const sameAs = ld.sameAs || [];
-        [profile.links.github, profile.links.linkedin].forEach((url) => {
+        [profile.links.github, profile.links.linkedin, profile.links.orcid].forEach((url) => {
             assert(sameAs.includes(url), `JSON-LD: sameAs lists ${url}`);
         });
 
-        // alumniOf must be exactly the institutions in the education list —
-        // no more (a school that was never attended) and no fewer.
+        // alumniOf must be exactly the institutions of the degrees awarded —
+        // no more (a school that was never attended, or one whose degree is
+        // still under way) and no fewer.
         const alumni = (ld.alumniOf || []).map(a => a.name).sort();
-        const expected = profile.education.map(e => e.institution).sort();
+        const expected = profile.education.filter(e => !e.inProgress).map(e => e.institution).sort();
         assert(
             JSON.stringify(alumni) === JSON.stringify(expected),
-            `JSON-LD: alumniOf matches the education list (${alumni.join(', ')} vs ${expected.join(', ')})`
+            `JSON-LD: alumniOf matches the degrees awarded (${alumni.join(', ')} vs ${expected.join(', ')})`
+        );
+        const underWay = profile.education.filter(e => e.inProgress);
+        assert(
+            underWay.every(e => !alumni.includes(e.institution)),
+            `JSON-LD: a degree still in progress makes no one an alumnus (${underWay.map(e => e.institution).join(', ') || 'none in progress'})`
         );
     }
 }
@@ -177,7 +195,9 @@ const fieldText = plain(fieldReport);
     profile.certifications.forEach((c) => {
         if (!indexText.includes(c.name)) certMissing.push(`index: "${c.name}"`);
         if (!indexText.includes(c.issuer)) certMissing.push(`index: "${c.issuer}"`);
-        if (!fieldText.includes(c.issuer) && !fieldText.includes(c.name)) certMissing.push(`field-report: "${c.name}"`);
+        // The field report once gave the issuers' longer titles; it names
+        // each certificate as the homepage does, with its issuer and year.
+        if (!fieldText.includes(`${c.name} — ${c.issuer}, ${c.year}`)) certMissing.push(`field-report: "${c.name} — ${c.issuer}, ${c.year}"`);
     });
     assert(certMissing.length === 0, `Certifications: both editions carry every entry (missing: ${certMissing.join('; ') || 'none'})`);
 
@@ -190,34 +210,16 @@ const fieldText = plain(fieldReport);
     );
 }
 
-// --- Narration ----------------------------------------------------------
-// What the listener hears must say what the page says — and Moses's recorded
-// introduction cannot be fixed with an edit, only with another take.
-{
-    const { SCRIPTS, INTRO } = require('../voice-scripts.js');
-    const spoken = SCRIPTS.concat(INTRO ? [INTRO] : []).map(s => s.text).join(' ');
-
-    assert(
-        spoken.includes(profile.currentRole.organization),
-        'Narration: the current employer is named in the scripts'
-    );
-
-    // Any spelling of the employer other than the canonical one means the
-    // audio says something the page does not.
-    const strays = ['Digital Society Schools', 'Amsterdam University of Sciences']
-        .filter(s => spoken.includes(s));
-    assert(strays.length === 0, `Narration: no mis-spelled organisation names (${strays.join(', ') || 'none'})`);
-}
-
 // --- Sitemap ------------------------------------------------------------
 {
     const missing = profile.pages.filter(p => !sitemap.includes(p.loc)).map(p => p.path);
     assert(missing.length === 0, `Sitemap: lists every page (missing: ${missing.join(', ') || 'none'})`);
 
-    // And every field note, each at its own address, dated the day it was published.
+    // And every field note, each at its own address, dated the day it last
+    // changed: its `updated` once corrected, or else the day it was published.
     const notes = require('../scripts/lib/content.js').loadAll().notes;
-    const noteMissing = notes.filter(n => !sitemap.includes(`<loc>${profile.links.site}notes/${n.slug}.html</loc>\n    <lastmod>${n.date}</lastmod>`)).map(n => n.slug);
-    assert(notes.length >= 3 && noteMissing.length === 0, `Sitemap: lists every field note, with the day it was published as its lastmod (missing: ${noteMissing.join(', ') || 'none'})`);
+    const noteMissing = notes.filter(n => !sitemap.includes(`<loc>${profile.links.site}notes/${n.slug}.html</loc>\n    <lastmod>${n.updated || n.date}</lastmod>`)).map(n => n.slug);
+    assert(notes.length >= 3 && noteMissing.length === 0, `Sitemap: lists every field note, with the day it last changed as its lastmod (missing: ${noteMissing.join(', ') || 'none'})`);
 
     const locs = sitemap.match(/<loc>([^<]+)<\/loc>/g) || [];
     const known = profile.pages.map(p => p.loc).concat(notes.map(n => `${profile.links.site}notes/${n.slug}.html`));
@@ -247,13 +249,34 @@ const fieldText = plain(fieldReport);
         if (!phrase.test(indexText)) missing.push(`index: team of ${r.teamSize} (${r.organization})`);
         if (!phrase.test(fieldText)) missing.push(`field-report: team of ${r.teamSize} (${r.organization})`);
     });
+    // What the projects a role worked on delivered: the two drilling jobs.
+    [['boreholesConstructed', 'boreholes'], ['wellsRehabilitated', 'hand-dug wells'], ['solarBoreholes', 'solar-powered']].forEach(([key, what]) => {
+        profile.experience.filter(r => r[key]).forEach((r) => {
+            if (!indexText.includes(`${r[key]} ${what}`)) missing.push(`index: ${r[key]} ${what} (${r.organization})`);
+            if (!fieldText.includes(`${r[key]} ${what}`)) missing.push(`field-report: ${r[key]} ${what} (${r.organization})`);
+        });
+    });
     profile.experience.filter(r => r.programmeWeeks).forEach((r) => {
         if (!indexText.includes(`${r.programmeWeeks}-week`)) missing.push(`index: ${r.programmeWeeks}-week (${r.organization})`);
     });
     profile.education.filter(e => e.grade).forEach((e) => {
         if (!indexText.includes(e.grade)) missing.push(`index: grade ${e.grade} (${e.institution})`);
     });
+    // A degree's specialisation, scholarship and classification, in the
+    // award's own words, the same on both editions.
+    profile.education.forEach((e) => ['specialisation', 'scholarship', 'classification'].filter(k => e[k]).forEach((k) => {
+        if (!indexText.includes(e[k])) missing.push(`index: ${k} "${e[k]}" (${e.institution})`);
+        if (!fieldText.includes(e[k])) missing.push(`field-report: ${k} "${e[k]}" (${e.institution})`);
+    }));
     assert(missing.length === 0, `Figures: the pages print the record facts profile.json holds (missing: ${missing.join('; ') || 'none'})`);
+
+    // The Hunan scholarship was named four ways, one of which reads as a
+    // different scheme. Every page that names it uses profile.json's name.
+    const hunan = profile.education.find(e => /MOFCOM/.test(e.scholarship || ''));
+    const otherWays = new RegExp(`Chinese Government (?!\\(MOFCOM\\) Scholarship)|(?<!Chinese Government \\()MOFCOM|MOFCOM\\) scholarship`);
+    const named = ['index.html', 'field-report.html', 'case-studies.html', 'research.html']
+        .map(f => [f, plain(read(f)).match(otherWays)]).filter(([, m]) => m).map(([f, m]) => `${f}: "${m[0]}"`);
+    assert(!!hunan && named.length === 0, `Figures: the Hunan scholarship has one name everywhere, "${hunan && hunan.scholarship}" (${named.join('; ') || 'no other'})`);
 }
 
 // --- Figures: case-study periods ------------------------------------------
@@ -339,12 +362,10 @@ const fieldText = plain(fieldReport);
 // named here so that one coming back is a failure with its reason attached,
 // not something a reader has to notice.
 {
-    const { SCRIPTS } = require('../voice-scripts.js');
     const pages = {
         'index.html': indexText,
         'field-report.html': fieldText,
-        'case-studies.html': plain(read('case-studies.html')),
-        narration: SCRIPTS.map(s => s.text).join(' ')
+        'case-studies.html': plain(read('case-studies.html'))
     };
     const UNSUPPORTED = [
         { re: /10,000\+ (?:people|beneficiaries)|ten thousand people/i, why: 'no count of people reached exists in content/' },
@@ -352,8 +373,16 @@ const fieldText = plain(fieldReport);
         { re: /15% efficiency|efficiency by 15%/i, why: 'an efficiency gain with no baseline behind it' },
         { re: /advised the (?:UN|United Nations)/i, why: 'the UN role was an internship: "supported", as everywhere else' },
         { re: /certified across/i, why: 'there is one ESG certificate, not a set of frameworks' },
+        { re: /coverage by 25%|\+25% regional|25% (?:more )?regional|coverage expanded by/i, why: 'the UNDRR coverage gain: no before-and-after counts of the catalogue are recorded (the 54 documented stays)' },
+        { re: /\baudited\b/i, why: 'the UNDRR work reviewed and cross-checked data; an audit is independent assurance' },
+        { re: /for national policy use/i, why: 'nothing records that the factsheet was used in national policy' },
         { re: /well above local averages|against roughly 30%/i, why: 'leans on the blind-drilling baseline, which has no recorded source' },
         { re: /if a skill is listed, there's a project behind it/i, why: 'Life Cycle Assessment, Carbon Markets and Circular Economy are listed with no project behind them' },
+        { re: /Life Cycle Assessment|\bLCA\b|Carbon Markets|Circular Economy|\bSASB\b/, why: 'listed as skills with nothing on the site behind them: no course, case study or output' },
+        { re: /top of (?:the |his |my )?class/i, why: 'a class rank no document on record states; the degree\'s First Class Honours stays' },
+        { re: /dual master|\bGPA\b/i, why: 'two separate master\'s degrees, not a joint programme; a Dutch university gives an average grade, not a GPA' },
+        { re: /representing graduate researchers/i, why: 'reads as a formal office nothing records' },
+        { re: /Clean Coast/, why: 'a storyline nothing in projects.json or the coastal case study records' },
         { re: /anywhere in the E\.?U\b/i, why: 'relocation and EU right to work are not stated on the site (owner checklist F2, F3)' },
         { re: /GeoPandas|GeoAI/i, why: 'not in the homepage\'s toolkit, so the CV printed from it left them off; the field report kept GeoPandas' }
     ];
@@ -365,45 +394,38 @@ const fieldText = plain(fieldReport);
         });
     });
     assert(found.length === 0, `Figures: no claim without a basis is back (${found.join('; ') || 'none'})`);
-
-    // The skills script reads out what the section only lists as a chip:
-    // nothing on the site is a life cycle assessment Moses did.
-    const skills = (SCRIPTS.find(x => x.id === 'skills') || { text: '' }).text;
-    assert(!/life cycle|\bLCA\b/i.test(skills), 'Figures: the skills narration names no skill without a project behind it (life cycle assessment)');
 }
 
 // --- Tools: the field report names none the homepage does not show -------
 // The field report is "the same content" as text. It kept Power BI after
-// the homepage dropped it for want of evidence, so the Assay answered a
-// Power BI requirement "Not evidenced on this site" while this page listed
-// it. Every named tool The Brief knows is held to the Brief's own test:
-// shown on the homepage, or not listed here (owner checklist E4).
+// the homepage dropped it for want of evidence (owner checklist E4). Each
+// named software tool it lists is held to the homepage: named there too, or
+// not listed here. (The Brief, retired in October 2026, held them by its
+// own matcher; this is the same list of tools, bar R, which a bare letter
+// cannot be told apart from in text.)
 {
-    const { JSDOM } = require('jsdom');
-    const dom = new JSDOM(read('brief.html'), { runScripts: 'outside-only', url: 'https://example.com/brief.html' });
-    dom.window.eval(read('brief.js'));
-    const A = dom.window.mks.brief;
+    const TOOLS = ['Python', 'SQL', 'QGIS', 'ArcGIS', 'Tableau', 'Excel', 'Power BI', 'MATLAB', 'SPSS', 'Stata', 'SimaPro', 'openLCA',
+        'GaBi', 'JavaScript', 'SAP', 'Google Earth Engine', 'Workiva', 'Enablon', 'Sphera', 'Persefoni', 'Salesforce Net Zero Cloud',
+        'Microsoft Sustainability Manager'];
+    const said = (text, tool) => new RegExp(`(?:^|[^A-Za-z])${tool.replace(/ /g, '\\s+')}(?![A-Za-z])`, 'i').test(text);
     const toolkit = plain((read('field-report.html').match(/<h2>Toolkit<\/h2>\s*<p>([\s\S]*?)<\/p>/) || [])[1] || '');
-    const tools = A.RULES.tools.map(t => (typeof t === 'string' ? t : t.name));
-    const a = A.analyse(`Requirements: ${toolkit}`, { now: new Date(2026, 8, 26) });
-    const named = a.met.concat(a.gaps).map(x => x.label).filter(l => tools.includes(l));
-    const unshown = a.gaps.map(g => g.label).filter(l => tools.includes(l));
+    const named = TOOLS.filter(t => said(toolkit, t));
+    const unshown = named.filter(t => !said(indexText, t));
     assert(named.length >= 6, `Tools: the field report's toolkit is found and read (${named.join(', ')})`);
-    assert(unshown.length === 0, `Tools: every tool the field report lists is one the homepage shows, so the Brief matches it (not shown: ${unshown.join(', ') || 'none'})`);
+    assert(unshown.length === 0, `Tools: every tool the field report lists is one the homepage shows (not shown: ${unshown.join(', ') || 'none'})`);
 }
 
 // --- Figures: illustrative numbers say so --------------------------------
-// The 30% blind-drilling baseline and the straight-line guess in You Draw It
-// have no source behind them. They stay, because the comparison is the
-// point of both widgets, but wherever they are shown they are labelled.
+// The straight-line guess in You Draw It has no source behind it. It
+// stays, because the comparison is the point of the widget, but wherever it
+// is shown it is labelled. (The borehole game's 30% blind-drilling baseline
+// had none either, and claimed a gain nothing measured; it went in October
+// 2026, and tests/widgets.test.js keeps it out.)
 {
     const { run } = require('./harness.js');
     const { window } = run('dark', { before: (w) => { w.console.log = () => {}; } });
     const doc = window.document;
     const text = (id) => (doc.getElementById(id) || { textContent: '' }).textContent;
-
-    // The 30% moved with the borehole game to the groundwater case study,
-    // where tests/widgets.test.js holds every place it is shown to the label.
 
     const legend = doc.querySelector('.ydi-leg-intuit');
     assert(!!legend && /illustrative/.test(legend.textContent), `Illustrative: the You Draw It legend labels the guess line (${legend && legend.textContent})`);
@@ -433,8 +455,8 @@ const fieldText = plain(fieldReport);
     };
     const inside = verdictFor(0.7);
     assert(inside.at >= R1.range[0] && inside.at <= R1.range[1] && /within that range/.test(inside.said) && !/underestimat|overestimat/.test(inside.said),
-        `Estimates: a guess inside the published range is told so, not that it missed (${inside.at} Wh: ${inside.said})`);
-    assert(inside.said.includes(`The published estimate is about ${R1.energyPer1kTokens_Wh} Wh (${R1.range[0]}–${R1.range[1]} Wh)`),
+        `Estimates: a guess inside the estimate's range is told so, not that it missed (${inside.at} Wh: ${inside.said})`);
+    assert(inside.said.includes(`The research estimate is about ${R1.energyPer1kTokens_Wh} Wh (${R1.range[0]}–${R1.range[1]} Wh)`),
         'Estimates: the verdict gives the central estimate with its range');
     const below = verdictFor(0.3);
     assert(below.at < R1.range[0] && /underestimated the frontier/.test(below.said), `Estimates: a guess below the range is an underestimate (${below.at} Wh: ${below.said})`);
@@ -502,7 +524,7 @@ const fieldText = plain(fieldReport);
     // A repository link anywhere is one of the six, spelled exactly: GitHub
     // forgives the case, a reader comparing names does not.
     const shipped = ['index.html', 'case-studies.html', 'research.html', 'carbon-ai.html', 'field-report.html', '404.html', 'stats.html', 'README.md']
-        .map(f => [f, read(f)]).concat(['projects', 'research', 'lenses', 'profile', 'narration'].map(n => [`content/${n}.json`, read(`content/${n}.json`)]));
+        .map(f => [f, read(f)]).concat(['projects', 'research', 'lenses', 'profile'].map(n => [`content/${n}.json`, read(`content/${n}.json`)]));
     const names = REPOS.map(r => r.name);
     const stray = [];
     shipped.forEach(([f, src]) => (src.match(/github\.com\/moseskolleh\/[\w.-]+/gi) || []).forEach((m) => {
@@ -511,7 +533,7 @@ const fieldText = plain(fieldReport);
     }));
     assert(stray.length === 0, `Repos: every repository link names one of the six as GitHub spells it (stray: ${stray.join(', ') || 'none'})`);
 
-    // Every role view has public work a reader can open somewhere other
+    // Every lens has public work a reader can open somewhere other
     // than this site, whatever lenses content/lenses.json holds. The
     // validator refuses one without; this says which work each lens has.
     const bare = lenses.map(l => [l.id, content.publicWorkFor(l.id, { caseStudies: projects }, research)
@@ -556,13 +578,27 @@ const fieldText = plain(fieldReport);
     const KEEP_OUT = [/\bTimbo\b/, /\bACF\b/, /Living Water International/i, /\bWiNGiN\b/i,
         /\bMatthijs\b/, /\bThomas\b/, /\bJop\b/, /\bCora\b/, /\bMirai\b/, /\bZahra\b/, /\bAli\b/, /\bRezaei\b/];
     const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json')).map(f => `content/${f}`), ['voice-scripts.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json')).map(f => `content/${f}`));
     const named = [];
     pages.forEach((f) => {
         const src = read(f);
         KEEP_OUT.forEach((re) => { const m = src.match(re); if (m) named.push(`${f}: "${m[0]}"`); });
     });
     assert(named.length === 0, `Partners: no client, partner or team member the repositories name is on the site (${named.join(', ') || 'none'})`);
+
+    // The Digital Society School's government partner has not agreed to be
+    // named (owner checklist D2): the site describes it, as profile.json
+    // does, on every page, in the notes and the feed, and in what the
+    // terminal prints. The CV names no partner (tests/cv.test.js).
+    const partnerRe = /Ministry of Finance|Ministerie|Financi[eë]n|finance ministry/i;
+    const notes = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`)
+        .concat(fs.readdirSync(path.join(ROOT, 'content/notes')).filter(f => f.endsWith('.md')).map(f => `content/notes/${f}`));
+    const ministry = pages.concat(notes, ['feed.xml', 'modules/terminal.js', 'script.js'])
+        .map(f => [f, read(f).match(partnerRe)]).filter(([, m]) => m).map(([f, m]) => `${f}: "${m[0]}"`);
+    assert(ministry.length === 0, `Partners: the government partner is described, not named, everywhere the site speaks (${ministry.join(', ') || 'named nowhere'})`);
+    const dss = profile.experience.find(r => r.organization === 'Digital Society School');
+    assert(!!dss && !!dss.partner && !partnerRe.test(dss.partner) && indexText.includes(dss.partner),
+        `Partners: the homepage describes the Digital Society School's partner as profile.json does ("${dss && dss.partner}")`);
 
     // The prototypes' README lists "success metrics" (a 25% CO2 cut, 4.2/5
     // stars, 70% improvement) that are targets. Wherever the site mentions
@@ -581,20 +617,16 @@ const fieldText = plain(fieldReport);
 
 // --- Power BI: a tool claimed only with its proof ------------------------
 // Nothing anywhere evidences Power BI, so it is named nowhere, unless the
-// homepage's toolkit lists it with a proof link (owner checklist E4). The
-// Brief's list of tools to detect in an ad (content/brief.json) is not a
-// claim, and is not read.
+// homepage's toolkit lists it with a proof link (owner checklist E4).
 {
     const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
-        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json') && f !== 'brief.json').map(f => `content/${f}`), ['voice-scripts.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'content')).filter(f => f.endsWith('.json')).map(f => `content/${f}`));
     const doc = new (require('jsdom').JSDOM)(index).window.document;
     const listed = Array.from(doc.querySelectorAll('#skills .toolkit-item')).filter(li => /power\s*bi/i.test(li.textContent));
     const proven = listed.every(li => li.querySelector('a.toolkit-proof[href^="http"], a.toolkit-proof[href^="case-studies.html#"]'));
-    // The rubric brief.html carries, as content/brief.json has it, is left out.
-    const shown = (f) => (f === 'brief.html' ? read(f).replace(/<script type="application\/json" id="briefData">[\s\S]*?<\/script>/, '') : read(f));
     const elsewhere = pages.filter(f => /power\s*bi/i.test(f === 'index.html'
         ? read(f).replace(/<li class="toolkit-item">[\s\S]*?<\/li>/g, li => (/power\s*bi/i.test(li) && proven ? '' : li))
-        : shown(f)));
+        : read(f)));
     assert(proven && elsewhere.length === 0, `Power BI: claimed nowhere without a proof link (${elsewhere.join(', ') || 'none'})`);
 }
 
@@ -648,7 +680,7 @@ const fieldText = plain(fieldReport);
 // --- One name for one tool -----------------------------------------------
 // "AI, Weighed", "EcoPrompt Coach" and "promptcoach" were one tool under
 // three names. It is the EcoPrompt Coach: carbon-ai.html is this site's
-// edition, the promptcoach repository and its app the maintained one, and
+// edition, the promptcoach repository and its app the newer one, and
 // "promptcoach" is only ever the repository's name.
 {
     const shipped = fs.readdirSync(ROOT).filter(f => /\.(html|js|css)$/.test(f))
@@ -669,7 +701,7 @@ const fieldText = plain(fieldReport);
     });
     assert(seen.length === 0, `One name: "promptcoach" names the repository, never the tool (${seen.join('; ') || 'as it should'})`);
 
-    // The maintained tool is linked as such, app and code, from the coach's
+    // The newer tool is linked as such, app and code, from the coach's
     // page and from the homepage's teaser.
     const APP = 'https://moseskolleh.github.io/promptcoach/';
     const REPO = 'https://github.com/moseskolleh/promptcoach';
@@ -678,7 +710,7 @@ const fieldText = plain(fieldReport);
     const teaser = new JSDOM(index).window.document.getElementById('ecoprompt');
     [['carbon-ai.html', coach.querySelector('.ca-hero')], ['the homepage teaser', teaser]].forEach(([where, el]) => {
         const hrefs = Array.from(el.querySelectorAll('a')).map(a => a.getAttribute('href'));
-        assert(hrefs.includes(APP) && hrefs.includes(REPO), `One name: ${where} links the maintained EcoPrompt Coach, its app and its code (${hrefs.join(', ')})`);
+        assert(hrefs.includes(APP) && hrefs.includes(REPO), `One name: ${where} links the newer EcoPrompt Coach, its app and its code (${hrefs.join(', ')})`);
     });
 
     // carbon-ai.html's own figures say how old they are, from the data.
@@ -691,7 +723,7 @@ const fieldText = plain(fieldReport);
         /For newer models, see the EcoPrompt Coach app; its 2026 models are extrapolated/.test(plain(vintage.innerHTML)),
         `Vintage: carbon-ai.html dates its figures as ai-carbon-data.js does (reviewed ${data.REVIEWED_ON}, grid ${grid}) and sends newer models to the app, extrapolated as it says`);
     assert(!/reproduces its calculation model|mirrors the calculation model/i.test(read('content/research.json') + read('content/projects.json') + read('carbon-ai.js')),
-        'One name: nothing says this site\'s edition reproduces the maintained tool\'s model; they have separate code and data');
+        'One name: nothing says this site\'s edition reproduces the newer tool\'s model; they have separate code and data');
 }
 
 // --- Staleness ----------------------------------------------------------
@@ -707,7 +739,7 @@ const fieldText = plain(fieldReport);
         console.log(`NOTICE: content/profile.json was logged ${Math.floor(months)} months ago (${profile.meta.verifiedOn}).`);
         console.log(`        "${profile.currentRole.displayDates}" at ${profile.currentRole.organization} is still being`);
         console.log('        published as current. Confirm it, then set meta.confirmedOn and meta.verifiedOn — or close the role');
-        console.log('        in profile.json, index.html, field-report.html, the CV and the narration together.');
+        console.log('        in profile.json, index.html, field-report.html and the CV together.');
         console.log('');
     } else {
         console.log(`INFO: profile logged ${Math.floor(months)} month(s) ago; next review due after ${profile.meta.staleAfterMonths}.`);

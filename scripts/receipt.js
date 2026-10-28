@@ -19,13 +19,14 @@
 //
 // The carbon figure is the one the footer badge uses: bytes transferred
 // times the Sustainable Web Design constant, 0.36 g CO₂e per MB (one copy,
-// in scripts/lib/voice-signature.js), for a first view with nothing cached.
-// It counts network transfer only, not the reader's device, and it is an
-// estimate; the receipt says both wherever it shows the figure.
+// in scripts/lib/carbon.js), for a first view with nothing cached.
+// The model (v3) allocates data-centre, network and device energy per
+// byte, and the figure is an estimate; the receipt says both wherever it
+// shows it.
 // ===================================================================
 
 const fs = require('fs');
-const { GRAMS_PER_MB, grams } = require('./lib/voice-signature.js');
+const { GRAMS_PER_MB, grams } = require('./lib/carbon.js');
 const { couldLowerTo, heldLength, fmtCeiling, keyFor, lengthHeld } = require('./check-budget.js');
 
 const KB = 1024;
@@ -149,8 +150,8 @@ function receipt({ base = null, head, baseLength = null, headLength = null, base
             const hg = hm === null ? null : mgOf(hm);
             out.push(`| \`${h.page}\` | ${cell(bg, fmtMg)} | ${cell(hg, fmtMg)} | ${change(bg, hg, fmtMgChange)} |`);
         });
-        out.push('', `Network transfer only: each page's first-view bytes, nothing cached, times the Sustainable Web Design constant this site's footer badge uses, ${GRAMS_PER_MB} g CO₂e per MB. ` +
-            'It leaves out the energy of the reader\'s device, and it is an estimate, not a measurement.');
+        out.push('', `Bytes transferred: each page's first-view bytes, nothing cached, times the Sustainable Web Design (v3) constant this site's footer badge uses, ${GRAMS_PER_MB} g CO₂e per MB. ` +
+            'The model allocates data-centre, network and device energy per byte; it is an estimate, not a measurement.');
     }
 
     // Length, per page and window size.

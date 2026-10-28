@@ -6,8 +6,8 @@
 // one slider now, each under the result it is about, loaded only when a
 // reader scrolls near it, on a page that has no script.js to lean on. What
 // follows boots that page in jsdom: the loader that fetches them, the
-// module on its own, a round of each, the labels that keep the illustrative
-// 30% honest, and the page without JavaScript. A real browser plays them
+// module on its own, a round of each, a scoreboard that claims no gain over
+// a blind-drilling rate, and the page without JavaScript. A real browser plays them
 // too, and measures their labels on a phone (scripts/smoke.js).
 //
 // Run with: node tests/widgets.test.js
@@ -155,7 +155,8 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
 }
 
 // ===================================================================
-// Seven in ten: one round, and a scoreboard that keeps the 30% honest
+// Seven in ten: one round, and a scoreboard of the reader's holes beside
+// the field records, with no blind-drilling rate to claim a gain over
 // ===================================================================
 {
     const { window, doc, errors } = boot({ eco: 'on' });   // low-energy: every drill finishes at once
@@ -166,10 +167,10 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
     const rows = Array.from(host.querySelectorAll('.strike-row'));
     const cells = (row, cls) => row.querySelectorAll(`.strike-cell${cls ? '.' + cls : ''}`).length;
 
-    assert(rows.length === 3 && rows.every(r => cells(r) === 10), 'Scoreboard: three rows of ten, one board, no slider of its own');
+    assert(rows.length === 2 && rows.every(r => cells(r) === 10), 'Scoreboard: two rows of ten, one board, no slider of its own');
     assert(!host.querySelector('input[type="range"]'), 'Scoreboard: one set of controls: the game\'s');
-    assert(cells(rows[1], 'water') === 7 && cells(rows[2], 'water') === 3, 'Scoreboard: the fixed rows show 7 and 3 in 10');
-    assert(/7 in 10, field records/.test(text(rows[1])) && /3 in 10, illustrative/.test(text(rows[2])), `Scoreboard: each fixed row says what it is (${text(rows[1])} | ${text(rows[2])})`);
+    assert(cells(rows[1], 'water') === 7, 'Scoreboard: the field records\' row shows 7 in 10');
+    assert(/7 in 10, field records/.test(text(rows[1])), `Scoreboard: the fixed row says what it is (${text(rows[1])})`);
     assert(rows.every(r => r.querySelector('.strike-waffle').getAttribute('aria-hidden') === 'true'), 'Scoreboard: the cells are decoration; each label carries its numbers');
     assert(cells(rows[0], 'water') + cells(rows[0], 'dry') === 0 && /drill to fill this row/.test(text(score)), 'Scoreboard: your row starts empty and says how to fill it');
 
@@ -215,13 +216,14 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
     click(window, doc.getElementById('drillResetBtn'));
     assert(text(score) === tally && /New site surveyed/.test(result.textContent), 'Round: a new site keeps your score and says it is new');
 
-    // The 30% has no recorded source. Wherever the widget shows it, it says so.
-    // (A figure's ledger mark, <span data-claim>, is part of its line, not a line.)
-    const lines = Array.from(host.querySelectorAll('h4, p, span:not([data-claim])')).filter(el => !el.querySelector(':not([data-claim])') || el.matches('p'))
-        .map(text).filter(t => /30%|3 in 10|blind/i.test(t));
-    assert(lines.length >= 2 && lines.every(t => /illustrative/.test(t)),
-        `Illustrative: every line of the widget that mentions blind drilling says illustrative (${lines.join(' / ')})`);
-    assert(/illustrative\s+—\s+not a measured figure/.test(text(host.querySelector('.cs-play-summary'))), 'Illustrative: the summary says the 30% is not measured');
+    // The game drew a blind-drilling rate of 3 in 10, which had no recorded
+    // source, beside the field records' 7 in 10, under the heading "what
+    // reading the ground is worth": a gain nothing measured. It draws no
+    // such rate now, and says what the 70% is.
+    const said = text(host);
+    assert(!/30%|3 in 10|blind|worth/i.test(said), 'No baseline: the widget draws no blind-drilling rate and claims no gain over one');
+    assert(/success rate from records, not a controlled trial/.test(text(host.querySelector('.cs-play-summary'))) && /practice in reading the curve/.test(text(host.querySelector('.cs-play-summary'))),
+        'No baseline: the summary says the 70% is a success rate from records, and the game is practice');
 }
 
 // The curve is the whole of the information, and a screen reader hears it:
@@ -329,7 +331,7 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
 
     // What the stylesheet does with the scale: 12px, 11 for small print,
     // and no drawing label at a fixed size anywhere.
-    assert(/\.bh-label,\s*\.fl-label\s*\{[^}]*font-size:\s*calc\(12px \* var\(--k, 1\)\)/.test(moduleCss) &&
+    assert(/\.bh-label\s*\{[^}]*font-size:\s*calc\(12px \* var\(--k, 1\)\)/.test(moduleCss) &&
         /\.bh-label-dim\s*\{[^}]*font-size:\s*calc\(11px \* var\(--k, 1\)\)/.test(moduleCss),
         'Labels: the stylesheet sizes drawing labels at 12px and 11px times the scale');
     const fixed = (moduleCss.match(/\.(?:bh|fl)-[\w-]+[^{]*\{[^}]*font-size:\s*[\d.]+px\s*;/g) || []);
@@ -375,12 +377,18 @@ const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
     let guard = 0;
     while (flush(1e6) && guard++ < 5);
     const flood = water();
-    assert(flood < calm - 80, `Flood: raised to July 2021, the channel water climbs towards the cars (y ${calm} → ${flood})`);
-    assert(doc.getElementById('floodLevelLabel').textContent === 'July 2021' && /2021 flood/.test(doc.getElementById('floodNote').textContent),
+    assert(flood < calm - 80, `Flood: raised to a severe flood, the channel water climbs towards the cars (y ${calm} → ${flood})`);
+    assert(doc.getElementById('floodLevelLabel').textContent === 'severe flood' && /severe flood/i.test(doc.getElementById('floodNote').textContent),
         'Flood: the level and the note follow the slider');
-    assert(slider.getAttribute('aria-valuetext') === 'river at the July 2021 flood level', `Flood: the slider speaks the level, not a number (${slider.getAttribute('aria-valuetext')})`);
+    assert(slider.getAttribute('aria-valuetext') === 'a severe flood', `Flood: the slider speaks the level, not a number (${slider.getAttribute('aria-valuetext')})`);
     set(1);
-    assert(slider.getAttribute('aria-valuetext') === 'river +1 m above normal', `Flood: a step up is spoken as one (${slider.getAttribute('aria-valuetext')})`);
+    assert(slider.getAttribute('aria-valuetext') === 'river at bankfull', `Flood: a step up is spoken as one (${slider.getAttribute('aria-valuetext')})`);
+    // A schematic carries no measured levels: no metres, no flood's date,
+    // and no claim about how often a flood comes.
+    const levels = (moduleJs.match(/const LEVELS = \[[\s\S]*?\];/) || [''])[0];
+    const ticks = doc.querySelector('.flood-ticks').textContent;
+    assert(!!levels && !/\d\s*m\b|20\d\d|more often|warming climate/.test(levels + ticks) && !doc.querySelector('#floodStage .fl-refline'),
+        `Flood: the steps are stages, not metres or a dated flood, and no line marks one (${ticks.trim()})`);
     set(0);
     while (flush(1e6) && guard++ < 10);
     assert(water() === calm && slider.getAttribute('aria-valuetext') === 'normal river level', 'Flood: and back down to a calm day');

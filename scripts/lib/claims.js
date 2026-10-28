@@ -11,9 +11,8 @@
 //                              generated pages carry the same
 //                              <span data-claim="…"> as the hand-authored
 //                              ones
-//   scripts/lib/content.js     checks that each entry's other forms, and
-//                              what the narration says aloud, come to the
-//                              entry's own value (quantity)
+//   scripts/lib/content.js     checks that each entry's other forms come
+//                              to the entry's own value (quantity)
 //   tests/claims.test.js       finds every number on every page, in digits
 //                              or in words, and every size said in words
 //                              ("a fifth", "twice", "an order of
@@ -24,7 +23,8 @@
 // So the rules live here, once. A figure is compared by what it amounts
 // to, not by how it is written: "70%", "7 in 10", "7 times out of 10" and
 // "seventy per cent" are one strike rate, and "a hundred and sixty-four"
-// is 164. That is what lets the spoken page be held to the ledger too.
+// is 164. That is what lets a figure written in words be held to the
+// ledger too.
 // ===================================================================
 
 // ------------------------------------------------------------------
@@ -79,7 +79,7 @@ function wordsValue(words) {
         const v = WORD_VALUE[w];
         if (SCALES[w] === 100) group = (group || 1) * 100;
         else if (SCALES[w]) { total += (group || 1) * v; group = 0; }
-        // "twenty thirteen", "twenty twenty-one": a year, spoken as two numbers.
+        // "twenty thirteen", "twenty twenty-one": a year, written as two numbers.
         else if (last !== null && !SCALES[last] && WORD_VALUE[last] >= 10 && v >= 10) group = group * 100 + v;
         else group += v;
         last = w;
@@ -170,6 +170,7 @@ const EXEMPT = [
     { why: 'the name of a cohort', re: /\bCohort \d+\b/g },
     { why: 'a place\'s coordinates', re: /\d+(?:\.\d+)?° ?[NSEW]\b/g },
     { why: 'a phone number', re: /\+\d{1,3}(?:[  ]\d{2,4}){2,4}/g },
+    { why: 'an ORCID iD', re: /\b\d{4}-\d{4}-\d{4}-\d{3}[\dX]\b/g },
     { why: 'an HTTP status code', re: /\b(?:error|HTTP) 404\b/g },
     { why: 'a unit: per thousand tokens', re: /\b(?:per[- ]|Wh\/)1k\b/g },
     { why: 'a model\'s size, as its name gives it (a 1B model)', re: /\b\d+B model\b/g },
@@ -196,13 +197,11 @@ function exemptAt(text, index, end) {
 // Numbers in words that are not claims
 //
 // The site writes small counts in words ("a team of six", "four
-// certificates"), and the narration says every figure that way ("a hundred
-// and sixty-four water points"). A count in words that is a figure is a
-// ledger entry like any other: the pages mark it, and the narration's has
-// to be an entry's `spoken` phrase. These are the words that are numbers
-// without being figures: "one" as in "one thread", a name (net zero), the
-// ordinals of a spoken list, and counts of things the page or the section
-// shows in full, so the reader could count them there.
+// certificates"). A count in words that is a figure is a ledger entry like
+// any other, and the pages mark it. These are the words that are numbers
+// without being figures: "one" as in "one thread", a name (net zero), and
+// counts of things the page or the section shows in full, so the reader
+// could count them there.
 // ------------------------------------------------------------------
 const SMALL = '(?:one|two|three|four|five|six|seven|eight|nine|ten)';
 
@@ -215,7 +214,8 @@ const SHOWN_IN_FULL = [
     { re: /\bsix projects\b/gi, what: 'the homepage\'s project cards',
       count: d => d.projects.caseStudies.filter(cs => cs.homepageCard !== false).length },
     { re: /\bseven case studies\b/gi, what: 'the case studies', count: d => d.projects.caseStudies.length },
-    { re: /\bthree degrees\b/gi, what: 'the degrees', count: d => d.profile.education.length },
+    // A degree still under way (inProgress, the PhD) is not one he holds.
+    { re: /\bthree degrees\b/gi, what: 'the degrees awarded', count: d => d.profile.education.filter(e => !e.inProgress).length },
     { re: /\bfour certificates\b/gi, what: 'the certificates', count: d => d.profile.certifications.length },
     { re: /\btwo of them you can play with\b/gi, what: 'the case studies with a game', count: d => d.projects.caseStudies.filter(cs => cs.widget).length },
     { re: /\bthree field notes\b/gi, what: 'the homepage\'s field notes', count: d => d.page('index.html').querySelectorAll('#notes .fieldnote').length },
@@ -225,8 +225,8 @@ const SHOWN_IN_FULL = [
     { re: /\btwo ESRS lines quantified\b/g, what: 'Anatomy of a Prompt\'s Scope 2 and cooling water, named just before the count', named: true },
     { re: /\bfive things to try\b/gi, what: 'the links of the homepage\'s play index, after it',
       count: d => d.page('index.html').querySelectorAll('.play-index a').length },
-    { re: /\bfive numbers\b/gi, what: 'the open counts page\'s measures, a card each',
-      count: d => d.page('stats.html').querySelectorAll('.st-five > .st-card').length },
+    { re: /\bfour numbers\b/gi, what: 'the open counts page\'s measures, a card each',
+      count: d => d.page('stats.html').querySelectorAll('.st-measures > .st-card').length },
     { re: /\bthree classes\b/gi, what: 'the window-width classes a page view sends, s, m and l, each named on the page',
       count: d => (d.source('scripts/fetch-stats.js').match(/\bconst VIEWPORTS = \[([^\]]*)\]/) || ['', ''])[1].split(',').filter(s => s.trim()).length }
 ];
@@ -235,9 +235,9 @@ const shownInFull = { why: 'a count of what the page shows in full, every one of
 // ------------------------------------------------------------------
 // Numerals a page draws from its own structure
 //
-// The core log's depth scale, a photo row's count, the flood game's river
-// steps: numerals that are not claims about anything, which the scan
-// (tests/claims.test.js) skips by selector, each with its reason. A count
+// The core log's depth scale, a photo row's count: numerals that are not
+// claims about anything, which the scan (tests/claims.test.js) skips by
+// selector, each with its reason. A count
 // of what the page shows is already in claims.html's "Not on this list";
 // the rest say there what they are (`listed`), from here, so the page and
 // the test cannot name different exceptions. `once` marks a host that is
@@ -246,12 +246,10 @@ const shownInFull = { why: 'a count of what the page shows in full, every one of
 const DRAWN = {
     'index.html': [
         { sel: '.corelog-depth, .corelog-head', why: 'the core log\'s depth scale: time drawn as depth',
-          listed: 'the core log’s depths, which draw time as depth from the dates beside them' }],
+          listed: 'the core log’s depth scale, which draws time as depth from the dates beside it' }],
     'case-studies.html': [
         { sel: '.cs-photos > summary', why: 'a count of the photos in the row, made from the gallery' },
-        { sel: '.cs-method-n', why: 'a count of the method\'s steps, made from the list it folds' },
-        { sel: '.flood-ticks', why: 'the river slider\'s steps, on a schematic not drawn to scale',
-          listed: 'the flood game’s river steps, on a schematic not drawn to scale' }],
+        { sel: '.cs-method-n', why: 'a count of the method\'s steps, made from the list it folds' }],
     'research.html': [{ sel: '.rs-summary', why: 'a count of the entries the page lists, made from them' }],
     // The open counts page: its counts are the counter's, rewritten each
     // week, and its rules are marked [data-rule] and held to the code.
@@ -330,16 +328,6 @@ const WORD_EXEMPT = [
     heldSizes
 ];
 
-/** In the narration, which also says years and the ordinals of its lists. */
-const SPOKEN_EXEMPT = [
-    { why: 'a year, said aloud', test: (run) => run.value >= 1900 && run.value < 2100 },
-    ONE,
-    { why: 'a list ordinal ("One, the sustainable A.I. framework")', res: [new RegExp(`(?:^|[.:!?]\\s+)(?:And\\s+)?${SMALL},`, 'gi')] },
-    { why: 'the name of a standard (Scopes 1 to 3)', res: [/\bscopes? one to three\b/gi] },
-    shownInFull,
-    heldSizes
-];
-
 /** Why a run of number words in `text` is not a figure, by `rules`, or null. */
 function wordExemptBy(rules, text, run) {
     for (const rule of rules) {
@@ -354,7 +342,6 @@ function wordExemptBy(rules, text, run) {
     }
     return null;
 }
-const spokenExempt = (text, run) => wordExemptBy(SPOKEN_EXEMPT, text, run);
 const wordExempt = (text, run) => wordExemptBy(WORD_EXEMPT, text, run);
 
 // ------------------------------------------------------------------
@@ -462,4 +449,4 @@ function unheld(text, claims) {
     return out;
 }
 
-module.exports = { unheld, wordRuns, sizeRuns, numbers, quantity, agrees, EXEMPT, exemptAt, SHOWN_IN_FULL, DRAWN, foldAround, HELD_SIZES, WORD_EXEMPT, wordExempt, SPOKEN_EXEMPT, spokenExempt, markable, displays, pattern, marker, plain };
+module.exports = { unheld, wordRuns, sizeRuns, numbers, quantity, agrees, EXEMPT, exemptAt, SHOWN_IN_FULL, DRAWN, foldAround, HELD_SIZES, WORD_EXEMPT, wordExempt, markable, displays, pattern, marker, plain };

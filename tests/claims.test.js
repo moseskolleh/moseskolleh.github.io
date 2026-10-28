@@ -20,14 +20,13 @@
 //   · a size said in words ("a fifth of a kettle", "twice as much") is
 //     neither reworded into a figure nor one the factor set is held to;
 //   · a script prints a figure of its own the ledger does not hold: the
-//     field terminal, the Assay's evidence, the receipt, You Draw It, the
+//     field terminal, the receipt, You Draw It, the
 //     coach's tips and the rest of what fills a host the scan skips, read
 //     from their source; or the footer's badge prints a fixed one;
-//   · a copy of the grams per MB (the narration player's, the build's)
-//     parts from the ledger's;
+//   · a copy of the grams per MB (the receipt's, the build's) parts from
+//     the ledger's;
 //   · a rule the open counts page states (30 counts a minute, nothing
 //     under 5) parts from the counter's code;
-//   · the narration says a number in words that no entry backs;
 //   · claims.html leaves an entry out, says it appears somewhere it does
 //     not, or links it to a place where it is folded away while the page
 //     shows it elsewhere, or into a fold the link neither opens nor names.
@@ -105,7 +104,10 @@ const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.doc
 // The ledger's own rules, fed bad entries
 // ===================================================================
 {
-    const good = { id: 'team-size', value: '23', unit: 'people in the team', basis: { profile: 'experience.4.teamSize' }, checkable: 'not-checkable' };
+    // The drilling team's size, wherever its role sits in the record (a role
+    // added above it moves it down one).
+    const teamPath = `experience.${data.profile.experience.findIndex(r => r.teamSize === 23)}.teamSize`;
+    const good = { id: 'team-size', value: '23', unit: 'people in the team', basis: { profile: teamPath }, checkable: 'not-checkable' };
     const refuses = (label, entry, why) => {
         const problems = content.checkClaims({ claims: [entry] }, { profile: data.profile, projects: data.projects, factors: content.loadFactors() });
         assert(problems.some(p => why.test(p)), `Validator refuses ${label} (${problems.join('; ') || 'it passed'})`);
@@ -113,7 +115,7 @@ const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.doc
     assert(content.checkClaims({ claims: [good] }, { profile: data.profile, projects: data.projects, factors: content.loadFactors() }).length === 0,
         'Validator: a sound entry passes');
     refuses('an entry with no basis', { ...good, basis: undefined }, /exactly one basis/);
-    refuses('an entry with two bases', { ...good, basis: { profile: 'experience.4.teamSize', illustrative: 'why' } }, /exactly one basis/);
+    refuses('an entry with two bases', { ...good, basis: { profile: teamPath, illustrative: 'why' } }, /exactly one basis/);
     refuses('a profile basis that says another number', { ...good, value: '24' }, /is 23, not 24/);
     refuses('a result that does not state the figure', { id: 'x', value: '65%', unit: 'strike rate', basis: { result: 'groundwater' } }, /no result .* states 65%/);
     refuses('a result entry that sets its own checkability', { id: 'x', value: '70%', unit: 'strike rate', basis: { result: 'groundwater' }, checkable: 'public' }, /the case study's/);
@@ -122,7 +124,7 @@ const docs = Object.fromEntries(PAGES.map(p => [p, new JSDOM(read(p)).window.doc
     refuses('"checkable from outside" with nowhere to check', { ...good, checkable: 'public' }, /says where/);
     refuses('a link on a figure no one can check', { ...good, check: 'carbon-ai.html' }, /reads as checkable/);
     refuses('an illustrative figure called checkable', { id: 'x', value: '30%', unit: 'baseline', basis: { illustrative: 'none' }, checkable: 'on-request' }, /illustrative/);
-    refuses('narration that says another number', { ...good, spoken: ['twenty-four people'] }, /does not say 23/);
+    refuses('another form that says another number', { ...good, forms: ['team of twenty-four'] }, /does not say 23/);
     refuses('a figure inside the unit', { ...good, unit: 'people, of 40 on site' }, /figure in it/);
     refuses('an unknown field', { ...good, source: 'x' }, /unknown field/);
     refuses('a derived figure from nothing', { id: 'x', value: '0.004', unit: 'g', basis: { derived: 'how', from: ['nope'] }, checkable: 'not-checkable' }, /not an entry/);
@@ -203,14 +205,14 @@ PAGES.forEach((page) => {
 // Hosts a script fills in the browser. In the HTML as shipped each holds a
 // placeholder. What the script works out there, a grade, a footprint, a
 // guess at a curve, is a model output, not a claim. What it prints of its
-// own is not: the Brief's "164 water points" and the coach's tips were
-// typed into scripts, skipped here with the hosts, and nothing held them.
+// own is not: the Brief's "164 water points" (it is retired now) and the
+// coach's tips were typed into scripts, skipped here with the hosts, and
+// nothing held them.
 // So each host names the script that fills it, and what that script
 // prints of its own is read from its source below (PRINTED) and held to
 // the ledger as the pages are.
 const RUNTIME = {
     'index.html': { '#ydi': 'ydi', '#carbonBadgeText': 'badge', '#receiptBody': 'receipt' },
-    'brief.html': { '#briefResult': 'brief', '#briefMsg': 'brief' },
     'carbon-ai.html': Object.assign(Object.fromEntries(['.ca-out', '[id^="equiv"]', '#tipsList', '#chartBars', '.ca-hint', '#inputNotice',
         '#ledgerReviewed', '#ledgerTable', '#ledgerSources', 'select'].map(sel => [sel, 'coach'])), { '#anatomyDraw': 'anatomy' }),
     'case-studies.html': { '#drillResult': 'games', '#drillScore': 'games', '#floodNote': 'games', '#floodLevelLabel': 'games' }
@@ -453,15 +455,6 @@ function between(src, from, to, file) {
 // The literals that read as words a person is shown, not an id, a class, a
 // colour or an SVG path: two letters together, and a space.
 const readAsWords = (list) => list.filter(t => /[A-Za-z]{2,}/.test(t) && /\s/.test(t.trim()));
-// Of a string of markup, what a reader is shown: its text and its labels,
-// not data-step="-1".
-const shownOf = (t) => (!/<[a-z]/i.test(t) ? t
-    : [t.replace(/<[^>]*>/g, ' ')].concat([...t.matchAll(/\b(?:aria-label|title|alt)="([^"]*)"/g)].map(m => m[1])).join(' '));
-
-// The Brief's rubric is data the page builds from (content/brief.json),
-// and so is where the homepage shows each tool, which the build writes into
-// the page beside it: both are read as brief.html has them.
-const briefData = JSON.parse(docs['brief.html'].getElementById('briefData').textContent);
 
 /**
  * What each script prints of its own, read from its source: `texts` the
@@ -473,8 +466,8 @@ const terminalSrc = read('modules/terminal.js');
 const drillLog = literals(between(terminalSrc, 'drill: (', 'cv: (', 'modules/terminal.js'));
 const PRINTED = {
     // The field terminal on the homepage (press `) prints the record in its
-    // own words: 164 water points, 10,226 sub-basins, a 70% strike rate,
-    // "odds are 7/10". The drill command's log is a game: its depths are made
+    // own words: 164 water points, 10,226 sub-basins, 70% of survey-sited
+    // holes struck water, "7/10 of the holes". The drill command's log is a game: its depths are made
     // up, and its first line says so. Only a depth in metres is let by, and
     // only there.
     terminal: { what: 'the field terminal (modules/terminal.js)', texts: literals(terminalSrc), sure: /164 water points/,
@@ -484,25 +477,13 @@ const PRINTED = {
     // per visit" that nothing held. It prints no figure of its own now.
     badge: { what: 'the footer\'s badge (script.js)', sure: /./,
         texts: [...read('script.js').matchAll(/badgeText\.textContent\s*=\s*(['"`][\s\S]*?['"`]);/g)].map(m => literals(m[1]).join(' ')) },
-    // The Brief grades an ad in the browser, but beside each area it matches
-    // it prints the record behind it, from its rubric: "164 water points…",
-    // "a 70% aquifer strike rate", "54 global hazard information systems";
-    // beside a tool, where the homepage shows it. Those, its gaps, its
-    // samples and the lines its script writes around them.
-    brief: { what: 'the Brief\'s evidence, gaps and messages (content/brief.json, brief.js)', sure: /164 water points/,
-        texts: briefData.rules.strengths.flatMap(r => [r.label].concat(r.ev.map(e => e.t)))
-            .concat(briefData.rules.gaps.flatMap(g => [g.label, g.text]), briefData.rules.confirm.map(c => c.label),
-                briefData.rules.languages.map(l => l.confirm || ''), Object.values(briefData.rules.grades),
-                briefData.rules.samples.flatMap(x => [x.label, x.text]),
-                Object.values(briefData.toolEvidence).flatMap(ev => ev.map(e => e.t)),
-                readAsWords(literals(read('brief.js')))) },
     // The receipt sums the visit's own bytes, and beside them the field
     // report's size, typed in.
     receipt: { what: 'the receipt\'s fixed lines (modules/interactives.js)', sure: /Text-only report/,
         texts: literals(between(interactives, 'const lines = [];', 'return lines;', 'modules/interactives.js')) },
     // You Draw It's verdict, card and table: the estimates come from the
     // factor set; its own words name the answer it prices.
-    ydi: { what: 'You Draw It\'s verdict, card and table (modules/interactives.js)', sure: /1,000-token answer/,
+    ydi: { what: 'You Draw It\'s verdict, card and table (modules/interactives.js)', sure: /1,000 tokens/,
         texts: readAsWords(literals(between(interactives, 'const est = ', '// Shape grade', 'modules/interactives.js'))
             .concat(literals(between(interactives, 'let shape;', 'cardData = {', 'modules/interactives.js')),
                 literals(between(interactives, 'callout.textContent', 'svg.appendChild(callout)', 'modules/interactives.js')),
@@ -513,15 +494,7 @@ const PRINTED = {
     // energy per token").
     coach: { what: 'the EcoPrompt Coach (carbon-ai.js)', texts: readAsWords(literals(read('carbon-ai.js'))), sure: /hidden output tokens/ },
     anatomy: { what: 'Anatomy of a Prompt (modules/anatomy.js)', texts: readAsWords(literals(read('modules/anatomy.js'))), sure: /Scope 2/ },
-    games: { what: 'the borehole and flood games (modules/dossier.js)', texts: readAsWords(literals(read('modules/dossier.js'))), sure: /STRIKE/ },
-    // The narration player is built when Listen is pressed, so no page's
-    // HTML holds it: its weight label's tooltip typed in "0.36 g CO₂e per
-    // MB", and nothing held that copy. It prints the badge's figure now; a
-    // figure typed in again is caught here. Its browser voice moves no
-    // bytes, and says so.
-    player: { what: 'the narration player (modules/dispatch.js)', texts: readAsWords(literals(read('modules/dispatch.js'))).map(shownOf),
-        sure: /Sustainable Web Design model/,
-        why: (text, a, b) => (/^browser voice · 0 KB transferred$/.test(text) && text.slice(a, b) === '0' ? 'nothing transferred: the browser voice moves no bytes' : null) }
+    games: { what: 'the borehole and flood games (modules/dossier.js)', texts: readAsWords(literals(read('modules/dossier.js'))), sure: /STRIKE/ }
 };
 {
     const hosts = Object.entries(RUNTIME).flatMap(([page, map]) => Object.entries(map).map(([sel, key]) => `${page} ${sel} → ${key}`));
@@ -533,12 +506,12 @@ const PRINTED = {
         loose.forEach(n => console.log(`  unmarked: ${key}: ${n}`));
         assert(found && loose.length === 0, `Scripts: every figure ${p.what} prints of its own is one the ledger holds, written as it writes it (${p.texts.length} strings read; ${loose.length} not${loose.length ? ', listed above' : ''})`);
     });
-    assert(PRINTED.terminal.texts.some(t => /odds are 7\/10/.test(t)) && drillLog.some(t => /made-up/.test(t)), 'Scripts: the terminal\'s drill log says it is made up, and only its depths are let by');
+    assert(PRINTED.terminal.texts.some(t => /7\/10 of the holes/.test(t)) && drillLog.some(t => /made-up/.test(t)), 'Scripts: the terminal\'s drill log says it is made up, and only its depths are let by');
     assert(PRINTED.badge.texts.length >= 2, `Scripts: the badge's lines are read (${PRINTED.badge.texts.length})`);
 }
 
 // Proof that the hold bites, on the figures the review changed in a copy
-// of the Brief's rubric: 164 → 200 water points, 14 → 50 solar-powered, 54 → 10
+// of the evidence lines The Brief printed: 164 → 200 water points, 14 → 50 solar-powered, 54 → 10
 // hazard systems, and the receipt's 10 KB → 9 KB. Each is caught.
 {
     const drifted = ['200 water points in Sierra Leone: 100 wells rehabilitated, 50 boreholes built, 14 solar-powered',
@@ -553,7 +526,6 @@ const PRINTED = {
 // be a figure nobody holds.
 {
     const said = PAGES.map(p => docs[p].body.textContent + ' ' + docs[p].head.textContent)
-        .concat([data.narration.intro ? data.narration.intro.text : ''], data.narration.scripts.map(x => x.text))
         .concat(Object.values(PRINTED).flatMap(p => p.texts)).join(' ');
     const wrong = [];
     let checked = 0;
@@ -582,11 +554,9 @@ const PRINTED = {
 // ===================================================================
 // Every entry is somewhere, and its basis holds today
 // ===================================================================
-const narration = [data.narration.intro ? data.narration.intro.text : ''].concat(data.narration.scripts.map(s => s.text)).join(' ');
 {
-    const said = (c) => (c.spoken || []).some(s => narration.toLowerCase().includes(s.toLowerCase()));
-    const nowhere = CLAIMS.filter(c => !MARKS.has(c.id) && !said(c)).map(c => c.id);
-    assert(nowhere.length === 0, `Ledger: every entry is on a page or in the narration — none is left over from a figure that has gone (${nowhere.join(', ') || 'none'})`);
+    const nowhere = CLAIMS.filter(c => !MARKS.has(c.id)).map(c => c.id);
+    assert(nowhere.length === 0, `Ledger: every entry is on a page — none is left over from a figure that has gone (${nowhere.join(', ') || 'none'})`);
 
     // The site's own measurements, as npm run budget makes them today.
     const { measure, BUDGETS } = require('../scripts/check-budget.js');
@@ -609,51 +579,22 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
         `Ledger: the badge in script.js compares against the ledger's median page and weighs with its grams per MB (${constant('MEDIAN_PAGE_MB')}, ${constant('G_CO2_PER_MB')})`);
 
     // The grams per MB, wherever the site weighs a transfer. The badge
-    // shares its constant as mks.carbon, which the receipt and the
-    // narration player read; the player once typed in a copy of its own,
-    // and so did a note in the factor set, and moving the ledger's figure
-    // would have left both behind with every test passing. The build's
-    // copy weighs the recording and the PR receipt.
-    const dispatch = read('modules/dispatch.js');
-    const build = constant('GRAMS_PER_MB', read('scripts/lib/voice-signature.js'));
+    // shares its constant as mks.carbon, which the receipt reads; a module
+    // once typed in a copy of its own, and so did a note in the factor set,
+    // and moving the ledger's figure would have left both behind with every
+    // test passing. The build's copy weighs the PR receipt.
+    const build = constant('GRAMS_PER_MB', read('scripts/lib/carbon.js'));
     const typed = ['script.js', 'carbon-ai.js', 'ai-carbon-data.js'].concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`))
         .flatMap(f => literals(read(f)).flatMap(t => [...t.matchAll(/(\d+(?:\.\d+)?)\s*g CO₂e(?: per |\/)MB/g)].map(m => `${f}: ${m[1]}`)));
-    assert(/const \{ gramsPerMB \} = mks\.carbon;/.test(dispatch) && /\* gramsPerMB\b/.test(dispatch) && !/\d\.\d+ g CO₂e/.test(literals(dispatch).join(' '))
+    assert(/const carbon = window\.mks\.carbon;/.test(interactives) && /= carbon\.gramsPerMB;/.test(interactives)
         && figures.agrees(byId.get('web-carbon').value, build) && typed.every(t => figures.agrees(byId.get('web-carbon').value, t.split(': ')[1])),
-        `Ledger: every copy of the grams per MB is the ledger's ${byId.get('web-carbon').value}: the player weighs with the badge's (mks.carbon), the build's is ${build}, and a script that writes the figure writes it (${typed.join('; ') || 'none does'})`);
+        `Ledger: every copy of the grams per MB is the ledger's ${byId.get('web-carbon').value}: the receipt weighs with the badge's (mks.carbon), the build's is ${build}, and a script that writes the figure writes it (${typed.join('; ') || 'none does'})`);
 
-    // The borehole game's scoreboard draws the two rates as rows of ten.
+    // The borehole game's scoreboard draws the field records' rate as a row of ten.
     const rows = Array.from(docs['case-studies.html'].querySelectorAll('.strike-waffle[data-row]')).filter(w => /^\d+$/.test(w.getAttribute('data-row')));
     const drawn = rows.map(w => [w.getAttribute('data-row'), w.parentElement.querySelector('[data-claim]')]);
-    assert(drawn.length === 2 && drawn.every(([n, mark]) => mark && figures.agrees(byId.get(mark.getAttribute('data-claim')).value, `${n} in 10`)),
-        `Ledger: the borehole game's scoreboard draws the field records' rate and the illustrative one as the ledger has them (${drawn.map(([n, mark]) => `${n} → ${mark && mark.getAttribute('data-claim')}`).join(', ')})`);
-}
-
-// ===================================================================
-// The narration: every number it says, in words, is an entry's
-// ===================================================================
-{
-    const texts = [['intro', data.narration.intro ? data.narration.intro.text : '']].concat(data.narration.scripts.map(s => [s.id, s.text]));
-    const unbacked = [];
-    let backed = 0;
-    texts.forEach(([id, text]) => {
-        const lower = text.toLowerCase();
-        const spans = [];
-        CLAIMS.forEach(c => (c.spoken || []).forEach((s) => {
-            for (let i = lower.indexOf(s.toLowerCase()); i > -1; i = lower.indexOf(s.toLowerCase(), i + 1)) spans.push([i, i + s.length, c.id]);
-        }));
-        figures.wordRuns(text).concat(figures.sizeRuns(text)).forEach((run) => {
-            if (figures.spokenExempt(text, run)) return;
-            const span = spans.find(([a, b]) => a <= run.index && b >= run.end);
-            if (span) backed++;
-            else unbacked.push(`${id}: "${run.text}" in "…${text.slice(Math.max(0, run.index - 40), run.end + 40)}…"`);
-        });
-    });
-    unbacked.forEach(u => console.log(`  unbacked: ${u}`));
-    assert(unbacked.length === 0, `Narration: every number said aloud is a ledger entry's spoken form (${backed} said; ${unbacked.length} with no entry${unbacked.length ? ', listed above' : ''})`);
-
-    const unused = CLAIMS.flatMap(c => (c.spoken || []).filter(s => !narration.toLowerCase().includes(s.toLowerCase())).map(s => `${c.id}: "${s}"`));
-    assert(unused.length === 0, `Narration: every spoken form in the ledger is something the narration says (${unused.join('; ') || 'all are'})`);
+    assert(drawn.length === 1 && drawn.every(([n, mark]) => mark && figures.agrees(byId.get(mark.getAttribute('data-claim')).value, `${n} in 10`)),
+        `Ledger: the borehole game's scoreboard draws the field records' rate as the ledger has it (${drawn.map(([n, mark]) => `${n} → ${mark && mark.getAttribute('data-claim')}`).join(', ')})`);
 }
 
 // ===================================================================
@@ -723,8 +664,6 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
         });
         const actual = Array.from(MARKS.get(c.id) || []).sort();
         if (JSON.stringify(listed) !== JSON.stringify(actual)) wrongWhere.push(`${c.id}: says ${listed.join(', ') || 'nowhere'}, marked on ${actual.join(', ') || 'none'}`);
-        const spoken = /the narration/.test(li.querySelector('.cl-where').textContent);
-        if (spoken !== (c.spoken || []).some(s => narration.toLowerCase().includes(s.toLowerCase()))) wrongWhere.push(`${c.id}: the narration ${spoken ? 'named but silent' : 'says it, unnamed'}`);
 
         const checkable = content.checkabilityOf(c, data.projects);
         const chip = li.querySelector('.cl-check');
@@ -744,7 +683,8 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
         `claims.html: reads every field note's marks too, each named by its number (${NOTE_PAGES.map(p => named[p]).join(', ')})`);
 
     // "Not on this list" names what the scan lets by. The core log's depths
-    // and the flood game's steps were let by here and named nowhere there;
+    // (and, until they became stages, the flood game's steps in metres) were
+    // let by here and named nowhere there;
     // the open counts page was excused for its counts, not its rules.
     const notListed = doc.querySelector('.cl-not-listed').textContent.replace(/\s+/g, ' ');
     const unnamed = Object.values(figures.DRAWN).flat().filter(d => d.listed && !notListed.toLowerCase().includes(d.listed.toLowerCase())).map(d => d.sel)

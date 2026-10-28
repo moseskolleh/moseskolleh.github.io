@@ -72,21 +72,26 @@ const facts = (d) => Array.from(d.querySelectorAll('.glance-fact')).map(f => [te
 {
     const d = strip(profile);
     const line = text(d.querySelector('.hero-availability'));
-    assert(/^Open to /.test(line) && /sustainable-AI/.test(line) && /climate-risk/.test(line) && /ESG/.test(line),
-        `Today: the availability line names sustainable AI beside sustainability, climate risk and ESG ("${line}")`);
+    // A doctoral researcher on a scholarship: research collaborations, and
+    // no job search, no consulting (decided October 2026), no job market's
+    // "remote-friendly".
+    assert(/^Open to research collaborations\b/.test(line) && /flood risk/.test(line) && !/\broles?\b|consult|hiring|\bjobs?\b|remote-friendly/i.test(line),
+        `Today: the availability line offers research collaborations, flood risk among them, and seeks no job or consulting ("${line}")`);
     const shown = facts(d);
     assert(shown.length === 1 && shown[0][0] === 'Location', `Today: one fact, the location; the rest wait for Moses (${shown.map(f => f[0]).join(', ')})`);
-    assert(shown[0][1] === 'Amsterdam, NL',
+    const here = `${profile.person.locality}, ${profile.person.country}`;
+    assert(shown[0][1] === here,
         `Today: the location is person.locality and person.country, and only that ("${shown[0][1]}")`);
-    // Where he would work is a preference, said with what he is open to.
-    // Under "Location", "EU" read as where he is or may work, beside a
-    // right to work the strip does not state yet.
-    assert(line.endsWith(` — ${profile.atAGlance.workArea.join(', ')}`),
-        `Today: the work area follows the roles on the availability line, not the location ("${line}")`);
+    // Where he would work is a preference, said with what he is open to, if
+    // at all. Under "Location", "EU" read as where he is or may work,
+    // beside a right to work the strip does not state yet.
+    const area = profile.atAGlance.workArea;
+    assert(area && area.length ? line.endsWith(` — ${area.join(', ')}`) : !/—/.test(line),
+        `Today: a work area, if any, follows the roles on the availability line, not the location ("${line}")`);
     assert(!/TBC|TBD|to be confirmed|n\/a|\?/i.test(d.body.textContent), 'Today: no stand-in for a fact nobody has stated');
     // The value line ended "from the field to the boardroom": no case study
     // puts the work before a board (the most senior are a municipality and
-    // a ministry, as partners). The first view claims no such audience.
+    // a government body, as partners). The first view claims no such audience.
     const value = text(doc.querySelector('.hero-valueprop'));
     assert(!!value && !/board|C-suite|\bexecutive/i.test(value), `Today: the value line claims no boardroom the case studies do not show ("${value}")`);
 }
@@ -97,7 +102,7 @@ const facts = (d) => Array.from(d.querySelectorAll('.glance-fact')).map(f => [te
 {
     const none = strip(withGlance({ seniority: null, availableFrom: null, rightToWork: null, workArea: null }, { languages: null }));
     const shown = facts(none);
-    assert(shown.length === 1 && shown[0][1] === 'Amsterdam, NL', `Null: seniority, start date, languages and right to work leave no label behind (${shown.map(f => f.join(': ')).join(' | ')})`);
+    assert(shown.length === 1 && shown[0][1] === `${profile.person.locality}, ${profile.person.country}`, `Null: seniority, start date, languages and right to work leave no label behind (${shown.map(f => f.join(': ')).join(' | ')})`);
     assert(!/—/.test(text(none.querySelector('.hero-availability'))), 'Null: no work area, no dash left after the roles');
     assert(none.querySelectorAll('dt').length === none.querySelectorAll('dd').length, 'Null: every label has its value');
 
@@ -222,8 +227,7 @@ const facts = (d) => Array.from(d.querySelectorAll('.glance-fact')).map(f => [te
         /\.nav-link\.contact-btn:hover\s*\{[^}]*background: var\(--primary-green\)/.test(navCss),
         `Nav: Contact is an outline at rest, filled only on hover, so the hero's is the one filled button (${resting.map(r => r.trim().replace(/\s+/g, ' ')).join(' | ')})`);
     const bar = doc.querySelector('.nav-container');
-    assert(!!bar.querySelector(':scope > #themeToggle') && !!bar.querySelector(':scope > .nav-listen #listenBtn'),
-        'Nav: the theme switch and the one Listen control stay in the bar');
+    assert(!!bar.querySelector(':scope > #themeToggle'), 'Nav: the theme switch stays in the bar');
     const css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8');
     assert(!/@media \(max-width: 1279px\)/.test(css) && /@media \(max-width: 899px\) \{\s*\.nav-toggle \{\s*display: flex;/.test(css),
         'Nav: the menu button takes over below 900px, not 1280px: six links fit where twelve did not');

@@ -66,7 +66,7 @@ const SECTIONS = `
         <section id="one"><button type="button" data-analytics="cv-download-hero">CV</button><a href="#one" data-analytics="cv-download-nav">CV</a></section>
         <section id="two">
             <section id="inner">nested, not top-level</section>
-            <button type="button" data-analytics="listen"><svg><use href="#i-waveform"></use></svg><span>Listen</span></button>
+            <button type="button" data-analytics="theme"><svg><use href="#i-moon"></use></svg><span>Theme</span></button>
         </section>
         <div>no id</div>
         <section id="has space">an id the server would refuse</section>
@@ -247,13 +247,13 @@ function load(options = {}) {
     const p = load();
     p.click('[data-analytics="cv-download-hero"]');
     p.click('[data-analytics="cv-download-hero"]');
-    p.click('[data-analytics="listen"] use');
+    p.click('[data-analytics="theme"] use');
     p.window.mks.track('module-dossier');
     ['Bad Name', '', undefined, null, 42, 'x'.repeat(41), 'semi;colon'].forEach(n => p.window.mks.track(n));
-    p.window.mks.track('brief-high');
+    p.window.mks.track('receipt-open');
     p.leave();
     const f = p.payload().features || [];
-    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'listen', 'module-dossier', 'brief-high']),
+    assert(JSON.stringify(f) === JSON.stringify(['cv-download-hero', 'cv-download', 'theme', 'module-dossier', 'receipt-open']),
         `features: clicks on [data-analytics] (even on an icon inside one) and mks.track(), each once, in order (${f.join(', ')})`);
 
     // Every CV link has a name of its own, and a view that used any of them
@@ -268,7 +268,7 @@ function load(options = {}) {
     assert(JSON.stringify(t) === JSON.stringify(['cv-download-nav', 'cv-download', 'cv-download-hero']),
         `features: two CV links in one view send both names and "cv-download" once (${t.join(', ')})`);
     const none = load();
-    none.click('[data-analytics="listen"]');
+    none.click('[data-analytics="theme"]');
     none.leave();
     assert(!(none.payload().features || []).includes('cv-download'), 'features: a view with no CV link clicked does not carry "cv-download"');
     assert(!('trackEvent' in p.window), 'features: mks.track is the one name for it, with no window.trackEvent beside it');
@@ -411,8 +411,8 @@ function load(options = {}) {
 
 // --- What feeds it on the homepage -----------------------------------------
 // script.js runs before the deferred count.js, as it does in the browser. A
-// module fetched on demand, the Listen control and the player it fetches,
-// and the contact form being sent all land in the list.
+// module fetched on demand and the contact form being sent both land in
+// the list.
 {
     const calls = [];
     const dom = new JSDOM(INDEX, { runScripts: 'outside-only', pretendToBeVisual: true, url: SITE });
@@ -441,13 +441,7 @@ function load(options = {}) {
     const settled = (loading) => Promise.race([loading, new Promise((resolve) => setTimeout(resolve, 2000))]);
 
     const loaded = window.mks.load('terminal');
-    // The one Listen control in the nav fetches the player on its first
-    // press: its stylesheet, the scripts it reads, then the player.
-    const dispatchFiles = ['modules/dispatch.css', 'voice-scripts.js', 'modules/dispatch.js'];
-    const pending = serve(['modules/terminal.js']).then(() => settled(loaded)).then(() => {
-        window.document.getElementById('listenBtn').dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
-        return serve(dispatchFiles);
-    }).then(tick);
+    const pending = serve(['modules/terminal.js']).then(() => settled(loaded)).then(tick);
 
     const form = window.document.getElementById('contactForm');
     ['name', 'email', 'message'].forEach((id) => { window.document.getElementById(id).value = id === 'email' ? 'ada@example.com' : 'Ada'; });
@@ -460,8 +454,6 @@ function load(options = {}) {
         const features = count.length ? JSON.parse(count[0].opts.body).features : [];
         assert(served.includes('modules/terminal.js'), 'Homepage: mksLoad injects the module it was asked for');
         assert(features.includes('module-terminal'), `Homepage: a module fetched on demand is counted as module-<name> (${features.join(', ')})`);
-        assert(served.length === 1 + dispatchFiles.length && features.includes('listen') && features.includes('module-dispatch'),
-            `Homepage: pressing Listen counts the press and the player it fetches (${served.join(', ')})`);
         assert(features.includes('contact-form-submit'), 'Homepage: sending the contact form is counted');
         assert(features.includes('contact-hero'), 'Homepage: a [data-analytics] hook in the real page is counted');
         assert(count.length === 1, `Homepage: one count for the visit (${count.length})`);
@@ -514,13 +506,6 @@ function load(options = {}) {
     window.document.getElementById('ftInput').value = 'cv';
     window.document.querySelector('.ft-line').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
     assert(tracked.join() === 'cv-download-terminal,cv-download', `Hooks: the terminal's cv command counts as a CV download too (${tracked.join(', ') || 'nothing'})`);
-
-    // The Brief's grade is counted, so its label cannot say nothing is sent;
-    // what it can say is that the ad is not.
-    const tracksGrade = /track\(\s*'brief-'\s*\+/.test(read('brief.js'));
-    const label = new JSDOM(read('brief.html')).window.document.querySelector('.bf-privacy').textContent;
-    assert(tracksGrade && !/nothing sent/.test(label) && /the ad is never sent/.test(label),
-        `Hooks: the Brief's grade is counted, and its label says the ad is never sent, not that nothing is ("${label.trim()}")`);
 }
 
 // Every hook name in the markup must be one the counter will keep: a name it
@@ -529,25 +514,20 @@ function load(options = {}) {
 {
     const sources = fs.readdirSync(ROOT).filter(f => f.endsWith('.html'))
         .concat(fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`))
-        .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`), ['script.js', 'brief.js']);
+        .concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`), ['script.js']);
     const names = [];
     sources.forEach((rel) => {
         (read(rel).match(/data-analytics="([^"]+)"/g) || []).forEach((m) => names.push([rel, m.slice(16, -1)]));
+        // And a name a script tracks by itself, as a whole literal.
+        if (rel.endsWith('.js')) (read(rel).match(/\btrack\('([^']+)'\)/g) || []).forEach((m) => names.push([rel, m.slice(7, -2)]));
     });
-    // The Brief reports its grade as brief-<class>, one per grade it can
-    // give, and that it was run, or opened from a shared link, by name.
-    const classes = (read('brief.js').match(/const GRADE_CLASS = \{([^}]*)\}/) || ['', ''])[1];
-    (classes.match(/'([a-z0-9-]+)'/g) || []).forEach((m) => names.push(['brief.js', `brief-${m.slice(1, -1)}`]));
-    (read('brief.js').match(/\btrack\('([a-z0-9-]+)'\)/g) || []).forEach((m) => names.push(['brief.js', m.slice(7, -2)]));
     const literal = names.filter(([, n]) => !n.includes('${'));
     const distinct = new Set(literal.map(([, n]) => n));
     const bad = literal.filter(([, n]) => !/^[a-z0-9-]{1,40}$/.test(n));
     assert(distinct.size >= 23, `Hooks: at least the 23 data-analytics hooks the plan counted are found (${distinct.size} distinct names)`);
     assert(bad.length === 0, `Hooks: every name is one the counter keeps (${bad.map(b => b.join(': ')).join(', ') || 'all fine'})`);
-    // The one listen control in the nav, and the player's offer of Moses's
-    // own introduction, are features like any other.
-    assert(distinct.has('listen') && distinct.has('listen-intro') && ['brief-high', 'brief-workable', 'brief-marginal', 'brief-run', 'brief-shared'].every(n => distinct.has(n)),
-        `Hooks: the nav's Listen control, the player's introduction, the Brief's runs and its grades are among them (${[...distinct].filter(n => /^(listen|brief-)/.test(n)).join(', ')})`);
+    // The Brief, retired, has left no hook behind.
+    assert(![...distinct].some(n => /^brief-|-brief$/.test(n)), `Hooks: none is The Brief's, now it is retired (${[...distinct].filter(n => /brief/.test(n)).join(', ') || 'none'})`);
 }
 
 // A message sent from a browser that asks not to be tracked says so, and

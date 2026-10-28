@@ -1,4 +1,4 @@
-// Tests for the case studies, role lenses and research outputs.
+// Tests for the case studies, lenses and research outputs.
 //
 // The content model exists to stop a portfolio drifting back into unsupported
 // claims, so most of what follows checks the guards rather than the content:
@@ -133,7 +133,7 @@ const { projects, research, lenses } = data;
     const checkable = data.projects.caseStudies.flatMap(cs => cs.results.filter(r => r.verifiable).map(r => `${cs.id}: ${r.claim.slice(0, 30)}`));
     assert(!checkable.some(r => /^(?:coastal|water-management):/.test(r)), `Results: the coastal count and the Hunan defence are not called checkable while nothing says where (${checkable.join('; ')})`);
 
-    // A role view needs public work a reader can open beyond this site: a
+    // A lens needs public work a reader can open beyond this site: a
     // game on one of its pages is not enough, a repository is, and so is
     // an output placed in the view by its own `lenses`.
     const lens = [{ id: 'x' }];
@@ -149,6 +149,35 @@ const { projects, research, lenses } = data;
     assert(content.checkLensWork(lens, touching, { outputs: [{ ...repo, caseStudy: 'h' }] }).length === 1 &&
         content.checkLensWork([{ id: 'y' }], touching, { outputs: [] }).length === 0,
         'Guard: a repository counts for the view its case study leads, not for one the case study only touches');
+
+    // The doctorate under way is said only as what it sets out to do, dated,
+    // with its thesis planned; and the block goes with the degree.
+    const uni = 'A University';
+    const who = { meta: { verifiedOn: '2026-11-02' }, education: [{ degree: 'PhD in X', institution: uni, inProgress: true }, { degree: 'MSc', institution: 'B' }] };
+    const done = { ...who, education: [{ degree: 'PhD in X', institution: uni }] };
+    const thesis = { id: 't', title: 'A thesis', status: 'planned', venue: uni };
+    const now = { asOf: '2026-11', question: 'Q?', why: 'Why.', position: `A PhD at ${uni}.`, will: ['Do a thing.'], notYet: ['No results'], thesis: 't' };
+    const nowSays = (n, outs, p) => content.checkNow(n, outs, p).join(' ');
+    assert(nowSays(now, [thesis], who) === '' && nowSays(undefined, [], done) === '', 'Guard: accepts a dated block for a degree in progress with its thesis planned, and no block once none is');
+    [
+        ['no block while a degree is in progress', undefined, [thesis], who],
+        ['a block with no degree in progress', now, [thesis], done],
+        ['a block dated after the record', { ...now, asOf: '2026-12' }, [thesis], who],
+        ['a block dated by day, not month', { ...now, asOf: '2026-11-02' }, [thesis], who],
+        ['a block that claims nothing is missing', { ...now, notYet: [] }, [thesis], who],
+        ['a block with nothing it will do', { ...now, will: undefined }, [thesis], who],
+        ['a block with no question', { ...now, question: '' }, [thesis], who],
+        ['a block that does not say where the degree is', { ...now, position: 'A PhD somewhere.' }, [thesis], who],
+        ['a block whose thesis is not listed', now, [], who],
+        ['a thesis called public before it is written', now, [{ ...thesis, status: 'public', url: 'research.html' }], who],
+        ['a thesis at another institution', now, [{ ...thesis, venue: 'Elsewhere' }], who],
+        ['a thesis placed in a lens', now, [{ ...thesis, lenses: ['water'] }], who]
+    ].forEach(([label, n, outs, p]) => assert(nowSays(n, outs, p) !== '', `Guard: rejects ${label}`));
+
+    // An aside is folded after the rest: something a reader can open.
+    assert(content.checkAside('t', { status: 'public', aside: true }).length === 0 && content.checkAside('t', { status: 'public' }).length === 0 &&
+        content.checkAside('t', { status: 'on-request', aside: true }).length === 1 && content.checkAside('t', { status: 'public', aside: 'yes' }).length === 1,
+        'Guard: an aside is a public output, marked true or not at all');
 }
 
 // --- research outputs -----------------------------------------------------
@@ -502,8 +531,11 @@ function loadWith(name, change) {
     const items = doc.querySelectorAll('.rs-item');
     assert(items.length === research.outputs.length, `Research page: every output is rendered (${items.length}/${research.outputs.length})`);
 
-    // The reproduction notes are folded for the screen, not for paper.
-    const notes = doc.querySelector('.rs-repro details');
+    // The reproduction notes are folded for the screen, not for paper. Their
+    // frame also holds the doctorate under way and the asides, so they are
+    // found by their own paragraph.
+    const reproduce = doc.getElementById('reproduce');
+    const notes = reproduce && reproduce.closest('.rs-repro details');
     window.dispatchEvent(new window.Event('beforeprint'));
     const printed = notes.open;
     window.dispatchEvent(new window.Event('afterprint'));
@@ -522,23 +554,45 @@ function loadWith(name, change) {
     // Grouped by what a reader can do with each output, public first: by
     // type, eleven outputs took eight headings. Each group holds only its own.
     const groups = Array.from(doc.querySelectorAll('.rs-group'));
-    const order = content.STATUSES.filter(s => research.outputs.some(o => o.status === s));
+    const order = content.STATUSES.filter(s => research.outputs.some(o => o.status === s && !o.aside));
     const byId = Object.fromEntries(research.outputs.map(o => [o.id, o]));
     assert(groups.map(g => g.id).join() === order.map(s => `rs-${s}`).join() &&
-        groups.every(g => Array.from(g.querySelectorAll('.rs-item')).every(it => `rs-${byId[it.id].status}` === g.id)),
+        groups.every(g => Array.from(g.querySelectorAll('.rs-item')).every(it => `rs-${byId[it.id].status}` === g.id && !byId[it.id].aside)),
         `Research page: grouped by availability, public first (${groups.map(g => g.querySelector('h2').textContent.trim()).join(', ')})`);
 
+    // The theses and reports are not read after coursework and the site's
+    // own scripts: those are the asides, after every group, folded.
+    const asides = research.outputs.filter(o => o.aside).map(o => o.id);
+    const fold = doc.querySelector('#rs-aside > details:not([open])');
+    const inFold = fold ? Array.from(fold.querySelectorAll('.rs-item')).map(it => it.id) : [];
+    const lastGroup = groups[groups.length - 1];
+    assert(asides.length > 0 && !!fold && inFold.join() === asides.join() && !!fold.querySelector('summary') &&
+        !!(lastGroup.compareDocumentPosition(fold) & window.Node.DOCUMENT_POSITION_FOLLOWING),
+        `Research page: coursework and the site's own pages and scripts come after the theses and reports, folded (${inFold.join(', ')})`);
+    window.dispatchEvent(new window.Event('beforeprint'));
+    const foldPrinted = fold.open;
+    window.dispatchEvent(new window.Event('afterprint'));
+    assert(foldPrinted && !fold.open, 'Print: the asides open for paper and fold again after');
+
+    // The key names every availability the page shows, Planned with the rest.
+    const key = doc.querySelector('.rs-key').textContent;
+    const shown = content.STATUSES.filter(s => research.outputs.some(o => o.status === s));
+    const labels = { 'public': 'Public', 'on-request': 'On request', 'internal': 'Held by the client', 'planned': 'Planned' };
+    assert(shown.every(s => key.includes(`${labels[s]}:`)) && /Planned: intended, not yet done\./.test(key.replace(/\s+/g, ' ')),
+        `Research page: the key explains each availability shown (${shown.map(s => labels[s]).join(', ')})`);
+
     // Each output says where it sits, at the end of its note: its case
-    // study, or the role view of an output with none.
+    // study, the lens of an output with none, or, for the thesis of
+    // the doctorate under way, what it sets out to do at the top.
     const placed = research.outputs.filter((o) => {
         const link = doc.querySelector(`#${o.id} .rs-note a.rs-link`);
-        const want = o.caseStudy ? `case-studies.html#${o.caseStudy}` : (o.lenses ? `case-studies.html?lens=${o.lenses[0]}` : null);
+        const want = o.caseStudy ? `case-studies.html#${o.caseStudy}` : (o.lenses ? `case-studies.html?lens=${o.lenses[0]}` : (research.now && o.id === research.now.thesis ? '#phd' : null));
         return want ? !!link && link.getAttribute('href') === want : !link;
     });
-    assert(placed.length === research.outputs.length, `Research page: each output links its case study or role view, and only those (${placed.length}/${research.outputs.length})`);
+    assert(placed.length === research.outputs.length, `Research page: each output links its case study or lens, and only those (${placed.length}/${research.outputs.length})`);
 
     // How to reproduce it is a press away, not a screen of the page.
-    const repro = doc.querySelector('.rs-repro');
+    const repro = reproduce && reproduce.closest('.rs-repro');
     assert(!!repro && !!repro.querySelector('details:not([open]) > summary') && !!repro.querySelector('details .rs-commands dt') && !!repro.querySelector('h2'),
         'Research page: the reproduction notes and commands are folded under their heading');
 
@@ -552,6 +606,51 @@ function loadWith(name, change) {
     const intro = trigrams(doc.querySelector('.rs-intro p').textContent);
     const shared = [...lead].filter(t => intro.has(t)).length / (lead.size || 1);
     assert(shared < 0.25, `Research page: the intro does not repeat the hero lead (${Math.round(shared * 100)}% of its phrasing shared)`);
+
+    // The doctorate under way, first of all, at #phd: the homepage and the
+    // field report link there. Its question, why there, what the work will
+    // do, where it is and who co-funds it, the month it is written as of,
+    // and what it does not claim yet, each from research.json's now; the
+    // thesis is listed as planned and the hero says the doctorate is under way.
+    const now = research.now;
+    const block = doc.getElementById('phd');
+    const flat = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
+    const firstInMain = doc.querySelector('main > section');
+    const time = block && block.querySelector('time');
+    const not = block && Array.from(block.querySelectorAll('h3')).find(h => /does not claim yet/.test(h.textContent));
+    const notList = not && not.nextElementSibling;
+    assert(!!now && !!block && firstInMain === block && /^Now researching\b/.test(flat(block.querySelector('h2'))),
+        'Research page: the doctorate under way comes first, at #phd, under "Now researching"');
+    assert(!!time && block.querySelector('h2').contains(time) && time.getAttribute('datetime') === now.asOf &&
+        new RegExp(`As of ${flat(time)}`).test(flat(block)) && /^[A-Z][a-z]+ \d{4}$/.test(flat(time)),
+        `Research page: the block's heading says the month it is written as of (${flat(time)})`);
+    assert([now.question, now.why, now.position].concat(now.will).every(t => flat(block).includes(t)),
+        'Research page: the block prints its question, why there, where it is and who co-funds it, and every line of what the work will do');
+    assert(!!notList && notList.localName === 'ul' && now.notYet.every(t => Array.from(notList.children).some(li => flat(li) === t)),
+        `Research page: the block lists what it does not claim yet (${now.notYet.join('; ')})`);
+    const thesis = byId[now.thesis];
+    assert(!!thesis && thesis.status === 'planned' && !thesis.url && !thesis.lenses && !thesis.caseStudy &&
+        !!doc.querySelector(`#rs-planned #${thesis.id}`) && !/\d/.test(thesis.title),
+        'Research page: the thesis is listed as planned, with no link, no lens and no figure in its title');
+    assert(/\bdoctorate under way\b/.test(flat(doc.querySelector('.ca-hero p'))) && !/happily/.test(flat(doc.querySelector('.ca-hero p'))),
+        'Research page: the hero lead says a doctorate is under way, without the sales line');
+
+    // The homepage and the field report point at the block, each from words
+    // already there: the current journey stop, the doctorate's layer of the
+    // core log and its degree card, and the field report's entry for it.
+    const page = (file) => new JSDOM(fs.readFileSync(path.join(ROOT, file), 'utf8')).window.document;
+    const home = page('index.html');
+    const report = page('field-report.html');
+    const where = data.profile.education.find(e => e.inProgress).institution;
+    const linksHere = (el) => !!el && !!el.querySelector('a[href="research.html#phd"]');
+    const pointers = {
+        'the current journey stop': home.querySelector('.journey-stop:last-child .journey-card-current'),
+        'the core log\'s layer for the doctorate': Array.from(home.querySelectorAll('.corelog-item')).find(it => it.textContent.includes(where)),
+        'the degree card for it': Array.from(home.querySelectorAll('.education-card')).find(c => c.textContent.includes(where)),
+        'the field report\'s journey entry for it': Array.from(report.querySelectorAll('dd')).find(dd => dd.textContent.includes('PhD'))
+    };
+    const unlinked = Object.keys(pointers).filter(k => !linksHere(pointers[k]));
+    assert(unlinked.length === 0, `Research page: the homepage and the field report link the block at #phd (not linked: ${unlinked.join('; ') || 'none'})`);
 }
 
 // --- an address into a fold opens it -------------------------------------
@@ -582,7 +681,7 @@ function loadWith(name, change) {
 
 // --- generated files carry their warning ---------------------------------
 {
-    ['case-studies.html', 'research.html', 'sitemap.xml', 'voice-scripts.js'].forEach((file) => {
+    ['case-studies.html', 'research.html', 'sitemap.xml'].forEach((file) => {
         const src = fs.readFileSync(path.join(ROOT, file), 'utf8').slice(0, 900);
         assert(/GENERATED by scripts\/build-content\.js/.test(src), `${file}: says it is generated, near the top`);
     });

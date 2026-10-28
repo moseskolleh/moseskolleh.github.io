@@ -3,7 +3,7 @@
 // RUN TESTS — every suite in tests/, side by side
 //
 //     npm run test:unit                 every tests/*.test.js
-//     npm run test:unit -- narration    only the suites whose name matches
+//     npm run test:unit -- claims       only the suites whose name matches
 //
 // The suites used to run one after another from a list in package.json:
 // twelve of them, about 17 s, most of it spent waiting on one suite at a time

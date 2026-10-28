@@ -9,14 +9,16 @@
 //     front matter Jekyll (which GitHub Pages runs over every markdown
 //     file) would read another way, instead of refusing it with its line;
 //   · the validator lets through a note with no title, a date that is not
-//     a day or is still to come, a slug the visit counter cannot name, a
+//     a day or is still to come, an `updated` day before its date or still
+//     to come, a slug the visit counter cannot name, a
 //     tie to a case study or lens that does not exist, or a figure the
 //     claims ledger does not hold;
 //   · a note's page is not dated, has no permalink, tag, case study or
 //     Article, or does not link the feed;
 //   · feed.xml is not well-formed Atom, an id is not a tag URI fixed for
 //     good (a feed reader takes a changed id for a new entry, and the site's
-//     address is due to change), or `updated` is not the newest note's;
+//     address is due to change), or `updated` is not the day each note
+//     last changed (and, for the feed, the latest of those);
 //   · a JSON-LD block does not parse, or says anything content/ does not.
 //
 // Run with: node tests/notes.test.js
@@ -117,6 +119,10 @@ const SITE = profile.links.site;
     refuses('a placeholder title', { title: 'TBC' }, /no title/);
     refuses('a date that is not a day', { date: '2026-02-30' }, /must be a day/);
     refuses('a date still to come', { date: '2099-01-01' }, /still to come/);
+    refuses('an updated day that is not a day', { updated: '2026-13-01' }, /updated must be a day/);
+    refuses('an updated day still to come', { updated: '2099-01-01' }, /updated 2099-01-01 is still to come/);
+    refuses('an updated day before the note was published', { updated: '2026-01-01' }, /before its date/);
+    assert(content.checkNotes([one({ updated: undefined })], ctx).length === 0, 'Validator: a note never changed needs no updated day');
     refuses('a slug in capitals', { slug: 'What-164', file: 'What-164.md' }, /slug/);
     refuses('a slug the counter cannot name', { slug: 'a'.repeat(36), file: `${'a'.repeat(36)}.md` }, /at most 35 characters/);
     refuses('a file not named for its slug', { file: 'other.md' }, /named for its slug/);
@@ -200,9 +206,9 @@ series.forEach((n, i) => {
     assert(/<script src="\.\.\/theme\.js"><\/script>/.test(src) && /<script defer src="\.\.\/count\.js" data-page="note-[a-z0-9-]+"><\/script>/.test(src),
         `${rel}: the light theme before first paint, and the visit counter, deferred, under the note's own name`);
     const article = ldOf(doc).find(ld => ld['@type'] === 'Article');
-    assert(!!article && article.headline === n.title && article.datePublished === n.date && article.url === canonical &&
+    assert(!!article && article.headline === n.title && article.datePublished === n.date && article.dateModified === (n.updated || n.date) && article.url === canonical &&
         article.author && article.author.name === profile.person.name && article.description === n.summary,
-        `${rel}: an Article in its structured data, headline, date, author and address the page's`);
+        `${rel}: an Article in its structured data, headline, dates, author and address the page's`);
     // The older and the newer note, in the series' order.
     const prev = doc.querySelector('.nt-near a[rel="prev"]');
     const next = doc.querySelector('.nt-near a[rel="next"]');
@@ -241,9 +247,9 @@ series.forEach((n, i) => {
     assert(links.some(l => l.getAttribute('rel') === 'self' && l.getAttribute('href') === `${SITE}feed.xml`) &&
         links.some(l => l.getAttribute('rel') === 'alternate' && l.getAttribute('href') === SITE), 'Feed: links itself and the site');
     const updated = one(feed, 'updated');
-    const newest = notes.map(n => n.date).sort().pop();
+    const newest = notes.map(n => n.updated || n.date).sort().pop();
     assert(!!updated && updated.textContent === `${newest}T00:00:00Z` && RFC3339.test(updated.textContent),
-        `Feed: updated is the newest note's date, not the build's (${updated && updated.textContent})`);
+        `Feed: updated is the day a note last changed, the latest of them, not the build's (${updated && updated.textContent})`);
 
     const entries = kids(feed, 'entry');
     assert(entries.length === notes.length, `Feed: an entry for every note (${entries.length} of ${notes.length})`);
@@ -257,8 +263,8 @@ series.forEach((n, i) => {
             `Feed: entry ${i + 1} is "${n.slug}", newest first, and its id is a tag URI that does not carry the site's address`);
         assert(!!link && link.getAttribute('href') === `${SITE}notes/${n.slug}.html` && one(e, 'title') && text(one(e, 'title')) === n.title &&
             text(one(e, 'summary')) === n.summary && one(e, 'published') && one(e, 'published').textContent === `${n.date}T00:00:00Z` &&
-            one(e, 'updated') && RFC3339.test(one(e, 'updated').textContent),
-            `Feed: entry ${i + 1} links its page, with its title, its one line and its date`);
+            one(e, 'updated') && RFC3339.test(one(e, 'updated').textContent) && one(e, 'updated').textContent === `${n.updated || n.date}T00:00:00Z`,
+            `Feed: entry ${i + 1} links its page, with its title, its one line and its dates`);
         const body = one(e, 'content');
         const html = body && body.getAttribute('type') === 'html' ? new JSDOM(body.textContent).window.document : null;
         const hrefs = html ? Array.from(html.querySelectorAll('a[href]')).map(a => a.getAttribute('href')) : [];
@@ -338,7 +344,7 @@ series.forEach((n, i) => {
     const withLanguages = build.personLd(Object.assign({}, profile, { languages: [{ language: 'Dutch', level: 'B1' }] }));
     assert(JSON.stringify(withLanguages.knowsLanguage) === '[{"@type":"Language","name":"Dutch"}]', 'Structured data: and then it is written from them');
     // The X profile the plan names is not in profile.json's links, so it is not in sameAs.
-    assert(JSON.stringify(person.sameAs) === JSON.stringify([profile.links.github, profile.links.linkedin]), 'Structured data: sameAs is profile.json\'s links, and nothing it does not hold');
+    assert(JSON.stringify(person.sameAs) === JSON.stringify([profile.links.github, profile.links.linkedin, profile.links.orcid]), 'Structured data: sameAs is profile.json\'s links (GitHub, LinkedIn, ORCID), and nothing it does not hold');
 
     const coach = ldOf(new JSDOM(read('carbon-ai.html')).window.document).find(ld => ld['@type'] === 'SoftwareApplication');
     const edition = data.research.outputs.find(o => o.id === 'ecoprompt-web');
@@ -346,7 +352,7 @@ series.forEach((n, i) => {
     assert(!!coach && coach.name === edition.title && coach.description === edition.summary && coach.url === `${SITE}carbon-ai.html`,
         'Structured data: carbon-ai.html is a SoftwareApplication, this site\'s edition, as research.json names and describes it');
     assert(!!coach && coach.mentions && coach.mentions.codeRepository === maintained.url && !('sameAs' in coach) && !('isBasedOn' in coach),
-        'Structured data: it mentions the maintained tool by its repository, and claims to be neither it nor built on it');
+        'Structured data: it mentions the newer tool by its repository, and claims to be neither it nor built on it');
     const shell = read('carbon-ai.html');
     assert(shell.indexOf('<!-- JSON-LD -->') > -1 && shell.indexOf('<!-- JSON-LD -->') < shell.indexOf('application/ld+json') && shell.indexOf('application/ld+json') < shell.indexOf('<!-- /JSON-LD -->'),
         'Structured data: the coach\'s block sits between its markers, written by the build');

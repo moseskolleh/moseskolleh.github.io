@@ -4,9 +4,7 @@
 // The share helper, You Draw It and The Receipt: JavaScript that only
 // matters once someone scrolls to section 05 or opens the footer receipt.
 // You Draw It needs ai-carbon-data.js, which the loader fetches first. The
-// calculator and Anatomy of a Prompt that were here are on carbon-ai.html,
-// and the Assay that sat under the contact form grew into The Brief, a
-// page of its own (brief.html, brief.js).
+// calculator and Anatomy of a Prompt that were here are on carbon-ai.html.
 //
 // Loaded on demand by script.js (mks.load('interactives')), whose ON-DEMAND
 // MODULES section says when, and why it declares nothing at the top level.
@@ -104,7 +102,7 @@ window.mks.share = (() => {
         return [v, svg.appendChild(mk('line', { class: 'ydi-grid' })), svg.appendChild(t)];
     });
     const yTitle = svg.appendChild(mk('text', { class: 'ydi-axis-title', 'text-anchor': 'start' }));
-    yTitle.textContent = 'Wh / answer';
+    yTitle.textContent = 'Wh / 1k tokens';
 
     // x labels
     const xLabels = models.map((m, i) => {
@@ -122,7 +120,7 @@ window.mks.share = (() => {
     const knownLine = svg.appendChild(mk('polyline', { class: 'ydi-known-line' }));
     const knownDots = models.slice(0, KNOWN).map(() => svg.appendChild(mk('circle', { r: 4, class: 'ydi-known-dot' })));
 
-    // the illustrative straight-line guess + the published estimates (both
+    // the illustrative straight-line guess + the research estimates (both
     // revealed later, when the dots and the callout join them)
     const intuitLine = svg.appendChild(mk('polyline', { class: 'ydi-intuit-line' }));
     const realLine = svg.appendChild(mk('polyline', { class: 'ydi-real-line' }));
@@ -137,7 +135,7 @@ window.mks.share = (() => {
         guessLine.setAttribute('points', pts(guess).split(' ').slice(KNOWN - 1).join(' '));
         for (let i = KNOWN; i < n; i++) set(guessDots[i], { cx: xAt(i), cy: yAt(guess[i]) });
         const g = guess[cursor].toFixed(2);
-        set(hit, { 'aria-valuenow': g, 'aria-valuetext': `${models[cursor].short}: your guess ${g} Wh per answer` });
+        set(hit, { 'aria-valuenow': g, 'aria-valuetext': `${models[cursor].short}: your guess ${g} Wh per 1,000 tokens` });
     };
     // Pulse the first predict dot so people know the curve is grabbable.
     if (guessDots[KNOWN]) guessDots[KNOWN].classList.add('ydi-dot-pulse');
@@ -152,7 +150,7 @@ window.mks.share = (() => {
     const hit = svg.appendChild(mk('rect', { class: 'ydi-hit', fill: 'transparent', tabindex: 0, role: 'slider', 'aria-valuemin': 0, 'aria-valuemax': yMax,
         'aria-label': 'Draw your prediction: left/right arrows move between models, up/down arrows (or Page Up/Down, Home, End) raise or lower the guessed energy, Enter reveals the research estimates. The Reveal button and the data table below are equivalent.' }));
 
-    // The published estimates, and a third line: a straight-line guess that
+    // The research estimates, and a third line: a straight-line guess that
     // misses the reasoning spike, drawn, not sourced, so the legend and the
     // data table say illustrative.
     const drawReveal = () => {
@@ -269,7 +267,7 @@ window.mks.share = (() => {
         const reduce = !window.mks.motionOK();
         drawReveal();
         svg.classList.add('revealed');
-        // Draw the published estimates in, left to right.
+        // Draw the research estimates in, left to right.
         if (!reduce && realLine.getTotalLength) {
             const len = realLine.getTotalLength();
             realLine.style.strokeDasharray = String(len);
@@ -288,7 +286,7 @@ window.mks.share = (() => {
         if (next && document.activeElement === revealBtn) next.focus();
         revealBtn.hidden = true;
 
-        // Each figure is a published estimate with a range, good to an order
+        // Each figure is an adapted estimate with a range, good to an order
         // of magnitude. A guess inside the range is not wrong, and a gap
         // quoted to a decimal against the central value was false precision.
         const gWh = Math.max(guess[n - 1], 0);
@@ -297,13 +295,13 @@ window.mks.share = (() => {
         const [lo, hi] = models[n - 1].range, [tLo, tHi] = models[0].range;
         const factorFrontier = Math.round(rWh / tiny);
         const factors = `${Math.round(lo / tHi)}–${Math.round(hi / tLo).toLocaleString('en')}×`;
-        const est = `The published estimate is about ${rWh} Wh (${lo}–${hi} Wh)`;
+        const est = `The research estimate is about ${rWh} Wh (${lo}–${hi} Wh)`;
         let msg;
         if (gWh < 0.02) msg = `You put the biggest model near zero. ${est}: a dramatic underestimate of the frontier.`;
         else if (gWh < lo) msg = `You put the biggest model at ~${gWh.toFixed(2)} Wh. ${est}, so you underestimated the frontier, about ${Math.round(rWh / gWh)}× below its central figure.`;
         else if (gWh > hi) msg = `You had the frontier at ~${gWh.toFixed(2)} Wh. ${est}, so that is an overestimate.`;
         else msg = `You had the frontier at ~${gWh.toFixed(2)} Wh. ${est}: your guess is within that range.`;
-        msg += ` A 1B model answers for about ${tiny} Wh, so the frontier reasoning model uses roughly ${factorFrontier}× more for the same 1,000-token answer (${factors} across the ranges). That gap is what the tools people prompt with rarely show them.`;
+        msg += ` A 1B model answers for about ${tiny} Wh, so the frontier reasoning model uses roughly ${factorFrontier}× more for the same 1,000 tokens (${factors} across the ranges). That gap is what the tools people prompt with rarely show them.`;
         // Shape grade: did they capture the frontier spike, not just a magnitude?
         let guessPeak = KNOWN;
         for (let i = KNOWN + 1; i < n; i++) if (guess[i] > guess[guessPeak]) guessPeak = i;
@@ -343,7 +341,7 @@ window.mks.share = (() => {
         ctx.font = "600 19px 'Space Grotesk', system-ui, sans-serif";
         const shapeLines = wrapText(ctx, cardData.shape, cw);
         ctx.font = "400 16px 'Inter', system-ui, sans-serif";
-        const factorText = `By the published estimates, the frontier reasoning model uses about ${cardData.factor}× the energy per answer of a 1B model (${cardData.factors} across their ranges).`;
+        const factorText = `By the research estimates, the frontier reasoning model uses about ${cardData.factor}× the energy per 1,000 tokens of a 1B model (${cardData.factors} across their ranges).`;
         const factorLines = wrapText(ctx, factorText, cw);
         const headerH = 78;
         const H = headerH + 26 + shapeLines.length * 26 + 14 + factorLines.length * 23 + 66;
@@ -400,7 +398,7 @@ window.mks.share = (() => {
     // --- accessible, non-visual data table ---
     if (tableEl) {
         const rows = models.map(m => `<tr><td>${m.label}</td><td>${m.wh} Wh</td></tr>`).join('');
-        tableEl.innerHTML = `<table><caption>Estimated energy per 1,000-token answer by model: published estimates, to an order of magnitude, before data-centre overhead. The chart's straight-line guess is illustrative — from no source — so it is not listed here.</caption><thead><tr><th>Model</th><th>Wh per answer</th></tr></thead><tbody>${rows}</tbody></table>`;
+        tableEl.innerHTML = `<table><caption>Estimated energy per 1,000 tokens, split evenly between prompt and answer, by model: adapted from published estimates, to an order of magnitude, before data-centre overhead. The chart's straight-line guess is illustrative — from no source — so it is not listed here.</caption><thead><tr><th>Model</th><th>Wh per 1k tokens</th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 })();
 
@@ -476,7 +474,7 @@ window.mks.share = (() => {
         const stamp = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}  ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 
         const lines = [];
-        lines.push({ t: 'c', s: 'MKS · SUSTAINTHEWORLD', b: true });
+        lines.push({ t: 'c', s: 'MKS · moseskolleh.github.io', b: true });
         lines.push({ t: 'c', s: 'page-load carbon receipt' });
         lines.push({ t: 'c', s: stamp, dim: true });
         lines.push({ t: 'd' });

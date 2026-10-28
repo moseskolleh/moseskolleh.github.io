@@ -13,6 +13,16 @@ Written 2026-09-25 from four audits of `main` at `00bf4db`:
 Every number below was measured in those runs or read from the repo; the file or
 line is named where it helps. Nothing in this plan has been built yet.
 
+> **Since 2026-10-28.** Moses is no longer looking for a job. From November
+> 2026 he is a doctoral researcher at Scuola Universitaria Superiore IUSS
+> Pavia, and he has moved to Pavia; the Digital Society School role ended in
+> February 2026. The site now offers research collaborations only. This plan
+> was written for a job search from Amsterdam, and is kept as it was
+> written: The Brief (4.1) is retired, the narration (2.5 and 4.3) is
+> withdrawn, the "Present" role (3.10) is settled, and the Dutch pages (5.6)
+> are not planned; each of those steps carries a dated note. What is still
+> open is in the owner checklist, [owner-checklist.md](owner-checklist.md).
+
 ---
 
 ## Where the site stands
@@ -196,7 +206,8 @@ data.
    - CV downloads
    - lens-link visits that reach a case study
    - share of visits that reach Contact
-   - Brief uses (from Phase 4)
+   - Brief uses (from Phase 4; dropped on 2026-10-28, when The Brief was
+     retired, which leaves four)
 
    Collect **four weeks of baseline** before judging Phase 2.
 
@@ -237,6 +248,7 @@ green.
    - Today there are ten; they add 8+ Tab stops, and on a phone the open player
      covers about 45% of the screen.
    - Default to the browser voice (0 bytes). Phase 4 replaces the recorded tracks.
+   - **Withdrawn, 2026-10-28,** with 4.3: the site has no listen control.
 6. `BETTER` **The journey map on phones.**
    - It only follows the reader at ≥ 980 px, so phones never see it fly. Use a
      compact sticky map or a static route.
@@ -314,6 +326,10 @@ single primary action and shared shell are live.
    around September 2025. The core-log depths are now about a year out.
 10. `OWNER` **Re-verify the "Present" role.** The `SustainableAIPrototypes` repo that
     documents it was last updated in November 2025. Then bump `meta.verifiedOn`.
+    - **Settled, 2026-10-28.** The role ended in February 2026, and every page
+      says so. The open-ended role is now the PhD, from November 2026, and
+      `meta.verifiedOn` is 2026-11-02; Moses's own confirmation waits until the
+      PhD has begun (owner checklist F5).
 
 **Done when:** every lens has at least one public artifact, the claims-ledger test
 is green, and the CV is generated.
@@ -321,6 +337,14 @@ is green, and the CV is generated.
 ## Phase 4 — Signature features · 7 days
 
 ### 4.1 `NEW` The Brief (the Assay's successor) · 3 days
+
+> **Retired, 2026-10-28.** Moses is not looking for a job, so the site no
+> longer offers a recruiter a job-ad grader. Its links in the nav, the
+> footers, the play index and the contact section went, and so did its
+> script, rubric, generator, tests and sitemap entry; Brief uses left the
+> open counts. `brief.html` answers with a short note (`noindex`) pointing
+> to the homepage and the case studies, so links already sent, `?focus=`
+> and all, do not end in a 404. The step is kept below as it was planned.
 
 - A recruiter pastes a job ad. They get:
   - an **honest fit**: matched evidence *and* gaps (language, years, tools, right to
@@ -341,9 +365,10 @@ A yearly `report-2026.html`: **the portfolio reports its own climate impact the 
 Moses would write it for a client**. It is structured after ESRS E1 (climate
 change) disclosure logic; it is not an assured CSRD report, and it says so.
 
-- **Boundary and method:** what counts (network transfer of every visit) and what
-  doesn't (device energy, embodied hardware, the author's laptop). Uses the Sustainable
-  Web Design constant already used on the site (0.36 g CO₂e/MB), stated as such.
+- **Boundary and method:** what counts (the bytes every visit transfers) and what
+  doesn't (the author's laptop). Uses the Sustainable Web Design v3 constant already
+  used on the site (0.36 g CO₂e/MB), stated as such: it allocates data-centre, network
+  and end-user device energy per byte, so device energy is in it, not left out.
 - **Activity data, measured, not modelled:** the sum of *bytes actually transferred*
   per visit from the Phase 1 counter, by page. Cached repeat visits count as the
   near-zero they are.
@@ -359,6 +384,11 @@ This is the ESG proof no other portfolio has: a real, tiny reporting entity with
 real disclosure. Publish the first one after at least a quarter of Phase 1 data.
 
 ### 4.3 `NEW` His own voice · 1 day
+
+> **Withdrawn, 2026-10-28.** Moses decided the site should not speak at all. The
+> Listen control, its player, the browser voice, the narration scripts and the
+> Fish Audio pipeline were removed, and there is nothing to record. The step is
+> kept below as it was planned.
 
 - Replace the ten stock-voice section tracks with **one 60–90 second introduction
   recorded by Moses** (opening with "Kushe"), and keep the 0-byte browser voice for
@@ -419,6 +449,9 @@ real disclosure. Publish the first one after at least a quarter of Phase 1 data.
      `content/i18n/nl.json`, with `hreflang`.
    - `OWNER` has them reviewed by a native speaker, and they state his real Dutch
      level. It is an Amsterdam job market, and the ministry work is Dutch.
+   - **Not planned, 2026-10-28.** The step was for a job search in Amsterdam;
+     Moses has moved to Pavia and is not looking for work. Whether he wants a
+     second-language edition at all is owner checklist L4.
 7. `NEW` **Newsletter** by RSS-to-email (e.g. Buttondown). The subscribe form posts
    off-site the way the contact form does, and is allowlisted the same way.
 8. `NEW` **A distribution kit per note.** `npm run note:kit <slug>` writes the
@@ -506,8 +539,8 @@ axe, validation and the PR receipt run in CI.
 | When | What |
 |---|---|
 | Monthly | Publish one note; read `stats.html`; answer every contact within two days |
-| Quarterly | Re-verify profile facts (`verifiedOn`); refresh AI data; ratchet budgets down; review the five numbers against the baseline |
-| Yearly | Publish the sustainability statement; regenerate the CV; review the lenses against the roles he is going for |
+| Quarterly | Re-verify profile facts (`verifiedOn`); refresh AI data; ratchet budgets down; review the four numbers against the baseline |
+| Yearly | Publish the sustainability statement; regenerate the CV; review the lenses against the work he is open to |
 
 A scheduled Action opens a "Quarterly review" issue carrying this checklist
 (`.github/workflows/review.yml`; the checklist's words, item by item, are in
@@ -529,8 +562,11 @@ About 10 days that still change how the site lands:
 
 - **No new mini-games or widgets** until the homepage passes its length budget.
 - **No AI chatbot "ask my portfolio".** It contradicts the site's own argument about
-  the cost of generation; the Brief does the useful part with 0 bytes sent.
-- **No per-section recorded narration** after Phase 4.3.
+  the cost of generation.
+- **No job-ad grader or recruiter tools** (since 2026-10-28, when The Brief was
+  retired).
+- **No narration of any kind** (since 2026-10-28, when Phase 4.3 was withdrawn and
+  the Listen control, its player and the Fish Audio pipeline were removed).
 - **No numbers typed straight into `index.html`.** They go through the claims ledger.
 - **No raising a budget ceiling** without removing something of equal weight.
 
@@ -539,13 +575,15 @@ About 10 days that still change how the site lands:
 | Needed for | Input |
 |---|---|
 | Phase 0.9 | Live contact-form check: Script Properties set, Apps Script redeployed, one real message |
-| Phase 2.1 | Target roles and seniority, available-from date, languages and Dutch level, right to work |
+| Phase 2.1 | What he is open to (research collaborations since 2026-10-28; consulting only once IUSS's rules allow it) and his languages with their levels; seniority, start date and right to work only if he looks for work again |
 | Phase 3.5 | Two or three testimonials with permission |
-| Phase 3.10 | Is the Digital Society School role still current? |
-| Phase 4.3 | A clean 60–90 s voice recording |
+| Phase 3.10 | Settled on 2026-10-28: the role ended in February 2026. Now, his confirmation of the record once the PhD has begun |
+| Phase 4.1 | Nothing now: The Brief was retired on 2026-10-28 |
+| Phase 4.3 | Nothing now: the step was withdrawn on 2026-10-28 |
 | Phase 5.2 | One note a month |
 | Phase 5.5 | Domain purchase; a decision on the `moseskolleh.github.io` template site |
-| Phase 5.6 | A native-speaker review of the Dutch pages |
+| Phase 5.6 | Nothing, unless he wants a second-language edition |
+| The PhD update | A merge on or after 2026-11-02; the PhD's wording approved; IUSS's rules on outside work; consent for the photos of other people and for naming the partner (owner checklist, U1 to U12 and D2) |
 
 ## How to know it worked
 
@@ -1182,7 +1220,10 @@ CV, the ministry's name, the certificates, the testimonials) and F5.
     `meta.confirmedOn`, null until he sets it, and only then does the CV say
     the facts were confirmed; bumping `meta.verifiedOn` redraws the core log
     (the narration says "as last logged", not "today"), so `npm run cv`
-    follows either.
+    follows either. Settled on 2026-10-28: the role ended in February 2026,
+    the PhD at IUSS Pavia is the open-ended role from November 2026,
+    `meta.verifiedOn` is 2026-11-02, and the narration is gone; F5 now asks
+    Moses to confirm the record once the PhD has begun.
 
 **Phase 4 — wave 5: step 1.** Step 4.2 waits on a quarter of counts, which
 have not begun (S1, S2); 4.3 is as wave 1 left it; 4.4 is not started.
@@ -1404,7 +1445,7 @@ and 6 wait on Moses (L2, L4); 7 and 8 are not started.
    `smoke.js --lengths-only` in the pinned Chromium), and
    `scripts/receipt.js` writes one comment, edited on each push: every
    budget's bytes and how they moved, the CO₂e of each page's first view at
-   0.36 g/MB (network transfer only), each page's length at both sizes, and
+   0.36 g/MB (Sustainable Web Design v3, per byte transferred), each page's length at both sizes, and
    anything over its ceiling first; from a fork it goes to the job summary
    instead. Each side's ceilings are its own: measuring another checkout,
    `check-budget.js --json --root` reads them from that checkout's copy of

@@ -126,22 +126,26 @@ const webpSize = (rel) => {
         const active = () => { const a = doc.querySelector('.journey-stop.map-active'); return a ? a.getAttribute('data-stop') : null; };
         const readout = () => doc.getElementById('journeyMapReadout').textContent;
         // Bonn's name just under the band, Wageningen arriving below it.
-        stack([-700, -376, 251, 575, 899]);
+        stack([-700, -376, 251, 575, 899, 1223]);
         io.cb([]);
         assert(active() === '2' && /Bonn$/.test(readout()), `Map: it shows the first stop whose name is below the band, not the next one arriving (${active()})`);
         // Bonn's name gone under the band, Wageningen's on screen below it:
         // by a reading line 30% down, still inside Bonn, Bonn stayed shown.
-        stack([-900, -576, 200, 524, 848]);
+        stack([-900, -576, 200, 524, 848, 1172]);
         io.cb([]);
         assert(active() === '3', `Map: once a stop's name is under the band, the next stop, its name on screen, is the one shown (${active()})`);
         // Bonn's name under the band, Wageningen's not yet on screen.
-        stack([-900, -576, 200, vh + 40, vh + 364]);
+        stack([-900, -576, 200, vh + 40, vh + 364, vh + 688]);
         io.cb([]);
         assert(active() === '2', `Map: until the next name is on screen, the stop just passed stays (${active()})`);
         // Past the last name.
-        stack([-1900, -1576, -1252, -928, -100]);
+        stack([-2224, -1900, -1576, -1252, -928, -100]);
         io.cb([]);
-        assert(active() === '4', `Map: past the last stop's name, the last stop stays (${active()})`);
+        assert(active() === '5' && /Pavia$/.test(readout()), `Map: past the last stop's name, the last stop stays (${active()})`);
+        // Back up to Amsterdam, the delta's last stop, its name just under the band.
+        stack([-1900, -1576, -1252, -928, 251, 575]);
+        io.cb([]);
+        assert(active() === '4' && /Amsterdam$/.test(readout()), `Map: scrolled back, the stop whose name is below the band is shown again (${active()})`);
 
         const scaleOf = () => parseFloat((svg.style.transform.match(/scale\(([\d.]+)\)/) || [])[1]);
         const unit = () => scaleOf() * frame.w / 1000;
@@ -153,14 +157,14 @@ const webpSize = (rel) => {
         assert(names().every(t => t.hasAttribute('x') && t.hasAttribute('y')) && !/<text[^>]+\sx=/.test(svgMarkup),
             'Map: the file carries no label positions, and the script places every name before the map is shown');
 
-        stack([251, 575, 899, 1223, 1547]);
+        stack([251, 575, 899, 1223, 1547, 1871]);
         io.cb([]);
         assert(active() === '0' && Math.abs(scaleOf() - 2.4) < 0.01, `Map: far from the delta the band keeps the plain zoom, and its context (stop ${active()}, scale ${scaleOf()})`);
         assert(sizes().every(px => px >= 10.99), `Map: Freetown's name too is 11px or more on a phone (${sizes().map(px => px.toFixed(1)).join(', ')})`);
         assert(!mapBox.classList.contains('map-still'), 'Map: with motion allowed, it flies');
 
         doc.body.classList.add('eco-mode');
-        stack([-700, -376, 251, 575, 899]);
+        stack([-700, -376, 251, 575, 899, 1223]);
         io.cb([]);
         assert(active() === '2' && mapBox.classList.contains('map-still'), 'Map: in low-energy mode it jumps to the next stop instead of flying');
         doc.body.classList.remove('eco-mode');
@@ -176,7 +180,7 @@ const webpSize = (rel) => {
         const deskLine = window.innerHeight * 0.45;
         assert(!!io && Math.abs(-parseFloat(io.opts.rootMargin) - (deskLine - 24)) <= 1,
             `Map: beside the stops, the reading line is 45% down the screen (strip from ${io && io.opts.rootMargin})`);
-        stack([-700, -376, deskLine - 100, 800, 1100]);
+        stack([-700, -376, deskLine - 100, 800, 1100, 1400]);
         io.cb([]);
         assert(active() === '2' && Math.abs(scaleOf() - 5) < 0.01, `Map: a desktop column keeps the zoom it was tuned at (scale ${scaleOf()})`);
         await wait(20);
@@ -187,8 +191,8 @@ const webpSize = (rel) => {
     {
         const gen = read('scripts/generate-journey-map.js');
         const svg = read('assets/journey-map.svg');
-        assert(/wuppertal:\s*{ dx: -22/.test(gen) && /data-cx="280.7" data-cy="86.4" data-dx="-22"/.test(svg),
-            'Map: Wuppertal\'s name starts clear of the Bonn-Wageningen leg, in the script and the file it writes');
+        assert(/wuppertal:\s*{ dx: -32/.test(gen) && /data-cx="280.7" data-cy="86.4" data-dx="-32"/.test(svg),
+            'Map: Wuppertal\'s name ends clear of the Bonn-Wageningen leg and the Amsterdam-Pavia one, in the script and the file it writes');
         assert(/changsha:\s*{ dx: 0,\s+dy: 26,\s+anchor: 'middle' }/.test(gen), 'Map: Changsha\'s name sits under it, inside a 320px phone\'s band');
         assert(/\.map-stop-label \{[^}]*stroke-width: 0\.3em/.test(read('style.css')), 'Map: a name\'s halo is sized in ems, not map units that zoom to 15px of black');
     }

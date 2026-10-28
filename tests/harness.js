@@ -1,6 +1,6 @@
 // Shared JSDOM harness for the site tests.
 //
-// Boots index.html with voice-scripts.js and script.js evaluated in page
+// Boots index.html with ai-carbon-data.js and script.js evaluated in page
 // order, stubs the handful of APIs jsdom does not implement, and collects
 // anything that threw so a test can assert on it.
 //
@@ -24,7 +24,6 @@ const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 // does.
 const themeJs = (html.match(/<script>([^<]*\bmks\.theme\(\))<\/script>/) || [])[1] || '';
 const js = fs.readFileSync(path.join(ROOT, 'script.js'), 'utf8');
-const voiceJs = fs.readFileSync(path.join(ROOT, 'voice-scripts.js'), 'utf8');
 const dataJs = fs.readFileSync(path.join(ROOT, 'ai-carbon-data.js'), 'utf8');
 
 // The on-demand modules script.js fetches in the browser. Here they are
@@ -35,8 +34,7 @@ const dataJs = fs.readFileSync(path.join(ROOT, 'ai-carbon-data.js'), 'utf8');
 // case-studies.html loads it, and tests/widgets.test.js boots that page.)
 const MODULE_FILES = [
     'modules/terminal.js',
-    'modules/interactives.js',
-    'modules/dispatch.js'
+    'modules/interactives.js'
 ];
 const moduleJs = MODULE_FILES.map((rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8'));
 
@@ -45,10 +43,9 @@ const moduleJs = MODULE_FILES.map((rel) => fs.readFileSync(path.join(ROOT, rel),
  *                        (null or undefined: nothing stored)
  * @param {object} options
  *   storage: 'ok' | 'blocked'   how window.localStorage/sessionStorage behave
- *   speech:  'none' | undefined  remove the speech synthesis API entirely
  *   before:  function(window)     runs after the stubs, before any site
- *                                 script — for installing fakes (a speech
- *                                 engine, a slow fetch) the scripts will see
+ *                                 script — for installing fakes (a slow
+ *                                 fetch) the scripts will see
  *   clock:   true                 the window's timers run on a fake clock
  *                                 that only moves when the test calls
  *                                 `await clock.tick(ms)` (see fakeClock)
@@ -103,11 +100,6 @@ function run(theme, options) {
         });
     }
 
-    if (opts.speech === 'none') {
-        delete window.speechSynthesis;
-        delete window.SpeechSynthesisUtterance;
-    }
-
     // What index.html's <head> does before any of it: mark the page html.js.
     // Without the mark, script.js sees a late start (the failsafe took the
     // mark off), which a test asks for with `before` removing it.
@@ -116,11 +108,10 @@ function run(theme, options) {
     if (typeof opts.before === 'function') opts.before(window);
 
     // Execute the site scripts in the window context, in the order the
-    // browser would: the theme from <head>, the two data files a
-    // module depends on, the core, then the modules the core would have
-    // fetched on demand.
+    // browser would: the theme from <head>, the data file a module
+    // depends on, the core, then the modules the core would have fetched
+    // on demand.
     window.eval(themeJs);
-    window.eval(voiceJs);
     window.eval(dataJs);
     window.eval(js);
     moduleJs.forEach((src) => window.eval(src));
@@ -134,7 +125,7 @@ function run(theme, options) {
  * A clock for the window's timers that only moves when the test says so.
  *
  * The suites that exercise timing (a copy button restoring its icon after
- * 1.7 s, a player waiting on a slow manifest) used to sleep for real, which
+ * 1.7 s, a module waiting on a slow fetch) used to sleep for real, which
  * made them the slowest thing in `npm test` and left the outcome to the
  * machine's load. Here setTimeout, setInterval and requestAnimationFrame
  * queue their callbacks, and `await clock.tick(ms)` runs every one that falls
@@ -191,4 +182,4 @@ function fakeClock(window, errors) {
     return { tick, now: () => now, pending: () => timers.size };
 }
 
-module.exports = { run, ROOT, html, js, voiceJs, themeJs, MODULE_FILES };
+module.exports = { run, ROOT, html, js, themeJs, MODULE_FILES };

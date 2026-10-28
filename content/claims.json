@@ -16,8 +16,7 @@
     "section number, a standard's name, \"one\", a count of what the page",
     "shows in full and the like, a size said in words (\"a fifth\", \"twice\")",
     "that nothing holds, a figure a script prints of its own (the field",
-    "terminal, The Brief, the receipt, the coach's tips) that is not here, and",
-    "a number the narration says aloud that no entry backs.",
+    "terminal, the receipt, the coach's tips) that is not here.",
     "",
     "FIELDS (scripts/lib/content.js refuses anything else)",
     "",
@@ -28,14 +27,12 @@
     "forms      optional; other ways the generated pages write it (\"~258\",",
     "           or in words with what it counts: \"team of six\"); a form in",
     "           words is marked on its number alone",
-    "spoken     optional; how the narration says it, in words, with what",
-    "           follows (\"a hundred and sixty-four water points\")",
     "basis      exactly one of",
     "             result        a case study's id: one of its results states",
     "                           the figure, and its basis and checkability",
     "                           are this entry's (not repeated here)",
     "             profile       a path, or paths, in content/profile.json",
-    "                           (\"experience.4.teamSize\"); a note when the",
+    "                           (\"experience.5.teamSize\"); a note when the",
     "                           figure is counted from it rather than read",
     "             factor        a path in ai-carbon-data.js: a calculator's",
     "                           input, with its cited source; `count: true`",
@@ -68,62 +65,49 @@
     {
       "id": "water-points",
       "value": "164",
-      "unit": "water points delivered across Sierra Leone",
-      "basis": { "result": "groundwater" },
-      "spoken": ["a hundred and sixty-four water points"]
+      "unit": "water points delivered across Sierra Leone by the drilling projects I worked on",
+      "basis": { "derived": "The sum of the entries below: the wells and boreholes delivered on the projects of my drilling jobs, as I record them.", "from": ["wells-rehabilitated", "boreholes-constructed", "solar-boreholes"] },
+      "checkable": "not-checkable"
     },
     {
       "id": "wells-rehabilitated",
       "value": "100",
-      "unit": "hand-dug wells rehabilitated: part of those water points",
-      "basis": { "result": "groundwater" }
+      "unit": "hand-dug wells rehabilitated by the team I supervised at Sierra Drilling and Water Supply Enterprise: part of those water points",
+      "basis": { "profile": "experience.5.wellsRehabilitated", "note": "As I record it; the employer's completion records are not public." },
+      "checkable": "not-checkable"
     },
     {
       "id": "boreholes-constructed",
       "value": "50",
-      "unit": "boreholes constructed: part of those water points",
-      "basis": { "result": "groundwater" }
+      "unit": "boreholes constructed by the same team: part of those water points",
+      "basis": { "profile": "experience.5.boreholesConstructed", "note": "As I record it; the employer's completion records are not public." },
+      "checkable": "not-checkable"
     },
     {
       "id": "solar-boreholes",
       "value": "14",
-      "unit": "solar-powered boreholes with storage tanks: the rest of them",
-      "basis": { "result": "groundwater" }
+      "unit": "solar-powered boreholes with storage tanks completed in the Team & Team International fieldwork: the rest of them",
+      "basis": { "profile": "experience.4.solarBoreholes", "note": "As I record it; the employer's completion records are not public." },
+      "checkable": "not-checkable"
     },
     {
       "id": "strike-rate",
       "value": "70%",
-      "unit": "aquifer strike rate on the boreholes sited with the resistivity survey",
-      "forms": ["7/10", "7 times out of 10"],
-      "basis": { "result": "groundwater" },
-      "spoken": ["seventy percent", "seventy per cent", "seven holes in ten", "seven times out of ten"]
-    },
-    {
-      "id": "blind-siting",
-      "value": "30%",
-      "unit": "strike rate for blind siting in the same geology: the comparison the borehole game draws",
-      "basis": { "illustrative": "No source for this baseline is recorded. It stays because the comparison is the point of the game, and wherever it is shown it is labelled illustrative." },
-      "checkable": "not-checkable"
+      "unit": "success rate of the later drilling at sites selected by resistivity survey: boreholes that struck water, of those drilled",
+      "forms": ["7/10"],
+      "basis": { "result": "groundwater" }
     },
     {
       "id": "sub-basins",
       "value": "10,226",
-      "unit": "river sub-basins modelled with the MARINA-Multi model",
-      "basis": { "result": "coastal" },
-      "spoken": ["ten thousand two hundred and twenty-six sub-basins", "more than ten thousand sub-basins"]
+      "unit": "river sub-basins worldwide in the domain of the MARINA-Multi model, the Water Systems & Global Change group's, whose output the thesis analysed",
+      "basis": { "result": "coastal" }
     },
     {
       "id": "hazard-systems",
       "value": "54",
       "unit": "global hazard information systems documented for UNDRR",
       "forms": ["54 hazard systems"],
-      "basis": { "result": "un-disaster" },
-      "spoken": ["fifty-four hazard systems", "fifty-four hazard information systems", "fifty-four global hazard information systems"]
-    },
-    {
-      "id": "coverage-gain",
-      "value": "25%",
-      "unit": "more regional and hazard-type coverage in UNDRR's catalogue of those systems",
       "basis": { "result": "un-disaster" }
     },
     {
@@ -137,44 +121,41 @@
       "value": "2",
       "unit": "master's degrees: Environmental Sciences at Wageningen and Industrial Engineering at Hunan",
       "basis": { "profile": "education", "note": "The MSc entries in the education record. The degree certificates are the evidence." },
-      "checkable": "on-request",
-      "spoken": ["two master's degrees"]
+      "checkable": "on-request"
     },
     {
       "id": "continents",
       "value": "3",
       "unit": "continents studied and worked on: Africa, Asia and Europe",
-      "basis": { "profile": ["education", "experience"], "note": "Sierra Leone for the BSc and the drilling work, China for the MSc at Hunan, and the Netherlands and Germany for the MSc at Wageningen, UNDRR in Bonn and the Digital Society School. The degree certificates are the evidence." },
-      "checkable": "on-request",
-      "spoken": ["three continents"]
+      "basis": { "profile": ["education", "experience"], "note": "Sierra Leone for the BSc and the drilling work, China for the MSc at Hunan, the Netherlands and Germany for the MSc at Wageningen, UNDRR in Bonn and the Digital Society School, and Italy for the PhD at IUSS Pavia. The degree certificates and the PhD enrolment are the evidence." },
+      "checkable": "on-request"
     },
     {
       "id": "countries",
-      "value": "4",
-      "unit": "countries studied and worked in: Sierra Leone, China, Germany and the Netherlands",
-      "basis": { "profile": ["education", "experience"], "note": "The places of the degrees and roles in the record, as the journey on the homepage follows them. The degree certificates are the evidence for Sierra Leone, China and the Netherlands; for Germany, the UNDRR internship, as I record it." },
-      "checkable": "on-request",
-      "spoken": ["four countries"]
+      "value": "5",
+      "unit": "countries studied and worked in: Sierra Leone, China, Germany, the Netherlands and Italy",
+      "basis": { "profile": ["education", "experience"], "note": "The places of the degrees and roles in the record, as the journey on the homepage follows them. The degree certificates are the evidence for Sierra Leone, China and the Netherlands; for Germany, the UNDRR internship, as I record it; for Italy, the PhD enrolment at IUSS Pavia." },
+      "checkable": "on-request"
     },
     {
       "id": "wur-grade",
       "value": "7.8/10",
-      "unit": "grade for the MSc in Environmental Sciences at Wageningen, on the Dutch scale",
-      "basis": { "profile": "education.0.grade", "note": "The transcript is the evidence." },
+      "unit": "average grade for the MSc in Environmental Sciences at Wageningen, on the Dutch scale",
+      "basis": { "profile": "education.1.grade", "note": "The transcript is the evidence." },
       "checkable": "on-request"
     },
     {
       "id": "team-size",
       "value": "23",
       "unit": "people in the drilling team managed at Sierra Drilling and Water Supply Enterprise",
-      "basis": { "profile": "experience.4.teamSize", "note": "As I record it; the employer's records are not public." },
+      "basis": { "profile": "experience.5.teamSize", "note": "As I record it; the employer's records are not public." },
       "checkable": "not-checkable"
     },
     {
       "id": "programme-weeks",
       "value": "8",
       "unit": "weeks: the length of the OnePointFive sustainability consulting accelerator",
-      "basis": { "profile": "experience.1.programmeWeeks", "note": "As I record it; no outside record of it is linked yet." },
+      "basis": { "profile": "experience.2.programmeWeeks", "note": "As I record it; no outside record of it is linked yet." },
       "checkable": "not-checkable"
     },
     {
@@ -182,7 +163,7 @@
       "value": "6",
       "unit": "people in the interdisciplinary team of the Wuppertal flood-resilience consultancy",
       "forms": ["six-person", "team of six"],
-      "basis": { "profile": "education.0.consultancyTeamSize", "note": "As I record it; the consultancy report is the client's." },
+      "basis": { "profile": "education.1.consultancyTeamSize", "note": "As I record it; the consultancy report is the client's." },
       "checkable": "not-checkable"
     },
     {
@@ -190,7 +171,7 @@
       "value": "5",
       "unit": "months with UNDRR in Bonn: the internship, June to October",
       "forms": ["five months"],
-      "basis": { "profile": "experience.2", "note": "Counted from the internship's dates as I record them; UNDRR holds its own record." },
+      "basis": { "profile": "experience.3", "note": "Counted from the internship's dates as I record them; UNDRR holds its own record." },
       "checkable": "not-checkable"
     },
     {
@@ -208,9 +189,9 @@
     },
     {
       "id": "first-view",
-      "value": "259",
+      "value": "257",
       "unit": "KB over the wire: the homepage's first view on a desktop, fonts included",
-      "forms": ["~259"],
+      "forms": ["~257"],
       "basis": { "budget": "criticalWire", "note": "The build fails if the homepage outgrows its ceiling or a page quotes another figure, and a real browser checks the estimate in CI." },
       "checkable": "public",
       "check": "https://github.com/moseskolleh/moseskolleh.github.io#performance"
@@ -226,7 +207,7 @@
     {
       "id": "field-report-carbon",
       "value": "0.004",
-      "unit": "g CO₂e to send the field report, at the Sustainable Web Design figure",
+      "unit": "g CO₂e for the field report's size as saved, at the Sustainable Web Design figure (a visit transfers less: the page is sent compressed)",
       "basis": { "derived": "The field report's size in MB times the grams of CO₂e per MB below, rounded to the nearest thousandth of a gram.", "from": ["field-report-kb", "web-carbon"] },
       "checkable": "public",
       "check": "field-report.html"
@@ -246,8 +227,8 @@
     {
       "id": "web-carbon",
       "value": "0.36",
-      "unit": "g CO₂e per MB transferred: the figure the footer's badge, its receipt and the narration player use",
-      "basis": { "factor": "TRANSFER.gramsPerMB.value", "url": "https://sustainablewebdesign.org/estimating-digital-emissions/" },
+      "unit": "g CO₂e per MB transferred: the figure the footer's badge and its receipt use",
+      "basis": { "factor": "TRANSFER.gramsPerMB.value", "url": "https://sustainablewebdesign.org/estimating-digital-emissions/", "note": "Model v3, which allocates the energy of data centres, networks and end-user devices per byte; the page linked now documents v4, whose figures differ." },
       "checkable": "public",
       "check": "https://sustainablewebdesign.org/estimating-digital-emissions/"
     },
@@ -255,7 +236,7 @@
       "id": "median-page",
       "value": "2.5",
       "unit": "MB: what the median web page ships, the footer's point of comparison",
-      "basis": { "source": "HTTP Archive, page weight report", "url": "https://httparchive.org/reports/page-weight" },
+      "basis": { "source": "HTTP Archive, page weight report", "url": "https://httparchive.org/reports/page-weight", "note": "The month and device it was read for are not recorded, and the median moves from month to month." },
       "checkable": "public",
       "check": "https://httparchive.org/reports/page-weight"
     },
@@ -263,23 +244,23 @@
       "id": "gaia-modelled",
       "value": "117",
       "unit": "of the current models in GAIA's database whose figures are modelled, not measured",
-      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md" },
+      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md" },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md"
+      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md"
     },
     {
       "id": "gaia-models",
       "value": "119",
       "unit": "current models in GAIA's database",
-      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md" },
+      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md" },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md"
+      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md"
     },
     {
       "id": "answer-tokens",
       "value": "1,000",
-      "unit": "tokens in the answer the homepage chart prices each model at",
-      "basis": { "factor": "MODELS", "note": "Each model's published energy is per 1k tokens, adapted from Jegham et al. (2025); the chart quotes it as it is." },
+      "unit": "tokens, split evenly between prompt and answer, at which the homepage chart prices each model",
+      "basis": { "factor": "MODELS", "note": "Each model's energy per 1k tokens is adapted from the estimates of Jegham et al. (2025), at an even mix of input and output; the chart quotes it as it is." },
       "checkable": "public",
       "check": "carbon-ai.html#evidence"
     },
@@ -302,8 +283,8 @@
     {
       "id": "reference-mix",
       "value": "50/50",
-      "unit": "split of input and output tokens at which the calculator reproduces the published per-1k-token figures",
-      "basis": { "factor": "TOKEN_ENERGY.referenceMix", "own": "A calibration convention, not a measurement: the mix at which the calculator gives back the published per-1k figures unchanged." },
+      "unit": "split of input and output tokens at which the calculator reproduces the per-1k-token figures adapted from the benchmarks",
+      "basis": { "factor": "TOKEN_ENERGY.referenceMix", "own": "A calibration convention, not a measurement: the mix at which the calculator gives back the adapted per-1k figures unchanged." },
       "checkable": "public",
       "check": "carbon-ai.html#evidence"
     },

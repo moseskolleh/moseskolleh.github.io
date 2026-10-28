@@ -17,9 +17,9 @@
     "    file in this repository or to a host the repository already trusts.",
     "    This is the rule that makes fabricating a link fail the build.",
     "  · No publication venue, DOI or journal is named anywhere unless the",
-    "    artifact genuinely has one. Two theses were examined and defended; that",
-    "    is what they say, and nothing more.",
-    "  · `lenses` lists which role-specific views a case study belongs to, and",
+    "    artifact genuinely has one. Two MSc theses were examined and defended,",
+    "    and a BSc dissertation examined; that is what they say, and nothing more.",
+    "  · `lenses` lists which views by field of work a case study belongs to, and",
     "    must reference ids defined in content/lenses.json. Nearest first: in",
     "    the view of its first lens a case study leads, ahead of those that",
     "    only touch that lens.",
@@ -37,7 +37,7 @@
     "THE HOMEPAGE CARD. index.html shows each case study as a teaser card,",
     "generated from this file (npm run build:content), so the two pages cannot",
     "disagree. The card takes the title, period, location, lenses,",
-    "`tags` (tools and topics; The Brief reads them as evidence) and `photo`,",
+    "`tags` (tools and topics) and `photo`,",
     "and the FIRST result as the headline. That result carries a `brief`: its",
     "basis in one line, for a card with no room for the whole of it. A brief",
     "may say less than the basis, never more.",
@@ -61,11 +61,11 @@
     {
       "id": "sustainable-ai",
       "title": "Sustainable AI Framework",
-      "subtitle": "Making a finance ministry's AI adoption accountable for its footprint",
-      "period": "2025 — present",
+      "subtitle": "Making public-sector AI adoption accountable for its footprint",
+      "period": "2025 — 2026",
       "location": "Amsterdam, NL",
       "organization": "Digital Society School, Amsterdam University of Applied Sciences",
-      "partner": "Ministry of Finance (Ministerie van Financiën)",
+      "partner": "a Dutch government partner",
       "lenses": ["sustainable-ai", "esg-csrd", "climate-risk"],
       "role": "Researcher — Sustainable Artificial Intelligence",
       "tags": ["AI Governance", "Sustainability", "SDG 12 & 13", "Prototyping"],
@@ -94,12 +94,12 @@
           "fullCaption": "Demo day — putting the decision-support toolkit into visitors' hands at the Digital Society School." }
       ],
 
-      "problem": "Generative AI is becoming government infrastructure — but every prompt has a footprint. How does a finance ministry adopt AI responsibly without greenwashing, and without grinding innovation to a halt?",
+      "problem": "Generative AI is becoming government infrastructure — but every prompt has a footprint. How does a government department adopt AI responsibly without greenwashing, and without grinding innovation to a halt?",
 
       "method": [
-        "Mapped the environmental footprint of generative AI end to end — Scope 2 electricity, Scope 3 hardware, and data-centre water.",
-        "Built a sustainability assessment framework for concrete AI use cases, framed against CSRD/ESRS disclosure logic so the output lands in a reporting language the ministry already speaks.",
-        "Prototyped decision-support tools with real users at both ends of the organisation: managers setting strategy, and employees writing prompts.",
+        "As a team, mapped the environmental footprint of generative AI end to end — Scope 2 electricity, Scope 3 hardware, and data-centre water.",
+        "Built, with the team, a sustainability assessment framework for concrete AI use cases, framed against CSRD/ESRS disclosure logic so the output lands in a reporting language the partner already speaks.",
+        "Prototyped decision-support tools for managers setting strategy and for staff writing prompts, and showed them at public research sessions and demo days.",
         "Aligned the framework against UN SDG 12 (responsible consumption and production) and SDG 13 (climate action)."
       ],
 
@@ -112,11 +112,11 @@
           "note": "Energy, water and carbon per LLM query across named models and grids, with every emission factor's source, range and review date shown in an evidence ledger."
         },
         {
-          "name": "EcoPrompt Coach — the maintained tool (promptcoach)",
+          "name": "EcoPrompt Coach — the newer tool (promptcoach)",
           "kind": "code",
           "status": "public",
           "url": "https://github.com/moseskolleh/promptcoach",
-          "note": "Version 2 of the Digital Society School prototype: a JavaScript engine, web app and Chrome extension (unpacked, in no store), with its own method and newer models."
+          "note": "Version 2 of the Digital Society School prototype: a JavaScript engine, web app and Chrome extension (unpacked, in no store), with its own method and newer models, whose 2026 figures are extrapolated."
         },
         {
           "name": "Sustainable AI Prototypes",
@@ -129,7 +129,7 @@
           "name": "Sustainability assessment framework for AI use cases",
           "kind": "framework",
           "status": "internal",
-          "heldBy": "Digital Society School / Ministry of Finance",
+          "heldBy": "Digital Society School and its government partner",
           "note": "Developed inside a research partnership; not mine to publish unilaterally."
         }
       ],
@@ -142,8 +142,8 @@
           "verifiable": true
         },
         {
-          "claim": "Framework tested with users at both ends of the organisation",
-          "basis": "Public research sessions and demo days in Amsterdam, with managers and day-to-day users. Qualitative — no completion or satisfaction metric was collected.",
+          "claim": "Prototypes shown at public research sessions and demo days",
+          "basis": "Sessions and demo days in Amsterdam, open to the public. The feedback was qualitative: no user study was run, and no completion or satisfaction metric was collected.",
           "verifiable": false
         }
       ],
@@ -166,7 +166,7 @@
         }
       ],
 
-      "caveat": "This work is in progress and the outcome measures are qualitative. Any figure describing adoption or emissions avoided would be a guess, so none is given."
+      "caveat": "My part in this work ended in February 2026, and its outcome measures were qualitative. Any figure describing adoption or emissions avoided would be a guess, so none is given."
     },
 
     {
@@ -175,7 +175,7 @@
       "subtitle": "Method and tooling that put AI's footprint on a sustainability report's lines, uncertainty included",
       "period": "2025 — 2026",
       "organization": "Open source (MIT licence)",
-      "role": "Author and maintainer",
+      "role": "Author",
       "lenses": ["esg-csrd", "sustainable-ai"],
       "homepageCard": false,
 
@@ -248,7 +248,7 @@
     {
       "id": "coastal",
       "title": "Coastal Water Pollution Dynamics",
-      "subtitle": "What drives river-borne pollution, and what Africa's coasts look like by mid-century",
+      "subtitle": "What drives river-borne pollution, and how Africa's coasts could look by mid-century, as storylines",
       "period": "2023 — 2024",
       "location": "Wageningen, NL",
       "organization": "Wageningen University & Research",
@@ -275,10 +275,10 @@
       "problem": "Rivers carry whatever we put in them straight to the sea. How do income, urbanisation and agriculture shape the export of multiple pollutants across the world's sub-basins — and what does that mean for Africa's coasts by mid-century?",
 
       "method": [
-        "Modelled river export of multiple pollutants with the MARINA-Multi model across 10,226 sub-basins worldwide.",
+        "Analysed river export of multiple pollutants across 10,226 sub-basins worldwide, using the MARINA-Multi model developed by Wageningen's Water Systems & Global Change group.",
         "Identified the socioeconomic drivers behind the resulting pollution patterns statistically.",
         "Built qualitative future storylines for African coastal waters, including a deliberately pessimistic 'Dirty Delta' scenario.",
-        "Integrated climate-change scenarios into the projections."
+        "Framed the storylines within climate-change scenarios."
       ],
 
       "artifacts": [
@@ -298,18 +298,18 @@
 
       "results": [
         {
-          "claim": "10,226 sub-basins modelled",
-          "basis": "The sub-basin count of the MARINA-Multi model configuration used — a property of the model domain, not an estimate.",
-          "brief": "A property of the model domain used, not an estimate; the thesis is on request.",
+          "claim": "10,226 sub-basins analysed with MARINA-Multi",
+          "basis": "The sub-basin count of the MARINA-Multi model's global domain — a property of the model, not an estimate. The model is the Water Systems & Global Change group's, at Wageningen; the thesis analysed its output.",
+          "brief": "The size of the domain of MARINA-Multi, the Water Systems & Global Change group's model; the thesis is on request.",
           "verifiable": false
         },
         {
           "claim": "Identified the socioeconomic factors that dominate coastal pollution export",
-          "basis": "Statistical analysis of model output against socioeconomic drivers. The finding is in the thesis; effect sizes are not restated here because they cannot be checked without it.",
+          "basis": "Statistical analysis of MARINA-Multi output against socioeconomic drivers. The finding is in the thesis; effect sizes are not restated here because they cannot be checked without it.",
           "verifiable": false
         },
         {
-          "claim": "Scenario storylines that turn model output into policy conversation",
+          "claim": "Scenario storylines written to bring model output into policy conversation",
           "basis": "Qualitative scenario method. Written to be argued with, not to be scored.",
           "verifiable": false
         }
@@ -323,7 +323,7 @@
         },
         {
           "kind": "recommendation",
-          "text": "Write the storyline first and let it demand the numbers: model output rarely moves a policymaker, a story they can picture does.",
+          "text": "Write the storyline first and let it decide which questions the numbers must answer, never the answers. In my experience, a scenario people can picture moves a discussion further than model output alone.",
           "basis": "Field note 02, on the homepage, on the \"Dirty Delta\" scenario."
         }
       ],
@@ -341,7 +341,7 @@
       "partner": "Municipality of Wuppertal",
       "lenses": ["climate-risk", "water"],
       "role": "Interdisciplinary team of six",
-      "tags": ["Climate Modelling", "GIS", "Risk Assessment", "Policy"],
+      "tags": ["Climate Projections", "GIS", "Risk Assessment", "Policy"],
       "photo": { "src": "assets/img/wuppertal-resilience-1.webp", "thumb": "assets/img/wuppertal-resilience-1-480.webp", "width": 900, "height": 675,
                  "alt": "The consultancy team riding the Wuppertal Schwebebahn" },
       "widget": "flood",
@@ -390,19 +390,19 @@
           "kind": "tool",
           "status": "public",
           "url": "case-studies.html#play-flood",
-          "note": "A schematic Wupper cross-section, below (it needs JavaScript): slide the river from a calm day to July 2021 and watch the clearance under the Schwebebahn's hanging cars shrink."
+          "note": "A schematic Wupper cross-section, below (it needs JavaScript): slide the river from a calm day to a severe flood and watch the clearance under the Schwebebahn's hanging cars shrink."
         }
       ],
 
       "results": [
         {
-          "claim": "A complete flood-risk management framework delivered to the municipality",
+          "claim": "A flood-risk management framework, delivered to the municipality",
           "basis": "The deliverable of the consultancy: accepted and presented to municipal stakeholders. Held by the client.",
           "brief": "The deliverable is held by the client; nothing here claims it was implemented.",
           "verifiable": false
         },
         {
-          "claim": "Critical infrastructure vulnerabilities identified alongside cost-effective interventions",
+          "claim": "Critical infrastructure vulnerabilities identified, with interventions proposed for them",
           "basis": "GIS and climate-projection analysis, cross-checked in stakeholder workshops. Whether the recommendations were implemented is not something I can claim — that is the municipality's to report.",
           "verifiable": false
         }
@@ -438,8 +438,8 @@
           "fullCaption": "The UN Campus in Bonn, Germany — my base for five months working with the UN Office for Disaster Risk Reduction." },
         { "src": "assets/img/undrr-bonn-2.webp", "thumb": "assets/img/undrr-bonn-2-480.webp", "width": 900, "height": 675,
           "alt": "Moses at his desk in the UN Campus with two monitors showing disaster data",
-          "caption": "At the desk — auditing Caribbean disaster-loss records for the Sendai Framework Monitor.",
-          "fullCaption": "At the desk in the UN Campus — auditing Caribbean disaster-loss records for the Sendai Framework Monitor." },
+          "caption": "At the desk — reviewing Caribbean disaster-loss records for the Sendai Framework Monitor.",
+          "fullCaption": "At the desk in the UN Campus — reviewing Caribbean disaster-loss records for the Sendai Framework Monitor." },
         { "src": "assets/img/undrr-bonn-3.webp", "width": 900, "height": 675,
           "alt": "View over Bonn from the UN Campus tower",
           "caption": "Bonn from the UN Campus tower.",
@@ -449,10 +449,10 @@
       "problem": "UNDRR needed clean, comparable hazard information to support the Sendai Framework — especially for small island states, where one storm can erase years of development.",
 
       "method": [
-        "Audited Caribbean disaster-loss data against external datasets for the Sendai Framework Monitor and the Losses & Damages Tracking System.",
-        "Documented global hazard information systems, expanding regional and hazard-type coverage.",
+        "Reviewed and cross-checked Caribbean disaster-loss data against external datasets for the Sendai Framework Monitor and the Losses & Damages Tracking System.",
+        "Documented global hazard information systems for the organisation's catalogue.",
         "Standardised disaster-reporting terminology across sources, so economic loss and damage meant the same thing in each.",
-        "Built a risk-management factsheet for Trinidad and Tobago."
+        "Wrote a disaster and climate-risk factsheet for Trinidad and Tobago."
       ],
 
       "artifacts": [
@@ -464,11 +464,11 @@
           "note": "Contributed to the organisation's internal databases."
         },
         {
-          "name": "Risk-management factsheet — Trinidad and Tobago",
+          "name": "Disaster and climate-risk factsheet — Trinidad and Tobago",
           "kind": "report",
           "status": "internal",
           "heldBy": "UNDRR",
-          "note": "Produced for national policy use."
+          "note": "Written during the internship."
         }
       ],
 
@@ -478,11 +478,6 @@
           "basis": "A count of the systems catalogued during the internship, recorded in the deliverable. Countable, not estimated.",
           "brief": "A count recorded in the deliverable, which UNDRR holds.",
           "verifiable": false
-        },
-        {
-          "claim": "Regional and hazard-type coverage expanded by 25%",
-          "basis": "Measured against the size of the organisation's existing catalogue at the start of the internship. The baseline is internal to UNDRR, so an outside reader cannot check it — which is why it is stated with its basis rather than on its own.",
-          "verifiable": false
         }
       ],
 
@@ -490,11 +485,11 @@
         {
           "kind": "finding",
           "text": "Disaster risk is a data problem before it is an engineering one: you cannot reduce what you cannot compare, so loss and damage had to mean the same in every source.",
-          "basis": "The audit and the terminology work in the method above; the records are UNDRR's."
+          "basis": "The review and the terminology work in the method above; the records are UNDRR's."
         }
       ],
 
-      "caveat": "Internship deliverables sit inside the organisation. The counts are real and were recorded; the baselines they are measured against are not public."
+      "caveat": "Internship deliverables sit inside the organisation. The count is real and was recorded; the inventory itself is not public."
     },
 
     {
@@ -517,11 +512,11 @@
         { "src": "assets/img/soft-path-2.webp", "width": 900, "height": 1200,
           "alt": "Moses in graduation gown at Hunan University",
           "caption": "Graduation day at Hunan University.",
-          "fullCaption": "Graduation day at Hunan University — the close of the master's years in China, on a full MOFCOM scholarship." },
+          "fullCaption": "Graduation day at Hunan University — the close of the master's years in China, on a full Chinese Government (MOFCOM) Scholarship." },
         { "src": "assets/img/soft-path-4.webp", "width": 900, "height": 1200,
           "alt": "Moses seated at a conference table with his name plate",
-          "caption": "At the table — representing graduate researchers at Hunan University.",
-          "fullCaption": "At the table — representing graduate researchers at Hunan University." },
+          "caption": "At a conference table at Hunan University.",
+          "fullCaption": "At a conference table at Hunan University, during the master's years." },
         { "src": "assets/img/soft-path-5.webp", "width": 900, "height": 675,
           "alt": "Graduates in blue gowns at Hunan University",
           "caption": "Graduation day with the international cohort at Hunan University.",
@@ -529,7 +524,7 @@
         { "src": "assets/img/soft-path-6.webp", "width": 900, "height": 1200,
           "alt": "Moses with a colleague at an industrial equipment expo in China",
           "caption": "An industrial-equipment expo during the Hunan years — the engineering side of the story.",
-          "fullCaption": "An industrial-equipment expo during the Hunan years — the engineering side of the dual-master's story." }
+          "fullCaption": "An industrial-equipment expo during the Hunan years — the engineering side of the story." }
       ],
 
       "problem": "Freetown keeps building bigger pipes, and keeps running dry. The uncomfortable question: what if the answer isn't more hard infrastructure at all?",
@@ -617,7 +612,7 @@
       "method": [
         "Applied electrical-resistivity surveying to detect groundwater in hard rock.",
         "Combined geological and hydrogeological data into GIS groundwater-potential maps.",
-        "Validated the predictions through field drilling campaigns — the only test that counts.",
+        "Used the survey method to site boreholes in later fieldwork, in 2019: the only test that counts.",
         "Produced siting recommendations for future boreholes."
       ],
 
@@ -626,13 +621,13 @@
           "name": "BSc dissertation — 'Mapping groundwater potential in the Freetown Complex: a geophysical approach'",
           "kind": "thesis",
           "status": "on-request",
-          "note": "First class honours, University of Sierra Leone. Available on request; not deposited in a public repository."
+          "note": "University of Sierra Leone. Available on request; not deposited in a public repository."
         },
         {
           "name": "Groundwater-potential maps for the Freetown Complex",
           "kind": "dataset",
           "status": "on-request",
-          "note": "Produced during the dissertation and used in subsequent siting work."
+          "note": "Produced during the dissertation."
         },
         {
           "name": "Groundwater Investigation Toolkit",
@@ -646,20 +641,20 @@
           "kind": "tool",
           "status": "public",
           "url": "case-studies.html#play-borehole",
-          "note": "A playable version of the reading the method depends on. Play it below (it needs JavaScript): read the resistivity curve, place the rig, drill, and set your strike rate beside the field records."
+          "note": "A playable version of the reading the method depends on. Play it below (it needs JavaScript): read the resistivity curve, place the rig, drill, and set your holes beside the field records."
         }
       ],
 
       "results": [
         {
-          "claim": "70% aquifer strike rate in subsequent drilling",
-          "basis": "Successful strikes as a share of boreholes drilled on sites selected with the survey method, during the Team & Team International fieldwork. The site sets it beside roughly 30% for blind siting in the same geology, but no source for that baseline is recorded — so wherever the 30% appears it is labelled illustrative, not measured.",
+          "claim": "70% success rate in later drilling at survey-selected sites",
+          "basis": "Boreholes that struck water, as a share of those drilled at sites selected with the survey method, in the Team & Team International fieldwork of 2019: a success rate from field records, not a controlled trial. How many holes were drilled, and what yield counted as a strike, are not recorded here.",
           "brief": "From the field records of the boreholes sited with the survey, not a controlled trial.",
           "verifiable": false
         },
         {
           "claim": "Method carried into the borehole siting that followed, part of 164 water points delivered across Sierra Leone",
-          "basis": "The boreholes behind the 70% strike rate were sited with the survey method in the Team & Team International fieldwork. They are part of the 164 water points — 100 hand-dug wells rehabilitated, 50 boreholes constructed, 14 solar-powered boreholes, itemised and summing to 164 — but not all of them: a rehabilitated well needs no siting, and no survey siting is recorded for the other boreholes. The mapping informed siting; it is not the sole cause of the outcome.",
+          "basis": "The boreholes that struck water at survey-selected sites, in the Team & Team International fieldwork, are part of the 164 water points: 100 hand-dug wells rehabilitated and 50 boreholes constructed on Sierra Drilling and Water Supply Enterprise's projects (2018–2019), and 14 solar-powered boreholes on Team & Team International's (2019), summing to 164. They are not all of them: a rehabilitated well needs no siting, and no survey siting is recorded for the other boreholes. The survey informed siting; it is not the sole cause of the outcome.",
           "verifiable": false
         }
       ],
@@ -677,7 +672,7 @@
         }
       ],
 
-      "caveat": "The strike rate comes from field records, not a controlled trial. Geology varies between sites, and a good surveyor is part of the result."
+      "caveat": "The success rate comes from field records, not a controlled trial. Geology varies between sites, and a good surveyor is part of the result."
     }
   ]
 }

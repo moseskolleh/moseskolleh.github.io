@@ -1,21 +1,15 @@
 node_modules/
 
-# API key for the optional Fish Audio section renderer
-# (scripts/generate-voice.js --sections). It must never be committed — it is
-# read from the environment at build time. The site ships no rendered
-# tracks; its one recording, Moses's introduction, needs no key at all.
+# Local environment files. Nothing in the build reads one, but a key kept
+# beside a checkout must never be committed.
 .env
 .env.*
-!.env.example
 
-# Output of `npm run voice:check`, which renders against the local mock
-# server in WAV. Throwaway and large — the real narration ships as .mp3.
-assets/audio/*.wav
-
-# Voice auditions written by the fish-audio MCP server (.mcp.json) while
-# choosing a voice. Scratch output — the only audio that ships is Moses's
-# own recording, installed by `npm run voice:intro`.
+# Left by the narration pipeline, which is gone: Fish Audio auditions and
+# WAV renders. Kept ignored until each checkout has deleted them
+# (docs/owner-checklist.md, U10), so none is committed by mistake.
 .voice-auditions/
+assets/audio/
 
 # Screenshots written by `npm run smoke -- --screens`.
 .smoke/

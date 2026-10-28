@@ -123,7 +123,7 @@ mks.scrollMotion = scrollMotion;
 // first, and true means the key is used, so one press closes one layer. A
 // key a control already used is left alone, and a widget's own keys (the
 // games' arrows, a dialog's Tab) stay on the widget.
-const KEY_RANK = Object.freeze({ terminal: 40, player: 20, menu: 10, page: 0 });
+const KEY_RANK = Object.freeze({ terminal: 40, menu: 10, page: 0 });
 const keyRoutes = {};
 mks.keyRank = KEY_RANK;
 mks.onKey = (keys, handler, rank = KEY_RANK.page) => {
@@ -154,8 +154,7 @@ document.addEventListener('keydown', (e) => {
 // first, so it has arrived before the script builds anything it styles.
 const MODULES = {
     interactives: ['ai-carbon-data.js', 'modules/interactives.js'],
-    terminal: ['modules/terminal.js'],
-    dispatch: ['modules/dispatch.css', 'voice-scripts.js', 'modules/dispatch.js']
+    terminal: ['modules/terminal.js']
 };
 
 const mksLoad = (() => {
@@ -236,7 +235,8 @@ const lateStart = !document.documentElement.classList.contains('js');
         '28.2282° N, 112.9388° E', // Changsha
         '50.7374° N, 7.0982° E',   // Bonn
         '51.9692° N, 5.6654° E',   // Wageningen
-        '52.3676° N, 4.9041° E'    // Amsterdam
+        '52.3676° N, 4.9041° E',   // Amsterdam
+        '45.1847° N, 9.1582° E'    // Pavia
     ];
     let i = 0;
     const ticker = setInterval(() => {
@@ -376,6 +376,11 @@ const focusTarget = (target) => {
 // router): then where it sits is theirs. The height is taken now: the
 // observer's first report comes a frame late, and growth in that frame was
 // once taken for the start (250-440px short).
+// While it holds, the hold alone keeps the target in place: the browser's
+// scroll anchoring is off. Firefox anchored against the same growth as well,
+// mid-glide, and the two together carried a jump to #contact past it by the
+// growth again (-262px, section 05's 334px counted twice). Released, the
+// page anchors as before, for a reader scrolling up.
 let releaseHold = () => {};
 const hold = (land) => {
     releaseHold();
@@ -386,11 +391,14 @@ const hold = (land) => {
         const now = height();
         if (now !== last) { last = now; land(); }
     });
+    const anchored = [document.documentElement, document.body];
+    anchored.forEach(el => { el.style.overflowAnchor = 'none'; });
     const HANDS = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
     const release = () => {
         ro.disconnect();
         clearTimeout(timer);
         HANDS.forEach(t => window.removeEventListener(t, release, true));
+        anchored.forEach(el => { el.style.overflowAnchor = ''; });
         if (releaseHold === release) releaseHold = () => {};
     };
     const timer = setTimeout(release, 4000);
@@ -455,16 +463,17 @@ inPageLinks.forEach((anchor, index) => {
 });
 
 // Links already shared to what moved off this page (the games, Anatomy of
-// a Prompt, and the Assay, which grew into The Brief) opened it at its top,
-// with no sign of what they were for. They go on to where it is now, with
-// the site that linked to them as ?via=: count.js would otherwise take
-// this page for the referrer.
+// a Prompt, and the Assay, which grew into The Brief, since retired) opened
+// it at its top, with no sign of what they were for. They go on to where
+// it is now, or to the note left where it was, with the site that linked
+// to them as ?via=: count.js would otherwise take this page for the
+// referrer.
 const MOVED = new Map([
     ['anatomy', 'carbon-ai.html#anatomy'],
     ['boreholeGame', 'case-studies.html#play-borehole'],
     ['strikeWidget', 'case-studies.html#play-borehole'],
     ['floodSim', 'case-studies.html#play-flood'],
-    ['assay', 'brief.html#grade']
+    ['assay', 'brief.html#retired']
 ]);
 const forwardMoved = () => {
     const id = location.hash.slice(1), to = MOVED.get(id);
@@ -524,7 +533,7 @@ if (navToggle && navMenu) {
         }
     });
 
-    // The lowest layer Escape closes: a dialog or the player goes first.
+    // The lowest layer Escape closes: the terminal goes first.
     mks.onKey('Escape', () => {
         if (!navMenu.classList.contains('active')) return false;
         setMenuOpen(false);
@@ -751,7 +760,11 @@ if (statsSection && 'IntersectionObserver' in window) {
         { x: 901.6, y: 254.1, zoom: 2.4, readout: '28.2282° N, 112.9388° E — Changsha' },
         { x: 279.7, y: 90.1,  zoom: 5.0, readout: '50.7374° N, 7.0982° E — Bonn' },
         { x: 273.5, y: 81.4,  zoom: 7.5, close: true, readout: '51.9692° N, 5.6654° E — Wageningen' },
-        { x: 269.9, y: 78.6,  zoom: 7.5, close: true, readout: '52.3676° N, 4.9041° E — Amsterdam' }
+        { x: 269.9, y: 78.6,  zoom: 7.5, close: true, readout: '52.3676° N, 4.9041° E — Amsterdam' },
+        // Pavia: close enough that the delta's names, still in view to the
+        // north, clear the legs (at 5 Wageningen's sat on the arc from
+        // Changsha), not so close that Amsterdam's is cut by the frame (6.5).
+        { x: 284.5, y: 129.8, zoom: 5.75, readout: '45.1847° N, 9.1582° E — Pavia' }
     ];
     const VB_W = 1000, VB_H = 726;
     // Tuned in a desktop's 660px column: screen px per map unit at zoom 1.
@@ -1551,63 +1564,3 @@ mks.ready = true;
         if (mks && typeof mks.track === 'function') mks.track('contact-form-submit');
     });
 })();
-
-// ===================================
-// THE SPOKEN PAGE — one listen control, in the nav
-// ===================================
-// The player behind it (modules/dispatch.js, its stylesheet and the scripts
-// it reads) is about 16 KB gzipped that only a visitor who presses Listen
-// needs. So the core only decides whether to show the button; the first
-// press fetches the player, which reads the section in view and moves
-// between sections itself. One control, not one per section (eight-plus
-// Tab stops for a feature most visits never use).
-//
-// The button stays hidden unless something can actually speak. A speech
-// engine that reports no voices (headless browsers, Linux without
-// speech-dispatcher) accepts an utterance and silently drops it, and a
-// button that loads a player to say nothing is worse than no button. The one
-// other thing that can speak is Moses's own recorded introduction, so a
-// browser with no voice asks the manifest once, well after the first view
-// (no-cache: a cached empty one must not hide a new recording).
-(() => {
-    const wrap = document.getElementById('navListen');
-    const btn = document.getElementById('listenBtn');
-    if (!wrap || !btn) return;
-
-    const synth = window.speechSynthesis;
-    const canSynth = typeof synth !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function';
-    const hasVoice = () => canSynth && (synth.getVoices() || []).length > 0;
-    const show = () => { wrap.hidden = false; };
-
-    if (hasVoice()) {
-        show();
-    } else {
-        // Chrome's first getVoices() is routinely empty; the list arrives later.
-        if (canSynth && typeof synth.addEventListener === 'function') {
-            synth.addEventListener('voiceschanged', () => { if (hasVoice()) show(); });
-        }
-        window.addEventListener('load', () => setTimeout(() => {
-            if (!wrap.hidden || typeof window.fetch !== 'function') return;
-            fetch('assets/audio/voice-manifest.json', { cache: 'no-cache' })
-                .then(r => (r.ok ? r.json() : null))
-                .then(m => { if (m && m.tracks && m.tracks.intro) show(); })
-                .catch(() => { /* no recording: the button stays hidden */ });
-        }, 1500));
-    }
-
-    // Every press goes through the player once it is here; the first one
-    // also fetches it. A second press while it is on its way is the same
-    // request, not a close.
-    btn.addEventListener('click', () => {
-        if (btn.getAttribute('aria-busy') === 'true') return;
-        btn.setAttribute('aria-busy', 'true');
-        mksLoad('dispatch').then(() => {
-            btn.removeAttribute('aria-busy');
-            if (mks.narration) mks.narration.toggle();
-        }, (err) => {
-            btn.removeAttribute('aria-busy');
-            mksLoadWarn(err);
-        });
-    });
-})();
-
