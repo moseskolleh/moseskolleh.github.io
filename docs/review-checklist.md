@@ -43,6 +43,7 @@ follows them says how.
 - [ ] **Regenerate the CV.** `npm run cv`, and commit
   `assets/Moses_Kolleh_Sesay_CV.pdf` with `assets/cv.hash`. The weekly
   health check says when `content/` has moved on since it was printed.
-- [ ] **Review the lenses against the roles he is going for.**
+- [ ] **Review the lenses against the work he is open to.**
   `content/lenses.json` against `atAGlance.targetRoles` in
-  `content/profile.json`.
+  `content/profile.json` (research collaborations since October 2026; owner
+  checklist U11 asks whether the lenses should still speak of roles).
