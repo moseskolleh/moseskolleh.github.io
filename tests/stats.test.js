@@ -581,7 +581,7 @@ const page = (s) => new JSDOM(renderStats({ stats: s, lenses })).window.document
         'Privacy: names the one way a DNT or GPC visitor is still counted');
     assert(/No IP address/.test(text) && /No cookie/.test(text) && /No id of any kind/.test(text), 'Privacy: lists what is never collected');
     // The site does keep a few choices in the browser (theme, low-energy
-    // mode, reading speed, the intro), so the claim is the count's, not the site's.
+    // mode, the intro), so the claim is the count's, not the site's.
     assert(!/nothing is written to your device/.test(text) && /the count neither reads nor writes any/.test(text) && /theme, low-energy mode/.test(text),
         'Privacy: the no-storage claim is made for the count, and the site\'s own remembered choices are named');
     assert(/Any count under 5 is shown as <5/.test(text), 'Privacy: says cells under 5 are suppressed');

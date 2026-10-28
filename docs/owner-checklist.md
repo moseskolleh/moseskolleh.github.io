@@ -516,7 +516,7 @@ These are what it could not settle for you.
   - *What:* revoke your Fish Audio API key, and disconnect the Fish Audio
     connector in your claude.ai settings; the site no longer uses either.
     If you have a local `.env` file or `.voice-auditions/` folder from the
-    old pipeline, delete them: git ignored both, so the repository never
+    old pipeline, delete them: git ignores both, so the repository never
     held them.
   - *Where:* your Fish Audio account, your claude.ai settings and your own
     computer.

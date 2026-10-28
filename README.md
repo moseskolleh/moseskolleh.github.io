@@ -952,10 +952,9 @@ The site counts its own page views, so that each later change to it can be
 judged against what readers actually do ([docs/plan.md](docs/plan.md),
 Phase 1). It uses no analytics service, and the count sets no cookie and
 reads or writes no browser storage. (The site itself remembers the theme,
-low-energy mode, the reading speed and whether the intro has played, in the
-visitor's own browser, and sends none of it.) All of it is `count.js`: 3 KB
-(2 KB gzipped), loaded deferred on every page and counted in each page's
-budget.
+low-energy mode and whether the intro has played, in the visitor's own
+browser, and sends none of it.) All of it is `count.js`: 3 KB (2 KB
+gzipped), loaded deferred on every page and counted in each page's budget.
 
 **Status.** Built, tested and on `main`, which the live site is built from,
 since pull request #49 was merged (2026-09-27), but not yet counting: the live Apps Script has to be
