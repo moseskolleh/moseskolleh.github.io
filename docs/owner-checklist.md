@@ -368,13 +368,15 @@ These are what it could not settle for you.
     - the core log's PhD layer: its title, "Co-funded by BrianzAcque, a
       water utility" (the longer "the water utility of Monza and Brianza"
       wraps to a second line there and makes the homepage too long), and
-      its three lines from the call;
+      its three lines from the call, written as aims ("To assess …", "To
+      estimate …", "To weigh …"), since none of the work has been done yet;
     - the PhD's degree card: "In progress, expected 2029" and "Topic:
       urban flood risk and drainage adaptation";
     - the research page's "Now researching" block: the question; why it
-      matters ("its drainage was built for the rainfall of the past" is
-      the site's framing, not the call's); the four things the work will
-      do; and the four things it does not claim yet. The call's line about
+      matters, in the call's own words ("highly urbanised and exposed to
+      pluvial flooding"; a line on how the drainage was designed was
+      dropped, since the call says nothing of it); the four things the
+      work will do; and the four things it does not claim yet. The call's line about
       building on existing hydrological and hydraulic modelling results is
       left out, since it could read as a model or data already in hand;
       add it if you want it;
@@ -500,8 +502,8 @@ These are what it could not settle for you.
 - [ ] **U9. The note at The Brief's old address, and when to delete it.**
   - *What:* `brief.html` now reads: "This address held The Brief, which set
     a job ad against the work on this site. I am not looking for a job
-    now, so I have taken it down, and a link to a fit it made no longer
-    opens one. The work it drew on is all still here." Change it if you
+    now, so I have taken it down; a link to one of its fits now opens this
+    note instead. The work it drew on is all still here." Change it if you
     would put it differently. Visits to it are still counted, as "The
     Brief (retired)" on `stats.html`; once they stop, the address can be
     deleted outright.
