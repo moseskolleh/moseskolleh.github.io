@@ -503,12 +503,13 @@ const noteLink = (n) => `<a href="${esc(notePath(n))}" title="Field note">${note
 // link here, and a heading and a footnote alone read as a broken page.
 const WIDGET_HOSTS = {
     // "Site the borehole" and "Seven in Ten" were two widgets making one
-    // point. They are one now: the game is the play, and the waffle is its
-    // scoreboard, the reader's holes beside the field records and the
-    // blind-drilling rate, which has no recorded source and so is labelled
-    // illustrative wherever it appears.
+    // point. They are one now: the game is the play, practice in reading a
+    // resistivity curve, and the waffle is its scoreboard, the reader's
+    // holes beside the field records. It drew a blind-drilling rate too,
+    // which had no recorded source, so the game claimed a gain nothing
+    // measured; that row is gone.
     borehole: {
-        title: '<span data-claim="strike-rate">Seven in ten</span>: what reading the ground is worth',
+        title: '<span data-claim="strike-rate">Seven in ten</span>: reading the ground before you drill',
         noun: 'drilling game',
         live: `
                         <p class="dw-intro">This is a resistivity profile like the ones we walked across the Freetown Complex. Low resistivity &mdash; the dips in the curve &mdash; can mean water-bearing fractures. Or clay. Move the rig, pick your spot, drill.</p>
@@ -520,10 +521,9 @@ const WIDGET_HOSTS = {
                         <p class="borehole-result" id="drillResult" aria-live="polite">Drag the rig (or focus the profile and use the arrow keys), then drill.</p>
                         <div class="strike-board">
                             <p class="strike-row"><span class="strike-row-label" id="drillScore">Your holes &middot; drill to fill this row</span><span class="strike-waffle" data-row="you" aria-hidden="true"></span></p>
-                            <p class="strike-row"><span class="strike-row-label">Reading the curve first &middot; <span data-claim="strike-rate">7 in 10</span>, field records</span><span class="strike-waffle" data-row="7" aria-hidden="true"></span></p>
-                            <p class="strike-row"><span class="strike-row-label">Blind drilling &middot; about <span data-claim="blind-siting">3 in 10</span>, illustrative</span><span class="strike-waffle" data-row="3" aria-hidden="true"></span></p>
+                            <p class="strike-row"><span class="strike-row-label">Sited by survey &middot; <span data-claim="strike-rate">7 in 10</span>, field records</span><span class="strike-waffle" data-row="7" aria-hidden="true"></span></p>
                         </div>`,
-        summary: 'Reading the resistivity curve first, the boreholes in the field records struck water <span data-claim="strike-rate">70%</span> of the time; the <span data-claim="blind-siting">~30%</span> for blind drilling is illustrative &mdash; not a measured figure.'
+        summary: 'In the field records, <span data-claim="strike-rate">70%</span> of the boreholes drilled at survey-selected sites struck water: a success rate from records, not a controlled trial. The game is practice in reading the curve.'
     },
     flood: {
         title: 'Don&rsquo;t let it become a boat',

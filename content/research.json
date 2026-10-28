@@ -65,9 +65,9 @@
       "year": "2017",
       "status": "on-request",
       "caseStudy": "groundwater",
-      "summary": "Electrical-resistivity surveying combined with geological and hydrogeological data into GIS potential maps for hard igneous rock, validated by subsequent drilling.",
-      "methods": ["Electrical-resistivity surveying", "GIS potential mapping", "Field validation"],
-      "note": "First class honours, graduated top of class. The method went on to inform real siting work."
+      "summary": "Electrical-resistivity surveying combined with geological and hydrogeological data into GIS potential maps for hard igneous rock; the survey method later sited boreholes, in 2019.",
+      "methods": ["Electrical-resistivity surveying", "GIS potential mapping"],
+      "note": "The method went on to inform real siting work."
     },
     {
       "id": "act-wuppertal",

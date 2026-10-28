@@ -108,7 +108,7 @@
     "displayDates": "Nov 2026 — Present"
   },
 
-  "$figures": "A figure on a page needs a basis in content/. A case-study result carries its own; a record fact about a role or a degree (a team's headcount, a programme's length, a grade; the Wuppertal consultancy's team, part of the Wageningen degree) sits on the entry it describes, here, and tests/content.test.js holds the pages to it. An outcome rate (a completion percentage, an efficiency gain, people reached) is not a record fact: it needs a method, and without one it stays off the site.",
+  "$figures": "A figure on a page needs a basis in content/. A case-study result carries its own; a record fact about a role or a degree (a team's headcount, a programme's length, what the projects it worked on delivered, a grade; the Wuppertal consultancy's team, part of the Wageningen degree) sits on the entry it describes, here, and tests/content.test.js holds the pages to it. An outcome rate (a completion percentage, an efficiency gain, people reached) is not a record fact: it needs a method, and without one it stays off the site.",
 
   "experience": [
     {
@@ -148,7 +148,8 @@
       "organization": "Team & Team International",
       "displayDates": "May 2019 — Sept 2019",
       "start": "2019-05",
-      "end": "2019-09"
+      "end": "2019-09",
+      "solarBoreholes": 14
     },
     {
       "title": "Operations Supervisor",
@@ -156,7 +157,9 @@
       "displayDates": "Sept 2018 — Apr 2019",
       "start": "2018-09",
       "end": "2019-04",
-      "teamSize": 23
+      "teamSize": 23,
+      "boreholesConstructed": 50,
+      "wellsRehabilitated": 100
     }
   ],
 

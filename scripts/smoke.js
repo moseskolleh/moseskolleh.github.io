@@ -2050,7 +2050,7 @@ async function checkClaimMarks(browser, origin) {
         else if (wrong.length) bad(`${rel}: once its scripts have run, ${wrong.length} marked figure(s) disagree with the ledger: ${wrong.join(', ')}`);
         else ok(`${rel}: once its scripts have run, all ${marks.length} marked figures say what the ledger says`);
         // A mark is an element, so in a flex or grid row it becomes an item
-        // of its own: "Seven in ten: what reading the ground is worth" split
+        // of its own: the borehole game's "Seven in ten: …" heading split
         // into two columns on a phone, the mark one and the words after it
         // the other. A mark sits in running text, never beside a loose line
         // of words in a flex or grid box.

@@ -65,40 +65,37 @@
     {
       "id": "water-points",
       "value": "164",
-      "unit": "water points delivered across Sierra Leone",
-      "basis": { "result": "groundwater" }
+      "unit": "water points delivered across Sierra Leone by the drilling projects I worked on",
+      "basis": { "derived": "The sum of the entries below: the wells and boreholes delivered on the projects of my drilling jobs, as I record them.", "from": ["wells-rehabilitated", "boreholes-constructed", "solar-boreholes"] },
+      "checkable": "not-checkable"
     },
     {
       "id": "wells-rehabilitated",
       "value": "100",
-      "unit": "hand-dug wells rehabilitated: part of those water points",
-      "basis": { "result": "groundwater" }
+      "unit": "hand-dug wells rehabilitated by the team I supervised at Sierra Drilling and Water Supply Enterprise: part of those water points",
+      "basis": { "profile": "experience.5.wellsRehabilitated", "note": "As I record it; the employer's completion records are not public." },
+      "checkable": "not-checkable"
     },
     {
       "id": "boreholes-constructed",
       "value": "50",
-      "unit": "boreholes constructed: part of those water points",
-      "basis": { "result": "groundwater" }
+      "unit": "boreholes constructed by the same team: part of those water points",
+      "basis": { "profile": "experience.5.boreholesConstructed", "note": "As I record it; the employer's completion records are not public." },
+      "checkable": "not-checkable"
     },
     {
       "id": "solar-boreholes",
       "value": "14",
-      "unit": "solar-powered boreholes with storage tanks: the rest of them",
-      "basis": { "result": "groundwater" }
+      "unit": "solar-powered boreholes with storage tanks completed in the Team & Team International fieldwork: the rest of them",
+      "basis": { "profile": "experience.4.solarBoreholes", "note": "As I record it; the employer's completion records are not public." },
+      "checkable": "not-checkable"
     },
     {
       "id": "strike-rate",
       "value": "70%",
-      "unit": "aquifer strike rate on the boreholes sited with the resistivity survey",
-      "forms": ["7/10", "7 times out of 10"],
+      "unit": "success rate of the later drilling at sites selected by resistivity survey: boreholes that struck water, of those drilled",
+      "forms": ["7/10"],
       "basis": { "result": "groundwater" }
-    },
-    {
-      "id": "blind-siting",
-      "value": "30%",
-      "unit": "strike rate for blind siting in the same geology: the comparison the borehole game draws",
-      "basis": { "illustrative": "No source for this baseline is recorded. It stays because the comparison is the point of the game, and wherever it is shown it is labelled illustrative." },
-      "checkable": "not-checkable"
     },
     {
       "id": "sub-basins",

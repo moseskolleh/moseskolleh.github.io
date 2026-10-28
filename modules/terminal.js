@@ -59,7 +59,7 @@
              'Flood-Resilient Wuppertal — don\'t let the Schwebebahn become a boat',
              'UN Disaster Risk Reduction — Sendai Framework data, Bonn',
              'Soft Path Water Management — beyond cement, steel and pipes',
-             'Groundwater Potential Mapping — geophysics with a 70% strike rate'
+             'Groundwater Potential Mapping — survey-sited holes: 70% struck water'
             ].forEach((p, i) => print(`  [${i + 1}] ${p}`));
             print('cards in section 04 — PROJECTS. the whole of each: case-studies.html');
         },
@@ -76,7 +76,7 @@
                 '── 26 m  saprolite, weathered gabbro',
                 '── 38 m  fractured gabbro — conductivity rising',
                 'STRIKE 💧 water at 38 m. static level −6 m, yield looks good.',
-                '(odds are 7/10 when you read the resistivity curve first — try it on the groundwater case study.)'
+                '(in the field records, 7/10 of the holes sited from the resistivity curve struck water — try reading one on the groundwater case study.)'
             ];
             if (!mks.motionOK()) { steps.forEach(s => print(s)); return; }
             let i = 0;

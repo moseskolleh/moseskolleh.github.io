@@ -72,7 +72,7 @@
     // SEVEN IN TEN — site the borehole, and keep score against the records
     // ===================================
     // One widget where there were two; build-content.js (WIDGET_HOSTS) says
-    // why, and why blind drilling's ~3 in 10 is labelled illustrative.
+    // why, and why it no longer draws a blind-drilling rate.
     (() => {
         const host = document.querySelector('[data-widget="borehole"]');
         const stage = document.getElementById('boreholeStage');
@@ -202,8 +202,8 @@
             return (clientX - r.left) * (W / r.width);
         };
 
-        // The scoreboard: yours (your last ten holes) and the two fixed
-        // rows. Each label carries its numbers; the cells are aria-hidden.
+        // The scoreboard: yours (your last ten holes) and the field
+        // records' row. Each label carries its numbers; the cells are aria-hidden.
         const rows = Array.from(host.querySelectorAll('.strike-waffle')).map((waffle) => {
             const cells = [];
             for (let i = 0; i < ROW; i++) {

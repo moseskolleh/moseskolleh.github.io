@@ -466,8 +466,8 @@ const terminalSrc = read('modules/terminal.js');
 const drillLog = literals(between(terminalSrc, 'drill: (', 'cv: (', 'modules/terminal.js'));
 const PRINTED = {
     // The field terminal on the homepage (press `) prints the record in its
-    // own words: 164 water points, 10,226 sub-basins, a 70% strike rate,
-    // "odds are 7/10". The drill command's log is a game: its depths are made
+    // own words: 164 water points, 10,226 sub-basins, 70% of survey-sited
+    // holes struck water, "7/10 of the holes". The drill command's log is a game: its depths are made
     // up, and its first line says so. Only a depth in metres is let by, and
     // only there.
     terminal: { what: 'the field terminal (modules/terminal.js)', texts: literals(terminalSrc), sure: /164 water points/,
@@ -506,7 +506,7 @@ const PRINTED = {
         loose.forEach(n => console.log(`  unmarked: ${key}: ${n}`));
         assert(found && loose.length === 0, `Scripts: every figure ${p.what} prints of its own is one the ledger holds, written as it writes it (${p.texts.length} strings read; ${loose.length} not${loose.length ? ', listed above' : ''})`);
     });
-    assert(PRINTED.terminal.texts.some(t => /odds are 7\/10/.test(t)) && drillLog.some(t => /made-up/.test(t)), 'Scripts: the terminal\'s drill log says it is made up, and only its depths are let by');
+    assert(PRINTED.terminal.texts.some(t => /7\/10 of the holes/.test(t)) && drillLog.some(t => /made-up/.test(t)), 'Scripts: the terminal\'s drill log says it is made up, and only its depths are let by');
     assert(PRINTED.badge.texts.length >= 2, `Scripts: the badge's lines are read (${PRINTED.badge.texts.length})`);
 }
 
@@ -590,11 +590,11 @@ const PRINTED = {
         && figures.agrees(byId.get('web-carbon').value, build) && typed.every(t => figures.agrees(byId.get('web-carbon').value, t.split(': ')[1])),
         `Ledger: every copy of the grams per MB is the ledger's ${byId.get('web-carbon').value}: the receipt weighs with the badge's (mks.carbon), the build's is ${build}, and a script that writes the figure writes it (${typed.join('; ') || 'none does'})`);
 
-    // The borehole game's scoreboard draws the two rates as rows of ten.
+    // The borehole game's scoreboard draws the field records' rate as a row of ten.
     const rows = Array.from(docs['case-studies.html'].querySelectorAll('.strike-waffle[data-row]')).filter(w => /^\d+$/.test(w.getAttribute('data-row')));
     const drawn = rows.map(w => [w.getAttribute('data-row'), w.parentElement.querySelector('[data-claim]')]);
-    assert(drawn.length === 2 && drawn.every(([n, mark]) => mark && figures.agrees(byId.get(mark.getAttribute('data-claim')).value, `${n} in 10`)),
-        `Ledger: the borehole game's scoreboard draws the field records' rate and the illustrative one as the ledger has them (${drawn.map(([n, mark]) => `${n} → ${mark && mark.getAttribute('data-claim')}`).join(', ')})`);
+    assert(drawn.length === 1 && drawn.every(([n, mark]) => mark && figures.agrees(byId.get(mark.getAttribute('data-claim')).value, `${n} in 10`)),
+        `Ledger: the borehole game's scoreboard draws the field records' rate as the ledger has it (${drawn.map(([n, mark]) => `${n} → ${mark && mark.getAttribute('data-claim')}`).join(', ')})`);
 }
 
 // ===================================================================

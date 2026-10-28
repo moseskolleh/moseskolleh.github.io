@@ -228,7 +228,7 @@ const profile = JSON.parse(read('content/profile.json'));
     assert(skills.querySelectorAll('.toolkit-item .toolkit-proof').length === 6, 'Skills: the six tools keep their proof links');
 
     // What left Skills was said elsewhere on the page too, and still is.
-    [['70%', /70% aquifer/], ['10,226 sub-basins', /10,226 sub-basins/], ['54 hazard information systems', /54 global hazard information systems/], ['a team of 23', /team of 23/]]
+    [['70%', /70% of those drilled struck water/], ['10,226 sub-basins', /10,226 sub-basins/], ['54 hazard information systems', /54 global hazard information systems/], ['a team of 23', /team of 23/]]
         .forEach(([what, re]) => {
             const outside = Array.from(bare.querySelectorAll('main > section')).filter(s => s.id !== 'skills' && re.test(text(s))).map(s => s.id);
             assert(outside.length > 0 && !re.test(skillText), `Skills: ${what} is not repeated here, and is still in ${outside.join(', ')}`);

@@ -246,6 +246,13 @@ const fieldText = plain(fieldReport);
         if (!phrase.test(indexText)) missing.push(`index: team of ${r.teamSize} (${r.organization})`);
         if (!phrase.test(fieldText)) missing.push(`field-report: team of ${r.teamSize} (${r.organization})`);
     });
+    // What the projects a role worked on delivered: the two drilling jobs.
+    [['boreholesConstructed', 'boreholes'], ['wellsRehabilitated', 'hand-dug wells'], ['solarBoreholes', 'solar-powered']].forEach(([key, what]) => {
+        profile.experience.filter(r => r[key]).forEach((r) => {
+            if (!indexText.includes(`${r[key]} ${what}`)) missing.push(`index: ${r[key]} ${what} (${r.organization})`);
+            if (!fieldText.includes(`${r[key]} ${what}`)) missing.push(`field-report: ${r[key]} ${what} (${r.organization})`);
+        });
+    });
     profile.experience.filter(r => r.programmeWeeks).forEach((r) => {
         if (!indexText.includes(`${r.programmeWeeks}-week`)) missing.push(`index: ${r.programmeWeeks}-week (${r.organization})`);
     });
@@ -384,17 +391,16 @@ const fieldText = plain(fieldReport);
 }
 
 // --- Figures: illustrative numbers say so --------------------------------
-// The 30% blind-drilling baseline and the straight-line guess in You Draw It
-// have no source behind them. They stay, because the comparison is the
-// point of both widgets, but wherever they are shown they are labelled.
+// The straight-line guess in You Draw It has no source behind it. It
+// stays, because the comparison is the point of the widget, but wherever it
+// is shown it is labelled. (The borehole game's 30% blind-drilling baseline
+// had none either, and claimed a gain nothing measured; it went in October
+// 2026, and tests/widgets.test.js keeps it out.)
 {
     const { run } = require('./harness.js');
     const { window } = run('dark', { before: (w) => { w.console.log = () => {}; } });
     const doc = window.document;
     const text = (id) => (doc.getElementById(id) || { textContent: '' }).textContent;
-
-    // The 30% moved with the borehole game to the groundwater case study,
-    // where tests/widgets.test.js holds every place it is shown to the label.
 
     const legend = doc.querySelector('.ydi-leg-intuit');
     assert(!!legend && /illustrative/.test(legend.textContent), `Illustrative: the You Draw It legend labels the guess line (${legend && legend.textContent})`);
