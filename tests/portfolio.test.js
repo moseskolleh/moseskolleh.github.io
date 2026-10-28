@@ -634,6 +634,23 @@ function loadWith(name, change) {
         'Research page: the thesis is listed as planned, with no link, no role view and no figure in its title');
     assert(/\bdoctorate under way\b/.test(flat(doc.querySelector('.ca-hero p'))) && !/happily/.test(flat(doc.querySelector('.ca-hero p'))),
         'Research page: the hero lead says a doctorate is under way, without the sales line');
+
+    // The homepage and the field report point at the block, each from words
+    // already there: the current journey stop, the doctorate's layer of the
+    // core log and its degree card, and the field report's entry for it.
+    const page = (file) => new JSDOM(fs.readFileSync(path.join(ROOT, file), 'utf8')).window.document;
+    const home = page('index.html');
+    const report = page('field-report.html');
+    const where = data.profile.education.find(e => e.inProgress).institution;
+    const linksHere = (el) => !!el && !!el.querySelector('a[href="research.html#phd"]');
+    const pointers = {
+        'the current journey stop': home.querySelector('.journey-stop:last-child .journey-card-current'),
+        'the core log\'s layer for the doctorate': Array.from(home.querySelectorAll('.corelog-item')).find(it => it.textContent.includes(where)),
+        'the degree card for it': Array.from(home.querySelectorAll('.education-card')).find(c => c.textContent.includes(where)),
+        'the field report\'s journey entry for it': Array.from(report.querySelectorAll('dd')).find(dd => dd.textContent.includes('PhD'))
+    };
+    const unlinked = Object.keys(pointers).filter(k => !linksHere(pointers[k]));
+    assert(unlinked.length === 0, `Research page: the homepage and the field report link the block at #phd (not linked: ${unlinked.join('; ') || 'none'})`);
 }
 
 // --- an address into a fold opens it -------------------------------------

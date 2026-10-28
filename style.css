@@ -1281,7 +1281,9 @@ html.light-mode .hero-photo-caption {
     color: var(--text-primary);
 }
 
-.journey-card p a {
+.journey-card p a,
+.timeline-content li a,
+.education-card li a {
     color: var(--accent-color);
     text-decoration: underline;
     text-underline-offset: 3px;
