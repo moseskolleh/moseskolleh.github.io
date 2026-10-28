@@ -196,7 +196,8 @@ data.
    - CV downloads
    - lens-link visits that reach a case study
    - share of visits that reach Contact
-   - Brief uses (from Phase 4)
+   - Brief uses (from Phase 4; dropped on 2026-10-28, when The Brief was
+     retired, which leaves four)
 
    Collect **four weeks of baseline** before judging Phase 2.
 
@@ -321,6 +322,14 @@ is green, and the CV is generated.
 ## Phase 4 — Signature features · 7 days
 
 ### 4.1 `NEW` The Brief (the Assay's successor) · 3 days
+
+> **Retired, 2026-10-28.** Moses is not looking for a job, so the site no
+> longer offers a recruiter a job-ad grader. Its links in the nav, the
+> footers, the play index and the contact section went, and so did its
+> script, rubric, generator, tests and sitemap entry; Brief uses left the
+> open counts. `brief.html` answers with a short note (`noindex`) pointing
+> to the homepage and the case studies, so links already sent, `?focus=`
+> and all, do not end in a 404. The step is kept below as it was planned.
 
 - A recruiter pastes a job ad. They get:
   - an **honest fit**: matched evidence *and* gaps (language, years, tools, right to
@@ -511,7 +520,7 @@ axe, validation and the PR receipt run in CI.
 | When | What |
 |---|---|
 | Monthly | Publish one note; read `stats.html`; answer every contact within two days |
-| Quarterly | Re-verify profile facts (`verifiedOn`); refresh AI data; ratchet budgets down; review the five numbers against the baseline |
+| Quarterly | Re-verify profile facts (`verifiedOn`); refresh AI data; ratchet budgets down; review the four numbers against the baseline |
 | Yearly | Publish the sustainability statement; regenerate the CV; review the lenses against the roles he is going for |
 
 A scheduled Action opens a "Quarterly review" issue carrying this checklist
@@ -534,7 +543,9 @@ About 10 days that still change how the site lands:
 
 - **No new mini-games or widgets** until the homepage passes its length budget.
 - **No AI chatbot "ask my portfolio".** It contradicts the site's own argument about
-  the cost of generation; the Brief does the useful part with 0 bytes sent.
+  the cost of generation.
+- **No job-ad grader or recruiter tools** (since 2026-10-28, when The Brief was
+  retired).
 - **No narration of any kind** (since 2026-10-28, when Phase 4.3 was withdrawn and
   the Listen control, its player and the Fish Audio pipeline were removed).
 - **No numbers typed straight into `index.html`.** They go through the claims ledger.
@@ -548,6 +559,7 @@ About 10 days that still change how the site lands:
 | Phase 2.1 | Target roles and seniority, available-from date, languages and Dutch level, right to work |
 | Phase 3.5 | Two or three testimonials with permission |
 | Phase 3.10 | Is the Digital Society School role still current? |
+| Phase 4.1 | Nothing now: The Brief was retired on 2026-10-28 |
 | Phase 4.3 | Nothing now: the step was withdrawn on 2026-10-28 |
 | Phase 5.2 | One note a month |
 | Phase 5.5 | Domain purchase; a decision on the `moseskolleh.github.io` template site |

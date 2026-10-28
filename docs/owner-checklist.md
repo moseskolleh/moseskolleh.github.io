@@ -16,10 +16,11 @@ in `content/`, run `npm run build:content` and then `npm test`.
 Last updated with wave 6 of the plan, 2026-10-18. Waves 1 to 5 are on
 `main` (pull requests #48 to #53): Phase 0, the narration steps of 2.5 and
 4.3 (the narration has since been removed, and its two items with it),
-Phase 1, Phase 2, Phase 3, The Brief, the notes as articles with a
+Phase 1, Phase 2, Phase 3, The Brief (retired on 2026-10-28, and its
+three items, S4, B1 and B2, with it), the notes as articles with a
 feed and preview cards, structured data, the weekly health and quarterly
 review issues, and Phase 6 steps 3, 6, 7 and 8. Wave 5's items are the
-group headed "wave 5" below (H1, H2, B1, B2, L5). Wave 6 (lighter images,
+group headed "wave 5" below (H1, H2, L5). Wave 6 (lighter images,
 a Content-Security-Policy, CSS hygiene, The Brief's review fixes, and the
 move to the root of `moseskolleh.github.io`, which you began by renaming
 the repository) is in its own pull request until it is merged; it adds
@@ -39,9 +40,8 @@ an hour together. Everything else can wait for them.
    (Phase 4.2) has no data.
 3. **F1, F2, F3** — your languages and Dutch level, right to work, target
    roles, seniority and available-from date. They are what a recruiter
-   asks first. Until they are stated, the at-a-glance strip and The Brief's
-   dossier leave them out, and The Brief lists every non-English language
-   an ad asks for as a gap.
+   asks first. Until they are stated, the at-a-glance strip leaves them
+   out.
 
 Once a week the "Site health" issue on GitHub (from wave 5) lists which of
 these are still open, beside anything on the site that has broken.
@@ -270,24 +270,9 @@ README under "The visit counter and privacy".
   - *Check:* after S1, `curl -L "<the URL above>?action=stats"`, without a
     token, prints `{"status":"refused",...}` and no `rows`.
 
-- [ ] **S4. Decide whether The Brief's grade should be counted at all.**
-  - *What:* when The Brief (`brief.html`, the Assay's successor since wave
-    5) grades a pasted job ad, that page view's count carries the grade:
-    `brief-high`, `brief-workable` or `brief-marginal`, as the Assay's did
-    (`assay-…`), beside `brief-run` (the fifth of the five numbers). The ad
-    itself never leaves the page, but the grade is derived from it. The
-    page says "the ad is never sent", which is true either way.
-    `stats.html` names the grade among the features a page view can carry.
-  - *Where:* if it should not be counted, say so: it is one line in
-    `brief.js` (the `mks.track('brief-' + …)` call for the grade), and
-    `tests/count.test.js`, `tests/stats.test.js` and `scripts/fetch-stats.js`
-    (which reads the grade names from `brief.js`) would change with it.
-  - *Check:* once removed, `brief.js` tracks no grade name, and `npm test`
-    passes.
-
 - [ ] **S5. Confirm the wording of `stats.html`.**
   - *What:* it speaks in the first person: "Every change I plan for this
-    site is a bet about what a recruiter does on it…" and "kept in a Google
+    site is a bet about what a reader does on it…" and "kept in a Google
     Sheet in my own Google account".
   - *Where:* the page is generated; its text is in `scripts/build-content.js`
     (`renderStats` and the functions around it). Edit there, then run
@@ -296,7 +281,7 @@ README under "The visit counter and privacy".
     once live, reads the way you would say it.
 
 - [ ] **S6. After four full weeks of counting, record the baseline for the
-  five numbers.**
+  four numbers.**
   - *When:* the weeks run Monday to Sunday, Amsterdam time, and each Monday's
     run adds the week just ended. Counting starts once S1 is done and this
     branch is live; the days before the first Monday are in no figure, so
@@ -306,8 +291,8 @@ README under "The visit counter and privacy".
     (a proxy, and an upper bound: arrivals through a role link, since the
     totals cannot say whether that reader went on to a case study), the
     share of homepage views that reached Contact, and page views for scale.
-    Brief uses stays empty until Phase 4.1 builds The Brief. Record a `<5`
-    or a `held` as it stands, not a guess.
+    (Brief uses, the fifth, went with The Brief.) Record a `<5` or a `held`
+    as it stands, not a guess.
   - *Where:* `docs/plan.md` → "Progress" → Phase 1, step 5: the four weeks'
     Monday dates and their figures. Every weekly version is also kept in git
     (`git log -p content/stats.json`).
@@ -962,12 +947,13 @@ keep, and some figures could move to "public" with a link only you have.
 
 ---
 
-## The Brief, the notes and the health checks (Phase 4.1, 5 and 6.9, wave 5)
+## The notes and the health checks (Phase 5 and 6.9, wave 5)
 
-Wave 5 moved the Assay to a page of its own, The Brief (`brief.html`),
-made the Field Notes dated articles with a feed and a preview card each,
-and added a weekly "Site health" issue. These are the choices it made for
-you, and one switch for the health check.
+Wave 5 moved the Assay to a page of its own, The Brief (`brief.html`,
+retired on 2026-10-28, which took B1 and B2 with it), made the Field
+Notes dated articles with a feed and a preview card each, and added a
+weekly "Site health" issue. These are the choices it made for you, and
+one switch for the health check.
 
 - [ ] **H1. Give the health check its token: `HEALTH_TOKEN`, then the
   repository secret `HEALTH_URL`** (after C2).
@@ -993,26 +979,6 @@ you, and one switch for the health check.
   If you use one and want it there, add its address as `links.x` and say
   so; `personLd` in `scripts/build-content.js` takes one line to list it.
   If not, tick this as "none".
-
-- [ ] **B1. Which case studies The Brief shows for each strength.**
-  - *What:* when a job ad matches a strength, the dossier shows the case
-    studies that strength picks. Wave 5 chose them: ESG analysis,
-    reporting, GHG and sustainable AI pick GAIA and the sustainable-AI
-    case; climate risk picks the UN disaster-risk case and Wuppertal;
-    water picks the groundwater and soft-path cases; GIS picks groundwater
-    and Wuppertal; water quality picks the coastal case; stakeholders picks
-    Wuppertal and sustainable AI; data, delivery, international work and
-    research pick none of their own.
-  - *Where:* `content/brief.json` → `strengths[n].caseStudies`. The
-    validator refuses an id that is not a case study, or a list that leaves
-    out a case study the strength's evidence links to.
-  - *Check:* paste an ad of the kind you are going for into `brief.html`;
-    the dossier shows the cases you would show.
-
-- [ ] **B2. Your phone number in The Brief's dossier?** The homepage's
-  contact card publishes it, and so does the CV; the dossier, the page a
-  recruiter forwards, gives the email, the CV and the contact form only.
-  Say if it should carry the phone too.
 
 - [ ] **L5. The notes as articles: their dates, their summaries and one
   changed line.**

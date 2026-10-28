@@ -460,7 +460,7 @@ const byId = (rs, id) => [].concat(rs).find(r => r.id === id);
         const first = body.split('The checks above wait on these:')[1].split('And the rest')[0];
         assert(/\*\*C2\.\*\* Redeploy the Apps Script/.test(first) && /\*\*S2\.\*\*/.test(first) && !/S7/.test(first),
             'Report: the open items a check waits on come first, by title; a ticked one (S7) is not listed');
-        assert(/- Switch on the visit counter and the open counts \(Phase 1\): S1, S3, S4, S5, S6\n/.test(body) && !/C2/.test(body.split('And the rest')[1]),
+        assert(/- Switch on the visit counter and the open counts \(Phase 1\): S1, S3, S5, S6\n/.test(body) && !/C2/.test(body.split('And the rest')[1]),
             'Report: the rest are counted by section, each listed once');
         assert(health.needsIssue(sample) && !health.needsIssue([sample[2], sample[3]]) && health.needsIssue([sample[1]]),
             'Report: an issue is needed while anything is broken or waiting, and not for "not checkable" alone');
