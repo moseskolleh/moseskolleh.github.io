@@ -112,11 +112,11 @@
           "note": "Energy, water and carbon per LLM query across named models and grids, with every emission factor's source, range and review date shown in an evidence ledger."
         },
         {
-          "name": "EcoPrompt Coach — the maintained tool (promptcoach)",
+          "name": "EcoPrompt Coach — the newer tool (promptcoach)",
           "kind": "code",
           "status": "public",
           "url": "https://github.com/moseskolleh/promptcoach",
-          "note": "Version 2 of the Digital Society School prototype: a JavaScript engine, web app and Chrome extension (unpacked, in no store), with its own method and newer models."
+          "note": "Version 2 of the Digital Society School prototype: a JavaScript engine, web app and Chrome extension (unpacked, in no store), with its own method and newer models, whose 2026 figures are extrapolated."
         },
         {
           "name": "Sustainable AI Prototypes",
@@ -175,7 +175,7 @@
       "subtitle": "Method and tooling that put AI's footprint on a sustainability report's lines, uncertainty included",
       "period": "2025 — 2026",
       "organization": "Open source (MIT licence)",
-      "role": "Author and maintainer",
+      "role": "Author",
       "lenses": ["esg-csrd", "sustainable-ai"],
       "homepageCard": false,
 

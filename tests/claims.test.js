@@ -483,7 +483,7 @@ const PRINTED = {
         texts: literals(between(interactives, 'const lines = [];', 'return lines;', 'modules/interactives.js')) },
     // You Draw It's verdict, card and table: the estimates come from the
     // factor set; its own words name the answer it prices.
-    ydi: { what: 'You Draw It\'s verdict, card and table (modules/interactives.js)', sure: /1,000-token answer/,
+    ydi: { what: 'You Draw It\'s verdict, card and table (modules/interactives.js)', sure: /1,000 tokens/,
         texts: readAsWords(literals(between(interactives, 'const est = ', '// Shape grade', 'modules/interactives.js'))
             .concat(literals(between(interactives, 'let shape;', 'cardData = {', 'modules/interactives.js')),
                 literals(between(interactives, 'callout.textContent', 'svg.appendChild(callout)', 'modules/interactives.js')),

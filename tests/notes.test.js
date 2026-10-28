@@ -346,7 +346,7 @@ series.forEach((n, i) => {
     assert(!!coach && coach.name === edition.title && coach.description === edition.summary && coach.url === `${SITE}carbon-ai.html`,
         'Structured data: carbon-ai.html is a SoftwareApplication, this site\'s edition, as research.json names and describes it');
     assert(!!coach && coach.mentions && coach.mentions.codeRepository === maintained.url && !('sameAs' in coach) && !('isBasedOn' in coach),
-        'Structured data: it mentions the maintained tool by its repository, and claims to be neither it nor built on it');
+        'Structured data: it mentions the newer tool by its repository, and claims to be neither it nor built on it');
     const shell = read('carbon-ai.html');
     assert(shell.indexOf('<!-- JSON-LD -->') > -1 && shell.indexOf('<!-- JSON-LD -->') < shell.indexOf('application/ld+json') && shell.indexOf('application/ld+json') < shell.indexOf('<!-- /JSON-LD -->'),
         'Structured data: the coach\'s block sits between its markers, written by the build');

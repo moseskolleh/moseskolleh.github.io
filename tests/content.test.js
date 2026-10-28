@@ -454,8 +454,8 @@ const fieldText = plain(fieldReport);
     };
     const inside = verdictFor(0.7);
     assert(inside.at >= R1.range[0] && inside.at <= R1.range[1] && /within that range/.test(inside.said) && !/underestimat|overestimat/.test(inside.said),
-        `Estimates: a guess inside the published range is told so, not that it missed (${inside.at} Wh: ${inside.said})`);
-    assert(inside.said.includes(`The published estimate is about ${R1.energyPer1kTokens_Wh} Wh (${R1.range[0]}–${R1.range[1]} Wh)`),
+        `Estimates: a guess inside the estimate's range is told so, not that it missed (${inside.at} Wh: ${inside.said})`);
+    assert(inside.said.includes(`The research estimate is about ${R1.energyPer1kTokens_Wh} Wh (${R1.range[0]}–${R1.range[1]} Wh)`),
         'Estimates: the verdict gives the central estimate with its range');
     const below = verdictFor(0.3);
     assert(below.at < R1.range[0] && /underestimated the frontier/.test(below.said), `Estimates: a guess below the range is an underestimate (${below.at} Wh: ${below.said})`);
@@ -679,7 +679,7 @@ const fieldText = plain(fieldReport);
 // --- One name for one tool -----------------------------------------------
 // "AI, Weighed", "EcoPrompt Coach" and "promptcoach" were one tool under
 // three names. It is the EcoPrompt Coach: carbon-ai.html is this site's
-// edition, the promptcoach repository and its app the maintained one, and
+// edition, the promptcoach repository and its app the newer one, and
 // "promptcoach" is only ever the repository's name.
 {
     const shipped = fs.readdirSync(ROOT).filter(f => /\.(html|js|css)$/.test(f))
@@ -700,7 +700,7 @@ const fieldText = plain(fieldReport);
     });
     assert(seen.length === 0, `One name: "promptcoach" names the repository, never the tool (${seen.join('; ') || 'as it should'})`);
 
-    // The maintained tool is linked as such, app and code, from the coach's
+    // The newer tool is linked as such, app and code, from the coach's
     // page and from the homepage's teaser.
     const APP = 'https://moseskolleh.github.io/promptcoach/';
     const REPO = 'https://github.com/moseskolleh/promptcoach';
@@ -709,7 +709,7 @@ const fieldText = plain(fieldReport);
     const teaser = new JSDOM(index).window.document.getElementById('ecoprompt');
     [['carbon-ai.html', coach.querySelector('.ca-hero')], ['the homepage teaser', teaser]].forEach(([where, el]) => {
         const hrefs = Array.from(el.querySelectorAll('a')).map(a => a.getAttribute('href'));
-        assert(hrefs.includes(APP) && hrefs.includes(REPO), `One name: ${where} links the maintained EcoPrompt Coach, its app and its code (${hrefs.join(', ')})`);
+        assert(hrefs.includes(APP) && hrefs.includes(REPO), `One name: ${where} links the newer EcoPrompt Coach, its app and its code (${hrefs.join(', ')})`);
     });
 
     // carbon-ai.html's own figures say how old they are, from the data.
@@ -722,7 +722,7 @@ const fieldText = plain(fieldReport);
         /For newer models, see the EcoPrompt Coach app; its 2026 models are extrapolated/.test(plain(vintage.innerHTML)),
         `Vintage: carbon-ai.html dates its figures as ai-carbon-data.js does (reviewed ${data.REVIEWED_ON}, grid ${grid}) and sends newer models to the app, extrapolated as it says`);
     assert(!/reproduces its calculation model|mirrors the calculation model/i.test(read('content/research.json') + read('content/projects.json') + read('carbon-ai.js')),
-        'One name: nothing says this site\'s edition reproduces the maintained tool\'s model; they have separate code and data');
+        'One name: nothing says this site\'s edition reproduces the newer tool\'s model; they have separate code and data');
 }
 
 // --- Staleness ----------------------------------------------------------

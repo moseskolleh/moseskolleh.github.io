@@ -1,11 +1,11 @@
 // ===================================================================
 // ECOPROMPT COACH — this site's edition
-// Energy, water, and carbon per LLM query. The maintained tool, with its
+// Energy, water, and carbon per LLM query. The newer tool, with its
 // own method and data, is github.com/moseskolleh/promptcoach.
 //
-// Model benchmarks adapted from:
-//   Jegham, Abedin, Ali, et al. (2025) "How Hungry is AI? Benchmarking
-//   Energy, Water, and Carbon Footprint of LLM Inference."
+// Model figures adapted from the estimates in:
+//   Jegham et al. (2025) "How Hungry is AI? Benchmarking Energy, Water,
+//   and Carbon Footprint of LLM Inference", arXiv:2505.09598.
 // Provider PUE/WUE disclosures: Google 2024, Microsoft 2024, AWS 2023.
 // All numbers are order-of-magnitude estimates, not measurements.
 // ===================================================================

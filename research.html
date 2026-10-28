@@ -151,7 +151,7 @@
                         <span class="cs-status cs-status-public" title="Open it now.">Public</span>
                         <span class="mono-label"><a href="notes/every-prompt-has-a-footprint.html" title="Field note">Note 03</a></span>
                     </div>
-                    <h3><a href="https://github.com/moseskolleh/promptcoach">EcoPrompt Coach &mdash; the maintained tool (promptcoach)</a></h3>
+                    <h3><a href="https://github.com/moseskolleh/promptcoach">EcoPrompt Coach &mdash; the newer tool (promptcoach)</a></h3>
 
                     <p class="rs-summary-text">A JavaScript engine, web app and Chrome extension that estimate the energy, water and carbon of an LLM prompt from published benchmarks, in everyday terms. Version 2's list of models runs to September 2026; the repo links the web app.</p>
 
@@ -168,8 +168,8 @@
                     <h3><a href="carbon-ai.html">EcoPrompt Coach &mdash; this site's edition, with its evidence ledger</a></h3>
                     <p class="rs-venue">moseskolleh.github.io</p>
                     <p class="rs-summary-text">Interactive per-query footprint calculator, with an evidence ledger giving every emission factor a source, publication date, vintage, uncertainty range and review date. Input and output tokens are priced separately, because decode costs several times what prefill does.</p>
-                    <p class="rs-methods"><span class="mono-label">Methods</span> Published inference benchmarks &middot; Ember grid intensities &middot; Disclosed provider PUE/WUE</p>
-                    <p class="rs-note">Every factor is auditable from the page itself. Its code and data are its own, separate from the maintained tool's. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
+                    <p class="rs-methods"><span class="mono-label">Methods</span> Inference estimates adapted from Jegham et al. (2025) &middot; Ember grid intensities &middot; Disclosed provider PUE/WUE</p>
+                    <p class="rs-note">Every factor is auditable from the page itself. Its code and data are its own, separate from the newer tool's. <a class="rs-link" href="case-studies.html#sustainable-ai">Read the case study &rarr;</a></p>
                 </article>
 
                 <article class="rs-item" id="carbon-data">
@@ -305,7 +305,7 @@
             <h2>Reproducing what is here</h2>
             <details>
                 <summary>How, and the commands to run</summary>
-                <p id="reproduce">The outputs that are part of this site run from its one clone, with no build step and no API key; each repository above says how to run it. The EcoPrompt Coach and the homepage's energy chart read one factor set, so they cannot disagree about a model. The chart shows each model's published figure for a <span data-claim="answer-tokens">1,000</span>-token answer; the coach multiplies it by data-centre overhead (PUE, <span data-claim="default-pue">1.2</span> unless you change it), so for the same answer it prints <span data-claim="default-pue">1.2</span> times the chart's figure. The map regenerates byte-identically from pinned dependencies.</p>
+                <p id="reproduce">The outputs that are part of this site run from its one clone, with no build step and no API key; each repository above says how to run it. The EcoPrompt Coach and the homepage's energy chart read one factor set, so they cannot disagree about a model. The chart shows each model's adapted estimate for <span data-claim="answer-tokens">1,000</span> tokens, split evenly between prompt and answer; the coach multiplies it by data-centre overhead (PUE, <span data-claim="default-pue">1.2</span> unless you change it), so for the same query it prints <span data-claim="default-pue">1.2</span> times the chart's figure. The map regenerates byte-identically from pinned dependencies.</p>
                 <dl class="rs-commands">
                     <dt><code>npm install &amp;&amp; npm test</code></dt><dd>runs every suite, the map check and the asset-weight budgets</dd>
                     <dt><code>npm run map:build</code></dt><dd>regenerates the journey map from Natural Earth data</dd>

@@ -207,7 +207,7 @@
     {
       "id": "field-report-carbon",
       "value": "0.004",
-      "unit": "g CO₂e to send the field report, at the Sustainable Web Design figure",
+      "unit": "g CO₂e for the field report's size as saved, at the Sustainable Web Design figure (a visit transfers less: the page is sent compressed)",
       "basis": { "derived": "The field report's size in MB times the grams of CO₂e per MB below, rounded to the nearest thousandth of a gram.", "from": ["field-report-kb", "web-carbon"] },
       "checkable": "public",
       "check": "field-report.html"
@@ -228,7 +228,7 @@
       "id": "web-carbon",
       "value": "0.36",
       "unit": "g CO₂e per MB transferred: the figure the footer's badge and its receipt use",
-      "basis": { "factor": "TRANSFER.gramsPerMB.value", "url": "https://sustainablewebdesign.org/estimating-digital-emissions/" },
+      "basis": { "factor": "TRANSFER.gramsPerMB.value", "url": "https://sustainablewebdesign.org/estimating-digital-emissions/", "note": "Model v3, which allocates the energy of data centres, networks and end-user devices per byte; the page linked now documents v4, whose figures differ." },
       "checkable": "public",
       "check": "https://sustainablewebdesign.org/estimating-digital-emissions/"
     },
@@ -236,7 +236,7 @@
       "id": "median-page",
       "value": "2.5",
       "unit": "MB: what the median web page ships, the footer's point of comparison",
-      "basis": { "source": "HTTP Archive, page weight report", "url": "https://httparchive.org/reports/page-weight" },
+      "basis": { "source": "HTTP Archive, page weight report", "url": "https://httparchive.org/reports/page-weight", "note": "The month and device it was read for are not recorded, and the median moves from month to month." },
       "checkable": "public",
       "check": "https://httparchive.org/reports/page-weight"
     },
@@ -244,23 +244,23 @@
       "id": "gaia-modelled",
       "value": "117",
       "unit": "of the current models in GAIA's database whose figures are modelled, not measured",
-      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md" },
+      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md" },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md"
+      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md"
     },
     {
       "id": "gaia-models",
       "value": "119",
       "unit": "current models in GAIA's database",
-      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md" },
+      "basis": { "source": "GAIA Framework's roadmap, section 0, “Where GAIA stands”, at version 2.2.0", "url": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md" },
       "checkable": "public",
-      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/main/ROADMAP.md"
+      "check": "https://github.com/moseskolleh/GAIA-Framework-/blob/f039e736ccf100be8e3fd2260a224d9b9184d6dd/ROADMAP.md"
     },
     {
       "id": "answer-tokens",
       "value": "1,000",
-      "unit": "tokens in the answer the homepage chart prices each model at",
-      "basis": { "factor": "MODELS", "note": "Each model's published energy is per 1k tokens, adapted from Jegham et al. (2025); the chart quotes it as it is." },
+      "unit": "tokens, split evenly between prompt and answer, at which the homepage chart prices each model",
+      "basis": { "factor": "MODELS", "note": "Each model's energy per 1k tokens is adapted from the estimates of Jegham et al. (2025), at an even mix of input and output; the chart quotes it as it is." },
       "checkable": "public",
       "check": "carbon-ai.html#evidence"
     },
@@ -283,8 +283,8 @@
     {
       "id": "reference-mix",
       "value": "50/50",
-      "unit": "split of input and output tokens at which the calculator reproduces the published per-1k-token figures",
-      "basis": { "factor": "TOKEN_ENERGY.referenceMix", "own": "A calibration convention, not a measurement: the mix at which the calculator gives back the published per-1k figures unchanged." },
+      "unit": "split of input and output tokens at which the calculator reproduces the per-1k-token figures adapted from the benchmarks",
+      "basis": { "factor": "TOKEN_ENERGY.referenceMix", "own": "A calibration convention, not a measurement: the mix at which the calculator gives back the adapted per-1k figures unchanged." },
       "checkable": "public",
       "check": "carbon-ai.html#evidence"
     },

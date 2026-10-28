@@ -346,7 +346,7 @@ function checkResult(label, params) {
     const coach = calculate({ ...BASE, modelKey: 'gpt-4o', inputTokens: field('inputTokens'), outputTokens: field('outputTokens'), pue });
     const chart = MODELS['gpt-4o'].energyPer1kTokens_Wh;
     const said = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'content', 'research.json'), 'utf8')).reproducibility.body;
-    const m = said.match(/PUE, ([\d.]+) unless you change it\), so for the same answer it prints ([\d.]+) times the chart's figure/);
+    const m = said.match(/PUE, ([\d.]+) unless you change it\), so for the same query it prints ([\d.]+) times the chart's figure/);
     assert(field('inputTokens') + field('outputTokens') === 1000 && Math.abs(coach.energyPerQuery_Wh / chart - pue) < 1e-9,
         `Research: at its defaults (${field('inputTokens')} in, ${field('outputTokens')} out) the coach prints the chart's 1,000-token figure times its PUE (${coach.energyPerQuery_Wh} Wh against ${chart} Wh)`);
     assert(!!m && +m[1] === pue && +m[2] === pue && !/cannot quote different numbers/.test(said),

@@ -170,7 +170,7 @@
     },
     {
       "id": "promptcoach",
-      "title": "EcoPrompt Coach — the maintained tool (promptcoach)",
+      "title": "EcoPrompt Coach — the newer tool (promptcoach)",
       "type": "Code",
       "year": "2026",
       "status": "public",
@@ -190,9 +190,9 @@
       "url": "carbon-ai.html",
       "caseStudy": "sustainable-ai",
       "summary": "Interactive per-query footprint calculator, with an evidence ledger giving every emission factor a source, publication date, vintage, uncertainty range and review date. Input and output tokens are priced separately, because decode costs several times what prefill does.",
-      "methods": ["Published inference benchmarks", "Ember grid intensities", "Disclosed provider PUE/WUE"],
+      "methods": ["Inference estimates adapted from Jegham et al. (2025)", "Ember grid intensities", "Disclosed provider PUE/WUE"],
       "reproducible": true,
-      "note": "Every factor is auditable from the page itself. Its code and data are its own, separate from the maintained tool's."
+      "note": "Every factor is auditable from the page itself. Its code and data are its own, separate from the newer tool's."
     },
     {
       "id": "carbon-data",
@@ -237,7 +237,7 @@
 
   "reproducibility": {
     "heading": "Reproducing what is here",
-    "body": "The outputs that are part of this site run from its one clone, with no build step and no API key; each repository above says how to run it. The EcoPrompt Coach and the homepage's energy chart read one factor set, so they cannot disagree about a model. The chart shows each model's published figure for a 1,000-token answer; the coach multiplies it by data-centre overhead (PUE, 1.2 unless you change it), so for the same answer it prints 1.2 times the chart's figure. The map regenerates byte-identically from pinned dependencies.",
+    "body": "The outputs that are part of this site run from its one clone, with no build step and no API key; each repository above says how to run it. The EcoPrompt Coach and the homepage's energy chart read one factor set, so they cannot disagree about a model. The chart shows each model's adapted estimate for 1,000 tokens, split evenly between prompt and answer; the coach multiplies it by data-centre overhead (PUE, 1.2 unless you change it), so for the same query it prints 1.2 times the chart's figure. The map regenerates byte-identically from pinned dependencies.",
     "commands": [
       { "command": "npm install && npm test", "does": "runs every suite, the map check and the asset-weight budgets" },
       { "command": "npm run map:build", "does": "regenerates the journey map from Natural Earth data" },

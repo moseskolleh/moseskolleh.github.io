@@ -335,7 +335,7 @@ const indentBlock = (block, indent) => block.split('\n').map(l => (l ? indent + 
 // pages has to carry one; no-referrer would count every visit an old
 // address forwards as direct. Off the site only the origin goes, never a
 // path or a query: enough for the places
-// Moses links to (his repositories' traffic page, the maintained coach) to
+// Moses links to (his repositories' traffic page, the newer coach) to
 // show this site sent the visit, which is the measuring the site is for.
 // It is most browsers' default, written down for those whose default sends
 // the whole address. The counter's own request sends none
@@ -2171,7 +2171,7 @@ ${LD_END}`;
 //
 // The page is hand-authored; its structured data is not, so it cannot say
 // more than content/research.json does: this site's edition, as that entry
-// names and describes it, with the maintained tool named only as the page
+// names and describes it, with the newer tool named only as the page
 // and the entry name it, a separate piece of code (mentions), never the
 // same application or its source.
 // ------------------------------------------------------------------

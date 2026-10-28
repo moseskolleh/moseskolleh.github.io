@@ -66,8 +66,8 @@
         co2: () => {
             const badge = document.getElementById('carbonBadgeText');
             print(badge ? badge.textContent : 'the scale is still warming up — scroll to the footer.');
-            print('methodology: Resource Timing API × Sustainable Web Design model.');
-            print('this counts network transfer only — not the energy your device spends rendering it.');
+            print('methodology: Resource Timing API × Sustainable Web Design model v3.');
+            print('it weighs the bytes transferred, with a model that allocates data-centre, network and device energy per byte.');
         },
         drill: (args, done) => {
             const steps = [

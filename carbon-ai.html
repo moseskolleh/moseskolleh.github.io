@@ -41,7 +41,7 @@
         },
         "mentions": {
             "@type": "SoftwareSourceCode",
-            "name": "EcoPrompt Coach — the maintained tool (promptcoach)",
+            "name": "EcoPrompt Coach — the newer tool (promptcoach)",
             "codeRepository": "https://github.com/moseskolleh/promptcoach"
         }
     }
@@ -90,7 +90,7 @@
             <p>
                 The <strong>energy, water and carbon cost</strong> of an LLM query, and tips to cut it:
                 this site's edition of the EcoPrompt Coach, which began as a prototype at the Digital
-                Society School. The maintained version is the
+                Society School. A newer version is the
                 <a href="https://moseskolleh.github.io/promptcoach/" target="_blank" rel="noopener">EcoPrompt Coach app</a>, its code at
                 <a href="https://github.com/moseskolleh/promptcoach" target="_blank" rel="noopener">github.com/moseskolleh/promptcoach</a>.
             </p>
@@ -251,8 +251,8 @@
                 <strong>Input and output tokens are priced differently.</strong> Reading a prompt is prefill —
                 the whole thing goes through the model in one parallel pass. Writing an answer is decode —
                 one token per forward pass, reloading the weights each time. An output token is modelled as
-                <span data-claim="output-weight">four</span> input tokens, a figure with a plausible range of <span data-claim="output-weight-range">2–8×</span>. The published per-1k-token
-                benchmarks are reproduced exactly at a <span data-claim="reference-mix">50/50</span> split, so this refines the numbers rather than
+                <span data-claim="output-weight">four</span> input tokens, my judgement, with a plausible range of <span data-claim="output-weight-range">2–8×</span>. The per-1k-token
+                figures adapted from the benchmarks are reproduced exactly at a <span data-claim="reference-mix">50/50</span> split, so this refines the numbers rather than
                 inflating them.
             </p>
             <div class="ca-disclaimer">
@@ -261,7 +261,7 @@
                 excluded, here and in <a href="#anatomy">Anatomy of a Prompt</a> above: no
                 per-query factor for it has a source good enough to use. Water counts on-site
                 cooling only, not the water used to generate the electricity. Use as a relative
-                comparator, not an absolute audit. The maintained EcoPrompt Coach has its own method
+                comparator, not an absolute audit. The newer EcoPrompt Coach has its own method
                 and data, so its figures can differ from these.
             </div>
         </section>

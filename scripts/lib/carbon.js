@@ -9,7 +9,8 @@
 // drifts from the ledger.
 // ===================================================================
 
-// Sustainable Web Design model, global average grid, network transfer only.
+// Sustainable Web Design model v3, global average grid: data-centre, network
+// and end-user device energy, allocated per byte transferred.
 const GRAMS_PER_MB = 0.36;
 
 /** Grams CO₂e for a transferred payload, Sustainable Web Design model. */

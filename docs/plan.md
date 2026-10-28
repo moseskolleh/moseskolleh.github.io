@@ -350,9 +350,10 @@ A yearly `report-2026.html`: **the portfolio reports its own climate impact the 
 Moses would write it for a client**. It is structured after ESRS E1 (climate
 change) disclosure logic; it is not an assured CSRD report, and it says so.
 
-- **Boundary and method:** what counts (network transfer of every visit) and what
-  doesn't (device energy, embodied hardware, the author's laptop). Uses the Sustainable
-  Web Design constant already used on the site (0.36 g CO₂e/MB), stated as such.
+- **Boundary and method:** what counts (the bytes every visit transfers) and what
+  doesn't (the author's laptop). Uses the Sustainable Web Design v3 constant already
+  used on the site (0.36 g CO₂e/MB), stated as such: it allocates data-centre, network
+  and end-user device energy per byte, so device energy is in it, not left out.
 - **Activity data, measured, not modelled:** the sum of *bytes actually transferred*
   per visit from the Phase 1 counter, by page. Cached repeat visits count as the
   near-zero they are.
@@ -1422,7 +1423,7 @@ and 6 wait on Moses (L2, L4); 7 and 8 are not started.
    `smoke.js --lengths-only` in the pinned Chromium), and
    `scripts/receipt.js` writes one comment, edited on each push: every
    budget's bytes and how they moved, the CO₂e of each page's first view at
-   0.36 g/MB (network transfer only), each page's length at both sizes, and
+   0.36 g/MB (Sustainable Web Design v3, per byte transferred), each page's length at both sizes, and
    anything over its ceiling first; from a fork it goes to the job summary
    instead. Each side's ceilings are its own: measuring another checkout,
    `check-budget.js --json --root` reads them from that checkout's copy of

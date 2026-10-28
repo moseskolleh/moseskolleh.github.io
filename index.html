@@ -737,12 +737,12 @@
                     <p class="ydi-lede">The three smallest models are plotted for you. <strong>Drag across the chart</strong> to predict the rest — from mid-size models up to a frontier reasoning model — then reveal what the research estimates.</p>
                 </div>
                 <div class="ydi-chart">
-                    <svg class="ydi-svg" id="ydiSvg" viewBox="0 0 640 380" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Interactive prediction chart of AI energy use per answer as models scale from a tiny 1-billion-parameter model up to a frontier reasoning model. Use the Reveal button and the data table below for a non-visual summary."></svg>
+                    <svg class="ydi-svg" id="ydiSvg" viewBox="0 0 640 380" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Interactive prediction chart of AI energy use per query as models scale from a tiny 1-billion-parameter model up to a frontier reasoning model. Use the Reveal button and the data table below for a non-visual summary."></svg>
                     <span class="ydi-hint" id="ydiHint" aria-hidden="true">drag to draw your guess</span>
                 </div>
                 <div class="ydi-legend" id="ydiLegend" hidden aria-hidden="true">
                     <span class="ydi-leg ydi-leg-guess">your guess</span>
-                    <span class="ydi-leg ydi-leg-real">published estimate</span>
+                    <span class="ydi-leg ydi-leg-real">research estimate</span>
                     <span class="ydi-leg ydi-leg-intuit">a straight-line guess (illustrative)</span>
                 </div>
                 <div class="ydi-controls">
@@ -757,7 +757,7 @@
 
             <div class="eco-actions">
                 <a class="btn btn-secondary btn-small" href="carbon-ai.html" data-analytics="ecoprompt-coach"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bolt"></use></svg> Open the EcoPrompt Coach</a>
-                <p class="eco-footnote">The full calculator, and where one answer lands on a CSRD report, are there.<span class="needs-js"> The chart's figures are published estimates for a <span data-claim="answer-tokens">1,000</span>-token answer (Jegham et&nbsp;al. 2025), good to an order of magnitude, inference only, before the data-centre overhead the coach adds.</span> The maintained version is the <a href="https://moseskolleh.github.io/promptcoach/" target="_blank" rel="noopener">EcoPrompt Coach app</a>, its code <a href="https://github.com/moseskolleh/promptcoach" target="_blank" rel="noopener">on GitHub</a>.</p>
+                <p class="eco-footnote">The full calculator, and where one answer lands on a CSRD report, are there.<span class="needs-js"> The chart's figures are estimates adapted from Jegham et&nbsp;al. (2025) for <span data-claim="answer-tokens">1,000</span> tokens, split evenly between prompt and answer, good to an order of magnitude, inference only, before the coach's data-centre overhead.</span> A newer version, with extrapolated 2026 models, is the <a href="https://moseskolleh.github.io/promptcoach/" target="_blank" rel="noopener">EcoPrompt Coach app</a>, its code <a href="https://github.com/moseskolleh/promptcoach" target="_blank" rel="noopener">on GitHub</a>.</p>
             </div>
         </div>
     </section>
@@ -1005,8 +1005,8 @@
                 </div>
                 <div class="carbon-method" id="carbonMethod" hidden>
                     <p>Measured live in your browser via the Resource Timing API: each asset's transferred size, or its compressed size when served from cache &mdash; so a repeat visit is never flattered into looking lighter than it is. Converted with the
-                    <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" target="_blank" rel="noopener">Sustainable Web Design model</a>
-                    (&asymp;<span data-claim="web-carbon">0.36</span>&nbsp;g CO&#8322;e per MB, global average grid). Comparison point: the median web page ships &asymp;<span data-claim="median-page">2.5</span>&nbsp;MB
+                    <a href="https://sustainablewebdesign.org/estimating-digital-emissions/" target="_blank" rel="noopener">Sustainable Web Design model</a> v3
+                    (&asymp;<span data-claim="web-carbon">0.36</span>&nbsp;g CO&#8322;e per MB, global average grid), which shares the energy of data centres, networks and readers&rsquo; devices out over the bytes sent; its page now documents v4. Comparison point: the median web page ships &asymp;<span data-claim="median-page">2.5</span>&nbsp;MB
                     (<a href="https://httparchive.org/reports/page-weight" target="_blank" rel="noopener">HTTP Archive</a>).
                     A leading &ldquo;+&rdquo; means a request to another site couldn&rsquo;t be measured (the visit count or a message, both sent to the site&rsquo;s Apps Script), so the true figure is a touch higher &mdash; never lower.
                     Before this redesign, this page loaded ~<span data-claim="old-images">22</span>&nbsp;MB of images on arrival. A first view now costs about <span data-claim="first-view">257</span>&nbsp;KB over the wire on a desktop, less on a phone, fonts included &mdash; text compressed, one hero image, everything else loaded only if you go looking for it. That figure is a budget the test suite enforces, not a claim in a README.

@@ -13,7 +13,7 @@
 //   value      the point estimate used in the calculation
 //   range      [low, high] — the plausible spread, not a confidence interval
 //   source     a key into SOURCES below
-//   vintage    what period the underlying measurement describes
+//   vintage    what period the underlying estimate describes
 //   updated    when a human last checked this entry against its source
 //
 // The tool renders this as a ledger, so a reader can audit any number without
@@ -39,21 +39,23 @@
     // ---------------------------------------------------------------
     const SOURCES = {
         jegham2025: {
-            citation: 'Jegham, Abedin, Ali, et al. (2025), "How Hungry is AI? Benchmarking Energy, Water, and Carbon Footprint of LLM Inference"',
+            citation: 'Jegham et al. (2025), "How Hungry is AI? Benchmarking Energy, Water, and Carbon Footprint of LLM Inference", arXiv:2505.09598',
             published: '2025',
             kind: 'preprint',
-            note: 'Per-query inference benchmarks across commercial and open models. Figures below are adapted to a per-1k-token basis.'
+            note: 'Per-query estimates across commercial and open models, from API performance and inferred hardware, not metered. The per-1k-token figures below are my own conversion of them, at a 50/50 input:output mix, and the ranges my own judgement.'
         },
-        luccioni2023: {
-            citation: 'Luccioni, Jernite & Strubell (2023), "Power Hungry Processing: Watts Driving the Cost of AI Deployment?"',
-            published: '2023',
-            kind: 'peer-reviewed',
-            note: 'Task-level inference energy; the basis for treating generation as far costlier than classification.'
+        // The output-token weight is a judgement, and says so: no paper
+        // gives it (Luccioni et al., cited for it until October 2026, compare
+        // tasks, not prefill with decode).
+        own: {
+            citation: 'Moses Kolleh Sesay, for this edition',
+            published: '2026-08',
+            kind: 'own judgement'
         },
         patterson2021: {
-            citation: 'Patterson et al. (2021), "Carbon Emissions and Large Neural Network Training"',
+            citation: 'Patterson et al. (2021), "Carbon Emissions and Large Neural Network Training", arXiv:2104.10350',
             published: '2021',
-            kind: 'peer-reviewed',
+            kind: 'preprint',
             note: 'Training-side; used here only for data-centre efficiency context.'
         },
         devries2023: {
@@ -120,8 +122,8 @@
     // ---------------------------------------------------------------
     // Energy per token
     //
-    // The published benchmarks give one blended Wh-per-1k-tokens figure, but
-    // input and output tokens are not the same work. Input is prefill: the
+    // The figures adapted from the benchmarks are one blended Wh per 1k
+    // tokens, but input and output tokens are not the same work. Input is prefill: the
     // whole prompt goes through the model in parallel, saturating the GPU.
     // Output is decode: one token at a time, each pass reloading the weights
     // for a single token, which is far less efficient per token.
@@ -132,17 +134,17 @@
     //
     // So: an output token is modelled as OUTPUT_MULTIPLIER input tokens, and
     // the per-1k figure is calibrated against a reference mix so that the
-    // published benchmark is reproduced exactly at that mix. Any other mix
+    // adapted figure is reproduced exactly at that mix. Any other mix
     // moves away from it in the direction the physics says it should.
     // ---------------------------------------------------------------
     const TOKEN_ENERGY = {
         outputMultiplier: 4,
         range: [2, 8],
         referenceMix: { input: 0.5, output: 0.5 },
-        source: 'luccioni2023',
+        source: 'own',
         vintage: '2023–2025',
         updated: REVIEWED_ON,
-        note: 'Decode is memory-bandwidth bound and processes one token per forward pass; prefill is compute-bound and batches the whole prompt. Reported ratios range from about 2× to 8× depending on batch size, sequence length and KV-cache reuse. 4× is the middle of that spread. The published per-1k-token figures are reproduced exactly at a 50/50 input:output mix.'
+        note: 'No published source gives this ratio. Decode is memory-bandwidth bound and processes one token per forward pass; prefill is compute-bound and batches the whole prompt. 2× to 8× is my judgement of the spread, which depends on batch size, sequence length and KV-cache reuse; 4× is its middle. The per-1k-token figures are reproduced exactly at a 50/50 input:output mix.'
     };
 
     /**
@@ -157,7 +159,7 @@
      * Wh of IT energy (before PUE) for one query.
      *
      * Calibrated so that 1000 tokens at the reference mix costs exactly the
-     * model's published energyPer1kTokens_Wh — the homepage's You Draw It
+     * model's energyPer1kTokens_Wh — the homepage's You Draw It
      * chart quotes that figure directly, and it must keep meaning the same
      * thing.
      */
@@ -174,9 +176,9 @@
     //
     // `vintage` is the period the benchmark describes, and it is the field to
     // look at before trusting any of this: these are 2024–2025 model releases
-    // measured in 2025. Providers ship faster than independent benchmarks are
+    // estimated in 2025. Providers ship faster than independent benchmarks are
     // published, so newer models are absent — not because they are efficient,
-    // but because nobody has measured them in public yet. Adding a model with
+    // but because no public estimate of them exists yet. Adding a model with
     // a guessed number would be worse than leaving it out.
     // ---------------------------------------------------------------
     const MODELS = {
@@ -185,7 +187,7 @@
             energyPer1kTokens_Wh: 0.50, range: [0.30, 0.90],
             modelVersion: 'gpt-4o, 2024 releases', vintage: '2024–2025',
             source: 'jegham2025', updated: REVIEWED_ON,
-            note: 'Parameter count is not disclosed; the energy figure is measured, the size is inferred.'
+            note: 'Parameter count is not disclosed; the energy figure is estimated, the size inferred.'
         },
         'gpt-4o-mini': {
             label: 'GPT-4o mini', provider: 'OpenAI', params: '~8B (distilled, est.)',
@@ -331,7 +333,7 @@
     // Kept here so there is exactly one of it.
     const TRANSFER = {
         gramsPerMB: { value: 0.36, range: [0.20, 0.60], unit: 'gCO₂e/MB', source: 'swd2023', vintage: '2023', updated: REVIEWED_ON,
-                      note: 'Covers network transfer only — not the energy the receiving device spends rendering or playing what it received.' }
+                      note: 'Model v3, whose energy per GB spans data centres, networks, end-user devices and hardware production, at a global average grid, allocated per byte transferred: an allocation, not a measurement of any visit. Its page now documents v4.' }
     };
 
     /**

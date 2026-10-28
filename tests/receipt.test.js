@@ -66,8 +66,8 @@ const cells = (line) => line.split('|').slice(1, -1).map(s => s.trim());
     assert(index[3] === `+${(want(281718) - want(280899)).toFixed(1)} mg`, `CO₂e: its change, signed (${index[3]})`);
     const cs = cells(row('`case-studies.html`', 'mg'));
     assert(cs[3] === `−${(want(98522) - want(86522)).toFixed(1)} mg`, `CO₂e: a lighter page shows a fall (${cs[3]})`);
-    assert(/Network transfer only/.test(md) && /0\.36 g CO₂e per MB/.test(md) && /estimate, not a measurement/.test(md),
-        'CO₂e: says it is network transfer only, at 0.36 g CO₂e per MB, and an estimate');
+    assert(/Sustainable Web Design \(v3\)/.test(md) && /0\.36 g CO₂e per MB/.test(md) && /allocates data-centre, network and device energy per byte/.test(md) && /estimate, not a measurement/.test(md),
+        'CO₂e: names the model (v3), at 0.36 g CO₂e per MB, says what it allocates per byte, and that it is an estimate');
     const pagesInCarbon = lines.filter(l => /^\| `[^`]+` \| [\d.]+ mg|^\| `[^`]+` \| — \|/.test(l) && /mg/.test(l)).map(l => cells(l)[0]);
     assert(pagesInCarbon.join() === '`index.html`,`case-studies.html`,`fresh.html`',
         `CO₂e: one row for each budget that is a page's first view, and only those (${pagesInCarbon.join(', ')})`);
