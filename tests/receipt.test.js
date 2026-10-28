@@ -20,7 +20,7 @@ const ROOT = path.join(__dirname, '..');
 const FIX = path.join(__dirname, 'fixtures', 'receipt');
 const load = (name) => JSON.parse(fs.readFileSync(path.join(FIX, name), 'utf8'));
 const { receipt, MARKER, signed, fmtByteChange, fmtBytes, fmtMgChange, mgOf } = require('../scripts/receipt.js');
-const { GRAMS_PER_MB } = require('../scripts/lib/voice-signature.js');
+const { GRAMS_PER_MB } = require('../scripts/lib/carbon.js');
 
 let failures = 0;
 function assert(cond, msg) {

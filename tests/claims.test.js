@@ -615,7 +615,7 @@ const narration = [data.narration.intro ? data.narration.intro.text : ''].concat
     // would have left both behind with every test passing. The build's
     // copy weighs the recording and the PR receipt.
     const dispatch = read('modules/dispatch.js');
-    const build = constant('GRAMS_PER_MB', read('scripts/lib/voice-signature.js'));
+    const build = constant('GRAMS_PER_MB', read('scripts/lib/carbon.js'));
     const typed = ['script.js', 'carbon-ai.js', 'ai-carbon-data.js'].concat(fs.readdirSync(path.join(ROOT, 'modules')).filter(f => f.endsWith('.js')).map(f => `modules/${f}`))
         .flatMap(f => literals(read(f)).flatMap(t => [...t.matchAll(/(\d+(?:\.\d+)?)\s*g CO₂e(?: per |\/)MB/g)].map(m => `${f}: ${m[1]}`)));
     assert(/const \{ gramsPerMB \} = mks\.carbon;/.test(dispatch) && /\* gramsPerMB\b/.test(dispatch) && !/\d\.\d+ g CO₂e/.test(literals(dispatch).join(' '))

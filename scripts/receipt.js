@@ -19,13 +19,13 @@
 //
 // The carbon figure is the one the footer badge uses: bytes transferred
 // times the Sustainable Web Design constant, 0.36 g CO₂e per MB (one copy,
-// in scripts/lib/voice-signature.js), for a first view with nothing cached.
+// in scripts/lib/carbon.js), for a first view with nothing cached.
 // It counts network transfer only, not the reader's device, and it is an
 // estimate; the receipt says both wherever it shows the figure.
 // ===================================================================
 
 const fs = require('fs');
-const { GRAMS_PER_MB, grams } = require('./lib/voice-signature.js');
+const { GRAMS_PER_MB, grams } = require('./lib/carbon.js');
 const { couldLowerTo, heldLength, fmtCeiling, keyFor, lengthHeld } = require('./check-budget.js');
 
 const KB = 1024;
