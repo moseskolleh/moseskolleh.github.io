@@ -110,6 +110,8 @@ function assert(cond, msg) {
             const at = flat.indexOf(squash(r.title));
             const block = flat.slice(at, at + 400);
             if (at < 0 || !block.includes(squash(r.organization)) || !block.includes(squash(r.displayDates))) missing.push(`"${r.title}" with its organisation and dates`);
+            // A partner with its consent recorded is named with its role (D2).
+            if (r.partner && r.partnerConsent === true && (at < 0 || !block.includes(squash(r.partner)))) missing.push(`"${r.title}" with its partner, ${r.partner}`);
         });
         profile.education.forEach((e) => { need('degree', e.degree); need('institution', e.institution); need(`dates of ${e.degree}`, e.displayDates); });
         profile.education.filter(e => e.grade).forEach(e => need('grade', e.grade));
@@ -140,6 +142,7 @@ function assert(cond, msg) {
 
     // --- Nothing the site does not say -----------------------------------
     {
+        const consented = [profile.currentRole].concat(profile.experience).filter(r => r.partner && r.partnerConsent === true);
         const FORBIDDEN = [
             { re: /10,000\+|ten thousand/i, why: 'no count of people reached exists in content/' },
             { re: /project completion|completion rate/i, why: 'a completion rate with no method behind it' },
@@ -150,7 +153,9 @@ function assert(cond, msg) {
             { re: /advised the (?:UN|United Nations)/i, why: 'the UN role was an internship' },
             { re: /coverage by 25%|25% (?:more )?regional|\baudited\b|for national policy use/i, why: 'the UNDRR wording the site dropped: an unsourced coverage gain, an audit, a policy use nothing records' },
             { re: /top of class|dual master|\bGPA\b|Life Cycle Assessment|Carbon Markets|Circular Economy|\bSASB\b/i, why: 'a rank, terms and skills the site dropped for want of a record' },
-            { re: /Ministry of Finance|Ministerie/i, why: 'naming the partner on the CV waits on the owner (consent)' },
+            // Naming a partner waits on its consent (owner checklist D2): the
+            // ministry is refused unless profile.json records it.
+            ...(consented.some(r => /Ministry of Finance/.test(r.partner)) ? [] : [{ re: /Ministry of Finance|Ministerie/i, why: 'naming the partner on the CV waits on the owner (consent)' }]),
             { re: /Dr\.? Timbo|\bACF\b|Living Water International|WiNGiN|Matthijs|\bJop\b|Rezaei/i, why: 'a client or partner named in the repositories, not cleared' }
         ];
         const found = FORBIDDEN.map(({ re, why }) => { const m = text.match(re); return m ? `"${m[0]}" (${why})` : null; }).filter(Boolean);
@@ -212,10 +217,24 @@ function assert(cond, msg) {
         assert(model.experience.every(r => r.lines.length >= 2), 'Model: each role carries its lines from the homepage card');
         assert(model.profile.length === 2 && model.skills.toolkit.length >= 6 && model.skills.toolkit.every(t => t.name && t.proof),
             'Model: the profile is the hero\'s two sentences, and every tool comes with its proof');
-        // Every role's partner, the closed ones' too: the current role has none.
-        const partners = [profile.currentRole].concat(profile.experience).map(r => r.partner).filter(Boolean);
-        assert(partners.every(p => !JSON.stringify(model).includes(p)),
-            `Model: no role's partner is named (owner checklist: consent) (${partners.length} checked)`);
+        // A role's partner is named only with its consent on record
+        // (`partnerConsent: true`, owner checklist D2), beside the role's
+        // organisation; without it, it is named nowhere on the CV. Every
+        // role's, the closed ones' too: the current role has none.
+        const roles = [profile.currentRole].concat(profile.experience).filter(r => r.partner);
+        const placed = (m, r) => m.experience.some(e => e.title === r.title && e.where.endsWith(` · with ${r.partner}`));
+        const wrong = roles.filter(r => (r.partnerConsent === true ? !placed(model, r) : JSON.stringify(model).includes(r.partner))).map(r => r.partner);
+        assert(roles.length > 0 && wrong.length === 0,
+            `Model: a role's partner is named, beside its organisation, exactly when its consent is recorded (${roles.map(r => `${r.partner}: ${r.partnerConsent === true ? 'consent' : 'none'}`).join('; ')}; wrong: ${wrong.join(', ') || 'none'})`);
+        // And the rule holds without consent: the same partner, its consent
+        // taken off, or recorded as anything but true, is left off the CV.
+        ['delete', 'yes', false].forEach((how) => {
+            const withheld = JSON.parse(JSON.stringify(data));
+            withheld.profile.experience.filter(r => r.partner).forEach((r) => { if (how === 'delete') delete r.partnerConsent; else r.partnerConsent = how; });
+            const m = cv.cvModel(withheld, read('index.html'));
+            const named = roles.filter(r => JSON.stringify(m).includes(r.partner)).map(r => r.partner);
+            assert(named.length === 0, `Model: a partner whose consent is ${how === 'delete' ? 'not recorded' : `recorded as ${JSON.stringify(how)}`} is not on the CV (${named.join(', ') || 'none named'})`);
+        });
         // The CV copies the homepage's words into its own order, Skills last,
         // after the certificates: a proof that says where to look on the
         // homepage ("certificate, below") points the wrong way on paper.

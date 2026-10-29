@@ -108,10 +108,14 @@ function cvModel(data, indexHtml) {
     const facts = [['Seniority', g.seniority], ['Available', available], ['Languages', languages], ['Right to work', g.rightToWork]]
         .filter(([, v]) => v).map(([label, value]) => `${label}: ${value}`);
 
+    // A role's partner is named only when its consent is on record
+    // (`partnerConsent: true`, owner checklist D2); without it the CV
+    // leaves the partner off, as it once left off every one.
     const experience = profile.experience.map((r) => {
         const card = home.roles.get(r.title);
         if (!card) throw new Error(`index.html has no experience card titled "${r.title}" (content/profile.json)`);
-        return { title: r.title, where: card.where.includes(r.organization) ? card.where : r.organization, when: r.displayDates, lines: card.lines };
+        const where = card.where.includes(r.organization) ? card.where : r.organization;
+        return { title: r.title, where: r.partner && r.partnerConsent === true ? `${where} · with ${r.partner}` : where, when: r.displayDates, lines: card.lines };
     });
 
     const education = profile.education.map((e) => {

@@ -122,8 +122,9 @@
       "title": "Researcher — Sustainable Artificial Intelligence",
       "organization": "Digital Society School",
       "parentOrganization": "Amsterdam University of Applied Sciences",
-      "partner": "a Dutch government partner",
-      "$partner": "Described, not named: no consent to name the organisation is recorded (owner checklist D2), so no page names it. The CV names no partner at all; tests/cv.test.js holds every role's partner off it.",
+      "partner": "Ministry of Finance (Netherlands)",
+      "partnerConsent": true,
+      "$partner": "Named with the ministry's written consent, which Moses confirmed on 28 Oct 2026 and keeps himself (owner checklist D2). partnerConsent: true is what lets a page or the CV name a partner; without it a partner is described, not named, and the CV leaves it off (tests/content.test.js, tests/cv.test.js).",
       "displayDates": "Sept 2025 — Feb 2026",
       "start": "2025-09",
       "end": "2026-02"
@@ -244,11 +245,11 @@
 
   "$pages": "Drives sitemap.xml. lastmod is set by hand when a page's content changes — a build timestamp would claim every page changed on every deploy, which is the fastest way to teach a crawler to ignore the field.",
   "pages": [
-    { "path": "index.html", "loc": "https://moseskolleh.github.io/", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "1.0" },
-    { "path": "case-studies.html", "loc": "https://moseskolleh.github.io/case-studies.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.9" },
+    { "path": "index.html", "loc": "https://moseskolleh.github.io/", "lastmod": "2026-10-29", "changefreq": "monthly", "priority": "1.0" },
+    { "path": "case-studies.html", "loc": "https://moseskolleh.github.io/case-studies.html", "lastmod": "2026-10-29", "changefreq": "monthly", "priority": "0.9" },
     { "path": "research.html", "loc": "https://moseskolleh.github.io/research.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.8" },
     { "path": "carbon-ai.html", "loc": "https://moseskolleh.github.io/carbon-ai.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.8" },
-    { "path": "field-report.html", "loc": "https://moseskolleh.github.io/field-report.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.3" },
+    { "path": "field-report.html", "loc": "https://moseskolleh.github.io/field-report.html", "lastmod": "2026-10-29", "changefreq": "monthly", "priority": "0.3" },
     { "path": "claims.html", "loc": "https://moseskolleh.github.io/claims.html", "lastmod": "2026-10-28", "changefreq": "monthly", "priority": "0.5" },
     { "path": "stats.html", "loc": "https://moseskolleh.github.io/stats.html", "lastmod": "2026-10-28", "changefreq": "weekly", "priority": "0.2" }
   ]
