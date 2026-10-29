@@ -143,7 +143,7 @@ const profile = JSON.parse(read('content/profile.json'));
             'the hero\'s "3 continents" and the journey\'s stops in Sierra Leone, China and Germany'],
         ['164 water points across Sierra Leone', () => /164 water points/.test(text(about.querySelector('.about-text p:nth-of-type(2)'))), 'About\'s own paragraph'],
         ['Python, SQL, GIS & ML', () => ['Python', 'SQL', 'QGIS & ArcGIS', 'Machine Learning'].every(t => Array.from(bare.querySelectorAll('#skills .toolkit-name')).some(n => text(n).startsWith(t))), 'the toolkit, each with its proof'],
-        ['ESG Specialist Program, Corporate Finance Institute (2024)', () => /^ESG Specialist Program Corporate Finance Institute · Sep 2024/.test(text(bare.querySelector('#education .certification'))), 'the certificates'],
+        ['ESG Specialist Program, Corporate Finance Institute (2024)', () => Array.from(bare.querySelectorAll('#education .certification')).some(c => /^ESG Specialist Program Corporate Finance Institute · Sep 2024/.test(text(c))), 'the certificates'],
         ['the six chips', () => ['ESG Analysis & Integration', 'GHG Accounting (Scope 1–3)', 'Climate Risk Assessment', 'Water Resource Management'].every(s => text(bare.querySelector('.skills-checklist')).includes(s)) &&
             ['IFRS S1&S2', 'GRI', 'CSRD'].every(s => text(bare.querySelector('.frameworks-list')).includes(s)), 'Skills\' two lists']
     ];
@@ -249,17 +249,20 @@ const profile = JSON.parse(read('content/profile.json'));
     });
     const degrees = Array.from(education.querySelectorAll('.education-grid > .education-card'));
     assert(degrees.length === profile.education.length, `Education: every degree keeps its own entry (${degrees.length})`);
+    // Each degree keeps its distinction and at least its thesis line. The
+    // two lines that only listed coursework (Hunan's and the BSc's) made
+    // room for a fifth certificate on 29 Oct 2026, a line of what was
+    // studied for a line of what was studied.
     profile.education.forEach((e) => {
         const d = degrees.find(el => text(el.querySelector('h3')) === e.degree);
         assert(!!d && text(d.querySelector('.education-top')) === e.displayDates && text(d.querySelector('h4')).startsWith(e.institution.replace(/ & Research$/, '')) &&
-            !!d.querySelector('.specialization') && d.querySelectorAll('li').length >= 2,
+            !!d.querySelector('.specialization') && d.querySelectorAll('li').length >= (e.inProgress ? 2 : 1),
             `Education: ${e.degree} keeps its dates, institution, distinction and lines`);
     });
     ['Wageningen African Scholarship Programme scholar', 'Average grade 7.8/10 (Dutch scale)', 'Full Chinese Government (MOFCOM) Scholarship',
         'First Class Honours', 'Human-Environment Interaction · Water Systems & Global Change',
-        'Thesis: socioeconomic drivers of river export of pollutants worldwide', 'Thesis: soft path water management — Freetown case study',
-        'Dissertation: groundwater potential mapping, geophysical approach', 'Project management, operations research, systems analysis',
-        'Hydrogeology, geophysics, environmental geology']
+        'Thesis: socioeconomic drivers of river export of pollutants', 'Thesis: soft path water management — Freetown case study',
+        'Dissertation: groundwater potential mapping, geophysical approach']
         .forEach(line => assert(plain.includes(line), `Education: "${line}" is still on the page`));
 }
 

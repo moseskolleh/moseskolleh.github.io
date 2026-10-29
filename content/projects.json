@@ -61,11 +61,11 @@
     {
       "id": "sustainable-ai",
       "title": "Sustainable AI Framework",
-      "subtitle": "Making public-sector AI adoption accountable for its footprint",
+      "subtitle": "Making a finance ministry's AI adoption accountable for its footprint",
       "period": "2025 — 2026",
       "location": "Amsterdam, NL",
       "organization": "Digital Society School, Amsterdam University of Applied Sciences",
-      "partner": "a Dutch government partner",
+      "partner": "Ministry of Finance (Netherlands)",
       "lenses": ["sustainable-ai", "esg-csrd", "climate-risk"],
       "role": "Researcher — Sustainable Artificial Intelligence",
       "tags": ["AI Governance", "Sustainability", "SDG 12 & 13", "Prototyping"],
@@ -94,11 +94,11 @@
           "fullCaption": "Demo day — putting the decision-support toolkit into visitors' hands at the Digital Society School." }
       ],
 
-      "problem": "Generative AI is becoming government infrastructure — but every prompt has a footprint. How does a government department adopt AI responsibly without greenwashing, and without grinding innovation to a halt?",
+      "problem": "Generative AI is becoming government infrastructure — but every prompt has a footprint. How does a finance ministry adopt AI responsibly without greenwashing, and without grinding innovation to a halt?",
 
       "method": [
         "As a team, mapped the environmental footprint of generative AI end to end — Scope 2 electricity, Scope 3 hardware, and data-centre water.",
-        "Built, with the team, a sustainability assessment framework for concrete AI use cases, framed against CSRD/ESRS disclosure logic so the output lands in a reporting language the partner already speaks.",
+        "Built, with the team, a sustainability assessment framework for concrete AI use cases, framed against CSRD/ESRS disclosure logic so the output lands in a reporting language the ministry already speaks.",
         "Prototyped decision-support tools for managers setting strategy and for staff writing prompts, and showed them at public research sessions and demo days.",
         "Aligned the framework against UN SDG 12 (responsible consumption and production) and SDG 13 (climate action)."
       ],
@@ -129,7 +129,7 @@
           "name": "Sustainability assessment framework for AI use cases",
           "kind": "framework",
           "status": "internal",
-          "heldBy": "Digital Society School and its government partner",
+          "heldBy": "Digital Society School / Ministry of Finance",
           "note": "Developed inside a research partnership; not mine to publish unilaterally."
         }
       ],

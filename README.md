@@ -206,8 +206,10 @@ The suites, and the failure each one exists to prevent:
   people", a project completion rate, "15% efficiency", "advised the UN",
   "certified across", "if a skill is listed, there's a project behind it",
   the UNDRR coverage gain, "top of class", a GPA, and skills with no receipt)
-  stay gone, the government partner is named nowhere, the field report names
-  no tool the homepage does not show, the illustrative You Draw It guess line
+  stay gone, a partner is named only once its consent is recorded
+  (`partnerConsent` in `profile.json`; the Dutch Ministry of Finance's is,
+  and the EcoPrompt Coach page, the site's own edition, names none), the
+  field report names no tool the homepage does not show, the illustrative You Draw It guess line
   says so wherever it is shown, and You Draw It judges a
   guess against the published range rather than calling an estimate the
   actual value.
@@ -253,7 +255,8 @@ The suites, and the failure each one exists to prevent:
   role with its organisation and dates, every degree and certificate, every
   case study's headline result with its checkability, and every public
   output; none of the claims the site dropped, no name the owner has not
-  cleared, no number content/ does not have; and `assets/cv.hash` matching
+  cleared (a role's partner only with `partnerConsent: true`, and never
+  without it), no number content/ does not have; and `assets/cv.hash` matching
   what content/ and the homepage say today and the PDF itself.
 - **`corelog.test.js`** — the core log's depths, worked out by hand for the
   roles as they are and a year later, a role ending in the month it was

@@ -196,8 +196,11 @@ const fieldText = plain(fieldReport);
         if (!indexText.includes(c.name)) certMissing.push(`index: "${c.name}"`);
         if (!indexText.includes(c.issuer)) certMissing.push(`index: "${c.issuer}"`);
         // The field report once gave the issuers' longer titles; it names
-        // each certificate as the homepage does, with its issuer and year.
-        if (!fieldText.includes(`${c.name} — ${c.issuer}, ${c.year}`)) certMissing.push(`field-report: "${c.name} — ${c.issuer}, ${c.year}"`);
+        // each certificate as the homepage does, with its issuer and year,
+        // or with the date the homepage shows where that names more than
+        // one year (a course completed twice, "2025 and 2026").
+        const dated = [c.year].concat(/^\d{4}(?: and \d{4})+$/.test(c.displayDate) ? [c.displayDate] : []);
+        if (!dated.some(d => fieldText.includes(`${c.name} — ${c.issuer}, ${d}`))) certMissing.push(`field-report: "${c.name} — ${c.issuer}, ${dated.join('" or "')}"`);
     });
     assert(certMissing.length === 0, `Certifications: both editions carry every entry (missing: ${certMissing.join('; ') || 'none'})`);
 
@@ -586,19 +589,37 @@ const fieldText = plain(fieldReport);
     });
     assert(named.length === 0, `Partners: no client, partner or team member the repositories name is on the site (${named.join(', ') || 'none'})`);
 
-    // The Digital Society School's government partner has not agreed to be
-    // named (owner checklist D2): the site describes it, as profile.json
-    // does, on every page, in the notes and the feed, and in what the
-    // terminal prints. The CV names no partner (tests/cv.test.js).
+    // A role's partner is named only once its consent is on record:
+    // `partnerConsent: true` on the role in profile.json (owner checklist
+    // D2: the Dutch Ministry of Finance agreed in writing, as Moses
+    // confirmed on 28 Oct 2026; the consent itself stays with him). Without
+    // it, the site describes the partner, as profile.json does, on every
+    // page, in the notes and the feed, and in what the terminal prints, and
+    // names it nowhere. With it, the homepage names it as profile.json
+    // does, and no stand-in for the name is left behind. Either way the
+    // EcoPrompt Coach page is this site's own edition, not the ministry's,
+    // so it names no partner. The CV follows the same rule (tests/cv.test.js).
     const partnerRe = /Ministry of Finance|Ministerie|Financi[eë]n|finance ministry/i;
+    const standIn = /a Dutch government partner|its government partner/i;
     const notes = fs.readdirSync(path.join(ROOT, 'notes')).filter(f => f.endsWith('.html')).map(f => `notes/${f}`)
         .concat(fs.readdirSync(path.join(ROOT, 'content/notes')).filter(f => f.endsWith('.md')).map(f => `content/notes/${f}`));
-    const ministry = pages.concat(notes, ['feed.xml', 'modules/terminal.js', 'script.js'])
-        .map(f => [f, read(f).match(partnerRe)]).filter(([, m]) => m).map(([f, m]) => `${f}: "${m[0]}"`);
-    assert(ministry.length === 0, `Partners: the government partner is described, not named, everywhere the site speaks (${ministry.join(', ') || 'named nowhere'})`);
+    const speaks = pages.concat(notes, ['feed.xml', 'modules/terminal.js', 'script.js']);
+    const saying = (re) => speaks.map(f => [f, read(f).match(re)]).filter(([, m]) => m).map(([f, m]) => `${f}: "${m[0]}"`);
     const dss = profile.experience.find(r => r.organization === 'Digital Society School');
-    assert(!!dss && !!dss.partner && !partnerRe.test(dss.partner) && indexText.includes(dss.partner),
-        `Partners: the homepage describes the Digital Society School's partner as profile.json does ("${dss && dss.partner}")`);
+    assert(!!dss && !!dss.partner && indexText.includes(dss.partner) && [undefined, true].includes(dss.partnerConsent),
+        `Partners: the homepage gives the Digital Society School's partner as profile.json does, and consent is recorded as true or not at all ("${dss && dss.partner}")`);
+    if (dss && dss.partnerConsent === true) {
+        const left = saying(standIn);
+        assert(partnerRe.test(dss.partner) && left.length === 0,
+            `Partners: with its consent recorded, the government partner is named, and no page still describes it instead (${left.join(', ') || 'none does'})`);
+    } else {
+        const ministry = saying(partnerRe);
+        assert(!!dss && !partnerRe.test(dss.partner) && ministry.length === 0,
+            `Partners: with no consent recorded, the government partner is described, not named, everywhere the site speaks (${ministry.join(', ') || 'named nowhere'})`);
+    }
+    const coach = (read('carbon-ai.html').match(partnerRe) || [])[0];
+    assert(!coach && /THIS SITE'S EDITION/.test(read('carbon-ai.html')),
+        `Partners: the EcoPrompt Coach page is this site's own edition, and names no partner (${coach || 'none'})`);
 
     // The prototypes' README lists "success metrics" (a 25% CO2 cut, 4.2/5
     // stars, 70% improvement) that are targets. Wherever the site mentions
