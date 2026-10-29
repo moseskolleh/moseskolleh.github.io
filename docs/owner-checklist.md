@@ -5,18 +5,30 @@ state, evidence only he holds, and checks on accounts only he can open. It
 grows from the "What only Moses can supply" table in [docs/plan.md](plan.md)
 and from what each wave of work found. An item is
 ticked only once it can be seen to be done: in the repository, on the live
-site, or by Moses saying so. One item is ticked, S7, because the repository
-shows it done; nothing else is yet.
+site, or by Moses saying so. S7 is ticked because the repository shows it
+done; twelve more are ticked on Moses's word of 28 October 2026: U2, U6,
+U8, U9, U11, U12, F4, E5, E8, K8, D2 and D4.
 
 Each item says what is needed, where it goes, what it unlocks, and how to
 check it. A path such as `content/profile.json` → `experience[5].teamSize`
 means that file, then that field (lists count from 0). After editing anything
 in `content/`, run `npm run build:content` and then `npm test`.
 
-Last updated with the PhD update, 2026-10-28. Waves 1 to 6 of the plan are
-on `main` (pull requests #48 to #54). The PhD update is in its own pull
-request until it is merged, which must not be before 2 November 2026 (U1).
-It opens your PhD at IUSS Pavia, closes the Digital Society School role
+Last updated 2026-10-29, with Moses's answers of 28 October 2026. On his
+word: the PhD update's wording, the corrected notes, the note at The
+Brief's old address, the lenses and the research page's fold are approved
+as they are (U2, U8, U9, U11, U12); the people in the photos agreed to
+appear (U6); the Digital Society School role was employment, as
+"Researcher" (F4); and K8, E5 and E8 stand as the site already says them.
+Two answers changed the site: the Dutch Ministry of Finance is named again,
+with its written consent (D2), and the Climatematch Academy certificate is
+listed (D4). U3, U5, U7 and F1 stay open, each with a dated line saying
+where it stands.
+
+Before that, the checklist was brought up to the PhD update (2026-10-28).
+Waves 1 to 6 of the plan are on `main` (pull requests #48 to #54), and so
+is the PhD update, since pull request #57 (merged on 28 October 2026, UTC,
+before the 2 November that U1 asked for). It opens your PhD at IUSS Pavia, closes the Digital Society School role
 (it ended in February 2026), moves the site to Pavia, offers research
 collaborations only, removes the narration and retires The Brief. Where a
 claim had no record behind it, the update applied the safe default and
@@ -41,10 +53,10 @@ can wait for them.
    runs each Monday and finds nothing, the four-week baseline every later
    change is judged by (S6) cannot start, and the sustainability statement
    (Phase 4.2) has no data.
-4. **U2, U3, D2** — read what the site now says about the PhD, check
-   IUSS's rules on paid outside work, and say whether the Digital Society
-   School's government partner may be named. Each is a default the update
-   chose for you.
+4. **U3** — check IUSS's rules on paid outside work. Not yet checked (28
+   October 2026), so the site offers research collaborations only. The
+   update's other two defaults are settled: its wording is approved (U2),
+   and the ministry is named again with its consent (D2).
 
 Once a week the "Site health" issue on GitHub (from wave 5) lists which of
 these are still open, beside anything on the site that has broken.
@@ -350,8 +362,10 @@ These are what it could not settle for you.
   - *Check:* the merge is dated 2 November 2026 or later, and the live
     homepage's core log reads "LOGGED NOV 2026".
 
-- [ ] **U2. Read what the site now says about the PhD and Pavia, and
+- [x] **U2. Read what the site now says about the PhD and Pavia, and
   approve it or change it.**
+  - *Done:* approved by Moses, 28 Oct 2026, as the site has it. No site
+    change.
   - *What:* the update's own words, each from the public call or from what
     the site already said:
     - the hero's value line, "I study what climate risk costs, and what
@@ -389,7 +403,7 @@ These are what it could not settle for you.
     `experience[0]` and `education[0]`; `content/research.json` → `now`
     and the `phd-thesis` output. Then `npm run build:content`, `npm run cv`
     and `npm run og`.
-  - *Room:* the homepage is 9.70 of its 9.74 screens on a desktop and the
+  - *Room:* the homepage is 9.71 of its 9.74 screens on a desktop and the
     field report 4.38 of 4.40, so a longer line needs a shorter one beside
     it.
   - *Check:* `npm test` passes, and so does `npm run smoke`'s length check.
@@ -408,6 +422,8 @@ These are what it could not settle for you.
   - *Unlocks:* a line such as "and consulting where my PhD allows", on
     flood risk, water and climate risk.
   - *Check:* `npm test` passes; then `npm run cv` and `npm run og`.
+  - *Status:* Not yet checked (28 Oct 2026). The site stays
+    collaborations-only until you have.
 
 - [ ] **U4. Whether your supervisor may be named, once appointed.**
   - *What:* the site names nobody at IUSS: neither the person the call
@@ -434,8 +450,13 @@ These are what it could not settle for you.
     hand (a test holds the card's number to `person.phone`).
   - *Check:* signed out, the ORCID link shows your record with IUSS on it;
     `npm test` passes, then `npm run cv`.
+  - *Status:* Drafts for LinkedIn and the ORCID record given to Moses, 28
+    Oct 2026. They are his to use; none is in this repository.
 
-- [ ] **U6. Consent for the photos that show other people.**
+- [x] **U6. Consent for the photos that show other people.**
+  - *Done:* Moses confirmed on 28 Oct 2026 that the people in every photo
+    group listed below agreed to appear, and he keeps the consents
+    himself. No site change.
   - *What:* whether the people in these photos agreed to appear on your
     site, or which photos to swap or crop:
     - the drilling crew: the hero's first slide
@@ -474,8 +495,13 @@ These are what it could not settle for you.
     repository.
   - *Check:* LinkedIn says what the CV the site prints
     (`assets/Moses_Kolleh_Sesay_CV.pdf`) says.
+  - *Status:* Drafts for LinkedIn and the ORCID record given to Moses, 28
+    Oct 2026. They are his to use; none is in this repository.
 
-- [ ] **U8. Confirm the corrections to the three notes.**
+- [x] **U8. Confirm the corrections to the three notes.**
+  - *Done:* approved by Moses, 28 Oct 2026. No site change for it; since
+    29 Oct 2026 Note 03 names the Dutch Ministry of Finance again (D2),
+    with its dated correction kept.
   - *What:* each note was changed after it was published, and says so in
     a dated last line:
     - Note 01, "What 164 water points taught me about data": "In hard
@@ -489,7 +515,8 @@ These are what it could not settle for you.
       and let it set the questions for the numbers, never the answers.",
       and "*Wording softened in October 2026.*";
     - Note 03, "Every prompt has a footprint — so what?": "I helped
-      build…", "a Dutch government partner", and "*Corrected October 2026:
+      build…", "a Dutch government partner" (the Dutch Ministry of Finance
+      again since 29 October 2026, D2), and "*Corrected October 2026:
       this first said "I'm building"; that work ended in February 2026.*"
   - *Where:* `content/notes/*.md`, then `npm run build:content`,
     `npm run og` and `npm test`. Each note is close to its length ceiling
@@ -497,7 +524,10 @@ These are what it could not settle for you.
     shorter one in the same note.
   - *Check:* the three notes, and `feed.xml`, read as you would put it.
 
-- [ ] **U9. The note at The Brief's old address, and when to delete it.**
+- [x] **U9. The note at The Brief's old address, and when to delete it.**
+  - *Done:* the note's wording approved by Moses, 28 Oct 2026. No site
+    change. Deleting the address once its visits stop is still yours to
+    call; how is below.
   - *What:* `brief.html` now reads: "This address held The Brief, which set
     a job ad against the work on this site. I am not looking for a job
     now, so I have taken it down; a link to one of its fits now opens this
@@ -522,7 +552,8 @@ These are what it could not settle for you.
     computer.
   - *Check:* Fish Audio lists the key as revoked.
 
-- [ ] **U11. Approve the lenses' new wording.**
+- [x] **U11. Approve the lenses' new wording.**
+  - *Done:* approved by Moses, 28 Oct 2026. No site change.
   - *What:* the lenses spoke to someone hiring ("Best fit for: Roles in …",
     the ESG lens offering sustainability consulting, and the homepage's
     "read them as a water role"). Since the site offers research
@@ -536,7 +567,9 @@ These are what it could not settle for you.
     against `atAGlance.targetRoles`.
   - *Check:* `npm run build:content`, then `npm test`.
 
-- [ ] **U12. Which outputs the research page folds away.**
+- [x] **U12. Which outputs the research page folds away.**
+  - *Done:* Moses chose on 28 Oct 2026 to keep the folded group as it is.
+    No site change.
   - *What:* the research page now lists the theses and reports before your
     coursework and this site's own scripts, which are folded under "Also
     public", behind "Coursework, and this site's own pages and scripts":
@@ -603,6 +636,8 @@ limits allow.
   - *Check:* `npm run build:content` copies it into the at-a-glance strip in
     `index.html` and the structured data; `npm test` rejects a level that is
     not A1–C2 or "native".
+  - *Status:* Moses chose on 28 Oct 2026 to leave them off for now. The
+    site states no language until he adds them.
 
 - [ ] **F2. Right to work, visa sponsorship, driving licence, security
   clearance: only if you look for work again.**
@@ -646,22 +681,18 @@ limits allow.
   - *Check:* after `npm run build:content`, the strip under the hero shows
     each one, and `npm run build:check` passes.
 
-- [ ] **F4. The Digital Society School role: employment or a programme
+- [x] **F4. The Digital Society School role: employment or a programme
   placement, and how big the team was.**
-  - *What:* were you employed under the title "Researcher — Sustainable
-    Artificial Intelligence" (by the Amsterdam University of Applied
-    Sciences, the school's parent), or did you take part in one of the
-    school's programmes? How many people were on the team? The answer
-    should match the CVs you have sent.
+  - *Done:* employment, with the title "Researcher" (Moses, 28 Oct 2026).
+    The site's title, "Researcher — Sustainable Artificial Intelligence",
+    stays as it is, on every page and the CV. The team's size was not
+    given, so the pages credit the work to the team without a figure ("As
+    a team, mapped…", "I was part of a team building…").
   - *Where:* `content/profile.json` → `experience[1]`: its `title`, and the
-    team's size if you give it (a figure needs its entry in
+    team's size if you ever give it (a figure needs its entry in
     `content/claims.json`, as `team-size` has). The homepage's core log and
     `field-report.html` repeat the title by hand, and the case study's
-    `role` is in `content/projects.json` → `sustainable-ai`. Until you say,
-    every page keeps the title and credits the work to the team ("As a
-    team, mapped…", "I was part of a team building…").
-  - *Unlocks:* a title you can stand behind anywhere it is read, on the
-    site and on the CV it prints.
+    `role` is in `content/projects.json` → `sustainable-ai`.
   - *Check:* `npm test` names a page that disagrees with the profile; then
     `npm run cv`.
 
@@ -762,7 +793,10 @@ limits allow.
     names a tool the homepage does not show, so the two go back together.
   - *Check:* the toolkit's Power BI proof links somewhere that shows it.
 
-- [ ] **E5. Was the Trinidad and Tobago factsheet published?**
+- [x] **E5. Was the Trinidad and Tobago factsheet published?**
+  - *Done:* not published, or Moses is not sure that it was (28 Oct
+    2026). It stays as the site describes it: written during the
+    internship and held by UNDRR. No site change.
   - *Why:* the old CV said it "directly informed national policy", and the
     site said "produced for national policy use". Neither had a record
     behind it. The site now calls it "a disaster and climate-risk factsheet
@@ -804,7 +838,10 @@ limits allow.
     the same commit.
   - *Check:* `npm test` passes with the figure and its basis back.
 
-- [ ] **E8. A document for "top of class".**
+- [x] **E8. A document for "top of class".**
+  - *Done:* there is none (Moses, 28 Oct 2026), so "top of class" stays
+    off the site and the CV, and the BSc keeps "First Class Honours" alone.
+    No site change.
   - *What:* a transcript, prize letter or class-rank letter that says you
     ranked first in Geology at the University of Sierra Leone; and whether
     "First Class" is the degree's classification, not the dissertation's
@@ -917,7 +954,7 @@ the right value.
   Digital Society School project is still described as having mapped
   "Scope 2 electricity, Scope 3 hardware, and data-centre water", as a team
   (`content/projects.json` → `sustainable-ai` → `method[0]`, the homepage's
-  core log, the field report). If the government partner's own boundary was
+  core log, the field report). If the ministry's own boundary was
   the hosted-service one, say so and those lines can name it.
 
 - [ ] **K6. The soft-path thesis title.** The site now spells it one way
@@ -933,7 +970,10 @@ the right value.
   `education[2].scholarship` and `education[1].scholarship`), and
   `npm test` holds every page to them. If your award letters say otherwise,
   change the field, and `npm test` names the pages that still disagree.
-- [ ] **K8. MARINA-Multi: did you run it, or analyse its output?** The site
+- [x] **K8. MARINA-Multi: did you run it, or analyse its output?**
+  *Done (Moses, 28 Oct 2026):* he analysed existing MARINA-Multi outputs
+  and did not run the model, so the site's "analysed" is right and stays.
+  No site change. The site
   now credits the model to Wageningen's Water Systems & Global Change group
   and says the thesis "analysed" river pollution with it, never "modelled".
   Say whether you ran MARINA-Multi yourself or analysed runs the group had
@@ -1014,9 +1054,8 @@ drawn from the GAIA repository or from what the site already said.
 - [ ] **G1. Where GAIA and promptcoach began, and whether the Digital
   Society School agreed to their release.**
   - *What:* the sustainable-AI case study lists its "Sustainability
-    assessment framework for AI use cases" as held by the Digital Society
-    School and its government partner ("not mine to publish
-    unilaterally"). GAIA, public under your own MIT licence, answers a
+    assessment framework for AI use cases" as held by "Digital Society
+    School / Ministry of Finance" ("not mine to publish unilaterally"). GAIA, public under your own MIT licence, answers a
     related question; promptcoach is "Version 2 of the Digital Society
     School prototype", and holds the school's EcoPrompt Coach handover
     document, dated January 2026, in its `docs/legacy/`. Say whether GAIA
@@ -1028,12 +1067,12 @@ drawn from the GAIA repository or from what the site already said.
     it began. The release and the handover document are settled in those
     two repositories, not here.
   - *Why it matters:* the notes this site was built from say GAIA began as
-    "Prototype E" in the prototype deck of the school's project with its
-    government partner, so a reader who knows both could take the public
+    "Prototype E" in the prototype deck of the school's project with the
+    ministry, so a reader who knows both could take the public
     one for the held one. GAIA is kept off the sustainable-AI case study's
     artifacts, on its own case only, so that case does not imply the
     answer.
-  - *Also:* whether the partner may be named at all is D2.
+  - *Also:* the ministry may be named since 28 October 2026 (D2).
 - [ ] **G2. The GAIA case's own facts, and whether you will keep the tools
   up to date.** Your role, now "Author" (it said "Author and maintainer"),
   its period ("2025 — 2026"), and that the web estimator at
@@ -1053,9 +1092,9 @@ drawn from the GAIA repository or from what the site already said.
   - which interventions the Wuppertal report recommended (if the
     municipality agrees). Today the Wuppertal case has no recommendation:
     one that named no measure came off;
-  - the decision criteria the sustainable-AI framework gives its government
-    partner, if the framework, which the client holds, may be quoted and the
-    partner may be named (D2). Today the case gives the five design
+  - the decision criteria the sustainable-AI framework gives the ministry,
+    if the framework, which the client holds, may be quoted (the ministry
+    itself may be named since D2). Today the case gives the five design
     principles instead.
   `content/projects.json` → `caseStudies[i].findings`; one to four each,
   and `npm test` refuses a figure without a basis.
@@ -1262,9 +1301,9 @@ keep, and some figures could move to "public" with a link only you have.
     `content/` and the homepage, so it says only what the site says, and the
     tests fail if it falls behind. Since the PhD update it opens with the
     PhD, closes the Digital Society School role in February 2026, and links
-    your ORCID iD. Two things on the old one are not on it: the Digital
-    Society School's partner, by name (D2), and the relevant courses under
-    each degree, which the site does not list. Your phone number is on it,
+    your ORCID iD. One thing on the old one is not on it: the relevant
+    courses under each degree, which the site does not list. The Digital
+    Society School's partner is on it by name again since D2. Your phone number is on it,
     because the homepage's contact card publishes it; it is `person.phone`
     in `content/profile.json`, and a test holds the homepage to it.
   - *Where:* anything you want on it goes on the site first (`content/profile.json`
@@ -1274,29 +1313,29 @@ keep, and some figures could move to "public" with a link only you have.
   - *Check:* `npm test` passes (`tests/cv.test.js`), and the PDF reads as you
     would want a reader or a collaborator to read it. Copies you sent before
     it are U7.
-- [ ] **D2. May the site and the CV name the Digital Society School's
+- [x] **D2. May the site and the CV name the Digital Society School's
   government partner?**
-  - *Why:* the plan says partner names stay out without their consent. The
-    site named the ministry from before this plan until the PhD update,
-    which applied the default: no consent is recorded, so no name.
-    Everywhere it was named (the EcoPrompt Coach page's hero tag, the
-    sustainable-AI case study's partner and its held framework, the
-    sustainable-AI lens, the homepage's core log, Note 03 and the feed,
-    the field report and the field terminal) now says "a Dutch government
-    partner" or "its government partner", and `tests/content.test.js`
-    fails if the name comes back. The CV names no partner at all
-    (`tests/cv.test.js`).
-  - *Off the site:* the `SustainableAIPrototypes` repository's README is
-    titled for the ministry's initiative, and the `promptcoach` README
-    names the ministry's partners; the site links both. Only you can
-    change those.
-  - *Where:* tell us yes or no. Yes, with the ministry's agreement in
-    writing: the name goes back in `content/profile.json` →
-    `experience[1].partner` (its `$partner` note says why it is not there
-    now), in `content/projects.json` → `sustainable-ai`, the lens and the
-    pages above, and the guard in `tests/content.test.js` comes off in the
-    same commit. No: nothing on the site changes, and the two READMEs are
-    yours to change.
+  - *Done:* yes: written consent confirmed by Moses, 28 Oct 2026. He keeps
+    it; no copy is in this repository.
+  - *Why it was asked:* the plan says partner names stay out without their
+    consent. The site named the ministry from before this plan until the
+    PhD update, which applied the default: no consent recorded, so no
+    name, and "a Dutch government partner" in its place.
+  - *What changed, 29 Oct 2026:* the Dutch Ministry of Finance is named
+    again wherever the project's partner is described: the profile entry
+    (`content/profile.json` → `experience[1].partner`, "Ministry of
+    Finance (Netherlands)", with `partnerConsent: true`), the homepage's
+    Amsterdam stop and core log, the sustainable-AI case study and its
+    held framework, the sustainable-AI lens, Note 03 and the feed, the
+    field report and the field terminal. The work stays credited to the
+    team. The EcoPrompt Coach page's hero tag stays unbranded: it is this
+    site's own edition, not the ministry's. The CV prints the partner
+    beside the role because consent is recorded; `tests/cv.test.js` and
+    `tests/content.test.js` refuse a partner named without it.
+  - *Off the site:* the `SustainableAIPrototypes` README, titled for the
+    ministry's initiative, no longer says more than the site. The `promptcoach`
+    README also names the ministry's own partners, whom this consent does
+    not cover; the site names none of them, and that README is yours.
 - [ ] **D3. A verification link for each certificate** (Phase 3.8).
   - *Why:* five certificates are listed with nothing a reader can check them
     against. Each can link the issuer's own page for it, on the homepage and
@@ -1318,7 +1357,13 @@ keep, and some figures could move to "public" with a link only you have.
       is added to `VERIFY_HOSTS` and `TRUSTED_HOSTS` in
       `scripts/lib/content.js` once someone has opened it.
   - *Check:* `npm test` passes, and each Verify link opens the certificate.
-- [ ] **D4. Climatematch Academy: completed, and when?**
+- [x] **D4. Climatematch Academy: completed, and when?**
+  - *Done:* Computational Tools for Climate Science, Climatematch Academy,
+    completed with a certificate in 2025 and again in 2026 (Moses, 28 Oct
+    2026). Since 29 Oct 2026 it is one entry, `certifications[0]`, shown as
+    "2025 and 2026" (the validator takes that form as it is), with 2026 as
+    its `year`: on the homepage and in its structured data, on the CV and
+    in the field report. A `verifyUrl` can follow (D3).
   - *What:* the climatematch-pipeline output says it was built for a
     Climatematch Academy course, but neither your certificates nor your
     education list it. Which course and year, and do you hold a completion
@@ -1352,12 +1397,12 @@ keep, and some figures could move to "public" with a link only you have.
     quote writes it: "164 water points" is fine, and is marked like any
     other; "a team of 23" needs a form, `"team of 23"`, on the team-size
     entry in `content/claims.json` (the build names the figure).
-  - *Room:* none, at full length. The homepage is 9.70 of its 9.74 screens
-    at 1440×900 and 16.83 of 17.03 at 390×844. Measured in wave 4, one
+  - *Room:* none, at full length. The homepage is 9.71 of its 9.74 screens
+    at 1440×900 and 16.94 of 17.03 at 390×844. Measured in wave 4, one
     stand-in quote of 200 characters added about 0.38 of a desktop screen
     and 0.40 of a phone screen, so before the first goes in, about a third
-    of a desktop screen and a fifth of a phone screen has to come off the
-    homepage; shorter quotes cost less. `npm run smoke` measures it and
+    of a screen has to come off the homepage on each; shorter quotes cost
+    less. `npm run smoke` measures it and
     fails a page over its ceiling, which only moves down.
   - *Check:* `npm test` passes and the homepage shows each quote with who
     said it and where to check it.
@@ -1408,7 +1453,9 @@ one switch for the health check.
   - *One line:* note 3 pointed at the homepage chart as "further down"; on
     a page of its own it says "on the homepage", linked.
   - *The partner:* note 3 named the ministry, as the homepage's note always
-    had; since the PhD update it says "a Dutch government partner" (D2).
+    had; the PhD update made it "a Dutch government partner", and since 29
+    October 2026, with the ministry's consent (D2), it names the Dutch
+    Ministry of Finance again.
     The corrections made to all three notes in October 2026 are U8.
   - *Where:* `content/notes/*.md`, then `npm run build:content`,
     `npm run og` and `npm test`.

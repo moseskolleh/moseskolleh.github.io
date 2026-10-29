@@ -575,7 +575,7 @@ About 10 days that still change how the site lands:
 | Needed for | Input |
 |---|---|
 | Phase 0.9 | Live contact-form check: Script Properties set, Apps Script redeployed, one real message |
-| Phase 2.1 | What he is open to (research collaborations since 2026-10-28; consulting only once IUSS's rules allow it) and his languages with their levels; seniority, start date and right to work only if he looks for work again |
+| Phase 2.1 | What he is open to (research collaborations since 2026-10-28; consulting only once IUSS's rules allow it, not yet checked on 2026-10-28) and his languages with their levels (left off for now, his choice on 2026-10-28); seniority, start date and right to work only if he looks for work again |
 | Phase 3.5 | Two or three testimonials with permission |
 | Phase 3.10 | Settled on 2026-10-28: the role ended in February 2026. Now, his confirmation of the record once the PhD has begun |
 | Phase 4.1 | Nothing now: The Brief was retired on 2026-10-28 |
@@ -583,7 +583,7 @@ About 10 days that still change how the site lands:
 | Phase 5.2 | One note a month |
 | Phase 5.5 | Domain purchase; a decision on the `moseskolleh.github.io` template site |
 | Phase 5.6 | Nothing, unless he wants a second-language edition |
-| The PhD update | A merge on or after 2026-11-02; the PhD's wording approved; IUSS's rules on outside work; consent for the photos of other people and for naming the partner (owner checklist, U1 to U12 and D2) |
+| The PhD update | A merge on or after 2026-11-02 (U1); IUSS's rules on outside work (U3); his supervisor's name once appointed (U4); his ORCID record, an IUSS email and an Italian number, and LinkedIn brought in line, from drafts he was given on 2026-10-28 (U5, U7); the narration's leftovers off the site (U10). Settled on 2026-10-28: the PhD's wording, the notes' corrections, the note at The Brief's address, the lenses and the research page's fold approved (U2, U8, U9, U11, U12), and consent for the photos of other people (U6) and for naming the partner (D2) |
 
 ## How to know it worked
 
@@ -1095,8 +1095,9 @@ CV, the ministry's name, the certificates, the testimonials) and F5.
    the page's length ceiling each method is folded behind a press ("02
    Method, four steps"), and so is the page's closing note; printed, both
    open. ✗ Moses: confirm the findings, and supply the coastal drivers, the
-   Wuppertal measures and, if the framework may be quoted and the ministry
-   named, its decision criteria (G3); the folded method (G4).
+   Wuppertal measures and, if the framework may be quoted, its decision
+   criteria (G3; the ministry may be named since 2026-10-28, D2); the
+   folded method (G4).
 4. ✓ **One name for one tool.** "AI, Weighed" is gone from every page, the
    README, the budget labels, the open counts' page names, smoke and the
    tests (`content.test.js` fails if it comes back): the tool is EcoPrompt
@@ -1195,17 +1196,20 @@ CV, the ministry's name, the certificates, the testimonials) and F5.
    `assets/cv.hash` fails it once `content/` or the homepage has moved on
    without a new print. The old CV's "10,000+", 95%, 15%, "3+ years" and
    Power BI are gone. His phone number is on it, as the homepage's contact
-   card publishes it (`person.phone`, held to the card by a test). Left off
-   until Moses says: the ministry's name. ✗ Moses: read it (D1); the
-   ministry (D2).
+   card publishes it (`person.phone`, held to the card by a test). The
+   ministry's name was left off until Moses confirmed its written consent
+   on 2026-10-28 (D2); since 2026-10-29 a role's partner is printed beside
+   its organisation when `partnerConsent` is true, and refused without it.
+   ✗ Moses: read it (D1).
 8. ◐ **Certificates link to their verification pages.** Built: an optional
    `verifyUrl` per certification in `profile.json`; the homepage's
    certificate cards are generated from the list, with a "Verify" link
    where there is one, on the CV too; `VERIFY_HOSTS` limits it to issuers'
    hosts, and Coursera's and CFI's credential site are on the allowlist.
-   Partial because no certificate has its link yet: ✗ Moses, the four
-   links (D3); Masterschool's and the UN System Staff College's hosts are
-   added once known.
+   Partial because no certificate has its link yet: ✗ Moses, the five
+   links (D3, a fifth certificate, Climatematch Academy's, since
+   2026-10-29); Climatematch Academy's, Masterschool's and the UN System
+   Staff College's hosts are added once known.
 9. ✓ **Depths from dates.** `npm run build:content` writes each core-log
    layer's depth from its role's dates, 10 m a year, its top where the role
    ended and its base where it began, measured from `meta.verifiedOn`
