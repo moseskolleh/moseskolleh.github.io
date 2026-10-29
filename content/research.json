@@ -157,7 +157,7 @@
       "lenses": ["climate-risk"],
       "summary": "A Python starter pipeline that pulls historical CMIP6 runs (1980–2014) and observed temperature and precipitation for West Africa, computes monthly-based extreme indices, fits GEV 20-year return levels and builds a graph of which models behave alike.",
       "methods": [],
-      "note": "Built for the Climatematch Academy course. Historical runs only; code on GitHub, with no licence file."
+      "note": "Built during the Climatematch Academy course. Historical runs only; code on GitHub, with no licence file."
     },
     {
       "id": "waterproject",

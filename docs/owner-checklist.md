@@ -1298,22 +1298,24 @@ keep, and some figures could move to "public" with a link only you have.
     same commit. No: nothing on the site changes, and the two READMEs are
     yours to change.
 - [ ] **D3. A verification link for each certificate** (Phase 3.8).
-  - *Why:* four certificates are listed with nothing a reader can check them
+  - *Why:* five certificates are listed with nothing a reader can check them
     against. Each can link the issuer's own page for it, on the homepage and
     the CV, as "Verify".
   - *Where:* `content/profile.json` → `certifications[i].verifyUrl`, one https
     address each, then `npm run build:content && npm run cv`. Leave the field
     out where there is none (never `null` or "TBC"; the build refuses them).
-    - `certifications[0]`, ESG Specialist Program (Corporate Finance
+    - `certifications[1]`, ESG Specialist Program (Corporate Finance
       Institute): its page on `credentials.corporatefinanceinstitute.com`,
       already accepted.
-    - `certifications[1]`, Google Advanced Data Analytics (Coursera):
+    - `certifications[2]`, Google Advanced Data Analytics (Coursera):
       `coursera.org/verify/...` or `coursera.org/account/accomplishments/...`,
       already accepted.
-    - `certifications[2]`, Data Analytics Training (Masterschool), and
-      `certifications[3]`, Synergizing DRR & Climate Change Adaptation (UN
-      System Staff College): their hosts are not known yet. Send the link,
-      and its host is added to `VERIFY_HOSTS` and `TRUSTED_HOSTS` in
+    - `certifications[0]`, Computational Tools for Climate Science
+      (Climatematch Academy, added 2026-10-29), `certifications[3]`, Data
+      Analytics Training (Masterschool), and `certifications[4]`,
+      Synergizing DRR & Climate Change Adaptation (UN System Staff
+      College): their hosts are not known yet. Send the link, and its host
+      is added to `VERIFY_HOSTS` and `TRUSTED_HOSTS` in
       `scripts/lib/content.js` once someone has opened it.
   - *Check:* `npm test` passes, and each Verify link opens the certificate.
 - [ ] **D4. Climatematch Academy: completed, and when?**

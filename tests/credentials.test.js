@@ -86,12 +86,14 @@ const withUrl = (url) => { const c = clone(profile.certifications); c[1].verifyU
 
     // With an address, the card links it: off-site, in a new tab, named so a
     // list of links tells four Verify links apart.
+    // The ESG certificate is found by its name, not its place in the list.
     const p = clone(profile);
-    p.certifications[0].verifyUrl = 'https://credentials.corporatefinanceinstitute.com/abc-123';
+    const esg = p.certifications.find(c => c.name === 'ESG Specialist Program');
+    esg.verifyUrl = 'https://credentials.corporatefinanceinstitute.com/abc-123';
     const html = homeRegions({ profile: p, testimonials: { testimonials: [] } }).CERTIFICATES;
-    const card = new JSDOM(html).window.document.querySelector('.certification');
+    const card = Array.from(new JSDOM(html).window.document.querySelectorAll('.certification')).find(c => c.querySelector('.cert-title').textContent === esg.name);
     const a = card.querySelector('.cert-meta a');
-    assert(!!a && a.getAttribute('href') === p.certifications[0].verifyUrl && a.target === '_blank' && a.rel === 'noopener',
+    assert(!!a && a.getAttribute('href') === esg.verifyUrl && a.target === '_blank' && a.rel === 'noopener',
         'Homepage: a verifyUrl is a link in the card\'s meta line, opening the issuer\'s page in a new tab');
     assert(!!a && a.textContent === 'Verify the ESG Specialist Program certificate with credentials.corporatefinanceinstitute.com' && a.querySelector('.sr-only'),
         `Homepage: its name says which certificate and where (${a && a.textContent})`);

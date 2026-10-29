@@ -196,8 +196,11 @@ const fieldText = plain(fieldReport);
         if (!indexText.includes(c.name)) certMissing.push(`index: "${c.name}"`);
         if (!indexText.includes(c.issuer)) certMissing.push(`index: "${c.issuer}"`);
         // The field report once gave the issuers' longer titles; it names
-        // each certificate as the homepage does, with its issuer and year.
-        if (!fieldText.includes(`${c.name} — ${c.issuer}, ${c.year}`)) certMissing.push(`field-report: "${c.name} — ${c.issuer}, ${c.year}"`);
+        // each certificate as the homepage does, with its issuer and year,
+        // or with the date the homepage shows where that names more than
+        // one year (a course completed twice, "2025 and 2026").
+        const dated = [c.year].concat(/^\d{4}(?: and \d{4})+$/.test(c.displayDate) ? [c.displayDate] : []);
+        if (!dated.some(d => fieldText.includes(`${c.name} — ${c.issuer}, ${d}`))) certMissing.push(`field-report: "${c.name} — ${c.issuer}, ${dated.join('" or "')}"`);
     });
     assert(certMissing.length === 0, `Certifications: both editions carry every entry (missing: ${certMissing.join('; ') || 'none'})`);
 
