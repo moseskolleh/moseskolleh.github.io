@@ -1152,12 +1152,12 @@ did.
 | Every image in the repository | ~3.38 MB | 3.5 MB |
 | Text-only field report, the HTML file (the size the footer quotes) | ~11 KB | 11 KB |
 | Text-only field report, over the wire (with its visit counter) | ~7 KB | 8 KB |
-| Case studies page, over the wire (fonts included) | ~109 KB | 109 KB |
-| Open counts page, over the wire (fonts included; sized for a full page) | ~97 KB | 103 KB |
-| Research outputs page, over the wire (fonts included) | ~98 KB | 99 KB |
-| Check my numbers (`claims.html`), over the wire (fonts included) | ~99 KB | 101 KB |
+| Case studies page, over the wire (fonts included) | ~108 KB | 109 KB |
+| Open counts page, over the wire (fonts included; sized for a full page) | ~96 KB | 103 KB |
+| Research outputs page, over the wire (fonts included) | ~97 KB | 99 KB |
+| Check my numbers (`claims.html`), over the wire (fonts included) | ~98 KB | 101 KB |
 | Each field note (`notes/*.html`), over the wire (fonts included; the heaviest) | ~88 KB | 93 KB |
-| EcoPrompt Coach (`carbon-ai.html`), over the wire (fonts included) | ~111 KB | 111 KB |
+| EcoPrompt Coach (`carbon-ai.html`), over the wire (fonts included) | ~110 KB | 111 KB |
 <!-- BUDGET-TABLE:END -->
 
 **What the estimate used to miss.** An earlier version of this table said

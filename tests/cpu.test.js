@@ -511,7 +511,7 @@ const key = (window, k, target, init) => {
                 if (!blocks.some(b => b.contains(el))) outside.push(sel);
             });
         });
-        assert(loopSelectors.length >= 8 && outside.length === 0,
+        assert(loopSelectors.length >= 7 && outside.length === 0,
             `Loops: all ${loopSelectors.length} looping rules sit inside a watched block, or are exempt for a reason (outside: ${[...new Set(outside)].join(', ') || 'none'})`);
     }
 
@@ -549,7 +549,7 @@ const key = (window, k, target, init) => {
             const props = (keyframes[name].match(/[\w-]+(?=\s*:)/g) || []).filter(p => p !== 'transform' && p !== 'opacity');
             if (props.length) offMain.push(`${name} (${[...new Set(props)].join(', ')})`);
         }));
-        assert(loops.length >= 8 && offMain.length === 0, `Loops: all ${loops.length} infinite animations move only transform and opacity, which the compositor runs (off it: ${offMain.join('; ') || 'none'})`);
+        assert(loops.length >= 7 && offMain.length === 0, `Loops: all ${loops.length} infinite animations move only transform and opacity, which the compositor runs (off it: ${offMain.join('; ') || 'none'})`);
 
         const BLOCK = 'html.js :is(body > header, main > section, body > footer):not(.onscreen) ';
         const still = rules.find(r => r.selector === `${BLOCK}*, ${BLOCK}*::before, ${BLOCK}*::after`);

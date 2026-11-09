@@ -27,7 +27,7 @@
 //     the at-a-glance strip and one primary action, or with the play index,
 //     today or with every at-a-glance fact filled in at the longest
 //     content.js accepts; a photo caption over the eyebrow or the name,
-//     down to 320px; a scroll cue drawn across the hero's words
+//     down to 320px
 //   - a page that, with JavaScript off (or script.js blocked or late), is
 //     covered, leaves content invisible, shows a [hidden] element or a
 //     control only a script could drive, or hides the contact form
@@ -799,8 +799,8 @@ async function exerciseCarbonTool(page, r) {
 // two laptops' browser windows, which are shorter than their screens: a
 // 1366x768 laptop leaves about 1366x657, and the figures sat wholly below
 // it; at 1280x720 the fold cut through the digits. And two windows 1,024px
-// wide, either side of the short-window rule (880px tall), where the
-// scroll cue was drawn through the hero's words. And two small phones,
+// wide, either side of the short-window rule (880px tall), where a scroll
+// cue the hero once had was drawn through its words. And two small phones,
 // 375x667 and 360x640, where the fold cut through the second row of
 // figures or left it below.
 const SMALL_PHONES = [[375, 667], [360, 640]];
@@ -822,27 +822,6 @@ function filledControls() {
         return b.width > 0 && b.bottom > 0 && b.top < innerHeight && b.right > 0 && b.left < innerWidth &&
             look.visibility !== 'hidden' && +look.opacity > 0 && look.backgroundColor === green;
     }).map(el => (el.matches('#home .btn-primary') ? 'hero primary: ' : '') + (el.textContent.trim() || el.getAttribute('aria-label')));
-}
-
-// The words in the hero the scroll cue is drawn across, if it is shown:
-// centred at the hero's foot, it ran through the description's last line
-// in windows 900-1,030px wide once a short window put the description
-// there, and through a figure's label at 1024x881. Run in the page.
-function cueOverText() {
-    const cue = document.querySelector('.scroll-indicator');
-    const c = cue && cue.getBoundingClientRect();
-    if (!c || !c.width || getComputedStyle(cue).display === 'none') return [];
-    const hits = [];
-    const walk = document.createTreeWalker(document.querySelector('.hero-content'), NodeFilter.SHOW_TEXT);
-    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-        if (!n.textContent.trim()) continue;
-        const range = document.createRange();
-        range.selectNodeContents(n);
-        if (Array.from(range.getClientRects()).some(b => b.width && b.left < c.right && c.left < b.right && b.top < c.bottom && c.top < b.bottom)) {
-            hits.push(n.textContent.trim().slice(0, 32));
-        }
-    }
-    return hits;
 }
 
 async function exerciseFirstView(browser, origin) {
@@ -888,9 +867,6 @@ async function exerciseFirstView(browser, origin) {
         if (r.play >= height) ok(`first view ${at}: the play index is below the fold (${r.play}px)`);
         else bad(`first view ${at}: the play index is in the first screen (${r.play}px)`);
         if (r.links <= 7) ok(`first view ${at}: ${r.links} links in the nav`); else bad(`first view ${at}: ${r.links} links in the nav — at most 7`);
-        const cue = await page.evaluate(cueOverText);
-        if (cue.length) bad(`first view ${at}: the scroll cue is drawn across "${cue.join('", "')}"`);
-        else ok(`first view ${at}: the scroll cue crosses no words of the hero`);
         await context.close();
     }
 
@@ -1001,9 +977,6 @@ async function exerciseLongestStrip(browser, origin) {
         if (Math.max(r.glance, r.act, r.stats) <= height) ok(`${at}: the strip, the primary action and the figures are on the first screen (the figures end at ${r.stats}px)`);
         else bad(`${at}: the strip ends at ${r.glance}px, the primary action at ${r.act}px and the figures at ${r.stats}px, past the first ${height}px`);
         if (r.wide) bad(`${at}: the page scrolls sideways`);
-        const cue = await page.evaluate(cueOverText);
-        if (cue.length) bad(`${at}: the scroll cue is drawn across "${cue.join('", "')}"`);
-        else ok(`${at}: the scroll cue crosses no words of the hero`);
         await context.close();
     }
 }

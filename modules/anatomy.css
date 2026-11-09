@@ -40,14 +40,14 @@
     margin: 16px 0 10px;
 }
 .anatomy-source { fill: var(--darker-bg); stroke: var(--border); }
-.anatomy-source-t { fill: var(--text-primary); font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; }
+.anatomy-source-t { fill: var(--text-primary); font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; }
 .anatomy-source-sub { fill: var(--text-secondary); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
 .anatomy-svg .r0 { color: var(--primary-green); }
 .anatomy-svg .r1 { color: var(--accent-amber); }
 .anatomy-svg .r2 { color: var(--accent-blue); }
 .anatomy-ribbon { fill: currentColor; opacity: 0.5; }
 .anatomy-ribbon-line { fill: none; stroke: currentColor; }
-.anatomy-t-title { fill: currentColor; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; }
+.anatomy-t-title { fill: currentColor; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; }
 .anatomy-t-val { fill: var(--text-primary); font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
 .anatomy-t-esrs { fill: var(--text-secondary); font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
 .ca-method .anatomy-summary {

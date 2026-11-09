@@ -25,12 +25,29 @@
 // fall back to a system font, which is what happened before as well — the
 // site never requested the other subsets.
 //
-// WHAT "INSTANCED" MEANS. Inter and Space Grotesk are variable fonts. Google
-// serves the full weight axis; the stylesheets use Inter at 400–600 and
-// Space Grotesk at 400–700, so the deltas outside those ranges are dropped.
-// Weights in between are still real (a `font-weight: 550` interpolates),
-// weights outside clamp to the nearest edge, exactly as they did when the
-// page only requested those weights.
+// WHAT "INSTANCED" MEANS. Inter and Newsreader are variable fonts. Google
+// serves Inter's full weight axis; the stylesheets use it at 400–600, so the
+// deltas outside that range are dropped. Weights in between are still real
+// (a `font-weight: 550` interpolates), weights outside clamp to the nearest
+// edge, exactly as they did when the page only requested those weights.
+//
+// Newsreader, the display face, has two axes, weight and optical size, and
+// Google's file for one style is over 130 KB. The stylesheets set every
+// heading at one weight (500 upright, 400 italic), so both axes are pinned:
+// the weight to that, the optical size to 48, between the 72 the face draws
+// for a poster and the 16 it draws for a paragraph, because one cut has to
+// serve a 20px card title and an 80px name. That is 22 KB upright. The
+// italic is kept for a word or two in a heading (the water on a map is set
+// in italic; here, the word the heading turns on), so it carries a narrower
+// range of its own (`range` below). A character outside it falls back to
+// the upright cut.
+//
+// Both cuts are also built without the glyphs only an OpenType feature
+// reaches (`lean` below): small capitals, old-style and tabular figures,
+// swashes and the like, a tenth of each file, none of which a heading here
+// asks for. "Field" and "office" set the same with ligatures on and off
+// (checked in Chromium), so nothing a reader sees went with them. 20 KB
+// upright and 12 KB italic.
 //
 // The output is committed. `--check` runs in CI and needs no network: it
 // hashes the committed files against assets/fonts/manifest.json and compares
@@ -40,8 +57,8 @@
 // LICENSING. All three families are under the SIL Open Font License 1.1,
 // which permits bundling, subsetting and serving them. The notices ship in
 // assets/fonts/LICENSE-OFL.txt. IBM Plex carries the Reserved Font Name
-// "Plex"; the @font-face family names here are what the stylesheets already
-// used, and nothing is redistributed under a new name.
+// "Plex"; the @font-face family names here are the families' own, and
+// nothing is redistributed under a new name.
 // ===================================================================
 
 const fs = require('fs');
@@ -65,21 +82,38 @@ const LATIN_RANGE =
     'U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, ' +
     'U+2212, U+2215, U+FEFF, U+FFFD';
 
-// The four files the pages used to fetch from fonts.gstatic.com. Google
-// serves one variable file per family regardless of which static weights the
-// CSS asks for, so these are the actual bytes a visitor used to download.
-// The version segment in each URL (v20, v22) pins the upstream release.
+// The italic's range: the letters, figures and marks of a heading in
+// English, and the dashes and quotation marks the pages write.
+const ITALIC_RANGE = 'U+0020-007E, U+00A0, U+00B7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026';
+
+// One file a face. Google serves one variable file per family and style
+// regardless of which weights the CSS asks for; the version segment in each
+// URL (v20, v26) pins the upstream release.
 const FONTS = [
     {
-        id: 'space-grotesk',
-        family: 'Space Grotesk',
-        file: 'space-grotesk-latin.woff2',
-        weight: '400 700',
+        id: 'newsreader',
+        family: 'Newsreader',
+        file: 'newsreader-latin-500.woff2',
+        weight: '500',
         style: 'normal',
-        axes: { wght: { min: 400, max: 700 } },
-        source: 'https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2',
-        upstream: 'https://github.com/floriankarsten/space-grotesk',
-        copyright: 'Copyright 2020 The Space Grotesk Project Authors'
+        axes: { opsz: 48, wght: 500 },
+        lean: true,
+        source: 'https://fonts.gstatic.com/s/newsreader/v26/cY9AfjOCX1hbuyalUrK4397yjA.woff2',
+        upstream: 'https://github.com/productiontype/Newsreader',
+        copyright: 'Copyright 2020 The Newsreader Project Authors'
+    },
+    {
+        id: 'newsreader-italic',
+        family: 'Newsreader',
+        file: 'newsreader-italic-400.woff2',
+        weight: '400',
+        style: 'italic',
+        axes: { opsz: 48, wght: 400 },
+        lean: true,
+        range: ITALIC_RANGE,
+        source: 'https://fonts.gstatic.com/s/newsreader/v26/cY9CfjOCX1hbuyalUrK439vCjohC.woff2',
+        upstream: 'https://github.com/productiontype/Newsreader',
+        copyright: 'Copyright 2020 The Newsreader Project Authors'
     },
     {
         id: 'inter',
@@ -99,16 +133,6 @@ const FONTS = [
         weight: '400',
         style: 'normal',
         source: 'https://fonts.gstatic.com/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2',
-        upstream: 'https://github.com/IBM/plex',
-        copyright: 'Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"'
-    },
-    {
-        id: 'ibm-plex-mono-500',
-        family: 'IBM Plex Mono',
-        file: 'ibm-plex-mono-latin-500.woff2',
-        weight: '500',
-        style: 'normal',
-        source: 'https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2',
         upstream: 'https://github.com/IBM/plex',
         copyright: 'Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"'
     }
@@ -137,7 +161,7 @@ function fontFaceBlock(manifest) {
         `    font-weight: ${f.weight};`,
         '    font-display: swap;',
         `    src: url('assets/fonts/${f.file}') format('woff2');`,
-        `    unicode-range: ${manifest.unicodeRange};`,
+        `    unicode-range: ${f.unicodeRange || manifest.unicodeRange};`,
         '}'
     ].join('\n'));
     return [
@@ -186,7 +210,8 @@ function check() {
         if (buf.length !== f.bytes) problems.push(`${f.file}: ${buf.length} bytes on disk, manifest says ${f.bytes}`);
         if (sha256(buf) !== f.sha256) problems.push(`${f.file}: hash differs from the manifest`);
         const spec = FONTS.find(s => s.id === f.id);
-        if (spec && (spec.weight !== f.weight || spec.family !== f.family || spec.file !== f.file)) {
+        if (spec && (spec.weight !== f.weight || spec.family !== f.family || spec.file !== f.file ||
+            spec.style !== f.style || (spec.range || null) !== (f.unicodeRange || null) || !!spec.lean !== !!f.lean)) {
             problems.push(`${f.id}: manifest entry no longer matches this script's definition`);
         }
     });
@@ -265,7 +290,8 @@ async function build() {
         const source = await fetchSource(spec);
         const options = { targetFormat: 'woff2' };
         if (spec.axes) options.variationAxes = spec.axes;
-        const out = await subsetFont(source, text, options);
+        if (spec.lean) options.noLayoutClosure = true;
+        const out = await subsetFont(source, spec.range ? textForRange(spec.range) : text, options);
         fs.writeFileSync(path.join(OUT_DIR, spec.file), out);
         entries.push({
             id: spec.id,
@@ -274,6 +300,8 @@ async function build() {
             weight: spec.weight,
             style: spec.style,
             axes: spec.axes || null,
+            ...(spec.lean ? { lean: true } : {}),
+            ...(spec.range ? { unicodeRange: spec.range } : {}),
             bytes: out.length,
             sha256: sha256(out),
             source: spec.source,
@@ -288,7 +316,7 @@ async function build() {
 
     const manifest = {
         generatedBy: GENERATED_BY,
-        note: 'Subset to the latin unicode-range below and instanced to the weights the stylesheets use. Regenerate with `npm run fonts:build`; `npm run fonts:check` verifies these hashes in CI.',
+        note: 'Subset to the latin unicode-range below (a face with a unicodeRange of its own, to that) and instanced to the weights the stylesheets use. Regenerate with `npm run fonts:build`; `npm run fonts:check` verifies these hashes in CI.',
         unicodeRange: LATIN_RANGE,
         fonts: entries
     };

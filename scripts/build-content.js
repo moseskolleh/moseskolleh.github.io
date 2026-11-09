@@ -447,7 +447,8 @@ function pageShell({ title, description, canonical, heroTag, heroTitle, heroLead
     <meta property="og:image:height" content="630">${published ? `
     <meta property="article:published_time" content="${esc(published)}">` : ''}
     <meta name="twitter:card" content="summary_large_image">${head ? `\n${indentBlock(head, '    ')}` : ''}
-    <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/space-grotesk-latin.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/newsreader-latin-500.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/newsreader-italic-400.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/inter-latin.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="${root}assets/fonts/ibm-plex-mono-latin-400.woff2" crossorigin>
     ${root ? THEME_SCRIPT.replace('src="', `src="${root}`) : THEME_SCRIPT}${sheets.map(href => `

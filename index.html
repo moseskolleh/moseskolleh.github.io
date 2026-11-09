@@ -165,7 +165,8 @@
     <link rel="preload" as="image" type="image/webp" href="assets/img/groundwater-mapping-1-hero.webp" media="(min-width: 600px)">
     <!-- The three typefaces are self-hosted (assets/fonts/, built by scripts/build-fonts.js):
          no request leaves this origin, and the bytes are counted in the budget. -->
-    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/space-grotesk-latin.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/newsreader-latin-500.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/newsreader-italic-400.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="assets/fonts/ibm-plex-mono-latin-400.woff2" crossorigin>
     <link rel="stylesheet" href="style.css">
@@ -234,18 +235,25 @@
         </div>
     </nav>
 
-    <!-- Hero -->
+    <!-- Hero: the words on the left, the fieldwork on the right (above
+         them on a phone), in a plate of its own with its caption. The
+         photos are background images and the plate is decoration to a
+         screen reader, as it was when they sat behind the words. -->
     <header id="home" class="hero">
-        <div class="hero-background" aria-hidden="true">
-            <div class="hero-bg-slide hero-bg-1 active"></div>
-            <div class="hero-bg-slide hero-bg-2"></div>
-            <div class="hero-bg-slide hero-bg-3"></div>
-            <div class="hero-bg-slide hero-bg-4"></div>
-        </div>
-        <div class="hero-overlay" aria-hidden="true"></div>
         <div class="contour-layer" aria-hidden="true"></div>
 
         <div class="hero-content container">
+            <div class="hero-plate" aria-hidden="true">
+                <div class="hero-background">
+                    <div class="hero-bg-slide hero-bg-1 active"></div>
+                    <div class="hero-bg-slide hero-bg-2"></div>
+                    <div class="hero-bg-slide hero-bg-3"></div>
+                    <div class="hero-bg-slide hero-bg-4"></div>
+                </div>
+                <div class="hero-photo-caption" id="heroCaption">
+                    <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-map-marker-alt"></use></svg> <span id="heroCaptionText">Borehole drilling · Sierra Leone</span>
+                </div>
+            </div>
             <p class="hero-eyebrow"><span class="blink-dot"></span>It all started with water</p>
             <h1 class="hero-title">
                 <span class="hero-line">Moses Kolleh</span>
@@ -294,12 +302,6 @@
             <p class="hero-ledger mono-label"><a href="claims.html" data-analytics="claims-hero">Every number on this site, with its basis</a></p>
         </div>
 
-        <div class="hero-photo-caption" id="heroCaption" aria-hidden="true">
-            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-map-marker-alt"></use></svg> <span id="heroCaptionText">Borehole drilling · Sierra Leone</span>
-        </div>
-        <a href="#journey" class="scroll-indicator" aria-label="Scroll down">
-            <span class="scroll-indicator-line"></span>
-        </a>
     </header>
 
     <main id="main">

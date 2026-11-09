@@ -253,16 +253,18 @@ const facts = (d) => Array.from(d.querySelectorAll('.glance-fact')).map(f => [te
 // 1366x768 leaves about 1366x657 inside a browser, and with a fixed 104px
 // above the name the figures sat wholly below it. On a short desktop the
 // description follows the figures, as on a phone; smoke.js checks where
-// the figures land at 1366x657 and 1280x720.
+// the figures land at 1366x657 and 1280x720. Since the hero became words
+// beside a plate of photographs, the words' column is narrower, and the
+// rule reaches every window under 1,000px tall, 1440x900 included.
 {
     const css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     // The rule the phone has, its media query shared with the laptop's.
     const blocks = [...css.matchAll(/@media ([^{]*)\{([\s\S]*?)\n\}/g)]
         .map(([, query, body]) => ({ tall: +((query.match(/\(min-width: 900px\) and \(max-height: (\d+)px\)/) || [])[1] || 0), body }))
-        .filter(b => b.tall && /\.hero-content\s*\{[^}]*flex-direction:\s*column/.test(b.body) && /\.hero-description\s*\{[^}]*order:\s*1/.test(b.body));
+        .filter(b => b.tall && /\.hero-description\s*\{[^}]*order:\s*1/.test(b.body));
     const tall = blocks.length ? blocks[0].tall : 0;
-    assert(tall >= 768 && tall < 900,
-        `Short desktop: below ${tall || '?'}px tall (a laptop's window, not the plan's 1440x900), the description follows the figures`);
+    assert(tall >= 768 && tall < 1080,
+        `Short desktop: below ${tall || '?'}px tall (a laptop's window, and the plan's 1440x900), the description follows the figures`);
 }
 
 // ===================================================================
