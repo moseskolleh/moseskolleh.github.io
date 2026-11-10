@@ -824,6 +824,67 @@ function filledControls() {
     }).map(el => (el.matches('#home .btn-primary') ? 'hero primary: ' : '') + (el.textContent.trim() || el.getAttribute('aria-label')));
 }
 
+// What moves the page during a jump, for the landing checks to report when
+// one misses: a miss has only ever happened in Firefox in CI, where "sits at
+// -260px" says how far out and nothing about why. Run in the page before its
+// own scripts. It notes each call that scrolls (who asked, and where the
+// page was), each change in a section's height, each section marked .drawn,
+// and where each run of scroll events began and ended; told() is the list,
+// times in ms since the first entry.
+function traceJump() {
+    const log = [];
+    const at = () => Math.round(performance.now());
+    const y = () => Math.round(window.scrollY);
+    const note = (what) => { if (log.length < 400) log.push([at(), what]); };
+    const wrap = (owner, name, say) => {
+        const real = owner[name];
+        owner[name] = function () {
+            note(`${say(this, arguments)} at y=${y()}`);
+            return real.apply(this, arguments);
+        };
+    };
+    const how = (a) => (a && a[0] && typeof a[0] === 'object' ? `${a[0].behavior || 'auto'}${a[0].top === undefined ? '' : ' top=' + Math.round(a[0].top)}` : Array.from(a || []).join(','));
+    wrap(Element.prototype, 'scrollIntoView', (el, a) => `scrollIntoView(#${el.id || el.className}, ${how(a)}) with it at ${Math.round(el.getBoundingClientRect().top)}px`);
+    wrap(window, 'scrollBy', (w, a) => `scrollBy(${how(a)})`);
+    wrap(window, 'scrollTo', (w, a) => `scrollTo(${how(a)})`);
+    let run = null;
+    addEventListener('scroll', () => {
+        if (run && at() - run[2] < 80) { run[2] = at(); run[3] = y(); return; }
+        run = [at(), null, at(), y()];
+        const mine = run;
+        log.push([mine[0], { toString: () => `scrolled to y=${mine[3]} by ${mine[2] - mine[0]}ms later` }]);
+    }, { passive: true, capture: true });
+    addEventListener('DOMContentLoaded', () => {
+        const heights = new Map();
+        const blocks = Array.from(document.querySelectorAll('body > header, main > section, body > footer'));
+        const name = (b) => b.id || b.tagName.toLowerCase();
+        if (typeof ResizeObserver === 'function') {
+            const ro = new ResizeObserver((entries) => entries.forEach((en) => {
+                const h = Math.round(en.target.getBoundingClientRect().height);
+                const was = heights.get(en.target);
+                heights.set(en.target, h);
+                if (was !== undefined && was !== h) note(`${name(en.target)} ${was}px tall -> ${h}px (its top at ${Math.round(en.target.getBoundingClientRect().top)}px) at y=${y()}`);
+            }));
+            blocks.forEach(b => ro.observe(b));
+        }
+        new MutationObserver((list) => list.forEach((m) => {
+            const el = m.target;
+            if (el === document.documentElement || el === document.body) {
+                if (m.attributeName === 'style') note(`<${el.tagName.toLowerCase()}> overflow-anchor: ${el.style.overflowAnchor || 'as the stylesheet has it'}`);
+            } else if (m.attributeName === 'class' && blocks.includes(el) && el.classList.contains('drawn') && !/\bdrawn\b/.test(m.oldValue || '')) {
+                note(`${name(el)} marked .drawn at y=${y()}`);
+            }
+        })).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'], attributeOldValue: true, subtree: true });
+    });
+    window.__jump = {
+        told: () => {
+            if (!log.length) return 'nothing noted';
+            const t0 = log[0][0];
+            return log.map(([t, what]) => `[${t - t0}ms] ${what}`).join('; ');
+        }
+    };
+}
+
 async function exerciseFirstView(browser, origin) {
     console.log('  index.html — the first view');
     for (const [width, height] of FIRST_VIEWS) {
@@ -1739,6 +1800,7 @@ async function exerciseNavigation(browser, origin) {
     for (const [width, height, sel, id, what] of landings) {
         for (const reducedMotion of ['reduce', 'no-preference']) {
             const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion });
+            await ctx.addInitScript(traceJump);
             const pg = await ctx.newPage();
             await pg.goto(`${origin}/index.html`, { waitUntil: 'load' });
             await pg.waitForTimeout(600);
@@ -1751,7 +1813,7 @@ async function exerciseNavigation(browser, origin) {
             }), id);
             const tag = `first jump by the ${what} at ${width}px${reducedMotion === 'reduce' ? ', reduced motion' : ''}`;
             if (Math.abs(r.top - r.bar) <= 4) ok(`${tag}: #${id} lands under the nav bar and stays (${r.top}px, bar ends at ${r.bar}px)`);
-            else bad(`${tag}: #${id} sits at ${r.top}px, the nav bar ends at ${r.bar}px (module loaded: ${r.loaded})`);
+            else bad(`${tag}: #${id} sits at ${r.top}px, the nav bar ends at ${r.bar}px (module loaded: ${r.loaded}) — what moved the page, in order: ${await pg.evaluate(() => window.__jump.told())}`);
             await ctx.close();
         }
     }
