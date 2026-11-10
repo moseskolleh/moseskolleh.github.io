@@ -1504,7 +1504,7 @@ html.light-mode .nav-link.contact-btn:hover {
 }
 
 .corelog-item .timeline-content {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .corelog-foot {
@@ -1540,8 +1540,8 @@ html.light-mode .nav-link.contact-btn:hover {
 }
 
 .timeline-content h3 {
-    font-size: 1.3rem;
-    margin-bottom: 4px;
+    font-size: 1.24rem;
+    margin-bottom: 3px;
 }
 
 .timeline-content h4 {
@@ -2337,17 +2337,15 @@ html.light-mode .form-status.error {
     font-size: 0.9rem;
 }
 
-/* The two plain links side by side where they fit, apart where they wrap,
-   on a line of their own. */
 .footer-links {
-    margin-top: 6px;
+    margin-top: 8px;
 }
 
-/* Three sentences, not three shouted labels: the label's face and size
-   without its capitals. */
+/* Three sentences, a line each, not three shouted labels: the label's face
+   and size without its capitals. Side by side, the second ran under back
+   to top's corner at 1280px and hid it on the last screen. */
 .footer-fieldreport {
-    display: inline-block;
-    margin: 6px 12px 0;
+    margin-top: 4px;
     text-transform: none;
     letter-spacing: 0.01em;
 }
@@ -2690,10 +2688,10 @@ html.js .nojs-note { display: none; }
     }
 
     .hero-plate {
-        flex: 1 1 48px;
-        min-height: 48px;
+        flex: 1 1 44px;
+        min-height: 44px;
         max-height: 42vh;
-        margin: 0 -24px 22px;
+        margin: 0 -24px 18px;
     }
 
     .hero-plate::before,
@@ -2815,8 +2813,11 @@ html.js .nojs-note { display: none; }
 
 @media (min-width: 900px) and (max-height: 999px) {
     .hero { padding-top: 90px; }
+    .hero-eyebrow, .hero-subtitle { margin-bottom: 12px; }
+    .hero-title { margin-bottom: 14px; }
     .at-a-glance { margin-bottom: 18px; }
     .hero-cta { margin-bottom: 24px; }
+    .hero-stat { padding-top: 14px; }
     .hero-content > .hero-plate { grid-row: 1 / span 6; margin-bottom: 26px; }
     .hero-content > .hero-description { grid-column: 1 / -1; max-width: 780px; }
 }
@@ -2902,6 +2903,7 @@ html.js .nojs-note { display: none; }
 @media (max-width: 380px) {
     .hero-cta .btn { padding: 13px 10px; }
     .hero-stat-label, .hero-photo-caption { letter-spacing: 0; }
+    .hero-stat .hero-stat-number { min-width: 0; }
 }
 
 /* A small phone's window is short too (smoke.js: 375x667, 360x640), and
@@ -2919,12 +2921,12 @@ html.js .nojs-note { display: none; }
    fit with the strip at its longest (smoke.js: 1366x657, 1280x720): the
    name on one line, and the plate beside the six rows that are left. */
 @media (min-width: 900px) and (max-height: 880px) {
-    .hero-title { font-size: clamp(2.6rem, min(5.2vw, 9.4vh), 4.6rem); margin-bottom: 14px; }
+    .hero { padding-top: 84px; }
+    .hero-title { font-size: clamp(2.5rem, min(5.2vw, 8.6vh), 4.6rem); margin-bottom: 12px; }
     .hero-line { display: inline; }
-    .hero-subtitle { margin-bottom: 12px; }
-    .at-a-glance { margin-bottom: 16px; }
-    .hero-cta { margin-bottom: 22px; }
-    .hero-stat { padding-top: 14px; }
+    .hero-eyebrow, .hero-subtitle, .hero-valueprop { margin-bottom: 10px; }
+    .at-a-glance { margin-bottom: 12px; }
+    .hero-cta { margin-bottom: 16px; }
 }
 
 /* ===================================
@@ -3781,7 +3783,7 @@ html.light-mode .journey-you-readout {
 .section-cta {
     padding: 10px 16px;
     border-left: 2px solid var(--accent-color);
-    background: var(--line-soft);
+    background: var(--card-bg-alt);
     border-radius: 0 3px 3px 0;
     font-size: 0.95rem;
     line-height: 1.65;

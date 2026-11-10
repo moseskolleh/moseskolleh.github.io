@@ -28,7 +28,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - **Evidence-first skills**: no invented percentages — every tool's proof is public work that shows it, a repository on GitHub, or says there is none: machine learning, shown only by a certificate, links nowhere, and the GIS row links its case study, whose maps are on request. The 164 water points are itemised in About
 - **The Brief** (`brief.html`), a page that set a job ad against the work on this site, was retired in October 2026. Its address now answers with a short note, `noindex` and out of the sitemap, that points to the homepage and the case studies, so a link already sent to it (`brief.html?focus=…`) does not end in a 404; an old `/#assay` link goes on to the same note
 - **[Field Notes](notes/what-164-water-points-taught-me.html)**: short essays connecting boreholes, scenario storytelling and sustainable AI, each an article of its own in `notes/`, dated the day it was first published on this site, with an [Atom feed](feed.xml); About links the newest three. They are written in markdown in `content/notes/` (see [Field Notes and the feed](#field-notes-and-the-feed))
-- **Modern design**: dark theme with vibrant green accents, light mode (the reader's choice, shared by every page, or with none the system's, from the first paint), responsive layout, full SEO/social metadata (Open Graph, a sitemap, an Atom feed, and JSON-LD written from `content/`: see [Structured data](#structured-data))
+- **Design**: a dark theme with a vivid green accent, titles in Newsreader with the word each turns on in its italic, text and controls in Inter, labels and figures in IBM Plex Mono; the hero's fieldwork photographs in a plate of their own beside the name (a band above it on a phone), not behind it; light mode (the reader's choice, shared by every page, or with none the system's, from the first paint), responsive layout, full SEO/social metadata (Open Graph, a sitemap, an Atom feed, and JSON-LD written from `content/`: see [Structured data](#structured-data))
 - **Seven sections**: journey, about (with the CV download and links to the field notes), experience, six project cards leading to the case studies, the EcoPrompt Coach's chart, skills and education, contact form
 
 ## Technologies Used
@@ -37,15 +37,15 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 - **CSS3**: Modern styling with CSS Grid, Flexbox, animations, and transitions
 - **JavaScript (Vanilla)**: no framework, no bundler. A 70 KB core (`script.js`, 23 KB gzipped) and four on-demand modules in `modules/`, each fetched the first time it is needed: the core fetches two on the homepage (the section-05 interactives with the footer receipt, and the field terminal), the case studies fetch the two games (`dossier.js` and `.css`) and `carbon-ai.html` fetches Anatomy of a Prompt (`anatomy.js` and `.css`), each as it comes near the screen
 - **Icons**: an inline SVG symbol sprite, no icon font
-- **Fonts**: Inter, Space Grotesk and IBM Plex Mono, self-hosted as Latin subsets under the SIL Open Font License (see [Fonts](#fonts))
+- **Fonts**: Newsreader, Inter and IBM Plex Mono, self-hosted as Latin subsets under the SIL Open Font License (see [Fonts](#fonts))
 - **GitHub Pages**: Free hosting for static websites
 
 ## Sections Overview
 
 ### 🏠 Home (Hero)
-- Name, role and a one-line value proposition over a rotating set of fieldwork photographs (the rotation only runs while the hero is on screen and the tab is visible)
+- Name, role and a one-line value proposition beside a rotating set of fieldwork photographs, in a plate with each photo's caption on its corner (the rotation only runs while the hero is on screen and the tab is visible). On a phone the plate is a band under the nav bar that takes what the first screen has left once the words and the figures are in it
 - An at-a-glance strip written from `content/profile.json` by `npm run build:content`: what he is open to (research collaborations, since he began his PhD) and where he is today; his languages appear once Moses states them, and a fact that is `null` is simply not shown
-- One primary action (**See the evidence**, to the case studies), **Get in touch** second, and a quieter CV link; it is the one filled button on the first screen (the nav's Contact is an outline there, filled on hover). The figures below and the photo's caption sit inside the first screen at 1440×900 and 390×844, in a laptop's shorter browser window (1366×657, 1280×720), where the description follows the figures as it does on a phone, and on a small phone (375×667, 360×640)
+- One primary action (**See the evidence**, to the case studies), **Get in touch** second, and a quieter CV link; it is the one filled button on the first screen (the nav's Contact is an outline there, filled on hover). The figures below and the photo's caption sit inside the first screen at 1440×900 and 390×844, in a laptop's shorter browser window (1366×657, 1280×720), and on a small phone (375×667, 360×640). In a window under 1,000px tall, and on any phone, the description follows the figures; in a taller one it sits with the words beside the plate
 - A six-link nav: Work, About, Experience, Research, CV and Contact, with the theme switch beside them. The index of the five interactive features sits just before Contact
 - Four exact figures (164 water points, 54 hazard systems, 3 continents, 2 master's degrees), written into the HTML so they read correctly without JavaScript; with it they count up to the same values, with nothing appended, and stay still under reduced motion or low-energy mode
 
@@ -1149,7 +1149,7 @@ did.
 | First view of the homepage on a phone, over the wire (fonts included) | ~215 KB | 227 KB |
 | Everything a full visit adds on demand (modules, scripts, map) | ~41 KB | 44 KB |
 | Largest single image | ~180 KB | 189 KB |
-| Every image in the repository | ~3.38 MB | 3.5 MB |
+| Every image in the repository | ~3.40 MB | 3.5 MB |
 | Text-only field report, the HTML file (the size the footer quotes) | ~11 KB | 11 KB |
 | Text-only field report, over the wire (with its visit counter) | ~7 KB | 8 KB |
 | Case studies page, over the wire (fonts included) | ~108 KB | 109 KB |
@@ -1329,12 +1329,21 @@ npm run images -- --plan  # say what it would do; write nothing
 
 ### Fonts
 
-Inter, Space Grotesk and IBM Plex Mono live in `assets/fonts/`, subset to the
+Newsreader, Inter and IBM Plex Mono live in `assets/fonts/`, subset to the
 same Latin range Google Fonts served and instanced to the weights the
-stylesheets use (Inter 400–600, Space Grotesk 400–700, Plex Mono 400 and 500):
-76 KB in four files, against about 100 KB and two extra origins before. They
+stylesheets use (Inter 400–600, Plex Mono 400, and Newsreader at one weight
+a style: 500 upright for titles, 400 italic for the word a title turns on):
+75 KB in four files, against about 100 KB and two extra origins before. They
 are the last third-party request the site had, and `tests/html.test.js` now
 fails if one comes back.
+
+Newsreader has two axes, weight and optical size, and Google's file for one
+style is over 130 KB. Both axes are pinned (the optical size to 48, between
+a poster's and a paragraph's, since one cut serves a 20px card title and an
+80px name), the italic keeps only the characters a heading in English uses,
+and neither cut carries the glyphs only an OpenType feature reaches: 20 KB
+and 12 KB. Until November 2026 the titles were in Space Grotesk and the
+labels had a second weight of Plex Mono; those two files were 34 KB.
 
 ```bash
 npm run fonts:build     # fetch the sources, subset, write assets/fonts/ and the @font-face blocks
@@ -1398,7 +1407,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Design inspiration: EcoSearch theme (environmental sustainability focus)
 - Icons: an inline SVG sprite drawn from [Font Awesome Free](https://fontawesome.com/) (CC BY 4.0)
-- Fonts: [Inter](https://github.com/rsms/inter), [Space Grotesk](https://github.com/floriankarsten/space-grotesk) & [IBM Plex Mono](https://github.com/IBM/plex), self-hosted under the SIL Open Font License
+- Fonts: [Newsreader](https://github.com/productiontype/Newsreader), [Inter](https://github.com/rsms/inter) & [IBM Plex Mono](https://github.com/IBM/plex), self-hosted under the SIL Open Font License
 - Map data: [Natural Earth](https://www.naturalearthdata.com/) via world-atlas, projected with d3-geo
 - Hosting: [GitHub Pages](https://pages.github.com/)
 

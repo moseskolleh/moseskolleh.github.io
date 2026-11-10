@@ -99,7 +99,7 @@ function cards(root = ROOT) {
 /** The fonts, inline: the card fetches nothing. */
 function fontFaces() {
     const file = (name) => fs.readFileSync(path.join(ROOT, 'assets', 'fonts', `${name}.woff2`)).toString('base64');
-    return [['Space Grotesk', 'space-grotesk-latin', '300 700'], ['Inter', 'inter-latin', '100 900'], ['IBM Plex Mono', 'ibm-plex-mono-latin-400', '400']]
+    return [['Newsreader', 'newsreader-latin-500', '500'], ['Inter', 'inter-latin', '100 900'], ['IBM Plex Mono', 'ibm-plex-mono-latin-400', '400']]
         .map(([family, f, weight]) => `@font-face { font-family: '${family}'; font-weight: ${weight}; src: url(data:font/woff2;base64,${file(f)}) format('woff2'); }`)
         .join('\n');
 }
@@ -111,12 +111,12 @@ const TEMPLATE = (card, fonts) => `<!DOCTYPE html>
 ${fonts}
 * { margin: 0; box-sizing: border-box; }
 html, body { width: ${SIZE.width}px; height: ${SIZE.height}px; background: #0a0a0a; color: #ffffff; overflow: hidden; }
-body { display: flex; flex-direction: column; justify-content: space-between; padding: 64px 72px; border-left: 12px solid #7CFC00; font-family: 'Inter', sans-serif; }
+body { display: flex; flex-direction: column; justify-content: space-between; padding: 64px 72px; border-left: 6px solid #7CFC00; font-family: 'Inter', sans-serif; }
 .kicker { font-family: 'IBM Plex Mono', monospace; font-size: 26px; letter-spacing: 0.06em; text-transform: uppercase; color: #7CFC00; }
-h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 1.12; letter-spacing: -0.01em; font-size: ${card.title.length > 60 ? 56 : card.title.length > 36 ? 68 : 84}px; max-width: 1000px; }
+h1 { font-family: 'Newsreader', serif; font-weight: 500; line-height: 1.06; letter-spacing: -0.02em; text-wrap: balance; font-size: ${card.title.length > 60 ? 64 : card.title.length > 36 ? 78 : 96}px; max-width: 1000px; }
 .by { display: flex; align-items: center; gap: 22px; }
 .by svg { width: 64px; height: 64px; color: #7CFC00; flex: none; }
-.name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 32px; }
+.name { font-family: 'Newsreader', serif; font-weight: 500; font-size: 36px; line-height: 1.1; }
 .role { font-size: 24px; color: #b0b0b0; margin-top: 2px; }
 </style></head><body>
 <p class="kicker">${esc(card.kicker)}</p>
