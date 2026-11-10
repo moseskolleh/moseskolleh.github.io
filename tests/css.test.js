@@ -246,10 +246,10 @@ assert(loose.length === 0, `Transitions: each names the properties it animates, 
 // 720, 800 and 860 to 900), changing only the widths between. The rest are
 // each tuned to what happens at their edge (the hero's two buttons on a
 // 375px phone, a select on a 320px one, the scroll drill's margin), and
-// moving one would change a phone or a laptop people use: so twelve, not
-// the plan's four.
+// moving one would change a phone or a laptop people use: so eleven, not
+// the plan's four. (Twelve until the hero's photographs moved into a plate:
+// 360px was where the hero stepped down under a caption on two lines.)
 const BREAKPOINTS = {
-    360: 'the smallest phones: the hero steps down under a caption on two lines',
     381: 'the hero\'s two buttons keep to one line below this',
     421: 'carbon-ai.css: a 320px phone\'s padding, and the calculator\'s three readings stacked',
     481: 'a phone: the at-a-glance strip and the hero\'s figures in columns',

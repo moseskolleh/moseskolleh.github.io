@@ -34,9 +34,11 @@
 
 .cl-figure { margin: 0 0 6px; line-height: 1.5; }
 .cl-value {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.35rem;
-    font-weight: 700;
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 1;
+    font-synthesis: none;
     color: var(--primary-green);
     margin-right: 2px;
 }

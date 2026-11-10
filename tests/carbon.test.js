@@ -691,7 +691,7 @@ const ROUNDED_TO_NOTHING = /^0(\.0+)?$|\b0\.0+ /;
             const box = (svg.getAttribute('viewBox') || '').split(' ').map(Number);
             assert(box[2] === width, `Anatomy on ${what}: drawn one unit to a pixel (viewBox ${svg.getAttribute('viewBox')})`);
             // A generous width per character for each face: IBM Plex Mono is
-            // 0.6em, and Space Grotesk under that on average.
+            // 0.6em, and the titles' face under that on average.
             const size = { 'anatomy-source-t': 15, 'anatomy-source-sub': 12, 'anatomy-t-title': 13, 'anatomy-t-val': 14, 'anatomy-t-esrs': 11 };
             const over = Array.from(svg.querySelectorAll('text')).filter((t) => {
                 const cls = Object.keys(size).find(c => t.classList.contains(c));

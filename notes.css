@@ -18,8 +18,8 @@
 .nt-text p,
 .nt-text ul,
 .nt-text ol { margin: 0 0 1.1em; }
-.nt-text h2 { margin: 1.6em 0 0.5em; font-size: 1.3rem; }
-.nt-text h3 { margin: 1.4em 0 0.4em; font-size: 1.1rem; }
+.nt-text h2 { margin: 1.6em 0 0.5em; font-size: 1.5rem; }
+.nt-text h3 { margin: 1.4em 0 0.4em; font-size: 1.25rem; }
 .nt-text a { text-underline-offset: 3px; }
 
 .nt-label {

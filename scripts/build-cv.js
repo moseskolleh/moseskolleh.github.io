@@ -27,10 +27,11 @@
 // scripts/cv.html is the template: the layout and the section headings,
 // nothing else. Chromium prints it (the build the smoke test uses, found
 // the same way), with the site's own fonts embedded from assets/fonts, so
-// nothing is fetched. Inter and Space Grotesk are variable fonts, which
-// Chromium's PDF writer would embed as Type 3 outlines that some
-// applicant-tracking systems cannot read; each weight is instanced to a
-// static font first (subset-font, as npm run fonts:build uses it).
+// nothing is fetched. Inter is a variable font, which Chromium's PDF writer
+// would embed as Type 3 outlines that some applicant-tracking systems
+// cannot read; each weight is instanced to a static font first (subset-font,
+// as npm run fonts:build uses it). Newsreader, the name's face, is already
+// one weight in assets/fonts.
 //
 // tests/cv.test.js reads the committed PDF back (scripts/lib/pdf-text.js)
 // and fails if it does not carry the profile's name, address, every role
@@ -303,7 +304,7 @@ async function fontFaces() {
     const faces = [
         ['Inter', 400, await pin('inter', 400)],
         ['Inter', 600, await pin('inter', 600)],
-        ['Space Grotesk', 700, await pin('space-grotesk', 700)],
+        ['Newsreader', 500, file('newsreader')],
         ['IBM Plex Mono', 400, file('ibm-plex-mono-400')]
     ];
     return faces.map(([family, weight, buf]) =>

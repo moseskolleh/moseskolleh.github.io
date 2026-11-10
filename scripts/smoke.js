@@ -27,7 +27,7 @@
 //     the at-a-glance strip and one primary action, or with the play index,
 //     today or with every at-a-glance fact filled in at the longest
 //     content.js accepts; a photo caption over the eyebrow or the name,
-//     down to 320px; a scroll cue drawn across the hero's words
+//     down to 320px
 //   - a page that, with JavaScript off (or script.js blocked or late), is
 //     covered, leaves content invisible, shows a [hidden] element or a
 //     control only a script could drive, or hides the contact form
@@ -799,8 +799,8 @@ async function exerciseCarbonTool(page, r) {
 // two laptops' browser windows, which are shorter than their screens: a
 // 1366x768 laptop leaves about 1366x657, and the figures sat wholly below
 // it; at 1280x720 the fold cut through the digits. And two windows 1,024px
-// wide, either side of the short-window rule (880px tall), where the
-// scroll cue was drawn through the hero's words. And two small phones,
+// wide, either side of the short-window rule (880px tall), where a scroll
+// cue the hero once had was drawn through its words. And two small phones,
 // 375x667 and 360x640, where the fold cut through the second row of
 // figures or left it below.
 const SMALL_PHONES = [[375, 667], [360, 640]];
@@ -824,25 +824,89 @@ function filledControls() {
     }).map(el => (el.matches('#home .btn-primary') ? 'hero primary: ' : '') + (el.textContent.trim() || el.getAttribute('aria-label')));
 }
 
-// The words in the hero the scroll cue is drawn across, if it is shown:
-// centred at the hero's foot, it ran through the description's last line
-// in windows 900-1,030px wide once a short window put the description
-// there, and through a figure's label at 1024x881. Run in the page.
-function cueOverText() {
-    const cue = document.querySelector('.scroll-indicator');
-    const c = cue && cue.getBoundingClientRect();
-    if (!c || !c.width || getComputedStyle(cue).display === 'none') return [];
-    const hits = [];
-    const walk = document.createTreeWalker(document.querySelector('.hero-content'), NodeFilter.SHOW_TEXT);
-    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-        if (!n.textContent.trim()) continue;
-        const range = document.createRange();
-        range.selectNodeContents(n);
-        if (Array.from(range.getClientRects()).some(b => b.width && b.left < c.right && c.left < b.right && b.top < c.bottom && c.top < b.bottom)) {
-            hits.push(n.textContent.trim().slice(0, 32));
+// What moves the page during a jump, for the landing checks to report when
+// one misses: a miss has only ever happened in Firefox in CI, where "sits at
+// -260px" says how far out and nothing about why. Run in the page before its
+// own scripts. It notes each call that scrolls (who asked, and where the
+// page was), each change in a section's height, each section marked .drawn,
+// and where each run of scroll events began and ended; told() is the list,
+// times in ms since the first entry.
+function traceJump() {
+    const log = [];
+    const at = () => Math.round(performance.now());
+    const y = () => Math.round(window.scrollY);
+    const note = (what) => { if (log.length < 400) log.push([at(), what]); };
+    const wrap = (owner, name, say) => {
+        const real = owner[name];
+        owner[name] = function () {
+            note(`${say(this, arguments)} at y=${y()}`);
+            return real.apply(this, arguments);
+        };
+    };
+    const how = (a) => (a && a[0] && typeof a[0] === 'object' ? `${a[0].behavior || 'auto'}${a[0].top === undefined ? '' : ' top=' + Math.round(a[0].top)}` : Array.from(a || []).join(','));
+    wrap(Element.prototype, 'scrollIntoView', (el, a) => `scrollIntoView(#${el.id || el.className}, ${how(a)}) with it at ${Math.round(el.getBoundingClientRect().top)}px`);
+    wrap(window, 'scrollBy', (w, a) => `scrollBy(${how(a)})`);
+    wrap(window, 'scrollTo', (w, a) => `scrollTo(${how(a)})`);
+    let run = null;
+    addEventListener('scroll', () => {
+        if (run && at() - run[2] < 80) { run[2] = at(); run[3] = y(); return; }
+        run = [at(), null, at(), y()];
+        const mine = run;
+        log.push([mine[0], { toString: () => `scrolled to y=${mine[3]} by ${mine[2] - mine[0]}ms later` }]);
+    }, { passive: true, capture: true });
+    addEventListener('DOMContentLoaded', () => {
+        const heights = new Map();
+        const blocks = Array.from(document.querySelectorAll('body > header, main > section, body > footer'));
+        const name = (b) => b.id || b.tagName.toLowerCase();
+        if (typeof ResizeObserver === 'function') {
+            const ro = new ResizeObserver((entries) => entries.forEach((en) => {
+                const h = Math.round(en.target.getBoundingClientRect().height);
+                const was = heights.get(en.target);
+                heights.set(en.target, h);
+                if (was !== undefined && was !== h) note(`${name(en.target)} ${was}px tall -> ${h}px (its top at ${Math.round(en.target.getBoundingClientRect().top)}px) at y=${y()}`);
+            }));
+            blocks.forEach(b => ro.observe(b));
         }
-    }
-    return hits;
+        new MutationObserver((list) => list.forEach((m) => {
+            const el = m.target;
+            if (el === document.documentElement || el === document.body) {
+                if (m.attributeName === 'style') note(`<${el.tagName.toLowerCase()}> overflow-anchor: ${el.style.overflowAnchor || 'as the stylesheet has it'}`);
+            } else if (m.attributeName === 'class' && blocks.includes(el) && el.classList.contains('drawn') && !/\bdrawn\b/.test(m.oldValue || '')) {
+                note(`${name(el)} marked .drawn at y=${y()}`);
+            }
+        })).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'], attributeOldValue: true, subtree: true });
+    });
+    window.__jump = {
+        told: () => {
+            if (!log.length) return 'nothing noted';
+            const t0 = log[0][0];
+            return log.map(([t, what]) => `[${t - t0}ms] ${what}`).join('; ');
+        }
+    };
+}
+
+// A stand-in for a glide that does not end where it was sent, for any
+// browser. Each smooth scrollIntoView goes where it is sent, at once; then,
+// a tenth of a second after the last of them, the page is put at its last
+// pixel, once, and left there: where Firefox's spring left a jump to
+// #contact in CI, after its last aim. Run in the page before its own
+// scripts.
+function overshootingGlide() {
+    const real = Element.prototype.scrollIntoView;
+    let quiet = 0;
+    let overshot = false;
+    Element.prototype.scrollIntoView = function (o) {
+        const out = real.call(this, Object.assign({}, o, { behavior: 'instant' }));
+        if (!overshot && o && o.behavior === 'smooth') {
+            clearTimeout(quiet);
+            quiet = setTimeout(() => {
+                overshot = true;
+                window.__overshot = Math.round(scrollY);
+                window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' });
+            }, 100);
+        }
+        return out;
+    };
 }
 
 async function exerciseFirstView(browser, origin) {
@@ -888,9 +952,6 @@ async function exerciseFirstView(browser, origin) {
         if (r.play >= height) ok(`first view ${at}: the play index is below the fold (${r.play}px)`);
         else bad(`first view ${at}: the play index is in the first screen (${r.play}px)`);
         if (r.links <= 7) ok(`first view ${at}: ${r.links} links in the nav`); else bad(`first view ${at}: ${r.links} links in the nav — at most 7`);
-        const cue = await page.evaluate(cueOverText);
-        if (cue.length) bad(`first view ${at}: the scroll cue is drawn across "${cue.join('", "')}"`);
-        else ok(`first view ${at}: the scroll cue crosses no words of the hero`);
         await context.close();
     }
 
@@ -1001,9 +1062,6 @@ async function exerciseLongestStrip(browser, origin) {
         if (Math.max(r.glance, r.act, r.stats) <= height) ok(`${at}: the strip, the primary action and the figures are on the first screen (the figures end at ${r.stats}px)`);
         else bad(`${at}: the strip ends at ${r.glance}px, the primary action at ${r.act}px and the figures at ${r.stats}px, past the first ${height}px`);
         if (r.wide) bad(`${at}: the page scrolls sideways`);
-        const cue = await page.evaluate(cueOverText);
-        if (cue.length) bad(`${at}: the scroll cue is drawn across "${cue.join('", "')}"`);
-        else ok(`${at}: the scroll cue crosses no words of the hero`);
         await context.close();
     }
 }
@@ -1766,6 +1824,7 @@ async function exerciseNavigation(browser, origin) {
     for (const [width, height, sel, id, what] of landings) {
         for (const reducedMotion of ['reduce', 'no-preference']) {
             const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion });
+            await ctx.addInitScript(traceJump);
             const pg = await ctx.newPage();
             await pg.goto(`${origin}/index.html`, { waitUntil: 'load' });
             await pg.waitForTimeout(600);
@@ -1778,9 +1837,38 @@ async function exerciseNavigation(browser, origin) {
             }), id);
             const tag = `first jump by the ${what} at ${width}px${reducedMotion === 'reduce' ? ', reduced motion' : ''}`;
             if (Math.abs(r.top - r.bar) <= 4) ok(`${tag}: #${id} lands under the nav bar and stays (${r.top}px, bar ends at ${r.bar}px)`);
-            else bad(`${tag}: #${id} sits at ${r.top}px, the nav bar ends at ${r.bar}px (module loaded: ${r.loaded})`);
+            else bad(`${tag}: #${id} sits at ${r.top}px, the nav bar ends at ${r.bar}px (module loaded: ${r.loaded}) — what moved the page, in order: ${await pg.evaluate(() => window.__jump.told())}`);
             await ctx.close();
         }
+    }
+
+    // A glide that ends somewhere else is landed again once it stops. In
+    // Firefox a jump to #contact came to rest at the page's last pixel,
+    // 333px past, and stayed: its smooth scroll is a spring, and re-aimed
+    // nearer as each section on the way was drawn at its real height, it
+    // ran on. Every browser gets the stand-in above, so the landing is held
+    // to this whether or not its own glide overshoots. #contact, because
+    // with it on screen the page's end changes nothing's height: a target
+    // further up is landed again anyway, by the sections drawn at the end.
+    {
+        const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
+        await ctx.addInitScript(overshootingGlide);
+        await ctx.addInitScript(traceJump);
+        const pg = await ctx.newPage();
+        await pg.goto(`${origin}/index.html`, { waitUntil: 'load' });
+        await pg.waitForTimeout(600);
+        await pg.evaluate(() => document.querySelector('.nav-menu a[href="#contact"]').click());
+        await pg.waitForTimeout(2500);
+        const r = await pg.evaluate(() => ({
+            top: Math.round(document.getElementById('contact').getBoundingClientRect().top),
+            bar: Math.round(document.getElementById('navbar').getBoundingClientRect().bottom),
+            end: document.documentElement.scrollHeight - innerHeight,
+            from: window.__overshot
+        }));
+        if (typeof r.from !== 'number' || r.end - r.from < 100) bad(`a glide that ends at the page's last pixel: the stand-in moved the page ${typeof r.from === 'number' ? `${r.end - r.from}px` : 'not at all'}, so nothing was checked`);
+        else if (Math.abs(r.top - r.bar) <= 4) ok(`a glide that ends at the page's last pixel, ${r.end - r.from}px past #contact: landed again once it stops (${r.top}px, bar ends at ${r.bar}px)`);
+        else bad(`a glide that ends at the page's last pixel, ${r.end - r.from}px past #contact, is left there (#contact at ${r.top}px) — what moved the page, in order: ${await pg.evaluate(() => window.__jump.told())}`);
+        await ctx.close();
     }
 
     // A shared link straight into section 05 lands a task after load, and
