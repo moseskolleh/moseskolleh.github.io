@@ -886,19 +886,26 @@ function traceJump() {
 }
 
 // A stand-in for a glide that does not end where it was sent, for any
-// browser: a smooth scrollIntoView asked for while the page is still moving
-// from the one before runs on to the page's last pixel and stops there (what
-// Firefox's spring did to a jump to #contact in CI); asked for from rest, it
-// goes where it is sent. Run in the page before its own scripts.
+// browser. Each smooth scrollIntoView goes where it is sent, at once; then,
+// a tenth of a second after the last of them, the page is put at its last
+// pixel, once, and left there: where Firefox's spring left a jump to
+// #contact in CI, after its last aim. Run in the page before its own
+// scripts.
 function overshootingGlide() {
     const real = Element.prototype.scrollIntoView;
-    let lastMove = -1e9;
-    addEventListener('scroll', () => { lastMove = performance.now(); }, { passive: true, capture: true });
+    let quiet = 0;
+    let overshot = false;
     Element.prototype.scrollIntoView = function (o) {
-        if (o && o.behavior === 'smooth' && performance.now() - lastMove < 100) {
-            return window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' });
+        const out = real.call(this, Object.assign({}, o, { behavior: 'instant' }));
+        if (!overshot && o && o.behavior === 'smooth') {
+            clearTimeout(quiet);
+            quiet = setTimeout(() => {
+                overshot = true;
+                window.__overshot = Math.round(scrollY);
+                window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' });
+            }, 100);
         }
-        return real.call(this, Object.assign({}, o, { behavior: 'instant' }));
+        return out;
     };
 }
 
@@ -1840,23 +1847,27 @@ async function exerciseNavigation(browser, origin) {
     // 333px past, and stayed: its smooth scroll is a spring, and re-aimed
     // nearer as each section on the way was drawn at its real height, it
     // ran on. Every browser gets the stand-in above, so the landing is held
-    // to this whether or not its own glide overshoots.
-    for (const [sel, id] of [['.nav-menu a[href="#contact"]', 'contact'], ['.nav-menu a[href="#about"]', 'about']]) {
+    // to this whether or not its own glide overshoots. #contact, because
+    // with it on screen the page's end changes nothing's height: a target
+    // further up is landed again anyway, by the sections drawn at the end.
+    {
         const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'no-preference' });
         await ctx.addInitScript(overshootingGlide);
         await ctx.addInitScript(traceJump);
         const pg = await ctx.newPage();
         await pg.goto(`${origin}/index.html`, { waitUntil: 'load' });
         await pg.waitForTimeout(600);
-        await pg.evaluate((s) => document.querySelector(s).click(), sel);
+        await pg.evaluate(() => document.querySelector('.nav-menu a[href="#contact"]').click());
         await pg.waitForTimeout(2500);
-        const r = await pg.evaluate((i) => ({
-            top: Math.round(document.getElementById(i).getBoundingClientRect().top),
+        const r = await pg.evaluate(() => ({
+            top: Math.round(document.getElementById('contact').getBoundingClientRect().top),
             bar: Math.round(document.getElementById('navbar').getBoundingClientRect().bottom),
-            end: Math.round(scrollY) >= document.documentElement.scrollHeight - innerHeight - 1
-        }), id);
-        if (Math.abs(r.top - r.bar) <= 4) ok(`a glide that overshoots to the end of the page: #${id} is landed again once it stops (${r.top}px, bar ends at ${r.bar}px)`);
-        else bad(`a glide that overshoots to the end of the page: #${id} is left at ${r.top}px${r.end ? ', the page at its last pixel' : ''} — what moved the page, in order: ${await pg.evaluate(() => window.__jump.told())}`);
+            end: document.documentElement.scrollHeight - innerHeight,
+            from: window.__overshot
+        }));
+        if (typeof r.from !== 'number' || r.end - r.from < 100) bad(`a glide that ends at the page's last pixel: the stand-in moved the page ${typeof r.from === 'number' ? `${r.end - r.from}px` : 'not at all'}, so nothing was checked`);
+        else if (Math.abs(r.top - r.bar) <= 4) ok(`a glide that ends at the page's last pixel, ${r.end - r.from}px past #contact: landed again once it stops (${r.top}px, bar ends at ${r.bar}px)`);
+        else bad(`a glide that ends at the page's last pixel, ${r.end - r.from}px past #contact, is left there (#contact at ${r.top}px) — what moved the page, in order: ${await pg.evaluate(() => window.__jump.told())}`);
         await ctx.close();
     }
 
