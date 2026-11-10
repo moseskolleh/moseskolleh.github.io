@@ -377,12 +377,17 @@ const focusTarget = (target) => {
 // observer's first report comes a frame late, and growth in that frame was
 // once taken for the start (250-440px short).
 // While it holds, the hold alone keeps the target in place: the browser's
-// scroll anchoring is off. Firefox anchored against the same growth as well,
-// mid-glide, and the two together carried a jump to #contact past it by the
-// growth again (-262px, section 05's 334px counted twice). Released, the
-// page anchors as before, for a reader scrolling up.
+// scroll anchoring is off, so a change in height is not corrected for twice.
+// Released, the page anchors as before, for a reader scrolling up.
+//
+// A jump's glide is also checked where it stops: a smooth scroll need not
+// end where it was sent. Firefox's is a spring, and re-aimed nearer as each
+// section on the way was drawn shorter than its estimate, it ran on to the
+// end of the page (#contact 333px above the screen; smoke.js traces it). So
+// at rest it lands again, and once a landing moves nothing the check is
+// over: a reader dragging the scroll bar is not pulled back.
 let releaseHold = () => {};
-const hold = (land) => {
+const hold = (land, glide) => {
     releaseHold();
     if (!('ResizeObserver' in window)) return;
     const height = () => document.body.getBoundingClientRect().height;
@@ -393,10 +398,17 @@ const hold = (land) => {
     });
     const anchored = [document.documentElement, document.body];
     anchored.forEach(el => { el.style.overflowAnchor = 'none'; });
+    let rest = 0;
+    const settled = () => window.removeEventListener('scroll', moved);
+    const atRest = () => { land(); rest = setTimeout(settled, 250); };
+    const moved = () => { clearTimeout(rest); rest = setTimeout(atRest, 150); };
+    if (glide) window.addEventListener('scroll', moved, { passive: true });
     const HANDS = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
     const release = () => {
         ro.disconnect();
         clearTimeout(timer);
+        clearTimeout(rest);
+        settled();
         HANDS.forEach(t => window.removeEventListener(t, release, true));
         anchored.forEach(el => { el.style.overflowAnchor = ''; });
         if (releaseHold === release) releaseHold = () => {};
@@ -423,7 +435,7 @@ const jumpTo = (target, behavior, focus, wait) => {
         const put = () => target.scrollIntoView({ behavior, block: 'start' });
         put();
         if (focus) focusTarget(target);
-        hold(put);
+        hold(put, true);
     };
     if (revealTarget(target)) setTimeout(land, 240);
     else if (wait) setTimeout(land, 0); else land();

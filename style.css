@@ -58,9 +58,8 @@
     --line-soft: rgba(124, 252, 0, 0.08);
     --box-shadow: 0 8px 30px rgba(124, 252, 0, 0.1);
     --border-radius: 6px;
-    /* Newsreader for what is read as a title, Inter for what is read as
-       text or pressed, IBM Plex Mono for what is measured: coordinates,
-       dates, depths, labels. */
+    /* Newsreader for titles, Inter for text and controls, IBM Plex Mono
+       for what is measured: coordinates, dates, depths, labels. */
     --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
     --font-body: 'Inter', 'Segoe UI', sans-serif;
     --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
@@ -171,9 +170,9 @@ section {
     position: relative;
 }
 
-/* A title is Newsreader at its one weight, never a bold the browser makes
-   up; the word a title turns on is its italic, in the accent (.highlight).
-   An h4 is a label under a title, in the text's face. */
+/* A title is Newsreader at its one weight, never a made-up bold; the word
+   it turns on is its italic, in the accent (.highlight). An h4 is a label
+   under a title, in the text's face. */
 h1, h2, h3 {
     font-family: var(--font-display);
     font-weight: 500;
@@ -479,10 +478,9 @@ html.light-mode .navbar {
    =================================== */
 /* Who, what, how to reach him and the figures, all in the first screen
    (smoke.js checks eight sizes), beside the fieldwork: the photos sat
-   behind the words under an overlay that let a fifth of them through, and
-   they are the best evidence on the page. From 900px they are a plate in a
-   column of its own, as tall as the words beside it; below, a band over the
-   words that takes what the first screen has left (RESPONSIVE). */
+   behind the words under an overlay that let a fifth of them through.
+   From 900px they are a plate in a column of its own, as tall as the words
+   beside it; below, a band over the words (RESPONSIVE). */
 .hero {
     min-height: 100vh;
     min-height: 100dvh;
@@ -1263,9 +1261,8 @@ html.light-mode .nav-link.contact-btn:hover {
     background: var(--primary-green);
 }
 
-/* A stop is an entry in a log, ruled off from the next, not a box: six
-   boxes down the page read as six of the same thing. The rule turns to the
-   accent for the stop the map is showing (.map-active, below). */
+/* A stop is an entry in a log, ruled off from the next, not a box. The
+   rule takes the accent for the stop the map is showing (.map-active). */
 .journey-card {
     border-bottom: 1px solid var(--line-soft);
     padding: 0 0 24px;
@@ -2341,9 +2338,8 @@ html.light-mode .form-status.error {
     margin-top: 8px;
 }
 
-/* Three sentences, a line each, not three shouted labels: the label's face
-   and size without its capitals. Side by side, the second ran under back
-   to top's corner at 1280px and hid it on the last screen. */
+/* Three sentences, a line each, in the label's face without its capitals.
+   Side by side, one ran under back to top's corner at 1280px and hid it. */
 .footer-fieldreport {
     margin-top: 4px;
     text-transform: none;
@@ -2665,15 +2661,12 @@ html.js .nojs-note { display: none; }
         grid-template-columns: minmax(0, 1fr);
     }
 
-    /* The plate is a band under the bar, edge to edge, and the words a
-       column under it. The band takes what the first screen has left once
-       the words and the figures are in it: about 170px on a 390x844 phone,
-       its least on a small one, or with every at-a-glance fact filled in
-       (smoke.js draws that), where the fold used to cut the figures. The
-       description comes after the figures here (below), under the fold, so
-       the hero is a screen and those lines: 60px is two of them, the fewest
-       it takes. The small viewport's height (svh) does not change as a
-       phone's toolbar slides away, so the band does not either. */
+    /* The plate is a band under the bar, edge to edge, and takes what the
+       first screen has left once the words and the figures are in it: its
+       least on a small phone, or with every at-a-glance fact filled in
+       (smoke.js draws that). The description follows the figures (below),
+       so the hero is a screen and its lines: 60px, two of them. svh, so the
+       band keeps its height as a phone's toolbar slides away. */
     .hero {
         justify-content: flex-start;
         min-height: calc(100vh + 60px);
@@ -2799,11 +2792,9 @@ html.js .nojs-note { display: none; }
 
 /* Filled in, the strip is five facts, and a line each pushed the figures
    off a 390x844 screen (smoke.js checks the longest strip content.js
-   accepts); a laptop's window is shorter than its screen, and at 1366x657
-   they sat wholly below it. So the description follows the figures,
-   except in a window 1,000px tall or more, which has room for it beside
-   the plate. The source order, which a screen reader follows, is
-   unchanged. */
+   accepts), and off a laptop's 1366x657 window. So the description
+   follows the figures, except in a window 1,000px tall or more. The source
+   order, which a screen reader follows, is unchanged. */
 @media (max-width: 899px), (min-width: 900px) and (max-height: 999px) {
     .hero-description {
         order: 1;

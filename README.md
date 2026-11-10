@@ -35,7 +35,7 @@ Professional portfolio website for **Moses Kolleh Sesay**, a Sustainability & Cl
 
 - **HTML5**: Semantic markup for better SEO and accessibility
 - **CSS3**: Modern styling with CSS Grid, Flexbox, animations, and transitions
-- **JavaScript (Vanilla)**: no framework, no bundler. A 70 KB core (`script.js`, 23 KB gzipped) and four on-demand modules in `modules/`, each fetched the first time it is needed: the core fetches two on the homepage (the section-05 interactives with the footer receipt, and the field terminal), the case studies fetch the two games (`dossier.js` and `.css`) and `carbon-ai.html` fetches Anatomy of a Prompt (`anatomy.js` and `.css`), each as it comes near the screen
+- **JavaScript (Vanilla)**: no framework, no bundler. A 71 KB core (`script.js`, 23 KB gzipped) and four on-demand modules in `modules/`, each fetched the first time it is needed: the core fetches two on the homepage (the section-05 interactives with the footer receipt, and the field terminal), the case studies fetch the two games (`dossier.js` and `.css`) and `carbon-ai.html` fetches Anatomy of a Prompt (`anatomy.js` and `.css`), each as it comes near the screen
 - **Icons**: an inline SVG symbol sprite, no icon font
 - **Fonts**: Newsreader, Inter and IBM Plex Mono, self-hosted as Latin subsets under the SIL Open Font License (see [Fonts](#fonts))
 - **GitHub Pages**: Free hosting for static websites
@@ -388,7 +388,10 @@ The suites, and the failure each one exists to prevent:
   the theme switch sits in the nav bar and names what
   it will do, and back to top waits a full screen and steps aside for every
   control in its corner, not whole regions; a jump lands again when the page
-  grows, even in the frame before the first report of it. `npm run smoke`
+  grows, even in the frame before the first report of it, and once more
+  where its glide comes to rest, since a browser's smooth scroll need not
+  end where it was sent (Firefox's, a spring, ran on to the end of the
+  page). `npm run smoke`
   checks the same in a real browser: the next Tab after the skip link lands
   inside `<main>`, Back to the first entry returns focus to the link that
   left it, a first jump into or past section 05, and a shared link straight
